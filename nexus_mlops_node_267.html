@@ -80,7 +80,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:480 Y:196 | 分類: mlops</div>
+        <div class="badge">星系座標: X:2439 Y:834 | 分類: mlops</div>
         <h1>ONNX - 實作細節 1</h1>
         
         <div class="content-box">
@@ -92,21 +92,45 @@
         <p>本節點由 NEXUS Agentic Engine 全自動化生成。探討 <code>ONNX - 實作細節 1</code> 於現代 AI 生態系中的作用與底層架構。</p>
 
         <h3>實戰架構範例</h3>
-        <pre><code>// 概念性實作: ONNX - 實作細節 1
+        <pre><code>// ---------------------------------------------------------
+// 【基礎概念解說】: 這是 ONNX - 實作細節 1 的概念性實作
+// 初學者請注意：以下程式碼旨在展示這個技術的「邏輯架構」
+// ---------------------------------------------------------
+
+// 步驟 1: 定義這個技術的核心類別 (Class)
+// 在程式設計中，我們把一個複雜的功能打包成一個「藍圖」
 class ONNX1 {
+  
+  // 步驟 2: 初始化設定 (Constructor)
+  // 當這個藍圖被建立成實體時，系統會最先執行的初始狀態設定
   constructor() {
-    this.status = "Active";
-    this.power = "100%";
+    this.status = "Active"; // 標記系統狀態為運作中 (可隨時待命)
+    this.power = "100%";    // 初始運算能量設定為滿載
   }
 
+  // 步驟 3: 核心執行方法 (Method)
+  // 這是實際處理資料的函數，負責接收使用者的輸入值 (inputData)
   execute(inputData) {
-    console.log("Processing via NEXUS Core...");
-    return `[NEXUS] ${this.status}: Processed ${inputData}`;
+    // console.log 會在終端機印出訊息，讓開發者知道現在程式跑到哪裡了
+    console.log("開始透過 NEXUS 核心處理資料...");
+    
+    // 處理完畢後，將結果回傳 (return)。這裡使用了字串組合的技巧來產出結果
+    return `[NEXUS 運算結果] 狀態: ${this.status} | 處理內容: ${inputData}`;
   }
 }
 
+// ---------------------------------------------------------
+// 【如何使用這段程式碼？】
+// ---------------------------------------------------------
+
+// 步驟 4: 使用 new 關鍵字，根據上面的「藍圖」建立一個真實的「物件實體」
 const instance = new ONNX1();
-instance.execute("Initial Prompt");</code></pre>
+
+// 步驟 5: 呼叫物件內部的執行方法，並傳入我們的測試資料 (例如使用者的問題)
+const result = instance.execute("初學者的第一道測試資料 (Prompt)");
+
+// 最後一步：將回傳的結果印出來看看！
+console.log(result);</code></pre>
 
         <div class="footer">
             NEXUS AI 知識宇宙 (100% Auto-Generated & Copyright Free)
