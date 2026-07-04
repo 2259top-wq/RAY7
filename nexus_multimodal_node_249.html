@@ -12,7 +12,7 @@
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: clamp(10px, 3vw, 40px) clamp(10px, 3vw, 20px);
             line-height: 1.6;
             background-image: 
               radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15), transparent 50%),
@@ -22,17 +22,19 @@
             min-height: 100vh;
         }
         .container {
+            width: 100%;
             max-width: 800px;
             margin: 0 auto;
             background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(56, 189, 248, 0.3);
             border-radius: 16px;
-            padding: 40px;
+            padding: clamp(20px, 5vw, 40px);
+            box-sizing: border-box;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(56, 189, 248, 0.1);
             backdrop-filter: blur(10px);
         }
         h1 {
-            font-size: 2.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
             margin-top: 0;
             color: #f59e0b;
             text-shadow: 0 0 15px #f59e0b80;
@@ -63,11 +65,13 @@
         }
         pre {
             background: #0f172a;
-            padding: 20px;
+            padding: clamp(12px, 3vw, 20px);
             border-radius: 8px;
             overflow-x: auto;
             border: 1px solid rgba(255,255,255,0.1);
             color: #e2e8f0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .code-comment {
             color: #10b981; /* 亮綠色，讓初學者容易辨識 */
