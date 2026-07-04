@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>對抗式攻擊防禦 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。 高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/adversarial.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="對抗式攻擊防禦 · 互動教學">
+    <meta property="og:description" content="對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。 高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/adversarial.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="對抗式攻擊防禦 · 互動教學">
+    <meta name="twitter:description" content="對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。 高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "對抗式攻擊防禦 · 互動教學",
+  "url": "https://akira.ipas-ai.com/adversarial.html",
+  "description": "對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。 高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Adversarial Defense</span>
+    <h1><span class="en">對抗式攻擊防禦</span></h1>
+    <div class="sub">肉眼看不出的擾動，卻能騙倒 AI</div>
+    <p class="lede">在輸入加上人眼難辨的微小擾動，模型就會自信地答錯。<br>最有效的防禦是「對抗訓練」——把對抗樣本也拿去訓練，讓模型變得更穩。</p>
+    <div class="eq-hero">防禦核心：對抗訓練 + 輸入淨化 + 異常偵測</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>一張貼紙，讓 AI 把停止標誌看成限速</h2>
+  <p>對抗式攻擊（Adversarial Attack）是 AI 安全裡最經典的一種：在輸入上加一點<span class="c-en hl">人眼幾乎看不出</span>的擾動，模型就會<span class="c-bad hl">自信滿滿地答錯</span>。一張小貼紙貼在路標上，自駕車就可能誤判——這是真實存在的風險。</p>
+  <div class="trio">
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="26" y="26" width="48" height="48" rx="6" fill="none" stroke="var(--l1)" stroke-width="3"/><text x="50" y="58" font-size="22" text-anchor="middle">🛑</text></svg><div class="nm">原始輸入</div><div class="tag">正確</div><p>模型判斷正確：停止標誌。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="26" y="26" width="48" height="48" rx="6" fill="none" stroke="var(--l2)" stroke-width="3"/><circle cx="40" cy="42" r="2.5" fill="var(--bad)"/><circle cx="58" cy="50" r="2.5" fill="var(--bad)"/><circle cx="46" cy="60" r="2.5" fill="var(--bad)"/></svg><div class="nm">加微小擾動</div><div class="tag">肉眼難辨</div><p>加上幾乎看不見的雜訊。</p></div>
+    <div class="persona hi"><svg viewBox="0 0 100 100"><rect x="26" y="26" width="48" height="48" rx="6" fill="none" stroke="var(--bad)" stroke-width="3"/><text x="50" y="58" font-size="20" text-anchor="middle">⚠️</text></svg><div class="nm">模型誤判</div><div class="tag">出錯</div><p>同一張圖，卻被判成別的類別。</p></div>
+  </div>
+  <p class="hint">可怕的是：擾動小到人眼看不出，模型卻錯得很有信心。這暴露了神經網路「決策邊界很脆弱」的本質。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>加大擾動，看模型何時崩潰</h2>
+  <p>下圖模型對一張圖的<span class="c-en hl">正確類別信心</span>。拖動<span class="hl">擾動強度</span>：一開始人眼幾乎看不出差別，但信心會快速下滑，過了某個臨界點就<span class="c-bad hl">突然翻盤誤判</span>。再開啟「對抗訓練」防禦，看模型變得多穩。</p>
+  <div class="card">
+    <div class="svgbox"><svg id="advSvg" viewBox="0 0 460 220"></svg></div>
+    <div class="slider-row"><label>擾動強度 ε</label><input type="range" id="eps" min="0" max="100" value="0"><span class="val" id="epsV">0</span></div>
+    <div class="seg" id="defSeg" style="margin-top:8px">
+      <button data-d="0" class="on">無防禦</button>
+      <button data-d="1">開啟對抗訓練</button>
+    </div>
+    <div class="readout">
+      <div class="ro"><div class="k">正確類別信心</div><div class="v c-en" id="conf">—</div></div>
+      <div class="ro"><div class="k">判定</div><div id="aStat" style="margin-top:2px"></div></div>
+    </div>
+    <p class="hint">無防禦時，小小擾動就能讓模型翻車；開啟對抗訓練後（把對抗樣本也拿去訓練），同樣的擾動下模型穩得多——這就是最主流的防禦法。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 防禦方法</div>
+  <h2>怎麼抵抗對抗攻擊？</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>對抗訓練：把對抗樣本加入訓練，最有效</li><li>輸入淨化：先把可疑擾動濾掉再餵模型</li><li>偵測異常輸入，可疑就拒絕或人工複核</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>對抗訓練成本高、會略降乾淨樣本準確率</li><li>攻防是軍備競賽，沒有一勞永逸</li><li>防得了已知攻擊，新攻法仍可能突破</li></ul></div>
+</div><h3 style='margin-top:26px'>典型應用場景</h3><div class="usecards"><div class="uc"><div class="ic">🚗</div><div class="t">自動駕駛</div><div class="d">防路標、車道被惡意干擾</div></div><div class="uc"><div class="ic">🔓</div><div class="t">人臉辨識</div><div class="d">防偽裝、對抗式眼鏡攻擊</div></div><div class="uc"><div class="ic">🛡️</div><div class="t">內容審核</div><div class="d">防繞過過濾的對抗文字/圖</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("advSvg");
+  const epsS=document.getElementById("eps"),epsV=document.getElementById("epsV");
+  const seg=document.getElementById("defSeg");
+  const confE=document.getElementById("conf"),stat=document.getElementById("aStat");
+  const W=460,padL=44,padB=40,padT=20,padR=18;
+  const x0=padL,x1=W-padR,y0=200-padB,y1=padT;
+  let eps=0, defended=false;
+  function conf(e){ // confidence vs epsilon
+    const k=defended?0.018:0.06, mid=defended?75:38;
+    return 1/(1+Math.exp(k*(e-mid))); // sigmoid drop
+  }
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    svg.setAttribute("viewBox","0 0 460 200");
+    svg.appendChild(el("line",{x1:x0,y1:y0,x2:x1,y2:y0,stroke:"#cfc8b8","stroke-width":1.5}));
+    svg.appendChild(el("line",{x1:x0,y1:y0,x2:x0,y2:y1,stroke:"#cfc8b8","stroke-width":1.5}));
+    svg.appendChild(txt((x0+x1)/2,196,"擾動強度 ε →",{fill:"#9aa1ac","font-size":12}));
+    // 50% line
+    const y50=y0+(y1-y0)*0.5;
+    svg.appendChild(el("line",{x1:x0,y1:y50,x2:x1,y2:y50,stroke:"#e0d9c9","stroke-dasharray":"3 3"}));
+    svg.appendChild(txt(x1,y50-4,"50% 翻盤線",{fill:"#b8b0a0","font-size":10,"text-anchor":"end"}));
+    // curve
+    function sx(e){return lerp(x0,x1,e/100);} function sy(c){return lerp(y0,y1,c);}
+    let d="";for(let e=0;e<=100;e+=2){d+=(e===0?"M":"L")+sx(e).toFixed(1)+" "+sy(conf(e)).toFixed(1);}
+    svg.appendChild(el("path",{d,fill:"none",stroke:defended?"var(--ok)":"var(--bad)","stroke-width":2.6}));
+    const c=conf(eps);
+    svg.appendChild(el("line",{x1:sx(eps),y1:y1,x2:sx(eps),y2:y0,stroke:"var(--en)","stroke-width":2,"stroke-dasharray":"3 3"}));
+    svg.appendChild(el("circle",{cx:sx(eps),cy:sy(c),r:6,fill:"var(--en)",stroke:"#fff","stroke-width":2}));
+    confE.textContent=(c*100).toFixed(0)+"%";
+    stat.innerHTML = c>=0.5?'<span class="badge keep">✓ 仍判斷正確</span>':'<span class="badge drop">✕ 已被騙！誤判</span>';
+  }
+  epsS.addEventListener("input",()=>{eps=+epsS.value;epsV.textContent=eps;build();});
+  seg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...seg.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");defended=b.dataset.d==="1";build();});
+  build();
+})();
+
+</script>
+
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>對抗式攻擊是 AI 安全的核心威脅,iPAS 治理考點(中級科目二)。重點:對輸入加上人眼幾乎看不出的微小擾動,就能讓模型自信地誤判(如把停止標誌誤認),防禦有對抗訓練、輸入淨化等。易混點:對抗樣本利用的是模型脆弱的決策邊界,與一般雜訊不同(是刻意設計的);與強健性、安全性密切相關。情境:自駕、人臉辨識、內容審核的安全評估。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>對抗樣本(adversarial example)是什麼？</summary><p>對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。</p></details><details><summary>為什麼模型會被騙？</summary><p>高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。</p></details><details><summary>有哪些攻擊類型？</summary><p>白箱(知道模型梯度，如 FGSM、PGD)、黑箱(只看輸出)、定向(指定誤判成某類)與非定向，也有實體攻擊(如貼紙)。</p></details><details><summary>怎麼防禦？</summary><p>對抗訓練(把對抗樣本加入訓練)最有效；還有輸入前處理、偵測對抗樣本、整體與認證式防禦(梯度遮蔽較弱)。</p></details><details><summary>為什麼這是 AI 安全重點？</summary><p>自駕、人臉辨識、內容審核等若被對抗攻擊後果嚴重；穩健性與防禦是部署高風險 AI 的必要考量。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "對抗樣本(adversarial example)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "對輸入加上人眼幾乎看不出的微小擾動，卻能讓模型自信地誤判(如把停止標誌看成限速)，暴露模型脆弱性。"}}, {"@type": "Question", "name": "為什麼模型會被騙？", "acceptedAnswer": {"@type": "Answer", "text": "高維空間中模型的決策邊界對某些方向極敏感；微小但對的方向的擾動就能跨過邊界、造成錯誤分類。"}}, {"@type": "Question", "name": "有哪些攻擊類型？", "acceptedAnswer": {"@type": "Answer", "text": "白箱(知道模型梯度，如 FGSM、PGD)、黑箱(只看輸出)、定向(指定誤判成某類)與非定向，也有實體攻擊(如貼紙)。"}}, {"@type": "Question", "name": "怎麼防禦？", "acceptedAnswer": {"@type": "Answer", "text": "對抗訓練(把對抗樣本加入訓練)最有效；還有輸入前處理、偵測對抗樣本、整體與認證式防禦(梯度遮蔽較弱)。"}}, {"@type": "Question", "name": "為什麼這是 AI 安全重點？", "acceptedAnswer": {"@type": "Answer", "text": "自駕、人臉辨識、內容審核等若被對抗攻擊後果嚴重；穩健性與防禦是部署高風險 AI 的必要考量。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="security.html">安全與防禦</a><a href="human.html">治理與倫理</a><a href="trustworthy-ai.html">可信賴性</a><a href="lime_vs_shap.html">可解釋 AI (XAI)</a><a href="fairness.html">公平性與去偏見</a><a href="robustness.html">強健性</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">對抗式攻擊防禦</span> · 互動教學</div></footer>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 工程演進：Prompt→Context→Harness→Loop Engineering｜白話＋互動</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="LLM 應用開發的四層演進：提示工程(Prompt)→脈絡工程(Context)→骨架工程(Harness)→迴圈工程(Loop)。字句→資訊→環境→迴圈，一層包一層。互動階梯示範同一任務在每一層怎麼被處理、解鎖什麼能力。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/engineering_evolution.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI 工程演進 Prompt→Context→Harness→Loop 互動演示">
+    <meta property="og:description" content="從提示工程到脈絡、骨架、迴圈工程：字句→資訊→環境→迴圈，一層包一層。互動階梯看同一任務怎麼一路升級成自主 agent。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/engineering_evolution.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI 工程演進 Prompt→Context→Harness→Loop 互動演示">
+    <meta name="twitter:description" content="提示→脈絡→骨架→迴圈工程：字句→資訊→環境→迴圈，一層包一層。互動階梯看同一任務怎麼升級成自主 agent。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "AI 工程演進 Prompt→Context→Harness→Loop 互動演示",
+  "url": "https://akira.ipas-ai.com/engineering_evolution.html",
+  "description": "LLM 應用開發的四層演進：提示工程(Prompt)→脈絡工程(Context)→骨架工程(Harness)→迴圈工程(Loop)。字句→資訊→環境→迴圈，一層包一層。互動階梯示範同一任務在每一層怎麼被處理、解鎖什麼能力。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-07-01",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": { "@type": "Person", "name": "AKIRA" }
+}
+    </script>
+
+    <style>
+    :root{
+      --bg:#f5f3ff; --ink:#2e1065; --sub:#6d28d9;
+      --brand:#7c3aed; --brand2:#6d28d9; --brand-soft:#ede9fe;
+      --card:#ffffff; --line:#ddd6fe;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#a78bfa,#7c3aed 55%,#6d28d9);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.9rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:690px;color:#ede9fe;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(124,58,237,.07)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#ddd6fe 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#eef7ff;border-left:4px solid #3b82f6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.86rem}
+    .cmp tbody tr:nth-child(even){background:#f7f5ff}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f7f5ff;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f7f5ff}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#5b21b6;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（作用域 .evo-demo） ===== */
+    .evo-demo{--l1:#22c55e;--l2:#3b82f6;--l3:#f59e0b;--l4:#7c3aed;margin:8px 0}
+    .evo-demo .lab-title{color:var(--brand2);font-size:1.15rem;font-weight:800;margin:0 0 4px;text-align:center}
+    .evo-demo .task{background:#f7f5ff;border:1px dashed var(--line);border-radius:10px;padding:9px 14px;margin:10px 0 14px;font-size:.92rem;text-align:center}
+    .evo-demo .task b{color:var(--brand2)}
+    .evo-demo .rungs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+    @media(max-width:620px){.evo-demo .rungs{grid-template-columns:repeat(2,1fr)}}
+    .evo-demo .rung{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:11px 8px;cursor:pointer;text-align:center;transition:.18s}
+    .evo-demo .rung:hover{transform:translateY(-2px)}
+    .evo-demo .rung .n{font-size:.72rem;font-weight:800;color:#a78bad}
+    .evo-demo .rung .t{font-weight:800;font-size:.95rem;margin:3px 0 1px}
+    .evo-demo .rung .e{font-size:.7rem;color:#9aa}
+    .evo-demo .rung.on{color:#fff;border-color:transparent}
+    .evo-demo .rung.on .n,.evo-demo .rung.on .e{color:rgba(255,255,255,.85)}
+    .evo-demo .rung.on[data-l="1"]{background:var(--l1)} .evo-demo .rung.on[data-l="2"]{background:var(--l2)}
+    .evo-demo .rung.on[data-l="3"]{background:var(--l3)} .evo-demo .rung.on[data-l="4"]{background:var(--l4)}
+    .evo-demo .grid{display:grid;grid-template-columns:minmax(230px,1fr) 1.15fr;gap:16px;align-items:start}
+    @media(max-width:640px){.evo-demo .grid{grid-template-columns:1fr}}
+    .evo-demo .nestwrap{display:flex;justify-content:center}
+    .evo-demo .nest{border-radius:14px;border:2px solid #e5e7eb;padding:16px 14px 14px;text-align:center;transition:.25s;width:100%;background:#fbfbfe}
+    .evo-demo .nest .cap{font-size:.72rem;font-weight:800;letter-spacing:.03em;color:#b6b6c6;display:block;margin-bottom:8px}
+    .evo-demo .nest.loop{border-color:#e9e5f8}
+    .evo-demo .nest.on.loop{border-color:var(--l4);background:#f5f2ff} .evo-demo .nest.on.loop>.cap{color:var(--l4)}
+    .evo-demo .nest.on.harness{border-color:var(--l3);background:#fff8ec} .evo-demo .nest.on.harness>.cap{color:#b45309}
+    .evo-demo .nest.on.context{border-color:var(--l2);background:#eef4ff} .evo-demo .nest.on.context>.cap{color:var(--l2)}
+    .evo-demo .nest.on.prompt{border-color:var(--l1);background:#eefdf3;color:#15803d} .evo-demo .nest.on.prompt>.cap{color:#15803d}
+    .evo-demo .nest.prompt{padding:14px 10px;font-weight:800;font-size:.9rem;color:#9aa}
+    .evo-demo .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 2px}
+    .evo-demo .prow{padding:11px 14px;border-bottom:1px solid #f0eefb}
+    .evo-demo .prow:last-child{border-bottom:0}
+    .evo-demo .prow .k{font-size:.72rem;font-weight:800;letter-spacing:.02em;color:var(--sub);display:block;margin-bottom:3px}
+    .evo-demo .prow .v{font-size:.92rem;color:#3f3357}
+    .evo-demo .prow.miss .k{color:#b91c1c} .evo-demo .prow.miss .v{color:#7f1d1d}
+    .evo-demo .prow.win .k{color:#15803d} .evo-demo .prow.win .v{color:#14532d}
+    .evo-demo .meter{margin:14px 2px 2px}
+    .evo-demo .meter .ml{display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;color:var(--sub);margin-bottom:5px}
+    .evo-demo .track{height:16px;background:#eee;border-radius:999px;overflow:hidden}
+    .evo-demo .fill{height:100%;width:0;border-radius:999px;transition:width .5s;background:linear-gradient(90deg,#22c55e,#3b82f6,#f59e0b,#7c3aed)}
+    @media(max-width:560px){.hero h1{font-size:1.5rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">生成式 AI · Agent 開發</span>
+  <h1>AI 工程演進：Prompt → Context → Harness → Loop</h1>
+  <p>從「怎麼問」一路長到「會自己做完」。LLM 應用的開發，正沿著四層往外擴：字句 → 資訊 → 環境 → 迴圈，一層包一層，最後長成一個自主 agent。</p>
+  <div class="chips">
+    <span>提示工程</span><span>脈絡工程</span><span>骨架工程</span><span>迴圈工程</span><span>一層包一層</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      LLM 應用開發的四層演進：<b>提示工程（Prompt）</b>管你送的<span class="term">字句</span> → <b>脈絡工程（Context）</b>管模型看得到的<span class="term">資訊</span> → <b>骨架工程（Harness）</b>管 agent 跑的<span class="term">環境</span> → <b>迴圈工程（Loop）</b>管驅動它的<span class="term">迴圈</span>。<span class="hl">每一層都把前一層包在裡面</span>，範圍越來越大，能力也越來越強。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：工程演進階梯</h2>
+    <p>同一個任務——<b>「處理一封客戶詢問信」</b>——點四個階梯往上爬，看每一層各自在「管什麼」、同一任務會怎麼被處理、解鎖了什麼能力、又還缺什麼。左邊的巢狀方框會顯示「一層包一層」。</p>
+    <div class="evo-demo">
+      <div class="lab-title">🪜 工程演進階梯</div>
+      <div class="task">🎯 任務：<b>處理一封客戶詢問信</b>（要回覆得準、還要把後續追蹤排進行事曆）</div>
+
+      <div class="rungs" id="rungs">
+        <div class="rung" data-l="1" onclick="evoSet(1)"><div class="n">第 1 階</div><div class="t">提示工程</div><div class="e">Prompt · 字句</div></div>
+        <div class="rung" data-l="2" onclick="evoSet(2)"><div class="n">第 2 階</div><div class="t">脈絡工程</div><div class="e">Context · 資訊</div></div>
+        <div class="rung" data-l="3" onclick="evoSet(3)"><div class="n">第 3 階</div><div class="t">骨架工程</div><div class="e">Harness · 環境</div></div>
+        <div class="rung" data-l="4" onclick="evoSet(4)"><div class="n">第 4 階</div><div class="t">迴圈工程</div><div class="e">Loop · 迴圈</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="nestwrap">
+          <div class="nest loop" id="nest-loop"><span class="cap">④ LOOP 迴圈</span>
+            <div class="nest harness" id="nest-harness"><span class="cap">③ HARNESS 環境</span>
+              <div class="nest context" id="nest-context"><span class="cap">② CONTEXT 資訊</span>
+                <div class="nest prompt" id="nest-prompt">① PROMPT 字句</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="prow"><span class="k">這一層在「管」什麼</span><span class="v" id="pManage">–</span></div>
+            <div class="prow"><span class="k">同一任務，這層怎麼處理</span><span class="v" id="pTask">–</span></div>
+            <div class="prow win"><span class="k">✅ 解鎖了什麼能力</span><span class="v" id="pWin">–</span></div>
+            <div class="prow miss"><span class="k">⚠️ 還缺什麼（要靠下一層）</span><span class="v" id="pMiss">–</span></div>
+          </div>
+          <div class="meter">
+            <div class="ml"><span>系統能力</span><span id="capLabel">–</span></div>
+            <div class="track"><div class="fill" id="capFill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧩</span>四層各自在管什麼</h2>
+    <div class="keys">
+      <div class="keycard"><span>✍️</span><b>① Prompt 提示工程</b><br>你送的<b>字句</b>：指令怎麼寫、給不給範例、要什麼格式。問「<b>怎麼問？</b>」</div>
+      <div class="keycard"><span>📚</span><b>② Context 脈絡工程</b><br>模型看得到的<b>資訊</b>：系統提示、對話史、RAG、工具清單、記憶、狀態。問「<b>這步該餵它什麼？</b>」</div>
+      <div class="keycard"><span>🛠️</span><b>③ Harness 骨架工程</b><br>agent 跑的<b>環境</b>：可用工具、權限、護欄、觀測、回饋，接到可執行世界。問「<b>它能做什麼、被怎麼管？</b>」</div>
+      <div class="keycard"><span>🔁</span><b>④ Loop 迴圈工程</b><br>驅動它的<b>迴圈</b>：act→observe→decide→repeat 的節奏與完成條件。問「<b>怎麼反覆推進到完成？</b>」</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📚</span>為什麼「脈絡工程」變成主角？</h2>
+    <div class="note meta">
+      Agent 要跨多步驟規劃、行動，光靠一句好 prompt 不夠——<b>模型記不住上下文視窗以外的東西</b>。<b>脈絡工程（Context Engineering）</b>在 2025 年中興起：重點從「怎麼措辭」轉為「<b>這一步該把哪些資訊組進上下文</b>」——動態拼裝系統提示、檢索到的文件、記憶與工具資訊。業界甚至出現「context is in, prompt is out」的說法。它負責 agent 的<b>記憶與狀態管理</b>，是 prompt 之外的下一個前沿。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🪆</span>一層包一層（不是彼此取代）</h2>
+    <div class="note app">
+      這四層是<b>往外擴、互相包住</b>，不是誰淘汰誰：<b>Loop</b> 驅動整個 agent，它在一個 <b>Harness</b>（環境）裡運轉，每一圈由 <b>Context</b>（資訊）動態拼裝要餵的內容，而其中一段就是你寫的 <b>Prompt</b>（字句）。所以做小工具，prompt／context 就夠；要做<b>會自己做完事情的 agent</b>，才需要往上補 harness 與 loop。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>四層對照表</h2>
+    <table class="cmp">
+      <thead><tr><th>層</th><th>管什麼</th><th>關鍵問題</th><th>例子</th><th>解鎖能力</th></tr></thead>
+      <tbody>
+        <tr><td>Prompt 提示</td><td>字句</td><td>怎麼問？</td><td>指令、範例、輸出格式</td><td>控制語氣與格式</td></tr>
+        <tr><td>Context 脈絡</td><td>資訊</td><td>餵它什麼？</td><td>系統提示、RAG、記憶、工具清單</td><td>有所本、個人化、少幻覺</td></tr>
+        <tr><td>Harness 骨架</td><td>環境</td><td>它能做什麼、被怎麼管？</td><td>工具、權限、護欄、觀測、回饋</td><td>能安全地採取行動</td></tr>
+        <tr><td>Loop 迴圈</td><td>迴圈</td><td>怎麼推進到完成？</td><td>act-observe-decide、完成條件、步數上限</td><td>自主完成多步任務</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">🤔</span>什麼時候用哪一層？</h2>
+    <div class="note warn">
+      <b>常見誤解：</b>以為新層會「取代」舊層。其實是<b>需求越複雜、往上補越多層</b>。<br>
+      單次問答、寫文案 → <b>Prompt</b> 就夠。<br>
+      要有所本、接自家資料、對話有記憶 → 加 <b>Context</b>（RAG／記憶）。<br>
+      要它真的動手、呼叫工具、又要安全可追溯 → 加 <b>Harness</b>（工具／護欄／觀測）。<br>
+      要它自主把多步驟任務從頭做到尾 → 加 <b>Loop</b>（迴圈與完成條件）。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. Prompt 與 Context engineering 差在哪？</summary>
+        <div class="ans">Prompt 管「怎麼問」（你送的字句）；Context 管「模型這一步看得到什麼」（系統提示、對話史、RAG、工具、記憶、狀態），動態拼裝。前者是措辭，後者是資訊架構。</div></details>
+      <details><summary>Q2. Harness engineering 是什麼？</summary>
+        <div class="ans">設計 agent 運行的「環境／骨架」：可用工具、權限、護欄、觀測（log/追蹤）與回饋機制，把模型接到可執行世界（檔案、API、記憶），讓它能安全、可追溯地行動。</div></details>
+      <details><summary>Q3. Loop engineering 是什麼？</summary>
+        <div class="ans">設計驅動 agent 的迴圈：act→observe→decide→repeat，設定節奏、何時再跑一圈、何時算完成，以及步數／成本上限，讓它自主推進到目標。</div></details>
+      <details><summary>Q4. 這四層是彼此取代嗎？</summary>
+        <div class="ans">不是。它們一層包一層、往外擴：Loop 驅動 agent、跑在 Harness 裡、每圈由 Context 拼裝內容、其中一段是 Prompt。需求越複雜就往上補越多層。</div></details>
+      <details><summary>Q5. 做一個簡單文案工具需要 harness/loop 嗎？</summary>
+        <div class="ans">通常不用。單次生成用 Prompt（＋必要的 Context）就夠；只有要「會自己呼叫工具、多步驟做完事情」的 agent，才需要 Harness 與 Loop。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>四層：</b>Prompt 字句 → Context 資訊 → Harness 環境 → Loop 迴圈。</li>
+      <li><b>關係：</b>一層包一層、往外擴，不是彼此取代。</li>
+      <li><b>Context 是新前沿：</b>從「怎麼問」轉為「這步餵什麼資訊」，管記憶與狀態。</li>
+      <li><b>Harness＝環境：</b>工具、護欄、觀測，讓 agent 能安全行動。</li>
+      <li><b>Loop＝迴圈：</b>act-observe-decide 與完成條件，讓 agent 自主做完。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const LV = {
+    1:{ manage:'你送給模型的「字句」——指令怎麼寫、要不要給範例、要什麼輸出格式。',
+        task:'你把指令寫清楚：「用專業又友善的語氣、條列回覆這封客戶信」。模型照著寫出語氣不錯的回覆。',
+        win:'能控制語氣、格式與風格，讓單次回答更到位。',
+        miss:'模型沒看過你的產品文件，細節可能亂編；也不能真的去查資料或動作。',
+        cap:'單次、通用回覆（可能幻覺）', pct:25 },
+    2:{ manage:'模型這一步「看得到什麼」——系統提示、對話史、RAG 檢索到的文件、可用工具清單、記憶、目前狀態，動態拼裝。',
+        task:'你把該看的東西組進上下文：客戶原信＋產品文件（RAG）＋這位客戶的訂單狀態＋公司語氣範例。回覆變得有所本、貼合這位客戶。',
+        win:'答案有依據、個人化、少幻覺——把「知識缺口」補起來。',
+        miss:'它還是只會「產生文字」，不能真的去查訂單系統，也不能把追蹤排進行事曆。',
+        cap:'有所本、個人化的回覆', pct:50 },
+    3:{ manage:'agent 跑在什麼「環境」——可用工具、權限、護欄、觀測(log/追蹤)、回饋機制；把模型接到可執行世界（檔案、API、記憶）。',
+        task:'你給它工具（訂單查詢 API、寄信、行事曆）＋護欄（寄出前要人確認）＋記錄每一步。它現在能實際查訂單、草擬追蹤行程。',
+        win:'能安全地「動手」做事，而且每一步都可追溯、可控。',
+        miss:'單靠一次執行還不夠——多步驟任務需要它自己反覆嘗試、觀察結果再修正。',
+        cap:'能安全地採取行動', pct:75 },
+    4:{ manage:'驅動 agent 的「運轉迴圈」——act→observe→decide→repeat 的節奏、何時再跑一圈、何時算「完成」，以及步數與成本上限。',
+        task:'它自己一圈一圈跑：草擬→查文件→發現缺料→查訂單→修訂→排程→寄確認→（沒完成就再一圈），直到達成完成條件。',
+        win:'能自主把多步驟任務從頭做到尾，會自我修正、也知道何時該停。',
+        miss:'已是最外層；再往外就是多 agent 協作、長期記憶與持續學習了。',
+        cap:'自主完成多步任務', pct:100 }
+  };
+  const RANK = { prompt:1, context:2, harness:3, loop:4 };
+  const $ = id => document.getElementById(id);
+  let level = 1;
+
+  window.evoSet = function(n){
+    level = n;
+    document.querySelectorAll('.evo-demo .rung').forEach(r=>r.classList.toggle('on', +r.dataset.l === n));
+    ['prompt','context','harness','loop'].forEach(name=>{
+      $('nest-'+name).classList.toggle('on', RANK[name] <= n);
+    });
+    const d = LV[n];
+    $('pManage').textContent = d.manage;
+    $('pTask').textContent = d.task;
+    $('pWin').textContent = d.win;
+    $('pMiss').textContent = d.miss;
+    $('capLabel').textContent = d.cap;
+    $('capFill').style.width = d.pct + '%';
+  };
+
+  window.evoSet(1);
+})();
+</script>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>「工程演進」是生成式 AI 應用開發的新興重點：提示工程(Prompt，字句)→脈絡工程(Context，模型看得到的資訊：系統提示、對話史、RAG、工具、記憶、狀態)→骨架工程(Harness，agent 運行環境：工具、護欄、觀測、回饋)→迴圈工程(Loop，act-observe-decide 的迴圈與完成條件)。關鍵觀念：四層一層包一層、往外擴，不是彼此取代。脈絡工程(Context Engineering)在 2025 年中興起、負責 agent 的記憶與狀態管理，是提示工程之外的下一個前沿。易混點：Prompt 是「怎麼問」，Context 是「餵什麼資訊」；Harness 是「環境與護欄」，Loop 是「反覆推進到完成」。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Prompt 與 Context engineering 差在哪？</summary><p>Prompt 管「怎麼問」（你送的字句）；Context 管「模型這一步看得到什麼」（系統提示、對話史、RAG、工具、記憶、狀態），動態拼裝。前者是措辭，後者是資訊架構。</p></details><details><summary>Harness engineering 是什麼？</summary><p>設計 agent 運行的環境／骨架：可用工具、權限、護欄、觀測與回饋機制，把模型接到可執行世界（檔案、API、記憶），讓它能安全、可追溯地行動。</p></details><details><summary>Loop engineering 是什麼？</summary><p>設計驅動 agent 的迴圈：act→observe→decide→repeat，設定節奏、何時再跑一圈、何時算完成，以及步數／成本上限，讓它自主推進到目標。</p></details><details><summary>這四層是彼此取代嗎？</summary><p>不是。它們一層包一層、往外擴：Loop 驅動 agent、跑在 Harness 裡、每圈由 Context 拼裝內容、其中一段是 Prompt。需求越複雜就往上補越多層。</p></details><details><summary>什麼時候需要 harness 與 loop？</summary><p>單次生成用 Prompt（＋必要 Context）就夠；只有要做「會自己呼叫工具、多步驟做完事情」的自主 agent，才需要 Harness 與 Loop。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Prompt 與 Context engineering 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "Prompt 管「怎麼問」（你送的字句）；Context 管「模型這一步看得到什麼」（系統提示、對話史、RAG、工具、記憶、狀態），動態拼裝。前者是措辭，後者是資訊架構。"}}, {"@type": "Question", "name": "Harness engineering 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "設計 agent 運行的環境／骨架：可用工具、權限、護欄、觀測與回饋機制，把模型接到可執行世界（檔案、API、記憶），讓它能安全、可追溯地行動。"}}, {"@type": "Question", "name": "Loop engineering 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "設計驅動 agent 的迴圈：act→observe→decide→repeat，設定節奏、何時再跑一圈、何時算完成，以及步數／成本上限，讓它自主推進到目標。"}}, {"@type": "Question", "name": "這四層是彼此取代嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不是。它們一層包一層、往外擴：Loop 驅動 agent、跑在 Harness 裡、每圈由 Context 拼裝內容、其中一段是 Prompt。需求越複雜就往上補越多層。"}}, {"@type": "Question", "name": "什麼時候需要 harness 與 loop？", "acceptedAnswer": {"@type": "Answer", "text": "單次生成用 Prompt（加必要 Context）就夠；只有要做會自己呼叫工具、多步驟做完事情的自主 agent，才需要 Harness 與 Loop。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="prompt_engineering.html">提示工程</a><a href="ai_agent.html">AI Agent</a><a href="rag.html">RAG 檢索增強生成</a><a href="hallucination_eval.html">AI 幻覺與評測</a><a href="rlhf.html">RLHF 對齊</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQN 深度 Q 網路｜白話＋互動：用神經網路估 Q 值、經驗回放與目標網路</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。 表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dqn.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DQN (Deep Q-Network) 互動演示">
+    <meta property="og:description" content="Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。 表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dqn.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DQN (Deep Q-Network) 互動演示">
+    <meta name="twitter:description" content="Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。 表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "DQN (Deep Q-Network) 互動演示",
+  "url": "https://akira.ipas-ai.com/dqn.html",
+  "description": "Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。 表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#f1f2fe; --ink:#181848; --sub:#4b4b86;
+      --brand:#4f46e5; --brand2:#4338ca; --brand-soft:#dcdcfb;
+      --card:#ffffff; --line:#dcddf5;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#818cf8,#4f46e5 55%,#4338ca);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.8rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:660px;color:#e8e8fd;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(79,70,229,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#bfc0f6 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#eef7ff;border-left:4px solid #0ea5e9}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#f2f2fd}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f2f2fd;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .lesson .formula{background:#16163a;color:#e2e2fb;border-radius:12px;padding:16px 18px;margin:14px 0;text-align:center;overflow-x:auto}
+    .lesson .formula small{display:block;font-family:'Noto Sans TC',sans-serif;color:#b3b4f0;font-size:.8rem;margin-top:8px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f2f2fd}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#454584;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始 DQN 演示，作用域限定於 .dqn-demo） ===== */
+    .dqn-demo{
+      --primary-color:#4f46e5; --secondary-color:#f43f5e; --highlight-color:#eab308;
+      margin:8px 0;
+    }
+    .dqn-demo .lab-title{color:#4338ca;font-size:1.15rem;font-weight:800;margin:0 0 14px;text-align:center}
+    .dqn-demo .viz-wrapper{display:flex;gap:20px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+    .dqn-demo .env-container{display:flex;flex-direction:column;align-items:center}
+    .dqn-demo .grid-board{display:grid;grid-template-columns:repeat(4,60px);grid-template-rows:repeat(4,60px);gap:5px;background:#cbd5e1;padding:5px;border-radius:8px}
+    .dqn-demo .cell{width:60px;height:60px;background:white;border-radius:4px;display:flex;justify-content:center;align-items:center;font-size:1.5rem;position:relative}
+    .dqn-demo .agent{background:var(--primary-color);border-radius:50%;width:40px;height:40px;box-shadow:0 0 10px var(--primary-color);transition:all .2s}
+    .dqn-demo .goal{background:#10b981;border-radius:4px;color:white}
+    .dqn-demo .trap{background:#ef4444;border-radius:4px;color:white}
+    .dqn-demo .nn-container{position:relative;width:300px;height:280px;background:#f1f5f9;border-radius:8px;border:1px solid #e2e8f0;display:flex;justify-content:center}
+    .dqn-demo .buffer-container{width:250px;height:280px;background:#1e293b;color:#10b981;font-family:monospace;padding:10px;border-radius:8px;overflow-y:hidden;font-size:.85rem;display:flex;flex-direction:column}
+    .dqn-demo .buffer-title{color:#fff;border-bottom:1px solid #475569;margin-bottom:5px;padding-bottom:5px}
+    .dqn-demo .log-entry{margin-bottom:4px;opacity:.7;animation:dqnFadeIn .3s}
+    .dqn-demo .log-entry:first-child{opacity:1;color:#fff;font-weight:bold}
+    @keyframes dqnFadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:.7;transform:translateY(0)}}
+    .dqn-demo .controls{width:100%;display:flex;gap:15px;justify-content:center;margin-top:20px;align-items:center;flex-wrap:wrap}
+    .dqn-demo button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:1rem;background-color:var(--primary-color);color:white;transition:transform .1s}
+    .dqn-demo button:hover{background-color:#4338ca}
+    .dqn-demo button:active{transform:scale(.95)}
+    .dqn-demo button:disabled{background-color:#cbd5e1;cursor:not-allowed}
+    .dqn-demo .stats-panel{margin-top:10px;display:flex;gap:20px;font-size:.9rem;color:#64748b;flex-wrap:wrap;justify-content:center}
+    .dqn-demo .node{fill:#fff;stroke:#94a3b8;stroke-width:2}
+    .dqn-demo .node.active{fill:var(--highlight-color);stroke:#b45309;transition:fill .2s}
+    .dqn-demo .link{stroke:#cbd5e1;stroke-width:1}
+    .dqn-demo .link.active{stroke:var(--highlight-color);stroke-width:2;transition:stroke .1s}
+    .dqn-demo .q-bar{fill:var(--primary-color);transition:height .3s}
+    .dqn-demo .q-text{font-size:10px;fill:#475569;text-anchor:middle}
+    @media(max-width:560px){.hero h1{font-size:1.45rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">強化學習 · 深度 RL</span>
+  <h1>DQN 深度 Q 網路</h1>
+  <p>Q-learning 遇到「棋盤／遊戲畫面」這種狀態爆炸就查不動表了。DQN 用一個神經網路來「估」Q 值，讓機器光看畫面就能學會玩。</p>
+  <div class="chips">
+    <span>神經網路估 Q</span><span>處理高維狀態</span><span>經驗回放</span><span>目標網路</span><span>off-policy 價值法</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>DQN（Deep Q-Network）</b>＝用<span class="term">神經網路</span>近似 Q 值函數的強化學習方法，讓 Q-learning 能處理<span class="hl">狀態龐大</span>（如遊戲畫面像素）的問題。輸入是狀態、輸出是每個動作的 Q 分數，不再需要一格一格查表。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：Grid World 學走迷宮</h2>
+    <p>藍點是 agent，⭐是目標（+10）、🔥是陷阱（−10）、每步 −1。按<b>單步</b>或<b>開始訓練</b>：左邊移動、中間 Q-Network 亮起輸出 Q 值、右邊經驗存進 <b>Replay Buffer</b>。看 Epsilon（探索率）隨訓練下降。</p>
+    <div class="dqn-demo">
+      <div class="lab-title">🧠 DQN (Deep Q-Network) 互動演示</div>
+      <div class="viz-wrapper">
+        <div class="env-container">
+          <div style="font-weight:bold; margin-bottom:10px;">環境 (Grid World)</div>
+          <div class="grid-board" id="grid"></div>
+          <div style="margin-top:10px; font-size:0.8rem; color:#64748b;">
+            <span style="color:green">●</span> Goal (+10) &nbsp;
+            <span style="color:red">●</span> Trap (-10) &nbsp;
+            Step (-1)
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; font-size:2rem; color:#cbd5e1;">➡</div>
+
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div style="font-weight:bold; margin-bottom:10px;">Q-Network (Agent's Brain)</div>
+          <div class="nn-container">
+            <svg id="nn-svg" width="300" height="280" viewBox="0 0 300 280">
+              <text x="40" y="30" text-anchor="middle" font-size="12" font-weight="bold">State</text>
+              <circle cx="40" cy="80" r="15" class="node" id="in-x" />
+              <text x="40" y="85" text-anchor="middle" font-size="10">X</text>
+              <circle cx="40" cy="140" r="15" class="node" id="in-y" />
+              <text x="40" y="145" text-anchor="middle" font-size="10">Y</text>
+
+              <g id="hidden-layer"></g>
+
+              <text x="250" y="30" text-anchor="middle" font-size="12" font-weight="bold">Q-Values</text>
+
+              <rect x="230" y="60" width="10" height="0" class="q-bar" id="bar-0" transform="scale(1,-1) translate(0,-110)" />
+              <text x="235" y="125" class="q-text">Up</text>
+
+              <rect x="245" y="60" width="10" height="0" class="q-bar" id="bar-1" transform="scale(1,-1) translate(0,-110)" />
+              <text x="250" y="125" class="q-text">Down</text>
+
+              <rect x="260" y="60" width="10" height="0" class="q-bar" id="bar-2" transform="scale(1,-1) translate(0,-110)" />
+              <text x="265" y="125" class="q-text">Left</text>
+
+              <rect x="275" y="60" width="10" height="0" class="q-bar" id="bar-3" transform="scale(1,-1) translate(0,-110)" />
+              <text x="280" y="125" class="q-text">Right</text>
+
+              <g id="connections" style="opacity:0.3"></g>
+            </svg>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; font-size:2rem; color:#cbd5e1;">➡</div>
+
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div style="font-weight:bold; margin-bottom:10px;">經驗回放 (Replay Buffer)</div>
+          <div class="buffer-container">
+            <div class="buffer-title">Memory Log [s, a, r, s']</div>
+            <div id="log-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button onclick="step()" id="btn-step">單步執行 (Step)</button>
+        <button onclick="toggleTrain()" id="btn-train">開始訓練 (Auto Train)</button>
+        <button onclick="resetEnv()" style="background-color:#64748b;">重置 (Reset)</button>
+      </div>
+
+      <div class="stats-panel">
+        <span>Epsilon (探索率): <strong id="val-eps">1.00</strong></span>
+        <span>Total Reward: <strong id="val-reward">0</strong></span>
+        <span>Episode: <strong id="val-episode">1</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>表格 Q-learning vs DQN</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>表格 Q-learning</th><th>DQN</th></tr></thead>
+      <tbody>
+        <tr><td>Q 值儲存</td><td>一張表，每個 (狀態,動作) 一格</td><td>神經網路估算，不用列舉</td></tr>
+        <tr><td>狀態很多時</td><td>爆炸、存不下</td><td>可處理高維（如像素）</td></tr>
+        <tr><td>泛化能力</td><td>無，沒見過的狀態不會</td><td>能從相似狀態泛化</td></tr>
+        <tr><td>適用</td><td>小型離散問題</td><td>大狀態空間、離散動作</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔑</span>兩大關鍵技術</h2>
+    <div class="keys">
+      <div class="keycard"><span>🗂️</span><b>經驗回放 Experience Replay</b><br>把 (s, a, r, s′) 存進記憶庫，訓練時<b>隨機抽樣</b>，打破連續樣本相關性、重複利用資料，更穩定。</div>
+      <div class="keycard"><span>🎯</span><b>目標網路 Target Network</b><br>用一個<b>更新較慢</b>的網路產生學習目標，避免目標與被更新網路同時變動造成震盪發散。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧮</span>損失函數（Bellman 目標）</h2>
+    <div class="formula">
+      $$ L(\theta) = \mathbb{E}\left[\left(\underbrace{r + \gamma \max_{a'} Q(s',a';\theta^-)}_{\text{Target（現實）}} - \underbrace{Q(s,a;\theta)}_{\text{Prediction（預測）}}\right)^2\right] $$
+      <small>θ：目前網路參數；θ⁻：目標網路參數（固定一段時間）。讓「預測 Q」逼近「獎勵 + 折扣後的未來最佳 Q」。</small>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧭</span>它在強化學習的定位</h2>
+    <div class="note meta">
+      DQN 屬於<b>價值法（value-based）</b>、<b>off-policy</b>：先估 Q 值、再由 argmax 選動作。它跟<b>策略梯度</b>（直接學策略）路線不同。DQN 只適合<b>離散動作</b>；動作為<b>連續</b>（如機器人關節角度）時要用 DDPG、PPO 等方法。它仍是強化學習（靠獎勵試錯），不是監督式。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>應用場景</h2>
+    <div class="note app">
+      <b>① Atari 遊戲：</b>DeepMind 用 DQN 讓電腦純看像素就把打磚塊、太空侵略者玩得比人強。<br>
+      <b>② 機器人控制：</b>教機械手臂抓物、機器狗走路。<br>
+      <b>③ 推薦系統：</b>把用戶點擊當「遊戲」，推薦系統當 agent，選推什麼內容（動作）能拿最高點擊（獎勵）。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. DQN 是什麼？</summary>
+        <div class="ans">用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大（如遊戲畫面像素）的問題。</div></details>
+      <details><summary>Q2. 為什麼不直接用表格 Q-learning？</summary>
+        <div class="ans">表格要為每個 (狀態,動作) 存一格，狀態一多（如影像）就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。</div></details>
+      <details><summary>Q3. 經驗回放與目標網路各做什麼？</summary>
+        <div class="ans">經驗回放把互動經驗存進緩衝區、訓練時隨機抽樣，打破相關性；目標網路用更新較慢的網路提供穩定學習目標，兩者都讓訓練更穩。</div></details>
+      <details><summary>Q4. DQN 適合什麼問題？</summary>
+        <div class="ans">狀態空間大、動作為離散的決策問題（如 Atari）；動作為連續（如機器人控制）則需 DDPG、PPO 等方法。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>本質：</b>用神經網路估 Q，取代查表。</li>
+      <li><b>解決：</b>狀態龐大、高維（如像素）也能學。</li>
+      <li><b>兩技術：</b>經驗回放 ＋ 目標網路穩定訓練。</li>
+      <li><b>目標：</b>逼近 Bellman 目標 r+γ·max Q。</li>
+      <li><b>定位：</b>價值法、off-policy、離散動作。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        // --- 1. Environment Logic ---
+        const gridSize = 4;
+        const gridEl = document.getElementById('grid');
+        let agentPos = {x: 0, y: 0};
+        const goalPos = {x: 3, y: 3};
+        const trapPos = {x: 1, y: 2};
+
+        // Q-Table simulation (Using a table to SIMULATE a network for this frontend demo)
+        // In reality, this would be a TensorFLow.js model.
+        let qTable = {};
+        const actions = [
+            {dx: 0, dy: -1, name: 'Up'},    // 0
+            {dx: 0, dy: 1,  name: 'Down'},  // 1
+            {dx: -1, dy: 0, name: 'Left'},  // 2
+            {dx: 1, dy: 0,  name: 'Right'}  // 3
+        ];
+
+        // Hyperparameters
+        let epsilon = 1.0; // Exploration rate
+        const epsilonDecay = 0.995;
+        const minEpsilon = 0.1;
+        const learningRate = 0.1;
+        const gamma = 0.9;
+
+        let episode = 1;
+        let totalReward = 0;
+        let isTraining = false;
+        let trainInterval;
+
+        // Initialize
+        function init() {
+            createGrid();
+            drawNN();
+            updateUI();
+        }
+
+        function createGrid() {
+            gridEl.innerHTML = '';
+            for(let y=0; y<gridSize; y++) {
+                for(let x=0; x<gridSize; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.id = `cell-${x}-${y}`;
+
+                    if(x === goalPos.x && y === goalPos.y) {
+                        cell.innerHTML = '⭐'; // Goal
+                        cell.classList.add('goal');
+                    } else if (x === trapPos.x && y === trapPos.y) {
+                        cell.innerHTML = '🔥'; // Trap
+                        cell.classList.add('trap');
+                    }
+
+                    gridEl.appendChild(cell);
+                }
+            }
+            renderAgent();
+        }
+
+        function renderAgent() {
+            // Clear previous agent
+            document.querySelectorAll('.agent-icon').forEach(el => el.remove());
+
+            const cell = document.getElementById(`cell-${agentPos.x}-${agentPos.y}`);
+            const agentDiv = document.createElement('div');
+            agentDiv.className = 'agent agent-icon';
+            cell.appendChild(agentDiv);
+
+            // Highlight Inputs in NN
+            updateNNInputs();
+        }
+
+        function getQ(x, y) {
+            const key = `${x},${y}`;
+            if(!qTable[key]) qTable[key] = [0, 0, 0, 0]; // Init 0
+            return qTable[key];
+        }
+
+        // --- 2. Neural Network Visualization Logic ---
+        function drawNN() {
+            const svg = document.getElementById('nn-svg');
+            const hiddenLayer = document.getElementById('hidden-layer');
+            const connections = document.getElementById('connections');
+
+            // Draw Hidden Nodes (4 nodes)
+            for(let i=0; i<4; i++) {
+                const cy = 60 + i * 40;
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", 150); circle.setAttribute("cy", cy);
+                circle.setAttribute("r", 10);
+                circle.setAttribute("class", "node hidden-node");
+                hiddenLayer.appendChild(circle);
+
+                // Connections Input -> Hidden
+                drawLink(40, 80, 150, cy); // x -> hidden
+                drawLink(40, 140, 150, cy); // y -> hidden
+
+                // Connections Hidden -> Output (Bars base y=110)
+                // We just draw lines to the text area approx
+                drawLink(150, cy, 235, 110);
+                drawLink(150, cy, 250, 110);
+                drawLink(150, cy, 265, 110);
+                drawLink(150, cy, 280, 110);
+            }
+        }
+
+        function drawLink(x1, y1, x2, y2) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+            line.setAttribute("class", "link");
+            document.getElementById('connections').appendChild(line);
+        }
+
+        function updateNNInputs() {
+            // Flash input nodes
+            const nx = document.getElementById('in-x');
+            const ny = document.getElementById('in-y');
+
+            nx.classList.add('active');
+            ny.classList.add('active');
+
+            setTimeout(() => {
+                nx.classList.remove('active');
+                ny.classList.remove('active');
+            }, 200);
+
+            // Visualize "Forward Pass" -> Update Q Bars
+            const qs = getQ(agentPos.x, agentPos.y);
+
+            // Normalize for visual (0 to 50 height)
+            // If Q is negative, show small.
+            for(let i=0; i<4; i++) {
+                const bar = document.getElementById(`bar-${i}`);
+                // Simple scaling
+                let h = Math.max(0, qs[i] * 10);
+                if (h > 50) h = 50;
+                bar.setAttribute("height", h);
+            }
+        }
+
+        // --- 3. RL Logic (Step) ---
+        function step() {
+            // 1. Choose Action (Epsilon Greedy)
+            let actionIdx;
+            const qs = getQ(agentPos.x, agentPos.y);
+
+            if (Math.random() < epsilon) {
+                actionIdx = Math.floor(Math.random() * 4); // Explore
+            } else {
+                // Exploit: argmax(Q)
+                actionIdx = qs.indexOf(Math.max(...qs));
+            }
+
+            // 2. Move
+            const oldX = agentPos.x;
+            const oldY = agentPos.y;
+            const action = actions[actionIdx];
+
+            let newX = oldX + action.dx;
+            let newY = oldY + action.dy;
+
+            // Boundary check
+            if(newX < 0) newX = 0;
+            if(newX >= gridSize) newX = gridSize - 1;
+            if(newY < 0) newY = 0;
+            if(newY >= gridSize) newY = gridSize - 1;
+
+            // 3. Get Reward
+            let reward = -1; // Step cost
+            let done = false;
+
+            if (newX === goalPos.x && newY === goalPos.y) {
+                reward = 10;
+                done = true;
+            } else if (newX === trapPos.x && newY === trapPos.y) {
+                reward = -10;
+                done = true;
+            }
+
+            // 4. Update Q (Train Network Simulation)
+            // Q(s,a) = Q(s,a) + lr * (r + gamma * max(Q(s')) - Q(s,a))
+            const maxNextQ = Math.max(...getQ(newX, newY));
+            const currentQ = qTable[`${oldX},${oldY}`][actionIdx];
+            const target = reward + gamma * maxNextQ;
+
+            qTable[`${oldX},${oldY}`][actionIdx] += learningRate * (target - currentQ);
+
+            // 5. Log to Replay Buffer
+            logExperience(oldX, oldY, action.name, reward, newX, newY);
+
+            // Update State
+            agentPos = {x: newX, y: newY};
+            totalReward += reward;
+
+            // Update UI
+            renderAgent();
+            updateUI();
+
+            // Check Done
+            if (done) {
+                if(isTraining) {
+                    resetEpisode();
+                } else {
+                    setTimeout(() => alert(reward === 10 ? "Goal Reached!" : "Game Over!"), 100);
+                    resetEpisode();
+                }
+            }
+        }
+
+        function resetEpisode() {
+            agentPos = {x: 0, y: 0};
+            episode++;
+            totalReward = 0;
+
+            // Decay Epsilon
+            if (epsilon > minEpsilon) epsilon *= epsilonDecay;
+
+            renderAgent();
+            updateUI();
+        }
+
+        function resetEnv() {
+            qTable = {};
+            epsilon = 1.0;
+            episode = 1;
+            totalReward = 0;
+            agentPos = {x:0, y:0};
+            isTraining = false;
+            clearInterval(trainInterval);
+            document.getElementById('btn-train').innerText = "開始訓練 (Auto Train)";
+            document.getElementById('log-content').innerHTML = '';
+            renderAgent();
+            updateUI();
+        }
+
+        function toggleTrain() {
+            if(isTraining) {
+                isTraining = false;
+                clearInterval(trainInterval);
+                document.getElementById('btn-train').innerText = "開始訓練 (Auto Train)";
+                document.getElementById('btn-step').disabled = false;
+            } else {
+                isTraining = true;
+                trainInterval = setInterval(step, 100); // Fast speed
+                document.getElementById('btn-train').innerText = "停止訓練 (Stop)";
+                document.getElementById('btn-step').disabled = true;
+            }
+        }
+
+        function logExperience(x, y, act, r, nx, ny) {
+            const logDiv = document.getElementById('log-content');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            // Format: ([0,0], Down, -1, [0,1])
+            entry.innerText = `([${x},${y}], ${act.charAt(0)}, ${r}, [${nx},${ny}])`;
+
+            logDiv.prepend(entry);
+            if(logDiv.children.length > 8) {
+                logDiv.removeChild(logDiv.lastChild);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('val-eps').innerText = epsilon.toFixed(2);
+            document.getElementById('val-reward').innerText = totalReward;
+            document.getElementById('val-episode').innerText = episode;
+        }
+
+        // Start
+        window.onload = init;
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>DQN(深度 Q 網路)用神經網路近似 Q 值,是深度強化學習的里程碑,iPAS RL 進階考點。重點:把 Q-learning 擴展到高維狀態(如遊戲畫面),靠經驗回放與目標網路穩定訓練。易混點:DQN 屬價值法、off-policy,與策略梯度(直接學策略)路線不同;它仍是強化學習(靠獎勵試錯)、非監督式。情境:Atari 遊戲等高維狀態的 RL。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>DQN 是什麼？</summary><p>Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。</p></details><details><summary>為什麼需要 DQN、不直接用表格 Q-learning？</summary><p>表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。</p></details><details><summary>經驗回放(Experience Replay)做什麼？</summary><p>把互動經驗(狀態、動作、獎勵、下一狀態)存進緩衝區，訓練時隨機抽樣；打破連續樣本的相關性、重複利用資料，讓訓練更穩定。</p></details><details><summary>目標網路(Target Network)為什麼重要？</summary><p>用一個更新較慢的網路產生學習目標，避免目標和被更新的網路同時變動造成的震盪與發散，提升訓練穩定性。</p></details><details><summary>DQN 適合什麼問題？</summary><p>狀態空間大、動作為離散的決策問題(如 Atari 遊戲)；動作為連續(如機器人控制)則需 DDPG、PPO 等其他方法。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "DQN 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Deep Q-Network，用神經網路近似 Q 值函數的強化學習方法，讓 Q-learning 能處理狀態龐大(如遊戲畫面像素)的問題。"}}, {"@type": "Question", "name": "為什麼需要 DQN、不直接用表格 Q-learning？", "acceptedAnswer": {"@type": "Answer", "text": "表格法要為每個狀態與動作存一格 Q 值，狀態一多(如影像)就爆炸且無法泛化；用網路近似可從相似狀態泛化、處理高維輸入。"}}, {"@type": "Question", "name": "經驗回放(Experience Replay)做什麼？", "acceptedAnswer": {"@type": "Answer", "text": "把互動經驗(狀態、動作、獎勵、下一狀態)存進緩衝區，訓練時隨機抽樣；打破連續樣本的相關性、重複利用資料，讓訓練更穩定。"}}, {"@type": "Question", "name": "目標網路(Target Network)為什麼重要？", "acceptedAnswer": {"@type": "Answer", "text": "用一個更新較慢的網路產生學習目標，避免目標和被更新的網路同時變動造成的震盪與發散，提升訓練穩定性。"}}, {"@type": "Question", "name": "DQN 適合什麼問題？", "acceptedAnswer": {"@type": "Answer", "text": "狀態空間大、動作為離散的決策問題(如 Atari 遊戲)；動作為連續(如機器人控制)則需 DDPG、PPO 等其他方法。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="q-learning.html">Q-Learning</a><a href="ppo.html">PPO</a><a href="actor-critic-deep.html">Actor-Critic (Deep)</a><a href="alphago.html">AlphaGo</a><a href="cumulativereward.html">累積獎勵, 成功率</a><a href="q-value.html">Q 值</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

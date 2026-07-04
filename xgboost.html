@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XGBoost vs GBDT 視覺化</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="一個高效能的梯度提升樹實作，加入正則化、二階梯度近似、平行化與缺失值處理等優化；在結構化/表格資料的競賽與實務表現突出。 目標函數含 L1/L2 正則化抑制過擬合、用一階加二階導數更精準找分裂、支援列與特徵子抽樣、平行化與快取優化、內建處理缺失值。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/xgboost.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="XGBoost vs GBDT 視覺化">
+    <meta property="og:description" content="一個高效能的梯度提升樹實作，加入正則化、二階梯度近似、平行化與缺失值處理等優化；在結構化/表格資料的競賽與實務表現突出。 目標函數含 L1/L2 正則化抑制過擬合、用一階加二階導數更精準找分裂、支援列與特徵子抽樣、平行化與快取優化、內建處理缺失值。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/xgboost.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="XGBoost vs GBDT 視覺化">
+    <meta name="twitter:description" content="高效能的梯度提升樹實作，加入正則化、二階梯度、平行化與缺失值處理；結構化/表格資料競賽與實務表現突出。屬 Boosting（序列、降偏差）。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "XGBoost vs GBDT 視覺化",
+  "url": "https://akira.ipas-ai.com/xgboost.html",
+  "description": "一個高效能的梯度提升樹實作，加入正則化、二階梯度近似、平行化與缺失值處理等優化；在結構化/表格資料的競賽與實務表現突出。目標函數含 L1/L2 正則化抑制過擬合、用一階加二階導數更精準找分裂、支援列與特徵子抽樣、平行化與快取優化、內建處理缺失值。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --lime:#65a30d; --lime-d:#4d7c0f; --blue:#2563eb; --blue-d:#1d4ed8;
+            --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+            /* demo (dark) palette */
+            --bg-color:#1a1b26; --panel-bg:#24283b; --text-main:#a9b1d6; --text-bright:#c0caf5;
+            --gbdt-color:#f7768e; --xgb-color:#9ece6a; --line-color:#414868;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#365314 0%,#65a30d 55%,#a3e635 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(101,163,13,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#d9f99d 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--lime-d); font-weight:700}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#f7fee7; border-left:5px solid var(--lime)}
+        .note.meta{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--lime); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--lime);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--lime-d)}
+
+        .qa{background:#f7fee7; border:1px solid #d9f99d; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #e4f7bf; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--lime-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* residual chain */
+        .resid{display:flex; flex-wrap:wrap; align-items:center; gap:8px; justify-content:center; margin:12px 0;
+            background:#fbfcfe; border:1px solid var(--line); border-radius:12px; padding:14px}
+        .resid .box{background:#fff; border:2px solid #cbd5e1; border-radius:10px; padding:8px 12px; text-align:center; font-size:.9rem; line-height:1.3}
+        .resid .box b{color:var(--lime-d)}
+        .resid .arr{color:var(--muted); font-weight:800}
+
+        /* ===== embedded dark demo (scoped) ===== */
+        .xgb-dash{background:var(--bg-color); color:var(--text-main); padding:22px 18px; border-radius:16px; margin:14px 0}
+        .xgb-dash .demo-title{color:var(--text-bright); text-align:center; margin:0 0 4px; font-size:1.25rem; font-weight:800}
+        .xgb-dash .demo-sub{color:#7aa2f7; text-align:center; margin:0 0 20px; font-weight:bold; font-size:.92rem}
+        .xgb-dash .controls{display:flex; justify-content:center; gap:12px; margin-bottom:22px; flex-wrap:wrap}
+        .xgb-dash button{padding:12px 18px; font-size:14px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; transition:all .3s; background:#414868; color:var(--text-bright)}
+        .xgb-dash button:hover{background:#565f89; transform:translateY(-2px)}
+        .xgb-dash button[data-mode="gbdt"].active{background:var(--gbdt-color); color:#1a1b26; box-shadow:0 0 15px var(--gbdt-color)}
+        .xgb-dash button[data-mode="xgb"].active{background:var(--xgb-color); color:#1a1b26; box-shadow:0 0 15px var(--xgb-color)}
+        .xgb-dash .dashboard{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+        .xgb-dash .zone{background:#16161e; border:2px solid var(--line-color); border-radius:12px; padding:14px; position:relative}
+        .xgb-dash .zone-title{font-size:15px; font-weight:bold; color:var(--text-bright); margin-bottom:10px; border-bottom:1px solid var(--line-color); padding-bottom:5px}
+        .xgb-dash svg{width:100%; height:180px}
+        .xgb-dash .flow-line{fill:none; stroke-width:3; stroke-linecap:round}
+        .xgb-dash .dashed-line{stroke-dasharray:6,6}
+        .xgb-dash .node{fill:#292e42; stroke-width:2}
+        .xgb-dash .node-text{fill:#fff; font-size:12px; font-weight:bold; text-anchor:middle}
+        .xgb-dash .worker{transition:x .5s ease; fill:#e0af68}
+        .xgb-dash .bar-bg{fill:#292e42}
+        .xgb-dash .bar-fill{fill:#9ece6a; transition:width .5s ease}
+        .xgb-dash .data-box{transition:all 1s ease}
+        .xgb-dash .data-text{fill:#1a1b26; font-size:12px; font-weight:bold; text-anchor:middle}
+        .xgb-dash .tree-branch{transition:all .5s; stroke-width:3}
+        .xgb-dash .overfit-node{transition:opacity .5s}
+        .xgb-dash .explanation{grid-column:1 / -1; margin-top:10px; padding:18px; background:#1f2335; border-radius:10px; border-left:6px solid #414868; font-size:14.5px; line-height:1.6; color:var(--text-bright); transition:border-color .3s}
+        .xgb-dash .highlight{font-weight:bold}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .xgb-dash .dashboard{grid-template-columns:1fr}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🌳 梯度提升樹 · 表格資料冠軍 · iPAS 常考</span>
+        <h1>XGBoost：表格資料競賽的常勝軍</h1>
+        <p>XGBoost（eXtreme Gradient Boosting）是 GBDT 的「加強版實作」。它用一棵接一棵的小樹，把前面的錯誤一步步補起來，再加上正則化、平行化、缺失值處理等優化——又準又快，是結構化／表格資料的首選。</p>
+        <div class="chips"><span>梯度提升</span><span>殘差修正</span><span>正則化</span><span>缺失值處理</span><span>是 Boosting</span><span>vs LightGBM/CatBoost</span></div>
+    </header>
+
+    <!-- ===== 1. 先備 ===== -->
+    <section class="lesson">
+        <h2>🧱 一、先備知識：它是「Boosting」家族</h2>
+        <p class="lead">看 XGBoost 之前，先記住它的出身。</p>
+        <div class="note def">
+            <h4>💡 一句話定位</h4>
+            XGBoost 屬於<span class="term">集成學習的 Boosting（提升法）</span>：<b>一棵接一棵</b>地訓練很多棵小決策樹，每棵新樹專門去<b>修正前面做錯的部分</b>，最後加起來變成一個很強的模型（主要降<b>偏差</b>）。它是 <b>GBDT（梯度提升樹）的高效實作</b>，再加上一堆工程與數學優化。👉 想先複習 Boosting 與 Bagging 的差別，看 <a href="ensemble.html" style="color:#4d7c0f;font-weight:700">集成學習</a>。
+        </div>
+    </section>
+
+    <!-- ===== 2. 核心 ===== -->
+    <section class="lesson">
+        <h2>🎯 二、核心：一棵樹接一棵樹，補「殘差」</h2>
+        <p class="lead">梯度提升的精髓，用一個數字例子就懂。</p>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>第一棵樹：先粗略猜</b><br>
+                假設真實答案是 <b>100</b>。第一棵樹很簡單，只猜到 <b>80</b> → 還差 <b>20</b>（這個「還差多少」就叫<span class="term">殘差 residual</span>）。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>第二棵樹：專門補上次的差</b><br>
+                第二棵樹不重猜答案，而是<b>去擬合那個殘差 20</b>，猜到 18 → 累積 80＋18＝<b>98</b>，殘差只剩 2。
+            </div></div>
+            <div class="step"><div class="num">3</div><div class="st-body">
+                <b>一直接力下去</b><br>
+                第三棵補 2、第四棵補更小的差……<span class="hl">每棵樹都補前面的不足，加起來越來越準</span>。這就是「梯度提升」——沿著誤差下降的方向，一步步逼近。
+            </div></div>
+        </div>
+
+        <div class="resid">
+            <div class="box">真實<br><b>100</b></div>
+            <div class="arr">→</div>
+            <div class="box">樹1 猜 80<br>殘差 <b>20</b></div>
+            <div class="arr">+樹2→</div>
+            <div class="box">累積 98<br>殘差 <b>2</b></div>
+            <div class="arr">+樹3→</div>
+            <div class="box">累積 99.8<br>殘差 <b>0.2</b></div>
+            <div class="arr">…</div>
+        </div>
+
+        <div class="note meta">
+            <h4>🐢 學習率（eta）：別一步到位</h4>
+            實務上每棵樹的貢獻會乘上一個小小的<b>學習率</b>（如 0.1），不讓它一次補滿。步子小、樹多一點，雖然慢，但<span class="hl">更穩、更不會過擬合</span>。所以「<b>小學習率 + 多棵樹 + 早停</b>」是 XGBoost 的黃金組合。
+        </div>
+    </section>
+
+    <!-- ===== 3. 五大優化 ===== -->
+    <section class="lesson">
+        <h2>🚀 三、XGBoost 比傳統 GBDT 多了什麼？</h2>
+        <p class="lead">同樣是梯度提升，XGBoost 加了五項關鍵優化，讓它又快又準又穩。</p>
+        <div class="keys">
+            <div class="keycard"><b>① 正則化（最關鍵）</b>目標函數加入對「葉子數量與權重」的 L1/L2 懲罰，自動剪掉複雜分支、抑制過擬合——這是傳統 GBDT 沒有的。</div>
+            <div class="keycard"><b>② 二階梯度</b>用一階＋二階導數（牛頓法）更精準地找分裂點，比只用一階的 GBDT 更準更快收斂。</div>
+            <div class="keycard"><b>③ 平行化</b>把特徵預先排序成 Block 結構，找分裂點時多執行緒同時掃描，速度大幅提升。</div>
+            <div class="keycard"><b>④ 內建缺失值處理</b>訓練時自動學「缺值該往左還往右」的預設方向，遇到空值不會卡死。</div>
+            <div class="keycard"><b>⑤ 剪枝與子抽樣</b>gamma 控制最小分裂增益（後剪枝）、subsample/colsample 隨機抽列與欄，進一步抗過擬合。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 四、動手玩：GBDT vs XGBoost</h2>
+        <p class="lead">切換上方兩個按鈕，看三個面板（平行計算、缺失值、剪枝）怎麼從「傳統作坊」變成「現代工廠」。</p>
+
+        <div class="xgb-dash">
+            <div class="demo-title">XGBoost 封神三大特徵</div>
+            <div class="demo-sub">看看它是如何全面碾壓傳統 GBDT 的！</div>
+            <div class="controls">
+                <button data-mode="gbdt" class="active" onclick="switchMode('gbdt')">1. 傳統 GBDT（緩慢、過擬合、怕缺漏）</button>
+                <button data-mode="xgb" onclick="switchMode('xgb')">2. 極限 XGBoost（並行、正則化、智慧分流）</button>
+            </div>
+            <div class="dashboard">
+                <div class="zone">
+                    <div class="zone-title" id="t1-title">計算節點分裂 (特徵排序)</div>
+                    <svg id="svg-parallel" viewBox="0 0 400 180">
+                        <text x="10" y="30" fill="#a9b1d6" font-size="12">特徵 1 (房價)</text>
+                        <rect x="100" y="20" width="280" height="15" rx="7" class="bar-bg" />
+                        <rect id="bar1" x="100" y="20" width="0" height="15" rx="7" class="bar-fill" />
+                        <text x="10" y="80" fill="#a9b1d6" font-size="12">特徵 2 (坪數)</text>
+                        <rect x="100" y="70" width="280" height="15" rx="7" class="bar-bg" />
+                        <rect id="bar2" x="100" y="70" width="0" height="15" rx="7" class="bar-fill" />
+                        <text x="10" y="130" fill="#a9b1d6" font-size="12">特徵 3 (屋齡)</text>
+                        <rect x="100" y="120" width="280" height="15" rx="7" class="bar-bg" />
+                        <rect id="bar3" x="100" y="120" width="0" height="15" rx="7" class="bar-fill" />
+                        <circle id="worker1" cx="100" cy="27" r="10" class="worker"/>
+                        <circle id="worker2" cx="100" cy="77" r="10" class="worker"/>
+                        <circle id="worker3" cx="100" cy="127" r="10" class="worker"/>
+                    </svg>
+                </div>
+                <div class="zone">
+                    <div class="zone-title" id="t2-title">遇到殘缺資料 (坪數=?)</div>
+                    <svg id="svg-missing" viewBox="0 0 400 180">
+                        <circle cx="200" cy="40" r="25" class="node" stroke="#a9b1d6"/>
+                        <text x="200" y="45" class="node-text">坪數 > 30?</text>
+                        <path d="M 185 60 L 100 140" class="flow-line" stroke="#414868"/>
+                        <text x="120" y="100" fill="#a9b1d6" font-size="12">Yes</text>
+                        <path d="M 215 60 L 300 140" class="flow-line" stroke="#414868"/>
+                        <text x="270" y="100" fill="#a9b1d6" font-size="12">No</text>
+                        <path id="default-path" d="M 210 65 Q 260 90 300 140" fill="none" stroke="var(--xgb-color)" stroke-width="4" class="dashed-line" style="opacity:0;"/>
+                        <text id="default-text" x="290" y="80" fill="var(--xgb-color)" font-size="12" font-weight="bold" style="opacity:0;">自動預設通道</text>
+                        <g id="data-package" class="data-box" transform="translate(200, -20)">
+                            <rect x="-20" y="-15" width="40" height="30" rx="5" fill="#e0af68"/>
+                            <text x="0" y="4" class="data-text">?</text>
+                        </g>
+                        <text id="error-msg" x="200" y="90" fill="var(--gbdt-color)" font-size="16" font-weight="bold" text-anchor="middle" style="opacity:0;">當機：無法分類！</text>
+                    </svg>
+                </div>
+                <div class="zone" style="grid-column: 1 / -1;">
+                    <div class="zone-title" id="t3-title">決策樹生長 (防止過擬合)</div>
+                    <svg id="svg-reg" viewBox="0 0 900 180">
+                        <circle cx="450" cy="30" r="15" class="node" stroke="#a9b1d6"/>
+                        <path d="M 450 45 L 350 90" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                        <path d="M 450 45 L 550 90" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                        <circle cx="350" cy="90" r="15" class="node" stroke="#a9b1d6"/>
+                        <circle cx="550" cy="90" r="15" class="node" stroke="#a9b1d6"/>
+                        <g id="overfit-group" class="overfit-node">
+                            <path d="M 350 105 L 300 140" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                            <path d="M 350 105 L 400 140" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                            <path d="M 550 105 L 500 140" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                            <path d="M 550 105 L 600 140" class="flow-line tree-branch" stroke="#a9b1d6"/>
+                            <circle cx="300" cy="140" r="10" class="node" stroke="#a9b1d6"/>
+                            <circle cx="400" cy="140" r="10" class="node" stroke="#a9b1d6"/>
+                            <circle cx="500" cy="140" r="10" class="node" stroke="#a9b1d6"/>
+                            <circle cx="600" cy="140" r="10" class="node" stroke="#a9b1d6"/>
+                            <path d="M 300 150 L 280 170" class="flow-line tree-branch" stroke="#a9b1d6" stroke-width="2"/>
+                            <path d="M 300 150 L 320 170" class="flow-line tree-branch" stroke="#a9b1d6" stroke-width="2"/>
+                            <path d="M 600 150 L 580 170" class="flow-line tree-branch" stroke="#a9b1d6" stroke-width="2"/>
+                            <circle cx="280" cy="170" r="5" fill="#a9b1d6"/>
+                            <circle cx="320" cy="170" r="5" fill="#a9b1d6"/>
+                            <circle cx="580" cy="170" r="5" fill="#a9b1d6"/>
+                        </g>
+                        <g id="scissor-group" style="opacity:0; transition: opacity 0.5s;">
+                            <text x="350" y="130" fill="var(--xgb-color)" font-size="24" text-anchor="middle">✂️ 剪枝</text>
+                            <text x="550" y="130" fill="var(--xgb-color)" font-size="24" text-anchor="middle">✂️ 剪枝</text>
+                            <text x="450" y="160" fill="var(--xgb-color)" font-size="14" font-weight="bold" text-anchor="middle">已加入正則化懲罰：保留簡單結構，提升泛化能力</text>
+                        </g>
+                    </svg>
+                </div>
+                <div class="explanation" id="exp-text"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 5. Bagging vs Boosting 提醒 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 五、最常考的混淆：它是 Boosting，不是 Bagging！</h2>
+        <div class="note warn">
+            <h4>別跟隨機森林搞混</h4>
+            <b>XGBoost＝Boosting</b>：樹是<b>序列</b>訓練（一棵接一棵補錯）、主要<b>降偏差</b>。<br>
+            <b>隨機森林＝Bagging</b>：樹是<b>平行</b>訓練（各自獨立再投票）、主要<b>降變異</b>。<br>
+            <span class="hl">XGBoost 雖然「平行化」加速，但那是「找分裂點時的工程平行」，模型本質仍是序列 Boosting</span>——這是陷阱題最愛考的點。
+        </div>
+    </section>
+
+    <!-- ===== 6. 參數 ===== -->
+    <section class="lesson">
+        <h2>🎛️ 六、重要參數速查</h2>
+        <table class="cmp">
+            <tr><th>參數</th><th>控制什麼</th><th>怎麼調</th></tr>
+            <tr><td>eta（學習率）</td><td>每棵樹的貢獻</td><td>調小（如 0.05～0.1）＋多棵樹，較穩</td></tr>
+            <tr><td>n_estimators</td><td>樹的數量</td><td>配合學習率與<b>早停</b>決定</td></tr>
+            <tr><td>max_depth</td><td>單棵樹的深度／複雜度</td><td>太大易過擬合，常 3～8</td></tr>
+            <tr><td>subsample / colsample</td><td>列／欄的隨機抽樣比例</td><td>< 1 增加隨機性、抗過擬合</td></tr>
+            <tr><td>gamma / lambda / alpha</td><td>正則化（分裂門檻、L2、L1）</td><td>調大 → 更保守、更不過擬合</td></tr>
+            <tr><td>min_child_weight</td><td>葉節點最小樣本權重</td><td>調大 → 更保守</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🛑 早停（Early Stopping）</h4>
+            設一個驗證集，當驗證分數<b>連續幾輪不再進步</b>就自動停止加樹——既省時間、又自動防過擬合，是 XGBoost 的標準做法。
+        </div>
+    </section>
+
+    <!-- ===== 7. 三兄弟 ===== -->
+    <section class="lesson">
+        <h2>👨‍👩‍👧 七、XGBoost vs LightGBM vs CatBoost</h2>
+        <p class="lead">三個都是梯度提升樹的明星實作，常一起被問。</p>
+        <table class="cmp">
+            <tr><th></th><th>XGBoost</th><th>LightGBM</th><th>CatBoost</th></tr>
+            <tr><td>樹生長</td><td>層級優先（level-wise）</td><td>葉子優先（leaf-wise）</td><td>對稱樹</td></tr>
+            <tr><td>強項</td><td>通用、生態最成熟</td><td><b>超大資料最快</b>（直方圖）</td><td><b>類別特徵</b>處理最好</td></tr>
+            <tr><td>注意</td><td>資料量大時較慢</td><td>小資料 leaf-wise 易過擬合</td><td>訓練相對較慢</td></tr>
+        </table>
+        <div class="note app">
+            <h4>🎯 何時用 / 不用</h4>
+            <b>中小型表格／結構化資料</b>的分類與回歸，XGBoost 幾乎是首選、又準又穩。但<b>影像、文字、語音</b>等非結構化資料，<span class="hl">深度學習通常更合適</span>，不要硬套 XGBoost。
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. XGBoost 屬於 Bagging 還是 Boosting？</summary>
+                <p><b>Boosting</b>（序列、後者補前者的錯、主要降偏差）。隨機森林才是 Bagging（平行、降變異）。它的「平行化」只是找分裂點的工程加速，模型本質仍序列。</p></details>
+            <details><summary>Q2. 梯度提升的核心是什麼？</summary>
+                <p>一棵接一棵樹，<b>每棵專門擬合前面的殘差（還差多少）</b>，加起來越來越準；用<b>學習率</b>控制每棵的貢獻，小步多樹較穩。</p></details>
+            <details><summary>Q3. XGBoost 比傳統 GBDT 多了哪些優化？</summary>
+                <p><b>正則化（L1/L2）</b>、二階梯度找分裂、平行化、內建缺失值處理、剪枝與子抽樣。其中正則化是抑制過擬合的關鍵。</p></details>
+            <details><summary>Q4. XGBoost 容易過擬合嗎？怎麼控制？</summary>
+                <p>會。用<b>小學習率＋多樹＋早停</b>、限制 max_depth、subsample/colsample 隨機化、gamma/lambda/alpha 正則化。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>梯度提升樹</b>一棵接一棵補殘差，加起來變強，主要降偏差。</div>
+            <div class="keycard"><b>是 Boosting（序列）</b>別跟隨機森林（Bagging、平行）搞混。</div>
+            <div class="keycard"><b>五大優化</b>正則化、二階梯度、平行化、缺失值、剪枝/抽樣。</div>
+            <div class="keycard"><b>黃金組合</b>小學習率 + 多樹 + 早停，又準又不過擬合。</div>
+            <div class="keycard"><b>表格資料首選</b>非結構化（影像/文字）用深度學習。</div>
+            <div class="keycard"><b>三兄弟</b>LightGBM 快、CatBoost 擅長類別、XGBoost 通用。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        let parallelInterval;
+
+        function switchMode(mode) {
+            document.querySelectorAll('.xgb-dash button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.xgb-dash button[data-mode="${mode}"]`).classList.add('active');
+
+            const color = mode === 'gbdt' ? 'var(--gbdt-color)' : 'var(--xgb-color)';
+            document.documentElement.style.setProperty('currentColor', color);
+            document.getElementById('exp-text').style.borderLeftColor = color;
+
+            const isXgb = mode === 'xgb';
+
+            clearInterval(parallelInterval);
+            document.getElementById('bar1').style.width = "0";
+            document.getElementById('bar2').style.width = "0";
+            document.getElementById('bar3').style.width = "0";
+            document.getElementById('worker1').setAttribute('cx', '100');
+            document.getElementById('worker2').setAttribute('cx', '100');
+            document.getElementById('worker3').setAttribute('cx', '100');
+
+            document.getElementById('worker2').style.opacity = isXgb ? '1' : '0';
+            document.getElementById('worker3').style.opacity = isXgb ? '1' : '0';
+
+            let progress = 0;
+            parallelInterval = setInterval(() => {
+                progress += isXgb ? 15 : 5;
+                if (progress > 280) progress = 0;
+
+                if (isXgb) {
+                    document.getElementById('bar1').style.width = progress + "px";
+                    document.getElementById('bar2').style.width = progress + "px";
+                    document.getElementById('bar3').style.width = progress + "px";
+                    document.getElementById('worker1').setAttribute('cx', 100 + progress);
+                    document.getElementById('worker2').setAttribute('cx', 100 + progress);
+                    document.getElementById('worker3').setAttribute('cx', 100 + progress);
+                } else {
+                    if (progress <= 93) {
+                        document.getElementById('bar1').style.width = (progress * 3) + "px";
+                        document.getElementById('worker1').setAttribute('cx', 100 + (progress * 3));
+                    } else if (progress <= 186) {
+                        document.getElementById('bar2').style.width = ((progress - 93) * 3) + "px";
+                        document.getElementById('worker1').setAttribute('cx', 100 + ((progress - 93) * 3));
+                        document.getElementById('worker1').setAttribute('cy', '77');
+                    } else {
+                        document.getElementById('bar3').style.width = ((progress - 186) * 3) + "px";
+                        document.getElementById('worker1').setAttribute('cx', 100 + ((progress - 186) * 3));
+                        document.getElementById('worker1').setAttribute('cy', '127');
+                    }
+                    if(progress === 0) {
+                        document.getElementById('bar1').style.width = "0";
+                        document.getElementById('bar2').style.width = "0";
+                        document.getElementById('bar3').style.width = "0";
+                        document.getElementById('worker1').setAttribute('cy', '27');
+                    }
+                }
+            }, 100);
+
+            const pkg = document.getElementById('data-package');
+            const defPath = document.getElementById('default-path');
+            const defText = document.getElementById('default-text');
+            const errMsg = document.getElementById('error-msg');
+
+            pkg.style.transition = 'none';
+            pkg.setAttribute('transform', 'translate(200, -20)');
+
+            setTimeout(() => {
+                pkg.style.transition = 'all 1s ease';
+                if (isXgb) {
+                    errMsg.style.opacity = '0';
+                    defPath.style.opacity = '1';
+                    defText.style.opacity = '1';
+                    pkg.setAttribute('transform', 'translate(300, 140)');
+                } else {
+                    defPath.style.opacity = '0';
+                    defText.style.opacity = '0';
+                    pkg.setAttribute('transform', 'translate(200, 40)');
+                    setTimeout(() => { errMsg.style.opacity = '1'; }, 1000);
+                }
+            }, 100);
+
+            const overfitGrp = document.getElementById('overfit-group');
+            const scissorGrp = document.getElementById('scissor-group');
+
+            if (isXgb) {
+                overfitGrp.style.opacity = '0';
+                scissorGrp.style.opacity = '1';
+            } else {
+                overfitGrp.style.opacity = '1';
+                scissorGrp.style.opacity = '0';
+            }
+
+            const expText = document.getElementById('exp-text');
+            if (isXgb) {
+                expText.innerHTML = `
+                    <span style="color:var(--xgb-color); font-weight:bold; font-size:1.2em;">【XGBoost 的現代化智能工廠】</span><br><br>
+                    1. <span class="highlight">並行化：</span>在尋找最佳切點時，啟動 Block 結構，多個 CPU 執行緒同時對不同特徵進行掃描排序，速度極快。<br>
+                    2. <span class="highlight">處理缺失值：</span>訓練時自動學習出「缺失值預設方向」。遇到 <code>?</code> 直接順滑通關，不會報錯。<br>
+                    3. <span class="highlight">正則化 (Regularization)：</span>在目標函數中加入對「葉子節點數量」與「權重」的懲罰。會自動剪去不必要的複雜分支，避免死背考題（過擬合）。
+                `;
+            } else {
+                expText.innerHTML = `
+                    <span style="color:var(--gbdt-color); font-weight:bold; font-size:1.2em;">【傳統 GBDT 的手工作坊】</span><br><br>
+                    1. <span class="highlight">循序計算：</span>特徵必須一個一個排隊掃描、排序，耗費大量時間。<br>
+                    2. <span class="highlight">無法自動處理缺失值：</span>如果資料清理沒做好，遇到空值模型直接不知道該往哪走，卡死在節點上。<br>
+                    3. <span class="highlight">容易過擬合：</span>沒有內建明確的正則化懲罰機制，為了逼近微小的誤差，樹會瘋狂往下長，把雜訊也背起來。
+                `;
+            }
+        }
+
+        switchMode('gbdt');
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>XGBoost 是 GBDT 的高效實作,iPAS 中級科目三常考、結構化資料競賽常勝。重點:在梯度提升上加入正則化、處理缺失值、平行加速與剪枝,兼顧準確與效率。易混點:它屬 Boosting(序列、降偏差),與隨機森林的 Bagging(平行、降變異)不同;強但易過擬合,需細調學習率與樹數。情境:表格與結構化資料的預測;LightGBM、CatBoost 是同類競品。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>XGBoost 是什麼、為什麼流行？</summary><p>一個高效能的梯度提升樹實作，加入正則化、二階梯度近似、平行化與缺失值處理等優化；在結構化/表格資料的競賽與實務表現突出。</p></details><details><summary>它和傳統 GBDT 的改良？</summary><p>目標函數含 L1/L2 正則化抑制過擬合、用一階加二階導數更精準找分裂、支援列與特徵子抽樣、平行化與快取優化、內建處理缺失值。</p></details><details><summary>重要參數怎麼調？</summary><p>學習率(eta)與樹數一起、max_depth 控制複雜度、subsample 與 colsample 做隨機化、min_child_weight 與 gamma 與 lambda/alpha 做正則化，常用早停。</p></details><details><summary>XGBoost、LightGBM、CatBoost 差在哪？</summary><p>都是梯度提升樹。LightGBM 用葉子優先生長與直方圖、超大資料更快；CatBoost 對類別特徵處理特別好；XGBoost 通用、生態成熟。</p></details><details><summary>什麼情況適合用 XGBoost？</summary><p>中小型表格/結構化資料的分類與回歸幾乎首選；但影像、文字、語音等非結構化資料，深度學習通常更合適。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "XGBoost 是什麼、為什麼流行？", "acceptedAnswer": {"@type": "Answer", "text": "一個高效能的梯度提升樹實作，加入正則化、二階梯度近似、平行化與缺失值處理等優化；在結構化/表格資料的競賽與實務表現突出。"}}, {"@type": "Question", "name": "它和傳統 GBDT 的改良？", "acceptedAnswer": {"@type": "Answer", "text": "目標函數含 L1/L2 正則化抑制過擬合、用一階加二階導數更精準找分裂、支援列與特徵子抽樣、平行化與快取優化、內建處理缺失值。"}}, {"@type": "Question", "name": "重要參數怎麼調？", "acceptedAnswer": {"@type": "Answer", "text": "學習率(eta)與樹數一起、max_depth 控制複雜度、subsample 與 colsample 做隨機化、min_child_weight 與 gamma 與 lambda/alpha 做正則化，常用早停。"}}, {"@type": "Question", "name": "XGBoost、LightGBM、CatBoost 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "都是梯度提升樹。LightGBM 用葉子優先生長與直方圖、超大資料更快；CatBoost 對類別特徵處理特別好；XGBoost 通用、生態成熟。"}}, {"@type": "Question", "name": "什麼情況適合用 XGBoost？", "acceptedAnswer": {"@type": "Answer", "text": "中小型表格/結構化資料的分類與回歸幾乎首選；但影像、文字、語音等非結構化資料，深度學習通常更合適。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="ensemble.html">集成學習</a><a href="matrix.html">分類問題</a><a href="rocauc.html">準確率、AUC-ROC、Log Loss</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

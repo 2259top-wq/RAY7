@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R² 決定係數視覺化</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。 R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/r2.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="R² 決定係數視覺化">
+    <meta property="og:description" content="衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。 R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/r2.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="R² 決定係數視覺化">
+    <meta name="twitter:description" content="衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。 R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "R² 決定係數視覺化",
+  "url": "https://akira.ipas-ai.com/r2.html",
+  "description": "衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。 R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #1e1e2f;
+            --panel-bg: #282a36;
+            --text-main: #f8f8f2;
+            --highlight: #bd93f9;
+            --mean-color: #ff5555;
+            --model-color: #50fa7b;
+            --data-color: #8be9fd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { color: #fff; text-align: center; margin-bottom: 5px; }
+        p.subtitle { color: var(--data-color); margin-bottom: 25px; font-weight: bold; }
+
+        .container {
+            background: var(--panel-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #44475a;
+            color: #fff;
+        }
+
+        button:hover { background-color: #6272a4; transform: translateY(-2px); }
+        button[data-mode="mean"].active { background-color: var(--mean-color); box-shadow: 0 0 15px var(--mean-color); }
+        button[data-mode="model"].active { background-color: var(--model-color); box-shadow: 0 0 15px var(--model-color); color: #1e1e2f; }
+        button[data-mode="r2"].active { background-color: var(--highlight); box-shadow: 0 0 15px var(--highlight); color: #1e1e2f; }
+
+        .layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .svg-container {
+            flex: 2;
+            background: #191a21;
+            border-radius: 8px;
+            border: 2px solid #44475a;
+            position: relative;
+        }
+
+        .info-panel {
+            flex: 1;
+            background: #21222c;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #44475a;
+            transition: border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .explanation {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* SVG 樣式 */
+        .axis { stroke: #6272a4; stroke-width: 2; }
+        .data-point { fill: var(--data-color); r: 6; stroke: #191a21; stroke-width: 2; z-index: 10; }
+        
+        .line-mean { stroke: var(--mean-color); stroke-width: 3; transition: opacity 0.5s; }
+        .line-model { stroke: var(--model-color); stroke-width: 3; transition: opacity 0.5s; }
+        
+        .error-line-mean { stroke: var(--mean-color); stroke-width: 2; stroke-dasharray: 4,4; opacity: 0; transition: opacity 0.5s; }
+        .error-line-model { stroke: var(--model-color); stroke-width: 2; stroke-dasharray: 4,4; opacity: 0; transition: opacity 0.5s; }
+
+        /* R2 進度條 */
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background-color: var(--mean-color);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+            display: none;
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--model-color);
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            box-sizing: border-box;
+            color: #1e1e2f;
+            font-weight: bold;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            color: #fff;
+            mix-blend-mode: difference;
+        }
+
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <h1>模型解釋力：R² = 0.85 是什麼意思？</h1>
+    <p class="subtitle">看看模型是如何把「未知的混亂」轉化為「可解釋的規律」</p>
+    
+    <div class="container">
+        <div class="controls">
+            <button data-mode="mean" class="active" onclick="switchMode('mean')">1. 瞎猜平均值 (總變異)</button>
+            <button data-mode="model" onclick="switchMode('model')">2. 線性迴歸模型 (預測)</button>
+            <button data-mode="r2" onclick="switchMode('r2')">3. R² 的真實意義</button>
+        </div>
+
+        <div class="layout">
+            <div class="svg-container">
+                <svg viewBox="0 0 600 400" width="100%" height="100%">
+                    <line x1="40" y1="360" x2="560" y2="360" class="axis" />
+                    <line x1="40" y1="40" x2="40" y2="360" class="axis" />
+                    <text x="300" y="390" text-anchor="middle" fill="#f8f8f2" font-weight="bold">X 軸：房屋坪數</text>
+                    <text x="15" y="200" text-anchor="middle" fill="#f8f8f2" font-weight="bold" transform="rotate(-90 15 200)">Y 軸：房屋價格</text>
+
+                    <g id="draw-area"></g>
+                </svg>
+            </div>
+
+            <div class="info-panel" id="panel-box">
+                <div class="explanation" id="exp-text"></div>
+                
+                <div class="progress-bar-container" id="r2-bar">
+                    <div class="progress-bar-fill" id="r2-fill"></div>
+                    <div class="progress-text">85% 的變異被解釋了！</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 假資料點 (房屋坪數與價格)
+        const dataPoints = [
+            {x: 100, y: 280}, {x: 150, y: 250}, {x: 200, y: 200},
+            {x: 250, y: 190}, {x: 300, y: 150}, {x: 350, y: 160},
+            {x: 400, y: 120}, {x: 450, y: 90},  {x: 500, y: 80}
+        ];
+        
+        // 畫布的 Y 軸是往下遞增，所以數字越小在畫面上越高 (價格越高)
+        const meanY = 168; // 平均線位置
+        // 迴歸線方程式 (大約): y = -0.5x + 320
+        function getModelY(x) { return -0.48 * x + 320; }
+
+        const drawArea = document.getElementById('draw-area');
+
+        // 1. 建立基準線 (平均值)
+        const lineMean = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        lineMean.setAttribute("x1", "40"); lineMean.setAttribute("y1", meanY);
+        lineMean.setAttribute("x2", "560"); lineMean.setAttribute("y2", meanY);
+        lineMean.setAttribute("class", "line-mean");
+        drawArea.appendChild(lineMean);
+
+        // 2. 建立迴歸線 (模型)
+        const lineModel = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        lineModel.setAttribute("x1", "40"); lineModel.setAttribute("y1", getModelY(40));
+        lineModel.setAttribute("x2", "560"); lineModel.setAttribute("y2", getModelY(560));
+        lineModel.setAttribute("class", "line-model");
+        drawArea.appendChild(lineModel);
+
+        // 3. 建立誤差線與資料點
+        const errorLinesMean = [];
+        const errorLinesModel = [];
+
+        dataPoints.forEach(p => {
+            // 平均誤差線 (紅)
+            let elMean = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            elMean.setAttribute("x1", p.x); elMean.setAttribute("y1", p.y);
+            elMean.setAttribute("x2", p.x); elMean.setAttribute("y2", meanY);
+            elMean.setAttribute("class", "error-line-mean");
+            drawArea.appendChild(elMean);
+            errorLinesMean.push(elMean);
+
+            // 模型誤差線 (綠)
+            let elModel = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            elModel.setAttribute("x1", p.x); elModel.setAttribute("y1", p.y);
+            elModel.setAttribute("x2", p.x); elModel.setAttribute("y2", getModelY(p.x));
+            elModel.setAttribute("class", "error-line-model");
+            drawArea.appendChild(elModel);
+            errorLinesModel.push(elModel);
+
+            // 資料點
+            let dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y);
+            dot.setAttribute("class", "data-point");
+            drawArea.appendChild(dot);
+        });
+
+        const expText = document.getElementById('exp-text');
+        const panelBox = document.getElementById('panel-box');
+        const r2Bar = document.getElementById('r2-bar');
+        const r2Fill = document.getElementById('r2-fill');
+
+        function switchMode(mode) {
+            // 更新 UI
+            document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[data-mode="${mode}"]`).classList.add('active');
+
+            if(mode === 'mean') {
+                panelBox.style.borderLeftColor = "var(--mean-color)";
+                lineMean.style.opacity = "1";
+                lineModel.style.opacity = "0";
+                errorLinesMean.forEach(l => l.style.opacity = "1");
+                errorLinesModel.forEach(l => l.style.opacity = "0");
+                r2Bar.style.display = "none";
+                r2Fill.style.width = "0%";
+
+                expText.innerHTML = `
+                    <span style="color:var(--mean-color); font-weight:bold; font-size:1.2em;">【瞎猜的代價：總變異】</span><br><br>
+                    如果你不知道每棟房子的「坪數」，你只能一律瞎猜「平均價格」（紅色的水平線）。<br><br>
+                    圖中那些又長又多的<span style="color:var(--mean-color)">紅色虛線</span>，就是你猜錯的離譜程度。把這些紅色虛線全部加起來，就是房價的<b>「總變異 (Total Variance)」</b>。
+                `;
+            } 
+            else if(mode === 'model') {
+                panelBox.style.borderLeftColor = "var(--model-color)";
+                lineMean.style.opacity = "0";
+                lineModel.style.opacity = "1";
+                errorLinesMean.forEach(l => l.style.opacity = "0");
+                errorLinesModel.forEach(l => l.style.opacity = "1");
+                r2Bar.style.display = "none";
+                r2Fill.style.width = "0%";
+
+                expText.innerHTML = `
+                    <span style="color:var(--model-color); font-weight:bold; font-size:1.2em;">【找到規律：線性迴歸】</span><br><br>
+                    現在，我們畫出了考慮「坪數」的綠色迴歸線。<br><br>
+                    看看那些<span style="color:var(--model-color)">綠色虛線（殘差）</span>！比起剛剛的紅線，綠線變得<b>非常短</b>。這代表我們預測的價格，已經非常接近真實的點了。<br><br>
+                    綠線就是模型預測完之後，<b>「依然無法解釋的剩餘誤差」</b>。
+                `;
+            }
+            else if(mode === 'r2') {
+                panelBox.style.borderLeftColor = "var(--highlight)";
+                lineMean.style.opacity = "0.3";
+                lineModel.style.opacity = "1";
+                errorLinesMean.forEach(l => l.style.opacity = "0.2");
+                errorLinesModel.forEach(l => l.style.opacity = "1");
+                r2Bar.style.display = "block";
+                
+                // 觸發進度條動畫
+                setTimeout(() => { r2Fill.style.width = "85%"; }, 100);
+
+                expText.innerHTML = `
+                    <span style="color:var(--highlight); font-weight:bold; font-size:1.2em;">【R² = 0.85 的真相】</span><br><br>
+                    我們把原本的「超長紅線」跟現在的「超短綠線」比一比：<br><br>
+                    你發現誤差整整縮小了 85%！這消失的 85% 誤差去哪了？<b>被你的模型成功「解釋」掉了。</b><br><br>
+                    這就叫做「85% 的變異可被模型解釋」。剩下的 15% 綠線，則是這個模型還無法理解的隨機雜訊。R² 越接近 1 (100%)，代表你的模型預測得越神！
+                `;
+            }
+        }
+
+        // 初始化
+        switchMode('mean');
+    </script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>決定係數(R²)衡量模型解釋了多少目標變異,是 iPAS 迴歸評估高頻考點(中級科目三)。重點:1 為完美擬合、0 等於只猜平均、可為負代表比猜平均還差。易混點:R² 會隨變數增加而虛高,應看調整後 R² 並用測試集驗證,避免過擬合假象;R² 高不代表有因果。情境:社會科學 R²=0.3 可能已不錯,要看領域判讀、別硬套標準。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>R 平方(決定係數)是什麼？</summary><p>衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。</p></details><details><summary>R 平方怎麼解讀？</summary><p>R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。</p></details><details><summary>R 平方越高就越好嗎？</summary><p>不一定；加入無用變數也會讓 R 平方升高、可能是過擬合。應看調整後 R 平方並用測試集驗證。</p></details><details><summary>調整後 R 平方是什麼？</summary><p>加入對變數數量的懲罰；只有新變數真正有貢獻才會上升，適合比較不同變數數的模型，避免 R² 虛高。</p></details><details><summary>R 平方可以是負的嗎？</summary><p>可以；當模型在測試集上比直接預測平均值還差時，R 平方會小於 0，代表模型沒有學到有用規律。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "R 平方(決定係數)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "衡量模型解釋了目標變異的比例；1 代表完美擬合、0 代表跟只猜平均值一樣、可能為負代表比猜平均還差。"}}, {"@type": "Question", "name": "R 平方怎麼解讀？", "acceptedAnswer": {"@type": "Answer", "text": "R 平方 0.8 表示模型解釋了 80% 的變異；越接近 1 越好，但要看領域，社會科學 0.3 可能已不錯。"}}, {"@type": "Question", "name": "R 平方越高就越好嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定；加入無用變數也會讓 R 平方升高、可能是過擬合。應看調整後 R 平方並用測試集驗證。"}}, {"@type": "Question", "name": "調整後 R 平方是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "加入對變數數量的懲罰；只有新變數真正有貢獻才會上升，適合比較不同變數數的模型，避免 R² 虛高。"}}, {"@type": "Question", "name": "R 平方可以是負的嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以；當模型在測試集上比直接預測平均值還差時，R 平方會小於 0，代表模型沒有學到有用規律。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="liner.html">線性回歸</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="roc_interactive.html">準確率、AUC-ROC、Log Loss</a><a href="matrix.html">準確率、邊界間距</a><a href="tp-tn-fp-fn.html">準確率、精確率、召回率</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

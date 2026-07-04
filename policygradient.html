@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Gradient 互動演示</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="直接學策略(狀態到動作的機率)的強化學習法；沿著能提高期望回報的方向調整策略參數，而非先學價值再推策略。價值法適合離散動作；策略法直接優化策略、天生支援連續動作與隨機策略，但變異較大。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/policygradient.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Policy Gradient 互動演示">
+    <meta property="og:description" content="直接學策略(狀態到動作的機率)的強化學習法；沿著能提高期望回報的方向調整策略參數。策略法天生支援連續動作與隨機策略，但變異較大，可用 baseline／Actor-Critic 穩定。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/policygradient.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Policy Gradient 互動演示">
+    <meta name="twitter:description" content="直接學策略(狀態到動作的機率)的強化學習法。策略法天生支援連續動作與隨機策略，但變異較大，可用 baseline／Actor-Critic 穩定。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Policy Gradient 互動演示",
+  "url": "https://akira.ipas-ai.com/policygradient.html",
+  "description": "直接學策略(狀態到動作的機率)的強化學習法；沿著能提高期望回報的方向調整策略參數，而非先學價值再推策略。價值法適合離散動作；策略法直接優化策略、天生支援連續動作與隨機策略，但變異較大。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --vi:#7c3aed; --vi-d:#6d28d9; --vi-dd:#4c1d95;
+            --tc:#0e7490; --am:#d97706; --green:#16a34a; --red:#ef4444; --blue:#2563eb;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f1edfa;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#3b0764 0%,#7c3aed 55%,#a78bfa 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(124,58,237,.30); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.85rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#ddd6fe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--vi-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#f5f3ff; border-left:5px solid var(--vi)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--am)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f4f1fb; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .p{color:var(--vi-d); font-weight:700} .cmp .v{color:var(--tc); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--vi);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--vi-d)}
+
+        .math-block{background:#f5f3ff; padding:12px 16px; border-left:4px solid var(--vi); border-radius:0 10px 10px 0; margin:10px 0; overflow-x:auto}
+
+        .qa{background:#f5f3ff; border:1px solid #ddd6fe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #e7e1fb; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--vi-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#f5f3ff; border:1px solid #ddd6fe; border-radius:14px; padding:18px; margin:14px 0}
+        .viz-layout{display:grid; grid-template-rows:1fr 1fr; gap:16px; width:100%; max-width:700px; margin:0 auto}
+        .chart-box{border:1px solid #ddd; border-radius:10px; background:#fff; position:relative; height:250px}
+        .demo-card .controls{display:flex; gap:12px; margin-top:16px; justify-content:center; flex-wrap:wrap}
+        .demo-card button{padding:11px 20px; background:var(--vi); color:#fff; border:none; border-radius:8px;
+            cursor:pointer; font-weight:800; font-size:1em; transition:.2s}
+        .demo-card button:hover{background:var(--vi-d)}
+        .demo-card button:disabled{background:#cbd5e1; cursor:not-allowed}
+        .demo-card .btn-reset{background:#94a3b8}
+        .demo-card .btn-reset:hover{background:#64748b}
+        .info-panel{margin-top:14px; font-family:monospace; background:#fff; border:1px solid var(--line); padding:10px; border-radius:8px; width:100%; max-width:700px; margin-left:auto; margin-right:auto; text-align:center; font-size:.92rem}
+        .policy-curve{fill:rgba(230,126,34,.2); stroke:#e67e22; stroke-width:3px}
+        .target-zone{fill:rgba(46,204,113,.3); stroke:#27ae60; stroke-width:1px; stroke-dasharray:4}
+        .action-line{stroke:#333; stroke-width:2px; stroke-dasharray:4}
+        .cannon{fill:#34495e} .bullet{fill:#c0392b}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.45rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🎯 Policy Gradient 策略梯度 · iPAS 進階</span>
+        <h1>Policy Gradient：不算價值，直接「練出一套好策略」</h1>
+        <p>前面的 <a href="q-learning.html" style="color:#fff;text-decoration:underline;font-weight:700">Q-Learning</a>、<a href="sarsa.html" style="color:#fff;text-decoration:underline;font-weight:700">SARSA</a> 都先學「每個動作多值錢」再選。策略梯度走<b>另一條路</b>：跳過價值，<b>直接調整「策略」本身</b>——哪個動作帶來好回報，就把它的機率調高。這讓它天生擅長<b>連續動作</b>。</p>
+        <div class="chips"><span>策略法 policy-based</span><span>直接學策略 π(a|s)</span><span>連續動作</span><span>梯度上升</span><span>REINFORCE</span></div>
+    </header>
+
+    <!-- ===== 1. 兩條路線 ===== -->
+    <section class="lesson">
+        <h2>🛣️ 一、強化學習的兩條路線</h2>
+        <table class="cmp">
+            <tr><th></th><th class="v">價值法 (Value-based)</th><th class="p">策略法 (Policy-based)</th></tr>
+            <tr><td>代表</td><td>Q-Learning、SARSA、DQN</td><td>Policy Gradient、REINFORCE</td></tr>
+            <tr><td>學什麼</td><td>每個動作的<b>價值 Q(s,a)</b></td><td>直接學<b>策略 π(a|s)</b>（做各動作的機率）</td></tr>
+            <tr><td>怎麼選動作</td><td>挑 Q 最大的（間接）</td><td>照策略的機率抽樣（直接）</td></tr>
+        </table>
+        <div class="note def">
+            <h4>一句話</h4>
+            價值法是「<b>先評估、再決定</b>」；策略法是「<span class="hl">直接練出決定的本能</span>」。做對的動作就調高它的機率，做錯就調低——像反覆練習一個動作直到變肌肉記憶。
+        </div>
+    </section>
+
+    <!-- ===== 2. 為什麼連續動作 ===== -->
+    <section class="lesson">
+        <h2>🎚️ 二、為什麼策略法適合「連續動作」？</h2>
+        <div class="note meta">
+            <h4>價值法在連續動作會卡住</h4>
+            Q-Learning 要算出<b>每一個</b>動作的 Q 值再挑最大。但如果動作是「<b>射擊角度</b>」，它有無限多種（0.1°、0.11°、0.111°…），根本列不完、挑不了。<br>
+            策略法不算每個動作的價值，而是<b>直接輸出一個機率分布</b>（例如高斯的平均 <b>μ</b> 和標準差 <b>σ</b>），動作就從這個分布<b>抽樣</b>出來。連續動作？抽樣就好，天生支援。
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：大砲射擊場</h2>
+        <p class="lead">上圖<b style="color:#e67e22">橘色曲線</b>就是策略 π(a|s)（一個高斯分布），<b style="color:#27ae60">綠色區</b>是目標（高獎勵）。下圖大砲每次從高斯<b>抽一個角度</b>發射。命中 → 正獎勵，脫靶 → 負獎勵。</p>
+
+        <div class="demo-card">
+            <div class="viz-layout">
+                <div id="policy-chart" class="chart-box">
+                    <div style="position:absolute; top:10px; left:10px; font-weight:bold;">策略網路 $\pi(a|s)$ (高斯分佈)</div>
+                </div>
+                <div id="env-view" class="chart-box">
+                    <div style="position:absolute; top:10px; left:10px; font-weight:bold;">環境 (射擊場)</div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <span>Mean ($\mu$): <span id="val-mu">0.0</span></span> |
+                <span>Std Dev ($\sigma$): <span id="val-sigma">1.5</span></span> |
+                <span>Reward: <span id="val-reward">-</span></span>
+            </div>
+
+            <div class="controls">
+                <button id="btn-fire" onclick="fire()">單次發射 (Step)</button>
+                <button id="btn-auto" onclick="toggleAuto()">自動訓練 (Auto)</button>
+                <button class="btn-reset" onclick="reset()">重置 (Reset)</button>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            一開始橘色曲線的尖峰（μ）偏在左邊（亂射）。每次<b>命中綠區</b>得到正獎勵，曲線尖峰就會立刻<b>「飄」向你剛剛射的角度</b>。按「自動訓練」連發，看 μ 慢慢移進綠區、曲線變<b>又高又窄</b>（σ 縮小＝越來越有把握）。這就是策略被一步步優化的過程。
+        </div>
+    </section>
+
+    <!-- ===== 4. 梯度上升 ===== -->
+    <section class="lesson">
+        <h2>📈 四、怎麼學？梯度上升（Gradient Ascent）</h2>
+        <p class="lead">目標是<b>最大化期望回報 J(θ)</b>。所以是「上升」——沿著能讓回報變大的方向，調整策略參數 θ：</p>
+        <div class="math-block">$$ \theta \leftarrow \theta + \alpha \cdot \nabla_\theta \log \pi_\theta(a|s) \cdot R $$</div>
+        <p>套到高斯策略的平均值 μ，直觀到不行：</p>
+        <div class="math-block">$$ \mu_{new} \leftarrow \mu_{old} + \alpha \cdot (\text{動作} - \mu_{old}) \cdot R $$</div>
+        <div class="keys">
+            <div class="keycard"><b>R 是正的 ✅</b>μ 往這次<b>動作的方向移</b> → 調高該動作未來被選中的機率（「做對了，多做」）。</div>
+            <div class="keycard"><b>R 是負的 ❌</b>μ 往動作的<b>反方向移</b> → 調低該動作的機率（「做錯了，少做」）。</div>
+        </div>
+    </section>
+
+    <!-- ===== 5. REINFORCE ===== -->
+    <section class="lesson">
+        <h2>🧮 五、最基本的版本：REINFORCE</h2>
+        <div class="note def">
+            <h4>跑完一整回合，再用「實際總回報」加權更新</h4>
+            <span class="term">REINFORCE</span> 是最入門的策略梯度法：完整玩完一個回合，算出實際拿到的<b>總回報</b>，再用它<b>加權</b>調整這回合每個動作的機率——回報高的那些動作，機率往上調。<b>概念簡單</b>，但因為要等整回合結束、又靠單次抽樣估計，<b>變異大、收斂慢</b>。
+        </div>
+    </section>
+
+    <!-- ===== 6. 高變異 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、最大痛點：高變異（High Variance）</h2>
+        <div class="note warn">
+            <h4>為什麼不穩？</h4>
+            策略梯度靠「抽樣到的回報」來估更新方向。同一套策略，這次運氣好回報高、下次運氣差回報低——<b>雜訊很大</b>，導致訓練忽上忽下、不穩定、樣本效率低。
+        </div>
+        <div class="note meta">
+            <h4>💪 常見穩定化手段</h4>
+            <b>① Baseline（基準線）：</b>用回報<b>減掉一個基準</b>（如狀態價值），只看「比平均好多少」，大幅降變異。<br>
+            <b>② 優勢函數 Advantage：</b>A＝Q − V，衡量某動作比平均好多少。<br>
+            <b>③ Actor-Critic：</b>用一個「評論家」即時估價值當基準，邊走邊更新（不必等整回合）→ 見 <a href="actor-critic.html" style="color:#6d28d9;font-weight:700">Actor-Critic</a>。<br>
+            <b>④ 獎勵標準化</b>也有幫助。
+        </div>
+    </section>
+
+    <!-- ===== 7. 總表 ===== -->
+    <section class="lesson">
+        <h2>📊 七、價值法 vs 策略法 總整理</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="v">價值法</th><th class="p">策略法</th></tr>
+            <tr><td>學的對象</td><td>價值 Q(s,a)</td><td>策略 π(a|s)</td></tr>
+            <tr><td>動作型態</td><td>適合<b>離散</b></td><td>離散、<b>連續</b>都行</td></tr>
+            <tr><td>隨機策略</td><td>較難</td><td><b>天生支援</b></td></tr>
+            <tr><td>穩定度</td><td>較穩</td><td>變異大、需穩定技巧</td></tr>
+            <tr><td>樣本效率</td><td>較高</td><td>較低</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 8. 優缺點 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 八、優點與缺點</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">優點</b>可處理<b>連續/高維動作</b>、能學<b>隨機策略</b>、收斂到的策略較直接。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">缺點</b><b>變異大</b>、樣本效率較低、容易陷<b>局部最優</b>。</div>
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 策略法和價值法最大的差別？</summary>
+                <p>策略法<b>直接學策略 π(a|s)</b>；價值法先學價值 Q 再挑最大的動作。</p></details>
+            <details><summary>Q2. 為什麼策略法適合連續動作？</summary>
+                <p>它<b>直接輸出機率分布</b>（如高斯 μ、σ）再抽樣，不必像價值法列舉每個動作的 Q。</p></details>
+            <details><summary>Q3. 梯度上升往哪個方向更新？</summary>
+                <p>往<b>提高期望回報</b>的方向；R 正 → 調高該動作機率、R 負 → 調低。</p></details>
+            <details><summary>Q4. REINFORCE 的主要缺點？</summary>
+                <p><b>變異大、收斂慢</b>（要等整回合、靠單次抽樣估計）。</p></details>
+            <details><summary>Q5. 怎麼降低策略梯度的高變異？</summary>
+                <p>加 <b>baseline</b>／<b>優勢函數</b>、用 <b>Actor-Critic</b>、獎勵標準化。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>策略法＝直接學 π(a|s)</b>不先算價值。</div>
+            <div class="keycard"><b>擅長連續動作</b>輸出機率分布再抽樣。</div>
+            <div class="keycard"><b>梯度上升</b>R 正調高該動作機率、R 負調低。</div>
+            <div class="keycard"><b>REINFORCE</b>最基本，變異大、收斂慢。</div>
+            <div class="keycard"><b>降變異</b>baseline／優勢／Actor-Critic。</div>
+            <div class="keycard"><b>優缺</b>連續/隨機策略強；變異大、樣本效率低。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        // Setup Dimensions
+        const width = 650;
+        const height = 250;
+        const margin = {top: 30, right: 30, bottom: 30, left: 40};
+        const envHeight = 250;
+
+        // Policy Parameters (Gaussian)
+        let mu = -3.0; // Start off-target
+        let sigma = 1.5; // Exploration noise
+        const learningRate = 0.5; // High LR for visualization effect
+
+        // Environment Parameters
+        const targetX = 2.0; // The goal angle
+        const targetWidth = 1.0; // Tolerance
+
+        // State
+        let isAuto = false;
+        let timer = null;
+        let lastAction = null;
+
+        // --- 1. Policy Chart (SVG) ---
+        const svgPolicy = d3.select("#policy-chart").append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", `0 0 ${width} ${height}`);
+
+        const xScale = d3.scaleLinear().domain([-6, 6]).range([margin.left, width - margin.right]);
+        const yScale = d3.scaleLinear().domain([0, 0.5]).range([height - margin.bottom, margin.top]);
+
+        // Add Axes
+        svgPolicy.append("g")
+            .attr("transform", `translate(0,${height - margin.bottom})`)
+            .call(d3.axisBottom(xScale).ticks(10));
+
+        // Path generator for Gaussian
+        const lineGen = d3.line()
+            .curve(d3.curveBasis) // smooth
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y));
+
+        // Elements
+        const pathPolicy = svgPolicy.append("path").attr("class", "policy-curve");
+        const lineAction = svgPolicy.append("line").attr("class", "action-line").attr("opacity", 0);
+        const circleMu = svgPolicy.append("circle").attr("r", 5).attr("fill", "#e67e22");
+
+        // Draw Target Zone on Chart (for reference)
+        svgPolicy.append("rect")
+            .attr("class", "target-zone")
+            .attr("x", xScale(targetX - targetWidth/2))
+            .attr("y", margin.top)
+            .attr("width", xScale(targetX + targetWidth/2) - xScale(targetX - targetWidth/2))
+            .attr("height", height - margin.top - margin.bottom);
+
+        svgPolicy.append("text")
+            .attr("x", xScale(targetX))
+            .attr("y", margin.top + 20)
+            .attr("text-anchor", "middle")
+            .attr("fill", "#27ae60")
+            .attr("font-size", "12px")
+            .text("目標區域 (High Reward)");
+
+        // --- 2. Environment View (SVG) ---
+        const svgEnv = d3.select("#env-view").append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("viewBox", `0 0 ${width} ${envHeight}`);
+
+        // Cannon position
+        const cannonX = width / 2;
+        const cannonY = envHeight - 30;
+
+        // Draw Ground
+        svgEnv.append("line")
+            .attr("x1", 0).attr("y1", envHeight-30)
+            .attr("x2", width).attr("y2", envHeight-30)
+            .attr("stroke", "#333").attr("stroke-width", 2);
+
+        // Draw Target on Ground
+        // Map abstract action space [-6, 6] to visual pixels [0, width]
+        const actionToPixel = d3.scaleLinear().domain([-6, 6]).range([margin.left, width - margin.right]);
+
+        const targetRect = svgEnv.append("rect")
+            .attr("x", actionToPixel(targetX - targetWidth/2))
+            .attr("y", envHeight - 40)
+            .attr("width", actionToPixel(targetX + targetWidth/2) - actionToPixel(targetX - targetWidth/2))
+            .attr("height", 10)
+            .attr("fill", "#2ecc71");
+
+        // Cannon Body
+        const cannonGroup = svgEnv.append("g")
+            .attr("transform", `translate(${cannonX}, ${cannonY})`);
+
+        cannonGroup.append("circle").attr("r", 15).attr("class", "cannon");
+        const cannonBarrel = cannonGroup.append("rect")
+            .attr("x", -5).attr("y", -30).attr("width", 10).attr("height", 30)
+            .attr("class", "cannon");
+
+        // Bullet
+        const bullet = svgEnv.append("circle")
+            .attr("r", 5).attr("class", "bullet")
+            .attr("opacity", 0);
+
+        // --- Core Functions ---
+
+        function gaussian(x, m, s) {
+            return (1 / (s * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - m) / s, 2));
+        }
+
+        function updateChart() {
+            // Generate data points for the curve
+            const data = [];
+            for (let x = -6; x <= 6; x += 0.1) {
+                data.push({x: x, y: gaussian(x, mu, sigma)});
+            }
+
+            pathPolicy.datum(data).attr("d", lineGen);
+
+            // Move Mu indicator
+            circleMu
+                .attr("cx", xScale(mu))
+                .attr("cy", yScale(gaussian(mu, mu, sigma)));
+
+            // Update Text
+            document.getElementById("val-mu").innerText = mu.toFixed(2);
+            document.getElementById("val-sigma").innerText = sigma.toFixed(2);
+        }
+
+        function fire() {
+            // 1. Sample Action from Gaussian Policy
+            // Box-Muller transform
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+            const action = mu + z * sigma;
+            lastAction = action;
+
+            // 2. Animate Action
+            animateShot(action);
+        }
+
+        function animateShot(action) {
+            // Disable buttons
+            const btnFire = document.getElementById("btn-fire");
+            if(!isAuto) btnFire.disabled = true;
+
+            // Visualize chosen action on chart
+            lineAction
+                .attr("x1", xScale(action)).attr("y1", yScale(0))
+                .attr("x2", xScale(action)).attr("y2", yScale(gaussian(action, mu, sigma)))
+                .attr("opacity", 1)
+                .attr("stroke", "#333");
+
+            // Rotate Cannon visual (map -6~6 to roughly -45~45 deg)
+            const angleDeg = action * 10;
+            cannonGroup.transition().duration(200)
+                .attr("transform", `translate(${cannonX}, ${cannonY}) rotate(${angleDeg})`);
+
+            // Fire Bullet
+            // Calculate endpoint based on angle
+            // Simple projection: height depends on angle?
+            // Let's just map x-position directly for clarity of the concept
+            const endX = actionToPixel(action);
+            const endY = margin.top + 50; // top of env
+
+            bullet
+                .attr("cx", cannonX).attr("cy", cannonY)
+                .attr("opacity", 1)
+                .transition().duration(600).ease(d3.easeQuadOut)
+                .attr("cx", endX).attr("cy", envHeight - 40)
+                .on("end", () => {
+                    bullet.attr("opacity", 0);
+                    calculateRewardAndUpdate(action);
+                    if(!isAuto) btnFire.disabled = false;
+                });
+        }
+
+        function calculateRewardAndUpdate(action) {
+            // 3. Calculate Reward
+            // Distance based reward? Or binary?
+            // Let's use binary hit/miss for clear gradient demonstration
+            const dist = Math.abs(action - targetX);
+            let reward = 0;
+
+            if (dist <= targetWidth / 2) {
+                reward = 1.0; // Hit!
+                // Visual Flash Green
+                svgEnv.append("circle").attr("cx", actionToPixel(action)).attr("cy", envHeight-40)
+                    .attr("r", 20).attr("fill", "#2ecc71").attr("opacity", 0.5)
+                    .transition().duration(500).attr("r", 50).attr("opacity", 0).remove();
+            } else {
+                reward = -0.1; // Miss (small penalty)
+                // Visual Flash Red
+                svgEnv.append("circle").attr("cx", actionToPixel(action)).attr("cy", envHeight-40)
+                    .attr("r", 10).attr("fill", "#c0392b").attr("opacity", 0.5)
+                    .transition().duration(500).attr("r", 30).attr("opacity", 0).remove();
+            }
+
+            document.getElementById("val-reward").innerText = reward;
+
+            // 4. Policy Gradient Update (The Math)
+            // Gradient of log-probability of Gaussian wrt mean mu is: (a - mu) / sigma^2
+            // Delta Mu = alpha * Gradient * Reward
+
+            // Simplify for visualization: Just move Mu towards Action if reward is positive
+            const grad = (action - mu);
+            // We ignore sigma^2 in denominator for visual stability, or treat it as part of alpha
+            const update = learningRate * grad * reward;
+
+            mu += update;
+
+            // Clamp Mu to screen
+            if(mu < -6) mu = -6;
+            if(mu > 6) mu = 6;
+
+            // Optional: Anneal sigma (reduce exploration over time)
+            if(reward > 0) {
+                sigma = Math.max(0.5, sigma * 0.99); // Exploit more
+            }
+
+            updateChart();
+        }
+
+        function toggleAuto() {
+            if(isAuto) {
+                isAuto = false;
+                clearInterval(timer);
+                document.getElementById("btn-auto").innerText = "自動訓練 (Auto)";
+                document.getElementById("btn-fire").disabled = false;
+            } else {
+                isAuto = true;
+                document.getElementById("btn-auto").innerText = "停止訓練";
+                document.getElementById("btn-fire").disabled = true;
+                fire(); // First shot immediately
+                timer = setInterval(fire, 800);
+            }
+        }
+
+        function reset() {
+            isAuto = false;
+            clearInterval(timer);
+            document.getElementById("btn-auto").innerText = "自動訓練 (Auto)";
+            document.getElementById("btn-fire").disabled = false;
+            mu = -3.0; // Reset to random start
+            sigma = 1.5;
+            document.getElementById("val-reward").innerText = "-";
+            updateChart();
+
+            // Reset Cannon
+            cannonGroup.attr("transform", `translate(${cannonX}, ${cannonY}) rotate(0)`);
+            lineAction.attr("opacity", 0);
+        }
+
+        // Init
+        updateChart();
+
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>策略梯度是強化學習的另一大家族(進階,中級科目三可能觸及)。重點:直接學策略(狀態到行動的機率分布),用梯度上升最大化期望回報,適合連續或高維行動空間。易混點:與價值法(如 Q-learning 先學價值再導出策略)是不同路線;策略梯度變異大,需基準線或 Actor-Critic 來穩定。情境:機器人連續控制、需要隨機策略的場景。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>策略梯度(Policy Gradient)是什麼？</summary><p>直接學策略(狀態到動作的機率)的強化學習法；沿著能提高期望回報的方向調整策略參數，而非先學價值再推策略。</p></details><details><summary>和價值法(如 Q-learning)差在哪？</summary><p>價值法先估價值再選動作、適合離散動作；策略法直接優化策略、天生支援連續動作與隨機策略，但變異較大。</p></details><details><summary>REINFORCE 是什麼？</summary><p>最基本的策略梯度法：用整段回合的實際回報加權更新動作機率(回報高的動作機率調高)；簡單但變異大、收斂慢。</p></details><details><summary>怎麼降低策略梯度的高變異？</summary><p>加 baseline(如狀態價值)、用優勢函數、Actor-Critic 框架、獎勵標準化，都能顯著穩定訓練。</p></details><details><summary>策略梯度的優缺點？</summary><p>優點：可處理連續或高維動作、能學隨機策略。缺點：變異大、樣本效率較低、易陷局部最優。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "策略梯度(Policy Gradient)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "直接學策略(狀態到動作的機率)的強化學習法；沿著能提高期望回報的方向調整策略參數，而非先學價值再推策略。"}}, {"@type": "Question", "name": "和價值法(如 Q-learning)差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "價值法先估價值再選動作、適合離散動作；策略法直接優化策略、天生支援連續動作與隨機策略，但變異較大。"}}, {"@type": "Question", "name": "REINFORCE 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "最基本的策略梯度法：用整段回合的實際回報加權更新動作機率(回報高的動作機率調高)；簡單但變異大、收斂慢。"}}, {"@type": "Question", "name": "怎麼降低策略梯度的高變異？", "acceptedAnswer": {"@type": "Answer", "text": "加 baseline(如狀態價值)、用優勢函數、Actor-Critic 框架、獎勵標準化，都能顯著穩定訓練。"}}, {"@type": "Question", "name": "策略梯度的優缺點？", "acceptedAnswer": {"@type": "Answer", "text": "優點：可處理連續或高維動作、能學隨機策略。缺點：變異大、樣本效率較低、易陷局部最優。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="q-learning.html">Q-Learning</a><a href="sarsa.html">SARSA</a><a href="actor-critic.html">Actor-Critic (A2C/A3C)</a><a href="monte_carlo.html">強化學習</a><a href="cumulativereward.html">累積獎勵、策略熵</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

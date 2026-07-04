@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNN 演算法互動視覺化</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。 K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/knn.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="KNN 演算法互動視覺化">
+    <meta property="og:description" content="對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。 K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/knn.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="KNN 演算法互動視覺化">
+    <meta name="twitter:description" content="對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。 K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "KNN 演算法互動視覺化",
+  "url": "https://akira.ipas-ai.com/knn.html",
+  "description": "對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。 K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root{
+            --fuchsia:#c026d3; --fuchsia-d:#a21caf; --blue:#2563eb; --blue-d:#1d4ed8;
+            --bluec:#3498db; --redc:#e74c3c; --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:940px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#86198f 0%,#c026d3 52%,#e879f9 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(192,38,211,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:940px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#f5d0fe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--fuchsia-d); font-weight:700}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#fdf4ff; border-left:5px solid var(--fuchsia)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--fuchsia); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.95rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .sm{color:var(--rose); font-weight:800}
+        .cmp .lg{color:var(--blue-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--fuchsia);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--fuchsia-d)}
+
+        .legend2{display:grid; gap:9px; margin:8px 0 2px}
+        .legend2 div{display:flex; align-items:flex-start; gap:10px}
+        .legend2 .mk{flex:0 0 auto; margin-top:4px; width:16px; height:16px; border-radius:50%}
+        .mk.blue{background:#3498db} .mk.red{background:#e74c3c} .mk.q{background:#ddd; border:2px solid #333}
+        .mk.line{width:20px;height:0;border-top:2px dashed #666;border-radius:0;margin-top:11px}
+
+        .qa{background:#fdf4ff; border:1px solid #f0abfc; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #f5d0fe; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--fuchsia-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-card{background:#fdf4ff; border:1px solid #f0d4f7; border-radius:14px; padding:18px; margin:14px 0}
+        .controls{width:100%; display:flex; justify-content:space-around; align-items:center; gap:16px; flex-wrap:wrap;
+            margin-bottom:16px; background:#fff; padding:14px; border-radius:10px; border:1px solid var(--line)}
+        .control-group{display:flex; align-items:center; gap:10px}
+        .control-group label{font-weight:bold}
+        .control-group input[type=range]{width:150px; accent-color:var(--fuchsia)}
+        .control-group button{background:var(--fuchsia); color:#fff; border:none; padding:9px 16px; border-radius:7px; font-weight:800; cursor:pointer; transition:.2s}
+        .control-group button:hover{background:var(--fuchsia-d)}
+        .viz-scroll{overflow-x:auto; text-align:center}
+        #viz-area{border:2px solid #eef1f6; border-radius:8px; background:#fff; cursor:crosshair; display:inline-block}
+        .data-point{stroke:white; stroke-width:1.5px}
+        .query-point{cursor:grab; stroke:#333; stroke-width:3px; fill:#ddd}
+        .query-point:active{cursor:grabbing}
+        .link-line{stroke:#666; stroke-width:1.5px; stroke-dasharray:4; opacity:.6}
+        .stats{display:flex; gap:14px; font-size:1.05em; justify-content:center; flex-wrap:wrap; margin-top:14px}
+        .stat-box{padding:10px 18px; border-radius:8px; color:#fff; font-weight:bold; min-width:90px; text-align:center}
+        .class-a{background:#3498db} .class-b{background:#e74c3c}
+        .result-box{border:2px solid #333; color:#333; background:#eee}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">👥 最直覺的分類法 · iPAS 常考</span>
+        <h1>KNN 近鄰演算法：近朱者赤，看鄰居決定你是誰</h1>
+        <p>KNN 是最好懂的機器學習演算法之一：要判斷一個新資料屬於哪一類，就看它周圍<b>最近的 K 個鄰居</b>多數是哪一類。它不需要先訓練模型、概念直白，但也藏著「為什麼一定要標準化」「為什麼高維會失效」這些必考細節。</p>
+        <div class="chips"><span>近朱者赤</span><span>距離→投票</span><span>K 怎麼選</span><span>惰性學習</span><span>標準化</span><span>維度詛咒</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、KNN 在做什麼？</h2>
+        <p class="lead">一句成語就懂：<span class="term">近朱者赤，近墨者黑</span>。</p>
+        <div class="note def">
+            <h4>💡 白話定義</h4>
+            想知道一個新資料（下面那顆灰色點）屬於哪一類？KNN 的做法超直白：<span class="hl">看它周圍最近的 K 個鄰居是哪一類，多數那一類就是它的類別</span>。就像你搬到新社區，看左鄰右舍多數是什麼樣的人，大概就能猜這一帶的調性。K 就是「要參考幾個鄰居」。
+        </div>
+    </section>
+
+    <!-- ===== 2. 三步驟 ===== -->
+    <section class="lesson">
+        <h2>⚙️ 二、運作三步驟</h2>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>算距離</b><br>
+                算「新資料」到<b>每一個</b>已知資料的距離，通常用<b>歐氏距離</b>（兩點間直線距離）；也可用曼哈頓距離（像走方格街道）。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>找最近的 K 個</b><br>
+                把距離由近到遠排序，挑出<b>最近的 K 個鄰居</b>。
+            </div></div>
+            <div class="step"><div class="num">3</div><div class="st-body">
+                <b>投票（分類）或平均（迴歸）</b><br>
+                這 K 個鄰居中，<b>哪一類最多，新資料就是那一類</b>（分類）。如果是預測數值（迴歸），就取這 K 個鄰居的<b>平均值</b>。
+            </div></div>
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：拖動灰點，看鄰居投票</h2>
+        <p class="lead">這個 demo 的灰色點<b>可以用滑鼠拖動</b>。拖它到不同地方、拉 K 值，看預測怎麼變。</p>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            <div class="legend2">
+                <div><span class="mk blue"></span><span class="mk red" style="margin-left:-4px"></span><b>藍點 / 紅點 = 兩類已知資料</b>。</div>
+                <div><span class="mk q"></span><b>灰色大點 = 要分類的新資料（可拖動！）</b>把它拖到藍區、紅區、或交界處看看。</div>
+                <div><span class="mk line"></span><b>虛線 = 連到「最近的 K 個鄰居」</b>；被選中的鄰居顏色變鮮明、其他變淡。下方顯示票數與預測。</div>
+            </div>
+            <p style="margin:8px 0 0">試試：把 <b>K 設為 1</b>（只看最近 1 個，邊界很破碎、易受雜訊）vs <b>K 設到 15</b>（看很多鄰居、邊界平滑）。</p>
+        </div>
+
+        <div class="demo-card">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="k-slider">K 值（鄰居數量）：<span id="k-value" style="color:#a21caf; font-size:1.2em;">3</span></label>
+                    <input type="range" id="k-slider" min="1" max="15" value="3" step="2">
+                </div>
+                <div class="control-group">
+                    <button onclick="generateData()">🔄 重新生成數據</button>
+                </div>
+            </div>
+            <div class="viz-scroll"><div id="viz-area"></div></div>
+            <div class="stats">
+                <div class="stat-box class-a">藍色票數: <span id="vote-a">0</span></div>
+                <div class="stat-box class-b">紅色票數: <span id="vote-b">0</span></div>
+                <div class="stat-box result-box">預測結果: <span id="prediction">未知</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 4. K 值 ===== -->
+    <section class="lesson">
+        <h2>🎚️ 四、K 值怎麼選？（最常考）</h2>
+        <p class="lead">K 控制「參考範圍」，太小太大都不好——這就是偏差–變異的權衡。</p>
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="sm">K 太小（如 K=1）</span></th><th><span class="lg">K 太大</span></th></tr>
+            <tr><td>決策邊界</td><td>破碎、彎彎曲曲</td><td>過度平滑</td></tr>
+            <tr><td>受雜訊影響</td><td>很大（一個雜訊點就改變判斷）</td><td>較小</td></tr>
+            <tr><td>毛病</td><td><b>過擬合</b>（高變異）</td><td><b>欠擬合</b>（高偏差，忽略局部結構）</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🔑 兩個實務原則</h4>
+            ① <b>用交叉驗證挑 K</b>：試一排 K，看哪個在沒見過的資料上最好。<br>
+            ② <b>二分類用奇數 K</b>：避免「2 票對 2 票」的平手（例如 K=3、5、7）。
+        </div>
+    </section>
+
+    <!-- ===== 5. 三必考 ===== -->
+    <section class="lesson">
+        <h2>⭐ 五、三個一定要知道的重點</h2>
+
+        <div class="note def">
+            <h4>① 它是「惰性學習（Lazy Learning）」</h4>
+            KNN <b>不先訓練、不建模型</b>——它只是把訓練資料整包記住。等到要預測時，<b>才</b>臨時去算距離、找鄰居。所以它「<span class="hl">訓練幾乎不花時間，但預測很慢</span>」（每次預測都要和一大堆資料比距離），跟邏輯迴歸那種「先訓練好、預測超快」的<b>積極學習（eager learning）</b>正好相反。
+        </div>
+
+        <div class="note warn">
+            <h4>② 一定要先「標準化」特徵</h4>
+            KNN 靠<b>距離</b>找鄰居。如果一個特徵是「年齡（0～100）」、另一個是「年收入（0～200 萬）」，那年收入的數字大很多，會<b>完全主導距離</b>，年齡幾乎沒影響。所以用 KNN 前<span class="hl">務必先把各特徵縮到同樣尺度（標準化）</span>，否則結果失真。
+        </div>
+
+        <div class="note warn">
+            <h4>③ 高維會失效：「維度詛咒」</h4>
+            特徵維度一高，所有點之間的距離會<b>變得差不多</b>，「最近的鄰居」其實也沒近多少、失去鑑別力。所以 KNN 在<b>高維資料上效果差</b>，通常要先降維（如 PCA）或改用別的方法。
+        </div>
+    </section>
+
+    <!-- ===== 6. 優缺點 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 六、優缺點與適用場景</h2>
+        <div class="keys">
+            <div class="keycard"><b>✅ 直觀、不用訓練</b>概念簡單、沒有訓練階段，很適合當基準模型。</div>
+            <div class="keycard"><b>✅ 能抓不規則邊界</b>不假設線性，決策邊界可以很彎。</div>
+            <div class="keycard"><b>✅ 分類迴歸都行</b>分類用投票、迴歸用平均。</div>
+            <div class="keycard"><b>⚠️ 預測慢、吃記憶體</b>要存全部資料、每次預測都算距離。</div>
+            <div class="keycard"><b>⚠️ 怕高維與雜訊</b>維度詛咒、對不相關特徵敏感。</div>
+            <div class="keycard"><b>👍 適合</b>資料量不大、特徵有意義且已標準化、邊界不規則。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 為什麼說 KNN 是「惰性學習」？</summary>
+                <p>它<b>不先建模</b>，只把訓練資料記著；等要預測時<b>才</b>臨時算距離找鄰居。所以訓練幾乎不花時間、預測卻很慢。</p></details>
+            <details><summary>Q2. K 太小和太大各有什麼問題？</summary>
+                <p>K 太小（K=1）邊界破碎、受雜訊影響大 → <b>過擬合</b>；K 太大邊界過度平滑、忽略局部 → <b>欠擬合</b>。用交叉驗證挑 K，二分類用奇數避免平票。</p></details>
+            <details><summary>Q3. 為什麼用 KNN 前一定要標準化？</summary>
+                <p>因為 KNN 靠<b>距離</b>找鄰居，尺度大的特徵（如年收入）會主導距離、蓋過尺度小的（如年齡）。標準化讓每個特徵<b>公平貢獻</b>。</p></details>
+            <details><summary>Q4. 什麼是「維度詛咒」？對 KNN 有何影響？</summary>
+                <p>高維空間裡，點與點的距離趨於相同，「最近的鄰居」失去意義 → KNN <b>高維失效</b>。常需先降維或改用其他方法。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>近朱者赤</b>看最近 K 個鄰居，多數投票（分類）或平均（迴歸）。</div>
+            <div class="keycard"><b>三步驟</b>算距離 → 找最近 K 個 → 投票/平均。</div>
+            <div class="keycard"><b>K 小過擬合、K 大欠擬合</b>交叉驗證挑；二分類用奇數避免平票。</div>
+            <div class="keycard"><b>惰性學習</b>不先建模，預測才算 → 訓練快、預測慢。</div>
+            <div class="keycard"><b>務必標準化</b>距離受尺度影響，否則大尺度特徵主導。</div>
+            <div class="keycard"><b>怕高維</b>維度詛咒使距離失效，需先降維。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 800;
+        const height = 500;
+        const margin = 20;
+
+        const svg = d3.select("#viz-area")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        let dataset = [];
+        let queryPoint = { x: width / 2, y: height / 2 };
+        let k = 3;
+
+        function generateData() {
+            dataset = [];
+            const numPoints = 60;
+            const centers = [
+                { x: width * 0.3, y: height * 0.3, label: 'A' },
+                { x: width * 0.7, y: height * 0.7, label: 'B' }
+            ];
+            for (let i = 0; i < numPoints; i++) {
+                const center = Math.random() < 0.5 ? centers[0] : centers[1];
+                const variance = 120;
+                let px = center.x + (Math.random() - 0.5) * variance * 2;
+                let py = center.y + (Math.random() - 0.5) * variance * 2;
+                px = Math.max(margin, Math.min(width - margin, px));
+                py = Math.max(margin, Math.min(height - margin, py));
+                dataset.push({ x: px, y: py, label: center.label, id: i });
+            }
+            updateViz();
+        }
+
+        function getDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        function updateViz() {
+            dataset.forEach(d => { d.distance = getDistance(d, queryPoint); });
+            const sortedData = [...dataset].sort((a, b) => a.distance - b.distance);
+            const neighbors = sortedData.slice(0, k);
+
+            let votes = { 'A': 0, 'B': 0 };
+            neighbors.forEach(n => votes[n.label]++);
+
+            document.getElementById('vote-a').innerText = votes['A'];
+            document.getElementById('vote-b').innerText = votes['B'];
+
+            let resultText = "平手";
+            let resultColor = "#ddd";
+            if (votes['A'] > votes['B']) { resultText = "藍色 (A)"; resultColor = "#3498db"; }
+            else if (votes['B'] > votes['A']) { resultText = "紅色 (B)"; resultColor = "#e74c3c"; }
+
+            const predBox = document.getElementById('prediction');
+            predBox.innerText = resultText;
+            predBox.style.backgroundColor = resultColor;
+            predBox.style.color = resultColor === "#ddd" ? "#333" : "white";
+
+            const circles = svg.selectAll(".data-point").data(dataset, d => d.id);
+            circles.enter()
+                .append("circle")
+                .attr("class", "data-point")
+                .attr("r", 8)
+                .merge(circles)
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+                .attr("fill", d => d.label === 'A' ? "#3498db" : "#e74c3c")
+                .attr("opacity", d => {
+                    const isNeighbor = neighbors.find(n => n.id === d.id);
+                    return isNeighbor ? 1 : 0.3;
+                });
+            circles.exit().remove();
+
+            const lines = svg.selectAll(".link-line").data(neighbors, d => d.id);
+            lines.enter()
+                .append("line")
+                .attr("class", "link-line")
+                .merge(lines)
+                .attr("x1", queryPoint.x)
+                .attr("y1", queryPoint.y)
+                .attr("x2", d => d.x)
+                .attr("y2", d => d.y);
+            lines.exit().remove();
+
+            let qPoint = svg.selectAll(".query-point").data([queryPoint]);
+            qPoint.enter()
+                .append("circle")
+                .attr("class", "query-point")
+                .attr("r", 12)
+                .call(d3.drag()
+                    .on("drag", function(event) {
+                        let nx = Math.max(margin, Math.min(width - margin, event.x));
+                        let ny = Math.max(margin, Math.min(height - margin, event.y));
+                        queryPoint.x = nx;
+                        queryPoint.y = ny;
+                        updateViz();
+                    })
+                )
+                .merge(qPoint)
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+                .attr("fill", resultColor);
+        }
+
+        document.getElementById('k-slider').addEventListener('input', function(e) {
+            k = parseInt(this.value);
+            document.getElementById('k-value').innerText = k;
+            updateViz();
+        });
+
+        generateData();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>KNN(K 近鄰)是最直覺的分類與迴歸法,iPAS 初級科目一、中級科目三考點。重點:預測時找最近的 K 個鄰居,以多數投票(分類)或平均(迴歸)決定;是惰性學習,不先建模、預測才算。易混點:K 太小易受雜訊過擬合、太大過度平滑欠擬合,用交叉驗證挑;務必先標準化(距離受尺度影響)。情境:小資料、非線性邊界,但預測慢、高維失效。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>KNN 怎麼做預測？</summary><p>對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。</p></details><details><summary>K 值怎麼選、影響是什麼？</summary><p>K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。</p></details><details><summary>為什麼 KNN 需要特徵標準化？</summary><p>因為它靠距離(如歐氏距離)找鄰居，尺度大的特徵會主導距離計算，標準化能讓每個特徵貢獻一致。</p></details><details><summary>KNN 的主要缺點？</summary><p>預測時要和大量訓練樣本算距離，慢且耗記憶體；高維時受「維度詛咒」使距離失去鑑別力；對不相關特徵與雜訊敏感。</p></details><details><summary>KNN 適合什麼情境？</summary><p>資料量不大、特徵有意義且已標準化、決策邊界不規則時，是很好的基準法；大規模或高維資料則較不適合。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "KNN 怎麼做預測？", "acceptedAnswer": {"@type": "Answer", "text": "對新樣本找訓練集中最近的 K 個鄰居，分類用多數投票、回歸用鄰居平均。它不建立模型、預測時才計算，屬「惰性學習(lazy learning)」。"}}, {"@type": "Question", "name": "K 值怎麼選、影響是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "K 太小(如 1)易受雜訊影響、邊界破碎(高變異/過擬合)；K 太大邊界過於平滑、可能忽略局部結構(高偏差/欠擬合)。常用交叉驗證選 K，二分類偏好奇數以避免平票。"}}, {"@type": "Question", "name": "為什麼 KNN 需要特徵標準化？", "acceptedAnswer": {"@type": "Answer", "text": "因為它靠距離(如歐氏距離)找鄰居，尺度大的特徵會主導距離計算，標準化能讓每個特徵貢獻一致。"}}, {"@type": "Question", "name": "KNN 的主要缺點？", "acceptedAnswer": {"@type": "Answer", "text": "預測時要和大量訓練樣本算距離，慢且耗記憶體；高維時受「維度詛咒」使距離失去鑑別力；對不相關特徵與雜訊敏感。"}}, {"@type": "Question", "name": "KNN 適合什麼情境？", "acceptedAnswer": {"@type": "Answer", "text": "資料量不大、特徵有意義且已標準化、決策邊界不規則時，是很好的基準法；大規模或高維資料則較不適合。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">分類問題</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a><a href="l1.html">Lasso (L1)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

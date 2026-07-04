@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBSCAN 互動圖解</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。 eps(鄰域半徑)與 minPts(成為核心點所需的最少鄰居數)；兩者決定何謂密集，影響分群結果。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dbscan_demo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DBSCAN 互動圖解">
+    <meta property="og:description" content="基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。 eps(鄰域半徑)與 minPts(成為核心點所需的最少鄰居數)；兩者決定何謂密集，影響分群結果。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dbscan_demo.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DBSCAN 互動圖解">
+    <meta name="twitter:description" content="基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。eps 與 minPts 兩參數決定何謂密集，影響分群結果。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "DBSCAN 互動圖解",
+  "url": "https://akira.ipas-ai.com/dbscan_demo.html",
+  "description": "基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。eps(鄰域半徑)與 minPts(成為核心點所需的最少鄰居數)；兩者決定何謂密集，影響分群結果。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --blue:#1d4ed8; --blue-d:#1e3a8a; --violet-d:#6b21a8;
+            --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 55%,#60a5fa 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(29,78,216,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#bfdbfe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--blue-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.94rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .up{color:var(--rose); font-weight:800}
+        .cmp .dn{color:var(--blue-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--blue);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--blue-d)}
+
+        .qa{background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #d3e3fd; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--blue-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#eff6ff; border:1px solid #d3e3fd; border-radius:14px; padding:18px; margin:14px 0}
+        .lab{display:flex; gap:18px; flex-wrap:wrap}
+        .controls{flex:1; min-width:240px; background:#fff; padding:18px; border-radius:10px; border:1px solid var(--line); display:flex; flex-direction:column; gap:18px}
+        .control-group label{display:flex; justify-content:space-between; font-weight:bold; margin-bottom:6px; color:var(--blue-d)}
+        .control-group p{margin:0 0 8px 0; font-size:13px; color:#64748b}
+        .control-group input[type=range]{width:100%; cursor:pointer; accent-color:var(--blue)}
+        .action-btn{padding:10px; background:var(--blue); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:800; transition:.2s}
+        .action-btn:hover{background:var(--blue-d)}
+        .stats{margin-top:auto; padding-top:14px; border-top:2px dashed #cbd5e1}
+        .stats div{margin-bottom:8px; font-size:15px}
+        .canvas-wrap{flex:2; min-width:300px}
+        .canvas-scroll{overflow-x:auto}
+        #canvas{background:#fff; border:2px solid #cbd5e1; border-radius:10px; cursor:crosshair; max-width:100%}
+        .canvas-hint{text-align:center; font-size:13px; color:#94a3b8; margin-top:10px}
+        .legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; padding:14px; background:#fff; border:1px solid var(--line); border-radius:10px}
+        .legend-item{display:flex; align-items:center; gap:8px; font-size:14px}
+        .ldot{width:13px; height:13px; border-radius:50%}
+        .ldot.core{background:#1d4ed8; border:2px solid #1e3a8a} .ldot.border{background:#93c5fd} .ldot.noise{background:#e2e8f0; border:1px solid #94a3b8}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🧪 DBSCAN 參數實驗室 · iPAS 常考</span>
+        <h1>DBSCAN 參數實驗室：ε 和 MinPts 怎麼改變分群？</h1>
+        <p>這頁專注在「<b>調參數</b>」——拖動 ε（掃描半徑）和 MinPts（最小點數），即時看群數、雜訊怎麼變。想先搞懂 DBSCAN 的完整原理，可看 <a href="dbscan.html" style="color:#fff;text-decoration:underline;font-weight:700">DBSCAN 概念頁</a>。</p>
+        <div class="chips"><span>ε 掃描半徑</span><span>MinPts 最小點數</span><span>核心/邊界/雜訊</span><span>參數效應</span><span>k-距離圖</span></div>
+    </header>
+
+    <!-- ===== 1. 快速回顧 ===== -->
+    <section class="lesson">
+        <h2>⚡ 一、30 秒快速回顧</h2>
+        <p class="lead">DBSCAN ＝「基於密度的空間分群」：不必先說有幾群，只看「點密不密」。</p>
+        <div class="note def">
+            <h4>三種點（這頁 demo 的顏色）</h4>
+            <b>核心點 Core</b>：在 ε 半徑內鄰居 ≥ MinPts（含自己）。<br>
+            <b>邊界點 Border</b>：自己鄰居不足，但落在某核心點的 ε 範圍內（demo 用半透明）。<br>
+            <b>雜訊 Noise</b>：都不是 → 孤獨的離群值（demo 用灰色）。
+        </div>
+    </section>
+
+    <!-- ===== 2. 兩參數 ===== -->
+    <section class="lesson">
+        <h2>🎛️ 二、要調的就這兩個參數</h2>
+        <div class="keys">
+            <div class="keycard"><b>ε（Epsilon，掃描半徑）</b>以每個點為圓心，畫多大的圓找鄰居。圓越大→越容易找到鄰居。</div>
+            <div class="keycard"><b>MinPts（最小點數）</b>圓內至少要幾個點，才算「核心點」、足以撐起一個群。</div>
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：拉滑桿，看群數與雜訊即時變</h2>
+        <p class="lead">把<b>滑鼠移到畫布上</b>會看到當前 ε 的探測圈；<b>點畫布</b>可手動加點。一邊拉滑桿一邊看右下角的「群集數」「雜訊數」。</p>
+
+        <div class="demo-card">
+            <div class="lab">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Epsilon (ε) 掃描半徑 <span id="val-eps">40</span></label>
+                        <p>以每個點為圓心，畫出多大的圓來尋找鄰居。</p>
+                        <input type="range" id="slider-eps" min="10" max="100" value="40">
+                    </div>
+                    <div class="control-group">
+                        <label>MinPts 最小點數 <span id="val-minpts">4</span></label>
+                        <p>在半徑 (ε) 內至少要包含幾個點，才能形成一個「核心群集」。</p>
+                        <input type="range" id="slider-minpts" min="2" max="15" value="4">
+                    </div>
+                    <button class="action-btn" onclick="generateRandomData()">🎲 重新生成隨機資料</button>
+                    <div class="stats">
+                        <div style="font-weight:bold; color:#333;">即時運算結果：</div>
+                        <div>發現群集數量：<strong id="stat-clusters" style="color:#1d4ed8;">0</strong></div>
+                        <div>雜訊點 (Noise)：<strong id="stat-noise" style="color:#ef4444;">0</strong></div>
+                    </div>
+                </div>
+                <div class="canvas-wrap">
+                    <div class="canvas-scroll"><canvas id="canvas" width="600" height="400"></canvas></div>
+                    <div class="canvas-hint">💡 滑鼠移到畫布看 ε 探測圈；點擊畫布可手動新增資料點。</div>
+                </div>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="ldot core"></div> <strong>核心 Core</strong></div>
+                <div class="legend-item"><div class="ldot border"></div> <strong>邊界 Border</strong></div>
+                <div class="legend-item"><div class="ldot noise"></div> <strong>雜訊 Noise</strong></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 參數效應 (核心) ===== -->
+    <section class="lesson">
+        <h2>📊 四、參數效應：這頁的重點</h2>
+        <p class="lead">記住下面這張表，調參數就不會瞎猜。邊看表、邊在上面 demo 驗證。</p>
+        <table class="cmp">
+            <tr><th>調整</th><th>會發生什麼</th></tr>
+            <tr><td><span class="up">ε 調大 ↑</span></td><td>探測圈變大 → 更容易找到鄰居 → <b>群容易合併成一大坨、雜訊變少</b>。</td></tr>
+            <tr><td><span class="dn">ε 調小 ↓</span></td><td>探測圈變小 → 不容易找到鄰居 → <b>群容易分裂、雜訊變多</b>。</td></tr>
+            <tr><td><span class="up">MinPts 調大 ↑</span></td><td>成為核心點更嚴格 → 邊緣稍稀疏的點被判為雜訊 → <b>群更緊湊、雜訊變多</b>。</td></tr>
+            <tr><td><span class="dn">MinPts 調小 ↓</span></td><td>標準變寬鬆 → 更多點達標 → <b>雜訊變少、群可能變大或變多</b>。</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 一句話</h4>
+            <b>ε 管「圈多大」、MinPts 管「要多少人」。</b>兩個都「放寬」(ε 大、MinPts 小) → 雜訊少、群大；兩個都「收緊」 → 雜訊多、群碎。實務上常一起調、互相搭配。
+        </div>
+    </section>
+
+    <!-- ===== 5. 怎麼挑 eps ===== -->
+    <section class="lesson">
+        <h2>📐 五、ε 到底要設多少？k-距離圖</h2>
+        <div class="note def">
+            <h4>💪 k-距離圖（最常用的估法）</h4>
+            把<b>每個點到「第 k 近鄰」的距離</b>由小到大排序、畫成曲線。大多數點的距離都差不多（曲線平緩），但到了某處會<b>急速上揚</b>（那些是雜訊/邊緣點）——那個<b>手肘轉折</b>的距離，就是不錯的 ε 起點，再用上面 demo 微調看雜訊比例。MinPts 經驗上常取約 <b>2 × 維度</b>（2D 用 4 左右）。
+        </div>
+    </section>
+
+    <!-- ===== 6. 弱點 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、弱點與替代方案</h2>
+        <div class="keys">
+            <div class="keycard"><b>對參數敏感</b>ε、MinPts 設不好，結果差很多——這也是這頁讓你練手感的原因。</div>
+            <div class="keycard"><b>密度差異大就吃力</b>有的群密、有的群鬆時，單一 ε 難兩全 → 改用 <a href="hdbscan.html" style="color:#1e3a8a;font-weight:700">HDBSCAN</a>。</div>
+            <div class="keycard"><b>高維失效</b>維度高時距離鑑別力下降（維度詛咒），分群變難。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. ε 調大，群數和雜訊會怎麼變？</summary>
+                <p>探測圈變大、更容易找到鄰居 → <b>群容易合併（群數可能變少）、雜訊變少</b>。</p></details>
+            <details><summary>Q2. MinPts 調大，會怎麼樣？</summary>
+                <p>成為核心點的標準變嚴 → 邊緣稀疏的點被判為雜訊 → <b>群更緊湊、雜訊變多</b>。</p></details>
+            <details><summary>Q3. 三種點怎麼分？</summary>
+                <p><b>核心</b>：ε 內鄰居 ≥ MinPts；<b>邊界</b>：自己不足但在某核心的 ε 內；<b>雜訊</b>：都不是。</p></details>
+            <details><summary>Q4. ε 怎麼估？</summary>
+                <p>用 <b>k-距離圖</b>找手肘轉折當 ε（MinPts 約 2×維度），再微調看雜訊比例。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>兩參數：ε 與 MinPts</b>ε 管圈多大、MinPts 管要幾個鄰居。</div>
+            <div class="keycard"><b>ε 大 → 群合併、雜訊少</b>ε 小 → 群分裂、雜訊多。</div>
+            <div class="keycard"><b>MinPts 大 → 雜訊多、群緊湊</b>MinPts 小 → 雜訊少。</div>
+            <div class="keycard"><b>三種點</b>核心、邊界、雜訊。</div>
+            <div class="keycard"><b>ε 用 k-距離圖估</b>找手肘轉折，再微調。</div>
+            <div class="keycard"><b>密度差異大 → HDBSCAN</b>對參數敏感、高維失效。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const sliderEps = document.getElementById('slider-eps');
+        const sliderMinPts = document.getElementById('slider-minpts');
+        const valEps = document.getElementById('val-eps');
+        const valMinPts = document.getElementById('val-minpts');
+
+        let points = [];
+        let mouseX = -100;
+        let mouseY = -100;
+        let isHovering = false;
+
+        const colors = [
+            '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+            '#ec4899', '#06b6d4', '#84cc16', '#6366f1'
+        ];
+
+        function generateRandomData() {
+            points = [];
+            for(let i=0; i<40; i++) {
+                points.push({ x: 200 + Math.random()*100 - 50, y: 150 + Math.random()*100 - 50 });
+            }
+            for(let i=0; i<35; i++) {
+                points.push({ x: 400 + Math.random()*120 - 60, y: 250 + Math.random()*80 - 40 });
+            }
+            for(let i=0; i<15; i++) {
+                points.push({ x: 150 + Math.random()*50, y: 300 + Math.random()*50 });
+            }
+            for(let i=0; i<25; i++) {
+                points.push({ x: Math.random()*580 + 10, y: Math.random()*380 + 10 });
+            }
+            runSimulation();
+        }
+
+        function dist(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+
+        function runDBSCAN(dataset, eps, minPts) {
+            dataset.forEach(p => { p.label = 'UNCLASSIFIED'; p.type = ''; });
+            let clusterId = 0;
+
+            for (let i = 0; i < dataset.length; i++) {
+                let p = dataset[i];
+                if (p.label !== 'UNCLASSIFIED') continue;
+
+                let neighbors = getNeighbors(dataset, p, eps);
+
+                if (neighbors.length < minPts) {
+                    p.label = 'NOISE';
+                    p.type = 'NOISE';
+                } else {
+                    clusterId++;
+                    p.label = clusterId;
+                    p.type = 'CORE';
+                    expandCluster(dataset, p, neighbors, clusterId, eps, minPts);
+                }
+            }
+            return clusterId;
+        }
+
+        function getNeighbors(dataset, p, eps) {
+            return dataset.filter(other => dist(p, other) <= eps);
+        }
+
+        function expandCluster(dataset, p, neighbors, clusterId, eps, minPts) {
+            let i = 0;
+            while (i < neighbors.length) {
+                let pPrime = neighbors[i];
+
+                if (pPrime.label === 'NOISE') {
+                    pPrime.label = clusterId;
+                    pPrime.type = 'BORDER';
+                }
+
+                if (pPrime.label === 'UNCLASSIFIED') {
+                    pPrime.label = clusterId;
+                    let pPrimeNeighbors = getNeighbors(dataset, pPrime, eps);
+
+                    if (pPrimeNeighbors.length >= minPts) {
+                        pPrime.type = 'CORE';
+                        for (let n of pPrimeNeighbors) {
+                            if (!neighbors.includes(n)) neighbors.push(n);
+                        }
+                    } else {
+                        pPrime.type = 'BORDER';
+                    }
+                }
+                i++;
+            }
+        }
+
+        function draw(eps) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isHovering) {
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, eps, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(29, 78, 216, 0.1)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(29, 78, 216, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            let noiseCount = 0;
+
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+
+                if (p.label === 'NOISE') {
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 1;
+                    noiseCount++;
+                } else {
+                    let cIdx = (p.label - 1) % colors.length;
+                    if (p.type === 'CORE') {
+                        ctx.fillStyle = colors[cIdx];
+                        ctx.strokeStyle = '#222';
+                        ctx.lineWidth = 1.5;
+                    } else if (p.type === 'BORDER') {
+                        ctx.fillStyle = colors[cIdx];
+                        ctx.globalAlpha = 0.5;
+                        ctx.strokeStyle = 'transparent';
+                    }
+                }
+
+                ctx.fill();
+                if(p.type === 'CORE' || p.type === 'NOISE') ctx.stroke();
+                ctx.globalAlpha = 1.0;
+            });
+
+            document.getElementById('stat-noise').innerText = noiseCount;
+        }
+
+        function runSimulation() {
+            const eps = parseInt(sliderEps.value);
+            const minPts = parseInt(sliderMinPts.value);
+
+            valEps.innerText = eps;
+            valMinPts.innerText = minPts;
+
+            const totalClusters = runDBSCAN(points, eps, minPts);
+            document.getElementById('stat-clusters').innerText = totalClusters;
+
+            draw(eps);
+        }
+
+        sliderEps.addEventListener('input', runSimulation);
+        sliderMinPts.addEventListener('input', runSimulation);
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+            isHovering = true;
+            draw(parseInt(sliderEps.value));
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isHovering = false;
+            draw(parseInt(sliderEps.value));
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+            points.push({ x, y });
+            runSimulation();
+        });
+
+        generateRandomData();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>DBSCAN 是基於密度的分群法,iPAS 非監督學習考點(中級科目三)。重點:把高密度區連成群、低密度點視為雜訊,不需先指定群數,能找任意形狀的群。易混點:與 K-means 不同——K-means 需先定 k、只找球狀群、對離群敏感;DBSCAN 靠 eps(鄰域半徑)與 minPts 兩參數,對密度差異大的資料較吃力。情境:離群偵測、任意形狀分群。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>DBSCAN 是什麼？</summary><p>基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。</p></details><details><summary>兩個關鍵參數是什麼？</summary><p>eps(鄰域半徑)與 minPts(成為核心點所需的最少鄰居數)；兩者決定何謂密集，影響分群結果。</p></details><details><summary>DBSCAN 比 K-means 好在哪？</summary><p>能找任意形狀的群、自動偵測離群(雜訊)、不必先定群數；K-means 只適合球狀且需指定 k。</p></details><details><summary>DBSCAN 的弱點？</summary><p>對 eps 與 minPts 敏感、難處理密度差異大的資料、高維時距離失效；此時可考慮 HDBSCAN。</p></details><details><summary>怎麼挑 eps？</summary><p>常用 k-距離圖：把每點到第 k 近鄰的距離排序畫出，找曲線手肘轉折處作為 eps，再微調看雜訊比例。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "DBSCAN 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "基於密度的聚類法；把高密度區域連成群、低密度點視為雜訊，不需事先指定群數、能找任意形狀的群。"}}, {"@type": "Question", "name": "兩個關鍵參數是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "eps(鄰域半徑)與 minPts(成為核心點所需的最少鄰居數)；兩者決定何謂密集，影響分群結果。"}}, {"@type": "Question", "name": "DBSCAN 比 K-means 好在哪？", "acceptedAnswer": {"@type": "Answer", "text": "能找任意形狀的群、自動偵測離群(雜訊)、不必先定群數；K-means 只適合球狀且需指定 k。"}}, {"@type": "Question", "name": "DBSCAN 的弱點？", "acceptedAnswer": {"@type": "Answer", "text": "對 eps 與 minPts 敏感、難處理密度差異大的資料、高維時距離失效；此時可考慮 HDBSCAN。"}}, {"@type": "Question", "name": "怎麼挑 eps？", "acceptedAnswer": {"@type": "Answer", "text": "常用 k-距離圖：把每點到第 k 近鄰的距離排序畫出，找曲線手肘轉折處作為 eps，再微調看雜訊比例。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="dbscan.html">DBSCAN 概念</a><a href="hdbscan.html">HDBSCAN</a><a href="k-means.html">K-Means</a><a href="hierarchicalclustering.html">階層式分群</a><a href="unsupervised_overview.html">非監督式學習</a><a href="clustering.html">分群總覽</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

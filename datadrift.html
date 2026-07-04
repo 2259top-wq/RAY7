@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料漂移與 KL 散度互動圖解</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。 資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/datadrift.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="資料漂移與 KL 散度互動圖解">
+    <meta property="og:description" content="模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。 資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/datadrift.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="資料漂移與 KL 散度互動圖解">
+    <meta name="twitter:description" content="模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。 資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "資料漂移與 KL 散度互動圖解",
+  "url": "https://akira.ipas-ai.com/datadrift.html",
+  "description": "模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。 資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 { text-align: center; color: #1e293b; }
+        
+        .container {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        /* SVG 畫布區域 */
+        .svg-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        svg {
+            width: 100%;
+            max-width: 700px;
+            height: 350px;
+        }
+
+        /* 控制面板 */
+        .panel-grid {
+            display: flex;
+            gap: 20px;
+        }
+        .controls {
+            flex: 1;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* 數據顯示區 */
+        .results {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        .kl-score {
+            font-size: 48px;
+            font-weight: bold;
+            font-family: monospace;
+            margin: 10px 0;
+            transition: color 0.3s;
+        }
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .status-normal { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-danger { background-color: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); }
+
+        /* 圖例說明 */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 10px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .dot { width: 16px; height: 16px; border-radius: 4px; }
+        .dot-train { background-color: #3b82f6; opacity: 0.7; }
+        .dot-prod { background-color: #ef4444; opacity: 0.7; }
+        
+        .math-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            text-align: center;
+            border: 1px dashed #cbd5e1;
+            margin-top: 20px;
+            color: #64748b;
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <h1>資料漂移 (Data Drift) 與 KL 散度偵測</h1>
+
+    <div class="container">
+        <div class="svg-container">
+            <svg id="chart" viewBox="0 0 800 400">
+                <line x1="50" y1="350" x2="750" y2="350" stroke="#94a3b8" stroke-width="2"/>
+                <line x1="400" y1="50" x2="400" y2="350" stroke="#cbd5e1" stroke-dasharray="4" stroke-width="1"/>
+                
+                <path id="path-q" fill="rgba(59, 130, 246, 0.15)" stroke="#3b82f6" stroke-width="2" stroke-dasharray="8"></path>
+                <path id="path-p" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" stroke-width="3"></path>
+            </svg>
+            
+            <div class="legend" style="position: absolute; top: 20px; right: 40px;">
+                <div class="legend-item"><div class="dot dot-train"></div> 基準：訓練資料 (Q)</div>
+                <div class="legend-item"><div class="dot dot-prod"></div> 實際：生產資料 (P)</div>
+            </div>
+        </div>
+
+        <div class="panel-grid">
+            <div class="controls">
+                <h3 style="margin-top: 0; color: #1e293b;">調整生產資料分佈 (P)</h3>
+                <div class="control-group">
+                    <label>顧客行為偏移 (平均值) <span id="val-mu">0.0</span></label>
+                    <input type="range" id="slider-mu" min="-3" max="3" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>特徵變異擴大/縮小 (標準差) <span id="val-sigma">1.0</span></label>
+                    <input type="range" id="slider-sigma" min="0.5" max="2.0" step="0.1" value="1">
+                </div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 15px;">
+                    💡 提示：試著移動滑桿。當紅色的生產資料偏離藍色的訓練資料越遠，代表資料漂移越嚴重。
+                </div>
+            </div>
+
+            <div class="results">
+                <h3 style="margin-top: 0; color: #1e293b;">KL 散度 (KL Divergence)</h3>
+                <div class="kl-score" id="kl-display">0.000</div>
+                <div id="status-badge" class="status-badge status-normal">🟢 模型狀態：正常</div>
+            </div>
+        </div>
+
+        <div class="math-box">
+            常態分佈 KL 散度公式： D_{KL}(P||Q) = log(σ_Q/σ_P) + [σ_P² + (μ_P - μ_Q)²] / (2σ_Q²) - 0.5
+        </div>
+    </div>
+
+    <script>
+        // 基準訓練資料 Q (固定不變)
+        const Q = { mu: 0, sigma: 1 };
+        
+        // DOM 元素
+        const pathQ = document.getElementById('path-q');
+        const pathP = document.getElementById('path-p');
+        const klDisplay = document.getElementById('kl-display');
+        const statusBadge = document.getElementById('status-badge');
+        
+        const sliderMu = document.getElementById('slider-mu');
+        const sliderSigma = document.getElementById('slider-sigma');
+        const valMu = document.getElementById('val-mu');
+        const valSigma = document.getElementById('val-sigma');
+
+        // SVG 座標轉換設定
+        const svgWidth = 800;
+        const svgHeight = 400;
+        const margin = { top: 50, bottom: 50, left: 50, right: 50 };
+        const innerWidth = svgWidth - margin.left - margin.right;
+        const innerHeight = svgHeight - margin.top - margin.bottom;
+
+        // X 軸範圍從 -6 到 +6
+        const xMin = -6;
+        const xMax = 6;
+        // Y 軸範圍從 0 到 0.9 (標準差 0.5 的峰值約為 0.8)
+        const yMax = 0.9;
+
+        // 將數學座標轉換為 SVG 畫布座標
+        function scaleX(val) {
+            return margin.left + ((val - xMin) / (xMax - xMin)) * innerWidth;
+        }
+
+        function scaleY(val) {
+            return svgHeight - margin.bottom - (val / yMax) * innerHeight;
+        }
+
+        // 常態分佈機率密度函數 (PDF)
+        function normalPDF(x, mu, sigma) {
+            const coefficient = 1 / (sigma * Math.sqrt(2 * Math.PI));
+            const exponent = -0.5 * Math.pow((x - mu) / sigma, 2);
+            return coefficient * Math.exp(exponent);
+        }
+
+        // 產生 SVG Path D 屬性字串
+        function generatePathD(mu, sigma) {
+            let d = `M ${scaleX(xMin)} ${scaleY(0)} `;
+            // 採樣 200 個點來畫平滑曲線
+            for (let i = 0; i <= 200; i++) {
+                let x = xMin + (xMax - xMin) * (i / 200);
+                let y = normalPDF(x, mu, sigma);
+                d += `L ${scaleX(x)} ${scaleY(y)} `;
+            }
+            d += `L ${scaleX(xMax)} ${scaleY(0)} Z`; // 封閉路徑以填充顏色
+            return d;
+        }
+
+        // 計算兩個常態分佈間的 KL 散度 D_KL(P || Q)
+        function calcKLDivergence(muP, sigmaP, muQ, sigmaQ) {
+            const term1 = Math.log(sigmaQ / sigmaP);
+            const term2 = (Math.pow(sigmaP, 2) + Math.pow(muP - muQ, 2)) / (2 * Math.pow(sigmaQ, 2));
+            return term1 + term2 - 0.5;
+        }
+
+        // 更新畫面與數據
+        function update() {
+            const muP = parseFloat(sliderMu.value);
+            const sigmaP = parseFloat(sliderSigma.value);
+
+            // 更新 UI 數字
+            valMu.innerText = muP.toFixed(1);
+            valSigma.innerText = sigmaP.toFixed(1);
+
+            // 重繪生產資料曲線 P
+            pathP.setAttribute('d', generatePathD(muP, sigmaP));
+
+            // 計算 KL 散度
+            const kl = calcKLDivergence(muP, sigmaP, Q.mu, Q.sigma);
+            klDisplay.innerText = kl.toFixed(3);
+
+            // 更新狀態警示
+            if (kl < 0.1) {
+                klDisplay.style.color = '#10b981';
+                statusBadge.className = 'status-badge status-normal';
+                statusBadge.innerText = '🟢 模型狀態：正常 (分佈一致)';
+            } else if (kl < 0.5) {
+                klDisplay.style.color = '#f59e0b';
+                statusBadge.className = 'status-badge status-warning';
+                statusBadge.innerText = '🟡 模型狀態：輕微漂移 (持續觀察)';
+            } else {
+                klDisplay.style.color = '#ef4444';
+                statusBadge.className = 'status-badge status-danger';
+                statusBadge.innerText = '🔴 模型狀態：嚴重漂移 (建議重訓)';
+            }
+        }
+
+        // 綁定事件監聽器
+        sliderMu.addEventListener('input', update);
+        sliderSigma.addEventListener('input', update);
+
+        // 初始繪製
+        pathQ.setAttribute('d', generatePathD(Q.mu, Q.sigma));
+        update();
+    </script>
+
+
+
+
+
+<style>
+.mxwrap{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;max-width:900px;margin:26px auto 0;padding:0 16px;box-sizing:border-box}
+.mxwrap .mxc{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.mxwrap .mxh{font-size:1.05rem;color:#0f766e;margin:0 0 11px;font-weight:800}
+.mxtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mxtbl th,.mxtbl td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top;color:#334155;line-height:1.6}
+.mxtbl thead th{background:#e8f2fe;color:#1565C0;font-weight:700;white-space:nowrap}
+.mxtbl td:first-child{font-weight:700;color:#1a2233;white-space:nowrap}
+.mxtbl tbody tr:nth-child(even){background:#f7f9fc}
+.mxq{border-top:1px solid #f0f2f5;padding:10px 0}
+.mxq:first-of-type{border-top:0}
+.mxq summary{cursor:pointer;font-weight:700;color:#2c3e50}
+.mxq .a{margin-top:7px;color:#475467;font-size:.93rem;line-height:1.7}
+.mxk{list-style:none;counter-reset:k;margin:2px 0 0;padding:0}
+.mxk li{position:relative;padding-left:30px;margin-bottom:8px;color:#334155;font-size:14.5px;line-height:1.6}
+.mxk li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+<div class="mxwrap">
+  <div class="mxc"><div class="mxh">📊 漂移類型</div><div style="overflow-x:auto"><table class="mxtbl"><thead><tr><th>類型</th><th>意思</th><th>例子</th></tr></thead><tbody><tr><td>資料漂移</td><td>輸入分布改變 P(X)</td><td>新客群、季節變化</td></tr><tr><td>概念漂移</td><td>X→Y 關係改變 P(Y|X)</td><td>消費行為質變</td></tr><tr><td>標籤漂移</td><td>目標分布改變 P(Y)</td><td>詐欺比例上升</td></tr><tr><td>偵測</td><td>KL／KS／PSI、監控績效</td><td>觸發再訓練</td></tr></tbody></table></div></div>
+  <div class="mxc"><div class="mxh">✅ 自我檢測</div><details class="mxq"><summary>資料漂移和概念漂移差在哪？</summary><div class="a">資料漂移是輸入分布 P(X) 變(客群變了);概念漂移是輸入到輸出的關係 P(Y|X) 變(同樣的人行為變了),後者更難。</div></details><details class="mxq"><summary>怎麼偵測漂移？</summary><div class="a">比對訓練與線上分布(KL 散度、KS 檢定、PSI),並監控模型績效是否衰退。</div></details><details class="mxq"><summary>發現漂移後怎麼辦？</summary><div class="a">依嚴重度:重新訓練／校準、更新特徵、調整門檻,必要時回滾或人工介入。</div></details></div>
+  <div class="mxc"><div class="mxh">🎯 重點整理</div><ol class="mxk"><li>資料漂移=輸入分布 P(X) 改變。</li><li>概念漂移=P(Y|X) 關係改變、更棘手。</li><li>用 KL／KS／PSI 與績效監控偵測。</li><li>漂移就再訓練／校準／調門檻。</li><li>上線後必須持續監控。</li></ol></div>
+</div>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>資料漂移是模型上線後退化的主因,iPAS 維運考點(中級科目一)。重點:輸入資料的分布隨時間改變(如客群、行為變了),使模型效能下降,需持續監控(如 PSI、KL 散度)。易混點:資料漂移(輸入分布變)與概念漂移(輸入與目標的關係變)不同;漂移不一定立刻反映在準確率,要監控輸入分布。情境:上線後監控、決定何時再訓練。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>資料漂移(Data Drift)是什麼？</summary><p>模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。</p></details><details><summary>資料漂移和概念漂移差在哪？</summary><p>資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。</p></details><details><summary>怎麼偵測漂移？</summary><p>比較上線資料與訓練資料的分布，用統計檢定(KS 檢定、PSI、卡方)或監控特徵統計量與模型信心、效能指標的變化。</p></details><details><summary>發現漂移後怎麼辦？</summary><p>視情況用新資料再訓練或微調、更新特徵或重新校準；嚴重時回滾舊版，並建立定期再訓練機制。</p></details><details><summary>為什麼一定要持續監控？</summary><p>因為世界會變(用戶行為、季節、政策)，沒有模型能永久準確；不監控就會在不知不覺中默默劣化、造成業務損失。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "資料漂移(Data Drift)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "模型上線後輸入資料分布隨時間改變、與訓練時不同，導致預測表現逐漸下滑，是模型會過期的主因之一。"}}, {"@type": "Question", "name": "資料漂移和概念漂移差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "資料漂移是輸入分布變(P(X) 變)；概念漂移是輸入與目標的關係變(P(Y|X) 變，例如同樣特徵對應的答案改了)，兩者都會傷害效能。"}}, {"@type": "Question", "name": "怎麼偵測漂移？", "acceptedAnswer": {"@type": "Answer", "text": "比較上線資料與訓練資料的分布，用統計檢定(KS 檢定、PSI、卡方)或監控特徵統計量與模型信心、效能指標的變化。"}}, {"@type": "Question", "name": "發現漂移後怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "視情況用新資料再訓練或微調、更新特徵或重新校準；嚴重時回滾舊版，並建立定期再訓練機制。"}}, {"@type": "Question", "name": "為什麼一定要持續監控？", "acceptedAnswer": {"@type": "Answer", "text": "因為世界會變(用戶行為、季節、政策)，沒有模型能永久準確；不監控就會在不知不覺中默默劣化、造成業務損失。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="deployment_strategies.html">部署與服務化</a><a href="mlops-overview.html">MLOps</a><a href="knowledge_distillation.html">模型優化</a><a href="cicd.html">建立 CI/CD</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

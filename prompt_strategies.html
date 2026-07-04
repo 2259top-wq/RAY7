@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt 策略比較 互動動畫</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。 在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/prompt_strategies.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Prompt 策略比較 互動動畫">
+    <meta property="og:description" content="zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。 在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/prompt_strategies.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Prompt 策略比較 互動動畫">
+    <meta name="twitter:description" content="zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。 在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Prompt 策略比較 互動動畫",
+  "url": "https://akira.ipas-ai.com/prompt_strategies.html",
+  "description": "zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。 在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);color:#e0e0e0;min-height:100vh;padding:1.2rem}
+h1{text-align:center;font-size:1.6rem;margin-bottom:.3rem;background:linear-gradient(90deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#aaa;font-size:.92rem;margin-bottom:1rem}
+.container{max-width:1050px;margin:0 auto}
+.card{background:rgba(255,255,255,.06);border-radius:16px;padding:1.2rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,.08)}
+.card h2{font-size:1.15rem;margin-bottom:.6rem;color:#fbbf24}
+.card p,.card li{font-size:.93rem;line-height:1.7;color:#ccc}
+.card ul{padding-left:1.2rem}.card li{margin-bottom:.3rem}
+.highlight{background:rgba(251,191,36,.12);border-left:3px solid #fbbf24;padding:.6rem .8rem;border-radius:8px;margin:.6rem 0;font-size:.9rem;color:#fde68a}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+.tab{padding:.5rem .9rem;border-radius:999px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#bbb;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s}
+.tab:hover{border-color:#fbbf24}
+.tab.active{background:#f59e0b;color:#1a1a3e;border-color:#f59e0b}
+.question-box{background:rgba(0,0,0,.25);border-radius:12px;padding:1rem;margin:.8rem 0;border-left:4px solid #fbbf24}
+.question-box .q{font-size:1rem;font-weight:700;color:#fde68a}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.8rem 0}
+@media(max-width:700px){.demo-grid{grid-template-columns:1fr}}
+.demo-card{background:rgba(0,0,0,.2);border-radius:14px;padding:1rem;border:2px solid rgba(255,255,255,.08);position:relative}
+.demo-card h3{font-size:.95rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.prompt-block{background:rgba(0,0,0,.3);border-radius:8px;padding:.6rem;font-size:.82rem;color:#aaa;line-height:1.6;margin:.4rem 0;font-family:'Noto Sans TC',monospace;white-space:pre-wrap}
+.prompt-block .user{color:#60a5fa}
+.prompt-block .ai{color:#4ade80}
+.prompt-block .system{color:#a78bfa}
+.prompt-block .step{color:#fbbf24}
+.result-tag{display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.75rem;font-weight:700;margin-top:.4rem}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:.5rem 0}
+.btn{padding:.5rem 1rem;border-radius:999px;border:none;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-q{background:rgba(255,255,255,.08);color:#bbb;border:1px solid rgba(255,255,255,.15)}
+.btn-q:hover,.btn-q.active{background:#fbbf24;color:#1a1a3e;border-color:#fbbf24}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+<div class="container">
+<h1>🎯 Prompt 策略比較 互動動畫</h1>
+<p class="subtitle">同一個問題，不同策略的推理過程和結果差異</p>
+
+<div class="card">
+<h2>💡 白話說明</h2>
+<ul>
+<li><strong>Zero-shot</strong>：直接問，不給範例 → 像問路人「郵局怎麼走？」</li>
+<li><strong>Few-shot</strong>：給 2-3 個範例再問 → 像教新人「照這樣寫就對了」</li>
+<li><strong>CoT（思維鏈）</strong>：叫 AI 一步一步想 → 像老師說「先列式再算」</li>
+<li><strong>ToT（思維樹）</strong>：探索多條路再選最好的 → 像下棋先想好幾步</li>
+</ul>
+<div class="highlight">📌 考試重點：Zero-shot 最簡單；Few-shot 引導格式；CoT 提升推理準確度；ToT 適合多方案比較。ReAct = 推理+行動交替。</div>
+</div>
+
+<div style="text-align:center;font-size:.9rem;color:#888;margin:.3rem 0">選擇問題情境：</div>
+<div class="btn-row" id="questionBtns"></div>
+
+<div class="question-box">
+<div class="q" id="questionText">-</div>
+</div>
+
+<div class="tabs" id="strategyTabs"></div>
+
+<div class="demo-grid" id="demoGrid"></div>
+
+<div class="card" style="margin-top:1rem">
+<h2>⚖️ 策略選擇指南</h2>
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse;font-size:.85rem">
+<tr style="border-bottom:2px solid rgba(255,255,255,.1)">
+<th style="padding:.5rem;text-align:left;color:#fbbf24">策略</th>
+<th style="padding:.5rem;color:#fbbf24">適用場景</th>
+<th style="padding:.5rem;color:#fbbf24">優點</th>
+<th style="padding:.5rem;color:#fbbf24">缺點</th>
+</tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:.5rem">Zero-shot</td><td>簡單任務、LLM 已熟悉</td><td>最快、最省 token</td><td>複雜推理容易錯</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:.5rem">Few-shot</td><td>需要特定格式/風格</td><td>引導輸出格式</td><td>佔用 context window</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:.5rem">CoT</td><td>數學、邏輯推理</td><td>大幅提升推理準確度</td><td>回應較長、較慢</td></tr>
+<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:.5rem">ToT</td><td>多方案比較、規劃</td><td>探索多種可能性</td><td>token 消耗大</td></tr>
+<tr><td style="padding:.5rem">ReAct</td><td>需查資料/呼叫工具</td><td>結合推理與行動</td><td>需要工具整合</td></tr>
+</table>
+</div>
+</div>
+</div>
+
+<script>
+const questions=[
+  {
+    id:'math',label:'🔢 數學推理',
+    question:'一家店有 23 顆蘋果，賣掉了 15 顆，又進貨了 8 顆。現在有幾顆？',
+    strategies:{
+      'zero-shot':{
+        name:'Zero-shot',color:'#60a5fa',icon:'💬',
+        prompt:'<span class="user">Q: 一家店有 23 顆蘋果，賣掉了 15 顆，又進貨了 8 顆。現在有幾顆？</span>',
+        response:'<span class="ai">答案是 16 顆。</span>',
+        correct:true,quality:'正確但沒有過程',tag:'✅ 正確',tagColor:'#4ade80'
+      },
+      'few-shot':{
+        name:'Few-shot',color:'#f472b6',icon:'📝',
+        prompt:'<span class="system">範例 1: 有 10 個，拿走 3 個 → 答案：7 個\n範例 2: 有 5 個，加 2 個 → 答案：7 個</span>\n\n<span class="user">Q: 有 23 顆蘋果，賣掉 15 顆，進貨 8 顆 → 答案：</span>',
+        response:'<span class="ai">答案：16 顆</span>',
+        correct:true,quality:'格式統一，但沒推理過程',tag:'✅ 正確',tagColor:'#4ade80'
+      },
+      'cot':{
+        name:'CoT 思維鏈',color:'#fbbf24',icon:'🔗',
+        prompt:'<span class="user">Q: 一家店有 23 顆蘋果，賣掉了 15 顆，又進貨了 8 顆。現在有幾顆？</span>\n<span class="step">請一步一步思考。</span>',
+        response:'<span class="ai"><span class="step">步驟 1:</span> 原本有 23 顆\n<span class="step">步驟 2:</span> 賣掉 15 顆 → 23 - 15 = 8 顆\n<span class="step">步驟 3:</span> 進貨 8 顆 → 8 + 8 = 16 顆\n\n答案是 <strong>16 顆</strong>。</span>',
+        correct:true,quality:'有完整推理過程，可驗證',tag:'✅ 最佳',tagColor:'#4ade80'
+      },
+      'tot':{
+        name:'ToT 思維樹',color:'#a78bfa',icon:'🌳',
+        prompt:'<span class="user">Q: 一家店有 23 顆蘋果，賣掉了 15 顆，又進貨了 8 顆。現在有幾顆？</span>\n<span class="step">請用多種方法驗證。</span>',
+        response:'<span class="ai"><span class="step">路徑 A（順序計算）:</span>\n23 - 15 = 8, 8 + 8 = 16 ✅\n\n<span class="step">路徑 B（合併變化量）:</span>\n變化量 = -15 + 8 = -7\n23 + (-7) = 16 ✅\n\n<span class="step">路徑 C（反向驗證）:</span>\n16 - 8 = 8, 8 + 15 = 23 ✅\n\n三條路徑一致，答案是 <strong>16 顆</strong>。</span>',
+        correct:true,quality:'多路徑交叉驗證，最可靠',tag:'✅ 最可靠',tagColor:'#4ade80'
+      }
+    }
+  },
+  {
+    id:'classify',label:'📧 分類任務',
+    question:'判斷以下郵件是否為垃圾郵件：「恭喜您中獎了！點擊連結領取 100 萬獎金！」',
+    strategies:{
+      'zero-shot':{
+        name:'Zero-shot',color:'#60a5fa',icon:'💬',
+        prompt:'<span class="user">這封郵件是垃圾郵件嗎？\n「恭喜您中獎了！點擊連結領取 100 萬獎金！」</span>',
+        response:'<span class="ai">是的，這是垃圾郵件。</span>',
+        correct:true,quality:'簡單任務 Zero-shot 就夠了',tag:'✅ 足夠',tagColor:'#4ade80'
+      },
+      'few-shot':{
+        name:'Few-shot',color:'#f472b6',icon:'📝',
+        prompt:'<span class="system">郵件: "會議改到下午三點" → 正常\n郵件: "免費 iPhone 點此領取" → 垃圾\n郵件: "明天記得交報告" → 正常</span>\n\n<span class="user">郵件: "恭喜您中獎了！點擊連結領取 100 萬獎金！" →</span>',
+        response:'<span class="ai">垃圾</span>',
+        correct:true,quality:'格式統一，適合批次處理',tag:'✅ 格式好',tagColor:'#4ade80'
+      },
+      'cot':{
+        name:'CoT 思維鏈',color:'#fbbf24',icon:'🔗',
+        prompt:'<span class="user">判斷是否為垃圾郵件，請說明理由：\n「恭喜您中獎了！點擊連結領取 100 萬獎金！」</span>',
+        response:'<span class="ai"><span class="step">分析：</span>\n1. 包含「中獎」「獎金」等誘餌詞彙\n2. 要求點擊不明連結\n3. 金額不合理（100 萬）\n4. 典型釣魚郵件模式\n\n結論：<strong>垃圾郵件</strong>（高信心度）</span>',
+        correct:true,quality:'有解釋理由，適合需要審計的場景',tag:'✅ 可解釋',tagColor:'#4ade80'
+      },
+      'tot':{
+        name:'ToT 思維樹',color:'#a78bfa',icon:'🌳',
+        prompt:'<span class="user">（此任務不需要 ToT）</span>',
+        response:'<span class="ai">⚠️ 簡單分類任務不需要 ToT。\nToT 適合需要探索多種方案的複雜問題，\n這裡用 Zero-shot 或 Few-shot 就夠了。</span>',
+        correct:true,quality:'殺雞不用牛刀',tag:'⚠️ 過度',tagColor:'#fbbf24'
+      }
+    }
+  },
+  {
+    id:'plan',label:'📋 規劃任務',
+    question:'幫我規劃一個 3 天的台南旅遊行程，要包含美食和古蹟。',
+    strategies:{
+      'zero-shot':{
+        name:'Zero-shot',color:'#60a5fa',icon:'💬',
+        prompt:'<span class="user">幫我規劃 3 天台南旅遊行程，要有美食和古蹟。</span>',
+        response:'<span class="ai">Day 1: 赤崁樓→度小月擔仔麵\nDay 2: 安平古堡→安平豆花\nDay 3: 奇美博物館→阿堂鹹粥</span>',
+        correct:true,quality:'有答案但太簡略',tag:'⚠️ 太簡略',tagColor:'#fbbf24'
+      },
+      'few-shot':{
+        name:'Few-shot',color:'#f472b6',icon:'📝',
+        prompt:'<span class="system">範例格式：\nDay 1:\n🏛️ 上午：[古蹟] → 🍜 午餐：[美食]\n📸 下午：[景點] → 🌙 晚餐：[美食]</span>\n\n<span class="user">請用以上格式規劃 3 天台南行程。</span>',
+        response:'<span class="ai">Day 1:\n🏛️ 上午：赤崁樓 → 🍜 午餐：度小月擔仔麵\n📸 下午：神農街 → 🌙 晚餐：阿霞飯店\n...</span>',
+        correct:true,quality:'格式統一漂亮',tag:'✅ 格式好',tagColor:'#4ade80'
+      },
+      'cot':{
+        name:'CoT 思維鏈',color:'#fbbf24',icon:'🔗',
+        prompt:'<span class="user">規劃 3 天台南行程。</span>\n<span class="step">請先分析需求，再逐步規劃。</span>',
+        response:'<span class="ai"><span class="step">需求分析：</span>\n- 3 天 2 夜\n- 必含：美食 + 古蹟\n- 考慮：地理動線、用餐時間\n\n<span class="step">動線規劃：</span>\nDay 1: 中西區（赤崁樓→神農街）\nDay 2: 安平區（安平古堡→漁光島）\nDay 3: 東區（奇美博物館）\n\n<span class="step">詳細行程：</span>\n...</span>',
+        correct:true,quality:'有邏輯、考慮動線',tag:'✅ 有邏輯',tagColor:'#4ade80'
+      },
+      'tot':{
+        name:'ToT 思維樹',color:'#a78bfa',icon:'🌳',
+        prompt:'<span class="user">規劃 3 天台南行程。</span>\n<span class="step">請提出 3 種不同風格的方案，比較後推薦最佳。</span>',
+        response:'<span class="ai"><span class="step">方案 A（文青路線）:</span>\n神農街→藍晒圖→文學館...\n\n<span class="step">方案 B（古蹟深度）:</span>\n赤崁樓→安平古堡→億載金城...\n\n<span class="step">方案 C（美食優先）:</span>\n國華街→大東夜市→花園夜市...\n\n<span class="step">推薦：</span>方案 B 最符合需求（古蹟+美食兼顧）</span>',
+        correct:true,quality:'多方案比較，最適合規劃類',tag:'✅ 最佳',tagColor:'#4ade80'
+      }
+    }
+  }
+];
+
+let currentQ=0;
+
+function render(){
+  const q=questions[currentQ];
+  document.getElementById('questionText').textContent=q.question;
+
+  // Question buttons
+  const qBtns=document.getElementById('questionBtns');
+  qBtns.innerHTML='';
+  questions.forEach((qq,i)=>{
+    const b=document.createElement('button');
+    b.className='btn btn-q'+(i===currentQ?' active':'');
+    b.textContent=qq.label;
+    b.addEventListener('click',()=>{currentQ=i;render();});
+    qBtns.appendChild(b);
+  });
+
+  // Strategy cards
+  const grid=document.getElementById('demoGrid');
+  grid.innerHTML='';
+  const keys=Object.keys(q.strategies);
+  keys.forEach(k=>{
+    const s=q.strategies[k];
+    const div=document.createElement('div');
+    div.className='demo-card';
+    div.style.borderColor=s.color+'44';
+    div.innerHTML=`
+      <h3 style="color:${s.color}">${s.icon} ${s.name}</h3>
+      <div style="font-size:.78rem;color:#888;margin-bottom:.3rem">Prompt：</div>
+      <div class="prompt-block">${s.prompt}</div>
+      <div style="font-size:.78rem;color:#888;margin-bottom:.3rem">AI 回應：</div>
+      <div class="prompt-block">${s.response}</div>
+      <span class="result-tag" style="background:${s.tagColor}22;color:${s.tagColor};border:1px solid ${s.tagColor}44">${s.tag}</span>
+      <span style="font-size:.78rem;color:#888;margin-left:.5rem">${s.quality}</span>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+render();
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>提示工程(Prompt Engineering)是 iPAS 生成式 AI 的核心考點(初級科目二)。重點:把指令寫清楚、給角色與脈絡、附範例(few-shot)、引導分步推理(思維鏈),同一模型答得好不好差在怎麼問。易混點:提示工程不改模型權重(與微調不同);要求固定輸出格式(如 JSON)利於系統接手。情境:用提示提升摘要、客服、生成內容的穩定與正確,並防範提示注入。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>常見的提示策略有哪些？</summary><p>zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。</p></details><details><summary>few-shot 為什麼有用？</summary><p>在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。</p></details><details><summary>思維鏈(CoT)什麼時候用？</summary><p>需要多步推理的題(數學、邏輯、規劃)；請模型逐步思考再給答案能顯著提升正確率，但會變長與變慢。</p></details><details><summary>怎麼寫出好提示？</summary><p>指令具體明確、提供必要脈絡與範例、指定輸出格式、必要時分步或設角色，並反覆測試迭代。</p></details><details><summary>提示工程的限制？</summary><p>受模型能力與上下文長度限制、對措辭敏感、無法保證一致；需要更穩定或專屬能力時應考慮微調或 RAG。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "常見的提示策略有哪些？", "acceptedAnswer": {"@type": "Answer", "text": "zero-shot(只給指令)、few-shot(給範例)、思維鏈(Chain-of-Thought 逐步推理)、角色設定、給格式範本、自我檢查與反思等。"}}, {"@type": "Question", "name": "few-shot 為什麼有用？", "acceptedAnswer": {"@type": "Answer", "text": "在提示中放幾個輸入與輸出範例，讓模型照樣造句、學會任務格式與風格，通常比 zero-shot 準，且不需改模型。"}}, {"@type": "Question", "name": "思維鏈(CoT)什麼時候用？", "acceptedAnswer": {"@type": "Answer", "text": "需要多步推理的題(數學、邏輯、規劃)；請模型逐步思考再給答案能顯著提升正確率，但會變長與變慢。"}}, {"@type": "Question", "name": "怎麼寫出好提示？", "acceptedAnswer": {"@type": "Answer", "text": "指令具體明確、提供必要脈絡與範例、指定輸出格式、必要時分步或設角色，並反覆測試迭代。"}}, {"@type": "Question", "name": "提示工程的限制？", "acceptedAnswer": {"@type": "Answer", "text": "受模型能力與上下文長度限制、對措辭敏感、無法保證一致；需要更穩定或專屬能力時應考慮微調或 RAG。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="prompt_engineering.html">提示工程</a><a href="rag.html">RAG</a><a href="gptbert.html">BERT vs GPT</a><a href="temperature.html">溫度 Temperature</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="transformer.html">Transformer</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

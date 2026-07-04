@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBCV 密度分群品質 - 互動圖解</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。 輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dbcv.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DBCV 密度分群品質 - 互動圖解">
+    <meta property="og:description" content="Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。 輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dbcv.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DBCV 密度分群品質 - 互動圖解">
+    <meta name="twitter:description" content="Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。 輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "DBCV 密度分群品質 - 互動圖解",
+  "url": "https://akira.ipas-ai.com/dbcv.html",
+  "description": "Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。 輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2 { color: #2c3e50; }
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .concept-box {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        svg {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        #status-text {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 15px;
+            min-height: 27px;
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <h1>DBCV 密度分群品質指標</h1>
+    
+    <div class="card">
+        <h2>給初學者的白話文說明</h2>
+        <p>想像你要評估兩個社團（群集）的凝聚力。DBCV 不看社團成員是不是排成一個完美的圓圈，而是看他們<strong>「手牽手」的緊密程度</strong>。它主要比較兩個極端值：</p>
+        
+        <div class="concept-box">
+            <strong>1. 群內稀疏度 (Density Sparseness)：</strong><br>
+            在同一個社團裡，為了讓所有人都能連在一起（最小生成樹 MST），必須牽的最長的那條線。這代表了這個社團<strong>「最鬆散的環節」</strong>。
+        </div>
+        
+        <div class="concept-box">
+            <strong>2. 群間分離度 (Density Separation)：</strong><br>
+            兩個不同社團之間，距離最近的兩個人之間的距離。這代表了兩個社團<strong>「最容易混淆的邊界」</strong>。
+        </div>
+
+        <p><strong>評分邏輯：</strong> 如果「社團之間的最短距離 (Separation)」大於「社團內部最鬆散的距離 (Sparseness)」，代表群集分得很好！</p>
+    </div>
+
+    <div class="card">
+        <h2>互動動畫演示</h2>
+        <p>點擊下方按鈕，一步步觀察 DBCV 是如何找出關鍵距離的。</p>
+        
+        <svg id="viz" width="600" height="400"></svg>
+        
+        <div id="status-text">請點擊「1. 顯示資料點」開始</div>
+        
+        <div class="controls">
+            <button id="btn1" onclick="step1()">1. 顯示資料點</button>
+            <button id="btn2" onclick="step2()" disabled>2. 建立最小生成樹 (MST)</button>
+            <button id="btn3" onclick="step3()" disabled>3. 找出群內稀疏度</button>
+            <button id="btn4" onclick="step4()" disabled>4. 找出群間分離度</button>
+            <button id="btn5" onclick="step5()" disabled>5. 計算 DBCV</button>
+            <button onclick="reset()" style="background-color: #7f8c8d;">重置</button>
+        </div>
+    </div>
+
+    <script>
+        const svg = document.getElementById('viz');
+        const ns = "http://www.w3.org/2000/svg";
+        
+        // 模擬兩個密度群集 (群 A 與 群 B)
+        const clusterA = [
+            {x: 150, y: 200}, {x: 180, y: 150}, {x: 220, y: 180}, 
+            {x: 200, y: 240}, {x: 120, y: 230}, {x: 260, y: 210} // 260,210 是離群最遠的點
+        ];
+        const clusterB = [
+            {x: 400, y: 200}, {x: 430, y: 140}, {x: 470, y: 170}, 
+            {x: 450, y: 250}, {x: 370, y: 230}, {x: 340, y: 180} // 340,180 是最靠近群A的點
+        ];
+
+        // 預先定義 MST 的邊 (起點索引, 終點索引)
+        const edgesA = [[0,1], [1,2], [0,4], [0,3], [2,5]]; // 2->5 是最長邊 (Sparseness)
+        const edgesB = [[0,1], [1,2], [0,5], [0,4], [3,4]]; 
+        const separationEdge = {xA: 260, yA: 210, xB: 340, yB: 180}; // 群間最短距離
+
+        function drawPoint(cx, cy, color, id) {
+            let circle = document.createElementNS(ns, 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', 0); // 初始半徑為0，用於動畫
+            circle.setAttribute('fill', color);
+            circle.setAttribute('class', 'point ' + id);
+            svg.appendChild(circle);
+            
+            // 點出現的動畫
+            setTimeout(() => {
+                circle.style.transition = "r 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+                circle.setAttribute('r', 8);
+            }, 50);
+        }
+
+        function drawLine(x1, y1, x2, y2, color, thickness, dash, id) {
+            let line = document.createElementNS(ns, 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2);
+            line.setAttribute('stroke', color);
+            line.setAttribute('stroke-width', thickness);
+            line.setAttribute('class', 'line ' + id);
+            
+            // 線條伸展動畫
+            let length = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+            line.setAttribute('stroke-dasharray', length);
+            line.setAttribute('stroke-dashoffset', length);
+            
+            if(dash) line.setAttribute('stroke-dasharray', '5,5');
+
+            svg.appendChild(line);
+
+            setTimeout(() => {
+                line.style.transition = "stroke-dashoffset 1s ease-in-out";
+                line.setAttribute('stroke-dashoffset', 0);
+            }, 50);
+        }
+
+        function setStatus(text) {
+            document.getElementById('status-text').innerText = text;
+        }
+
+        function toggleBtn(id, enable) {
+            document.getElementById(id).disabled = !enable;
+        }
+
+        // --- 動畫步驟 ---
+
+        function step1() {
+            clusterA.forEach((p, i) => drawPoint(p.x, p.y, '#2ecc71', 'ca')); // 綠色群集
+            clusterB.forEach((p, i) => drawPoint(p.x, p.y, '#9b59b6', 'cb')); // 紫色群集
+            setStatus("步驟 1：演算法識別出兩個群集（綠色與紫色）");
+            toggleBtn('btn1', false); toggleBtn('btn2', true);
+        }
+
+        function step2() {
+            // 畫 MST
+            edgesA.forEach(e => drawLine(clusterA[e[0]].x, clusterA[e[0]].y, clusterA[e[1]].x, clusterA[e[1]].y, '#a8e6cf', 3, false, 'mst'));
+            edgesB.forEach(e => drawLine(clusterB[e[0]].x, clusterB[e[0]].y, clusterB[e[1]].x, clusterB[e[1]].y, '#dcb0ff', 3, false, 'mst'));
+            
+            // 把點提上來才不會被線蓋住
+            document.querySelectorAll('.point').forEach(p => svg.appendChild(p));
+
+            setStatus("步驟 2：在群集內部建立「最小生成樹 (MST)」，確保所有人相連");
+            toggleBtn('btn2', false); toggleBtn('btn3', true);
+        }
+
+        function step3() {
+            // 標示群內稀疏度 (最長的 MST 邊)
+            drawLine(clusterA[2].x, clusterA[2].y, clusterA[5].x, clusterA[5].y, '#e74c3c', 5, false, 'sparse');
+            setStatus("步驟 3：找出群內最長的連線，這就是「群內稀疏度」(紅色粗線)");
+            toggleBtn('btn3', false); toggleBtn('btn4', true);
+        }
+
+        function step4() {
+            // 標示群間分離度
+            drawLine(separationEdge.xA, separationEdge.yA, separationEdge.xB, separationEdge.yB, '#f39c12', 4, true, 'sep');
+            setStatus("步驟 4：找出兩個群集之間最短的距離，這就是「群間分離度」(橘色虛線)");
+            toggleBtn('btn4', false); toggleBtn('btn5', true);
+        }
+
+        function step5() {
+            setStatus("結論：橘色虛線(分離度) > 紅色實線(稀疏度) => 這是一個高品質的分群！(DBCV分數高)");
+            toggleBtn('btn5', false);
+        }
+
+        function reset() {
+            svg.innerHTML = '';
+            setStatus("請點擊「1. 顯示資料點」開始");
+            toggleBtn('btn1', true); toggleBtn('btn2', false);
+            toggleBtn('btn3', false); toggleBtn('btn4', false); toggleBtn('btn5', false);
+        }
+    </script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>DBCV 是針對密度式分群(如 DBSCAN)的內部評估指標,iPAS 分群評估進階考點(中級科目三)。重點:傳統輪廓係數假設球狀凸群,對 DBSCAN 找出的任意形狀群不公平;DBCV 以密度為基礎衡量群內密集與群間稀疏,更適合密度分群。易混點:不同分群法要配適合的評估指標,別一律用輪廓係數。情境:評估 DBSCAN、HDBSCAN 等密度分群的品質。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>DBCV 是什麼？</summary><p>Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。</p></details><details><summary>為什麼 DBSCAN 不適合用輪廓係數？</summary><p>輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。</p></details><details><summary>DBCV 怎麼衡量品質？</summary><p>基於密度——比較群內的密度連結與群間的密度分離，值越高越好；比輪廓係數更適合 DBSCAN 等密度型分群。</p></details><details><summary>它能處理雜訊點嗎？</summary><p>能；DBCV 為密度分群設計，能在有雜訊或離群點與非凸群的情況下給較合理的評估。</p></details><details><summary>什麼時候用 DBCV？</summary><p>當你用 DBSCAN、HDBSCAN 等密度法、且群形狀不規則或有雜訊時；K-means 類球形分群仍可用 SSE 或輪廓。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "DBCV 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Density-Based Clustering Validation，專為密度型分群(如 DBSCAN)設計的內部評估指標，衡量分群品質而不假設群是球形。"}}, {"@type": "Question", "name": "為什麼 DBSCAN 不適合用輪廓係數？", "acceptedAnswer": {"@type": "Answer", "text": "輪廓係數假設群較凸、且不處理雜訊點；DBSCAN 會產生任意形狀的群與離群點，用輪廓易失準，DBCV 較合適。"}}, {"@type": "Question", "name": "DBCV 怎麼衡量品質？", "acceptedAnswer": {"@type": "Answer", "text": "基於密度——比較群內的密度連結與群間的密度分離，值越高越好；比輪廓係數更適合 DBSCAN 等密度型分群。"}}, {"@type": "Question", "name": "它能處理雜訊點嗎？", "acceptedAnswer": {"@type": "Answer", "text": "能；DBCV 為密度分群設計，能在有雜訊或離群點與非凸群的情況下給較合理的評估。"}}, {"@type": "Question", "name": "什麼時候用 DBCV？", "acceptedAnswer": {"@type": "Answer", "text": "當你用 DBSCAN、HDBSCAN 等密度法、且群形狀不規則或有雜訊時；K-means 類球形分群仍可用 SSE 或輪廓。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="dbscan.html">DBSCAN / HDBSCAN</a><a href="mae-mse-rmse-r2.html">MAE、MSE、RMSE、R²</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="roc_interactive.html">準確率、AUC-ROC、Log Loss</a><a href="matrix.html">準確率、邊界間距</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

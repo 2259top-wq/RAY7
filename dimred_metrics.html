@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>降維品質評估指標｜Trustworthiness、Continuity、kNN 保留率互動動畫</title>
+  <!-- AKIRA-SEO-v1 -->
+  <meta name="description" content="降維（t-SNE / UMAP / PCA）好不好沒有單一標準答案。用互動動畫理解局部結構保留指標 Trustworthiness、Continuity、kNN 保留率，與全局結構的距離相關性，並比較好壞嵌入的差異。適合 iPAS 備考。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://akira.ipas-ai.com/dimred_metrics.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="降維品質評估指標｜Trustworthiness、Continuity、kNN 保留率互動動畫">
+  <meta property="og:description" content="用互動動畫理解 Trustworthiness、Continuity、kNN 保留率與距離相關性，比較好壞嵌入差異。t-SNE / UMAP 降維品質怎麼看。">
+  <meta property="og:url" content="https://akira.ipas-ai.com/dimred_metrics.html">
+  <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+  <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="降維品質評估指標｜Trustworthiness、Continuity、kNN 保留率">
+  <meta name="twitter:description" content="用互動動畫理解降維品質評估指標，比較好壞嵌入差異。">
+  <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "降維品質評估指標",
+    "url": "https://akira.ipas-ai.com/dimred_metrics.html",
+    "description": "用互動動畫理解降維品質評估指標：Trustworthiness、Continuity、kNN 保留率與距離相關性，比較好壞嵌入的差異。",
+    "inLanguage": "zh-TW",
+    "isAccessibleForFree": true,
+    "learningResourceType": "interactive simulation",
+    "teaches": ["Trustworthiness", "Continuity", "kNN 保留率", "距離相關性", "降維評估", "t-SNE", "UMAP"],
+    "isPartOf": { "@type": "WebSite", "name": "AKIRA 互動式 AI 學習與考證地圖", "url": "https://akira.ipas-ai.com/" },
+    "author": { "@type": "Person", "name": "AKIRA" }
+  }
+  </script>
+  <style>
+    :root{
+      --accent:#E91E63; --accent-dark:#AD1457;
+      --bg:#f4f6f9; --card:#ffffff; --text:#2c3e50; --muted:#667085;
+      --shadow:0 6px 24px rgba(0,0,0,.08); --good:#16a34a; --bad:#dc2626;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Tahoma,-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+      background:var(--bg);color:var(--text);line-height:1.65;max-width:980px;margin:0 auto;padding:20px}
+    a.back{display:inline-block;color:var(--accent-dark);text-decoration:none;font-weight:700;font-size:.9rem;margin-bottom:14px}
+    a.back:hover{text-decoration:underline}
+    header.hero{text-align:center;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:34px 24px;border-top:5px solid var(--accent)}
+    .eyebrow{display:inline-block;font-size:.72rem;letter-spacing:.12em;font-weight:800;color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent-dark));padding:5px 14px;border-radius:999px;text-transform:uppercase}
+    h1{font-size:1.7rem;margin:14px 0 8px}
+    .sub{color:var(--muted);font-size:1rem;max-width:700px;margin:0 auto}
+    section{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:24px;margin-top:20px}
+    h2{font-size:1.25rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+    h2 .dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
+    .lead{color:var(--muted);margin-bottom:14px}
+    .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .panel h3{font-size:.95rem;text-align:center;margin-bottom:6px;color:#475467}
+    canvas.viz{width:100%;border-radius:12px;border:1px solid #e6e9ef;background:#fbfcfe;display:block;cursor:crosshair}
+    .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin:18px 0 4px}
+    .cg{display:flex;flex-direction:column;gap:4px;min-width:170px}
+    .cg label{font-weight:700;font-size:.85rem;color:#475467}
+    input[type=range]{width:100%;cursor:pointer;accent-color:var(--accent)}
+    .val{font-family:monospace;color:var(--accent-dark);font-weight:700}
+    button{font:inherit;font-weight:700;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;
+      background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;transition:transform .15s,box-shadow .15s}
+    button:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(233,30,99,.3)}
+    button.ghost{background:#eef2f7;color:var(--text)}
+    .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:18px}
+    .metric{border:1px solid #e6e9ef;border-radius:16px;padding:16px;background:#fbfcfe}
+    .metric .name{font-weight:800;font-size:.95rem}
+    .metric .num{font-size:1.6rem;font-weight:800;font-family:monospace;margin:4px 0}
+    .bar{height:9px;border-radius:6px;background:#edf0f4;overflow:hidden}
+    .bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#f59e0b,#16a34a);transition:width .25s}
+    .metric .desc{font-size:.8rem;color:var(--muted);margin-top:8px}
+    .hint{font-size:.85rem;color:var(--muted);margin-top:10px}
+    table.def{width:100%;border-collapse:collapse;margin-top:8px;font-size:.9rem}
+    table.def th,table.def td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top}
+    table.def th{background:#fdeef4;color:var(--accent-dark)}
+    .quiz{border-left:4px solid var(--accent);background:#fdeef4;padding:16px 18px;border-radius:0 12px 12px 0}
+    .quiz summary{cursor:pointer;font-weight:700;color:var(--accent-dark)}
+    .seealso{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .seealso a{text-decoration:none;font-size:.85rem;font-weight:600;color:var(--accent-dark);background:#fdeef4;border:1px solid #f7c6dc;border-radius:999px;padding:6px 12px}
+    .seealso a:hover{background:var(--accent);color:#fff}
+    footer{text-align:center;color:var(--muted);font-size:.82rem;padding:24px 0}
+    @media(max-width:680px){.panels{grid-template-columns:1fr}h1{font-size:1.4rem}}
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← 返回 AI 學習與考證地圖</a>
+
+  <header class="hero">
+    <span class="eyebrow">降維評估 · t-SNE / UMAP / PCA</span>
+    <h1>降維畫出來的圖，可信嗎？</h1>
+    <p class="sub">t-SNE、UMAP 把高維資料壓成 2D 很漂亮，但「漂亮」不等於「正確」。降維品質沒有單一標準答案，得看<b>局部結構</b>(鄰居有沒有被保留)與<b>全局結構</b>(整體距離關係)。拖動下面的「扭曲程度」看指標怎麼變。</p>
+  </header>
+
+  <section>
+    <h2><span class="dot"></span>互動實驗：好嵌入 vs 壞嵌入</h2>
+    <p class="lead">左邊是「原始空間」的真實鄰居關係，右邊是「降維後的嵌入」。<b>把滑鼠移到任一點</b>，會畫出它的 k 個最近鄰——比較左右兩邊鄰居是否一致，就是降維品質的核心。</p>
+    <div class="panels">
+      <div class="panel"><h3>原始空間（高維示意）</h3><canvas id="cO" class="viz" width="440" height="360"></canvas></div>
+      <div class="panel"><h3>降維後嵌入</h3><canvas id="cE" class="viz" width="440" height="360"></canvas></div>
+    </div>
+    <div class="controls">
+      <div class="cg">
+        <label>扭曲程度 distortion：<span class="val" id="dVal">8%</span></label>
+        <input type="range" id="dist" min="0" max="100" value="8">
+      </div>
+      <div class="cg">
+        <label>鄰居數 k：<span class="val" id="kVal">7</span></label>
+        <input type="range" id="kk" min="3" max="15" value="7">
+      </div>
+      <div class="cg" style="min-width:auto;flex-direction:row;gap:8px;align-items:flex-end">
+        <button id="good" class="ghost">好嵌入</button>
+        <button id="bad" class="ghost">壞嵌入</button>
+        <button id="regen" class="ghost">↻ 換資料</button>
+      </div>
+    </div>
+    <div class="hint" id="hint">提示：滑過點看鄰居連線；扭曲越大，右邊鄰居越亂，四個指標就越低。</div>
+
+    <div class="metrics">
+      <div class="metric"><div class="name">Trustworthiness</div><div class="num" id="mT">–</div><div class="bar"><i id="bT"></i></div><div class="desc">局部可信度：嵌入中靠近的點，原本是否也靠近？懲罰「假鄰居」。</div></div>
+      <div class="metric"><div class="name">Continuity</div><div class="num" id="mC">–</div><div class="bar"><i id="bC"></i></div><div class="desc">連續性：原本靠近的點，嵌入後是否還靠近？懲罰「被拆散的鄰居」。</div></div>
+      <div class="metric"><div class="name">kNN 保留率</div><div class="num" id="mK">–</div><div class="bar"><i id="bK"></i></div><div class="desc">原始與嵌入的 k 近鄰集合平均重疊比例，最直觀的局部指標。</div></div>
+      <div class="metric"><div class="name">距離相關性 (Spearman)</div><div class="num" id="mS">–</div><div class="bar"><i id="bS"></i></div><div class="desc">全局結構：所有點對距離的等級相關，看整體幾何是否保留。</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="dot"></span>四個指標怎麼讀</h2>
+    <table class="def">
+      <tr><th>指標</th><th>看的是</th><th>白話</th></tr>
+      <tr><td>Trustworthiness</td><td>局部</td><td>「嵌入裡的鄰居是真的嗎？」靠太近卻其實很遠 = 假鄰居，扣分。</td></tr>
+      <tr><td>Continuity</td><td>局部</td><td>「真正的鄰居有被保留嗎？」原本很近卻被拆開 = 漏鄰居，扣分。</td></tr>
+      <tr><td>kNN 保留率</td><td>局部</td><td>兩邊 k 近鄰名單的重疊率，越高越好（0~1）。</td></tr>
+      <tr><td>距離相關性</td><td>全局</td><td>整體點對距離的 Spearman 等級相關，看大尺度幾何。</td></tr>
+    </table>
+    <p class="hint">⚠️ iPAS 易混點：<b>KL 散度是 t-SNE 的「訓練損失」，不適合拿來跨模型比較降維好壞</b>；要比品質請用上面這類結構保留指標。t-SNE 偏重保留<b>局部</b>結構、全局距離常失真；UMAP 在全局結構通常較好。</p>
+  </section>
+
+  <section>
+    <h2><span class="dot"></span>iPAS 考點提醒</h2>
+    <div class="quiz">
+      <div style="font-weight:700;margin-bottom:6px">情境題：要評估一張 t-SNE 圖「把原本相近的樣本是否仍畫得相近」，最適合的指標是？</div>
+      <div>答：偏向 <b>Continuity / kNN 保留率</b>（局部結構保留）。若要看「圖上靠近的是否真的相近」則用 <b>Trustworthiness</b>。</div>
+      <details><summary>常見陷阱</summary>
+        <p style="margin-top:8px;color:var(--muted)">不要用 KL 散度或「圖好不好看」當品質指標。降維沒有唯一正解，務必區分局部(Trustworthiness/Continuity/kNN)與全局(距離相關性)。</p>
+      </details>
+    </div>
+    <div class="seealso">
+      <a href="t-sne.html">→ t-SNE 原理動畫</a>
+      <a href="umap.html">→ UMAP 原理動畫</a>
+      <a href="dim-reduction.html">→ 降維總覽</a>
+      <a href="pca.html">→ PCA</a>
+    </div>
+  </section>
+
+  <footer>AKIRA 互動式 AI 學習與考證地圖 · 降維品質評估指標</footer>
+
+  <script>
+  (function(){
+    const N=72; let k=7, dist=0.08;
+    let O=[],T=[],E=[];                  // normalized [0,1] positions
+    let knnO=[],knnE=[],rankO=[],rankE=[];
+    let sel=-1;
+    const cO=document.getElementById('cO'),cE=document.getElementById('cE');
+    const xO=cO.getContext('2d'),xE=cE.getContext('2d');
+    let pixO=[],pixE=[];
+
+    function g(m,s){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();
+      return m+s*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+    const cl=v=>Math.max(0.02,Math.min(0.98,v));
+
+    function gen(){O=[];T=[];const ctr=[[.28,.3],[.72,.3],[.3,.72],[.72,.72]];
+      for(let c=0;c<4;c++)for(let i=0;i<N/4;i++){
+        O.push([cl(g(ctr[c][0],.075)),cl(g(ctr[c][1],.075))]);
+        T.push([Math.random(),Math.random()]);}
+      const o=neigh(O);knnO=o.knn;rankO=o.rank;recompE();}
+
+    function recompE(){E=O.map((p,i)=>{const t=T[i];
+      let x=(1-dist)*p[0]+dist*t[0]+g(0,0.012);
+      let y=(1-dist)*p[1]+dist*t[1]+g(0,0.012);
+      return [cl(x),cl(y)];});
+      const e=neigh(E);knnE=e.knn;rankE=e.rank;metrics();draw();}
+
+    function neigh(P){const knn=[],rank=[];
+      for(let i=0;i<N;i++){const ds=[];
+        for(let j=0;j<N;j++)if(j!==i)ds.push([j,(P[i][0]-P[j][0])**2+(P[i][1]-P[j][1])**2]);
+        ds.sort((a,b)=>a[1]-b[1]);
+        const s=new Set(),r={};for(let t=0;t<ds.length;t++){r[ds[t][0]]=t+1;if(t<k)s.add(ds[t][0]);}
+        knn.push(s);rank.push(r);}
+      return {knn,rank};}
+
+    function metrics(){
+      const denom=N*k*(2*N-3*k-1);
+      let st=0,sc=0,ov=0;
+      for(let i=0;i<N;i++){
+        knnE[i].forEach(j=>{if(!knnO[i].has(j))st+=(rankO[i][j]-k);});
+        knnO[i].forEach(j=>{if(!knnE[i].has(j))sc+=(rankE[i][j]-k);});
+        let c=0;knnO[i].forEach(j=>{if(knnE[i].has(j))c++;});ov+=c/k;}
+      const Tw=1-(2/denom)*st, Co=1-(2/denom)*sc, Kr=ov/N;
+      // global: Spearman of pairwise distances
+      const dO=[],dE=[];for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+        dO.push(Math.hypot(O[i][0]-O[j][0],O[i][1]-O[j][1]));
+        dE.push(Math.hypot(E[i][0]-E[j][0],E[i][1]-E[j][1]));}
+      const sp=spearman(dO,dE);
+      put('T',Tw);put('C',Co);put('K',Kr);put('S',(sp+1)/2,sp);}
+
+    function rankArr(a){const idx=a.map((v,i)=>[v,i]).sort((x,y)=>x[0]-y[0]);
+      const r=new Array(a.length);for(let t=0;t<idx.length;t++)r[idx[t][1]]=t+1;return r;}
+    function spearman(a,b){const ra=rankArr(a),rb=rankArr(b),n=a.length;
+      let ma=0,mb=0;for(let i=0;i<n;i++){ma+=ra[i];mb+=rb[i];}ma/=n;mb/=n;
+      let num=0,da=0,db=0;for(let i=0;i<n;i++){const x=ra[i]-ma,y=rb[i]-mb;num+=x*y;da+=x*x;db+=y*y;}
+      return num/Math.sqrt(da*db||1);}
+
+    function put(id,frac,raw){const v=Math.max(0,Math.min(1,frac));
+      const num=document.getElementById('m'+id),bar=document.getElementById('b'+id);
+      num.textContent=(raw!==undefined?raw:v).toFixed(3);
+      bar.style.width=(v*100).toFixed(0)+'%';}
+
+    function map(P,cv){const W=cv.width,H=cv.height,p=26;
+      return P.map(q=>[p+q[0]*(W-2*p),p+q[1]*(H-2*p)]);}
+    function panel(ctx,cv,pix,knn,col){const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+      if(sel>=0){ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.globalAlpha=.55;
+        knn[sel].forEach(j=>{ctx.beginPath();ctx.moveTo(pix[sel][0],pix[sel][1]);ctx.lineTo(pix[j][0],pix[j][1]);ctx.stroke();});
+        ctx.globalAlpha=1;}
+      pix.forEach((q,i)=>{let r=4.5,fill='#9aa5b1';
+        if(sel>=0){if(i===sel){r=7;fill=col;}else if(knn[sel].has(i)){r=5.5;fill='#334155';}}
+        ctx.beginPath();ctx.arc(q[0],q[1],r,0,7);ctx.fillStyle=fill;ctx.globalAlpha=.9;ctx.fill();
+        ctx.globalAlpha=1;ctx.lineWidth=1;ctx.strokeStyle='#fff';ctx.stroke();});}
+    function draw(){pixO=map(O,cO);pixE=map(E,cE);
+      panel(xO,cO,pixO,knnO,'#2563eb');panel(xE,cE,pixE,knnE,'#E91E63');}
+
+    // hover highlights nearest point + its kNN in both panels
+    cO.addEventListener('mousemove',e=>moveSel(e,cO,pixO));
+    cE.addEventListener('mousemove',e=>moveSel(e,cE,pixE));
+    function moveSel(e,cv,pix){const r=cv.getBoundingClientRect();
+      const mx=(e.clientX-r.left)*cv.width/r.width,my=(e.clientY-r.top)*cv.height/r.height;
+      let bi=-1,bd=420;pix.forEach((q,i)=>{const d=(q[0]-mx)**2+(q[1]-my)**2;if(d<bd){bd=d;bi=i;}});
+      if(bi!==sel){sel=bi;draw();}}
+    [cO,cE].forEach(c=>c.addEventListener('mouseleave',()=>{sel=-1;draw();}));
+
+    document.getElementById('dist').oninput=function(){dist=+this.value/100;
+      document.getElementById('dVal').textContent=this.value+'%';recompE();};
+    document.getElementById('kk').oninput=function(){k=+this.value;
+      document.getElementById('kVal').textContent=k;const o=neigh(O);knnO=o.knn;rankO=o.rank;recompE();};
+    document.getElementById('good').onclick=()=>setDist(8);
+    document.getElementById('bad').onclick=()=>setDist(68);
+    document.getElementById('regen').onclick=()=>{gen();};
+    function setDist(v){dist=v/100;document.getElementById('dist').value=v;
+      document.getElementById('dVal').textContent=v+'%';recompE();}
+
+    function fit(){[cO,cE].forEach(c=>{const w=Math.min(440,c.parentElement.clientWidth);
+      c.style.width=w+'px';c.style.height=(w*360/440)+'px';});draw();}
+    window.addEventListener('resize',fit);
+    gen();fit();
+  })();
+  </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>降維品質評估是 iPAS 資料處理與非監督式學習考點(中級科目二、三)。重點:降維(t-SNE、UMAP、PCA)沒有單一標準答案,要分局部結構(Trustworthiness、Continuity、kNN 保留率)與全局結構(距離相關性)。易混點:KL 散度是 t-SNE 的訓練損失、不能拿來跨模型比較降維好壞;t-SNE 偏重保留局部、全局常失真,UMAP 全局通常較好。情境:判斷一張降維圖「可不可信」。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>降維好壞怎麼評估？</summary><p>沒有單一標準答案；要看局部結構是否保留(Trustworthiness、Continuity、kNN 保留率)與全局結構是否保留(所有點對距離的相關性)。</p></details><details><summary>Trustworthiness 和 Continuity 差在哪？</summary><p>Trustworthiness 懲罰「假鄰居」(嵌入裡靠近、原本卻很遠);Continuity 懲罰「漏鄰居」(原本很近、嵌入卻被拆散)。一個看新鄰居可不可信、一個看真鄰居有沒有保住。</p></details><details><summary>可以用 KL 散度評估降維品質嗎？</summary><p>不行。KL 散度是 t-SNE 的訓練損失,只在同一模型內有意義,不能跨方法或跨模型比較降維好壞;要用結構保留指標。</p></details><details><summary>t-SNE 和 UMAP 的品質差異？</summary><p>t-SNE 偏重保留局部鄰居結構,全局距離常失真、群間距離不可信;UMAP 通常在全局結構上表現較好,也較快。</p></details><details><summary>kNN 保留率是什麼？</summary><p>原始空間與嵌入空間中,每個點的 k 個最近鄰名單平均重疊比例(0~1,越高越好),是最直觀的局部結構指標。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "降維好壞怎麼評估？", "acceptedAnswer": {"@type": "Answer", "text": "沒有單一標準答案；要看局部結構是否保留(Trustworthiness、Continuity、kNN 保留率)與全局結構是否保留(所有點對距離的相關性)。"}}, {"@type": "Question", "name": "Trustworthiness 和 Continuity 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "Trustworthiness 懲罰假鄰居(嵌入裡靠近、原本卻很遠);Continuity 懲罰漏鄰居(原本很近、嵌入卻被拆散)。"}}, {"@type": "Question", "name": "可以用 KL 散度評估降維品質嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不行。KL 散度是 t-SNE 的訓練損失,只在同一模型內有意義,不能跨方法或跨模型比較降維好壞;要用結構保留指標。"}}, {"@type": "Question", "name": "t-SNE 和 UMAP 的品質差異？", "acceptedAnswer": {"@type": "Answer", "text": "t-SNE 偏重保留局部鄰居結構,全局距離常失真;UMAP 通常在全局結構上表現較好,也較快。"}}, {"@type": "Question", "name": "kNN 保留率是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "原始空間與嵌入空間中,每個點的 k 個最近鄰名單平均重疊比例(0~1,越高越好),是最直觀的局部結構指標。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="t-sne.html">t-SNE</a><a href="umap.html">UMAP</a><a href="pca.html">PCA</a><a href="pca_variance.html">解釋變異量</a><a href="pca-metrics.html">降維指標</a><a href="embedding.html">詞嵌入</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Means 分群演算法互動演示</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。 用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/k-means.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="K-Means 分群演算法互動演示">
+    <meta property="og:description" content="把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。 用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/k-means.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="K-Means 分群演算法互動演示">
+    <meta name="twitter:description" content="把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。 用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "K-Means 分群演算法互動演示",
+  "url": "https://akira.ipas-ai.com/k-means.html",
+  "description": "把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --sky:#0284c7; --sky-d:#075985; --blue:#2563eb; --blue-d:#1d4ed8;
+            --c0:#FF6B6B; --c1:#4ECDC4; --c2:#FFE66D;
+            --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:940px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#0c4a6e 0%,#0284c7 55%,#38bdf8 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(2,132,199,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:940px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#bae6fd 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--sky-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#f0f9ff; border-left:5px solid var(--sky)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--sky); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.94rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .km{color:var(--sky-d); font-weight:800}
+        .cmp .kn{color:#a21caf; font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--sky);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--sky-d)}
+
+        .qa{background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #cfeafc; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--sky-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#f0f9ff; border:1px solid #cde8f7; border-radius:14px; padding:18px; margin:14px 0}
+        #viz-container{width:100%; height:400px; border:1px solid #d6e6f0; background:#fafdff; border-radius:10px; position:relative; overflow:hidden}
+        #kmeans-svg{width:100%; height:100%}
+        .point{transition:fill .5s ease}
+        .centroid{transition:cx .8s cubic-bezier(.175,.885,.32,1.275), cy .8s cubic-bezier(.175,.885,.32,1.275); stroke:#333; stroke-width:2px; fill-opacity:.85}
+        .centroid-ring{fill:none; stroke-width:2px; opacity:.5; animation:pulse 2s infinite}
+        @keyframes pulse{0%{r:10; opacity:.8} 100%{r:20; opacity:0}}
+        .cluster-0{fill:var(--c0)} .cluster-1{fill:var(--c1)} .cluster-2{fill:var(--c2)} .cluster-unassigned{fill:#95a5a6}
+        .status-text{text-align:center; font-weight:bold; margin-top:10px; color:#555; min-height:24px}
+        .controls{margin-top:14px; display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap}
+        .controls button{padding:10px 18px; font-size:15px; cursor:pointer; background:var(--sky); color:#fff; border:none; border-radius:8px; font-weight:800; transition:.2s}
+        .controls button:hover{background:var(--sky-d)}
+        .controls button:disabled{background:#bdc3c7; cursor:not-allowed}
+        .controls button.reset{background:#e74c3c} .controls button.reset:hover{background:#c0392b}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🎨 非監督式分群 · iPAS 高頻考點</span>
+        <h1>K-Means 分群：讓資料自己「物以類聚」</h1>
+        <p>K-Means 是最常用的分群（clustering）演算法。它<b>沒有標準答案</b>——不靠標籤，自己把長得像的資料分成 K 群。它靠「分配 → 更新」兩步反覆迭代，直到群中心不再移動。下面點一點就看懂。</p>
+        <div class="chips"><span>非監督式</span><span>分配↔更新</span><span>群中心 Centroid</span><span>怎麼選 K</span><span>k-means++</span><span>vs KNN</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、K-Means 在做什麼？</h2>
+        <p class="lead">一句話：<span class="term">沒有老師給答案，自己把相似的資料分成 K 堆</span>。</p>
+        <div class="note def">
+            <h4>💡 白話定義（重點：非監督）</h4>
+            前面的分類（如 KNN、SVM）都是<b>監督式</b>——資料有「正確答案（標籤）」。但 K-Means 是<span class="term">非監督式</span>：<b>資料沒有標籤</b>，你只是想把它們<b>自動分成幾群</b>。就像一場派對，沒人指定座位，但大家會自然地<span class="hl">「站得近的湊成一桌」</span>——K-Means 做的就是這件事，K 就是「要分成幾桌」。
+        </div>
+    </section>
+
+    <!-- ===== 2. 四步驟 ===== -->
+    <section class="lesson">
+        <h2>⚙️ 二、運作四步驟（不斷循環）</h2>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>初始化（Initialization）</b><br>
+                先<b>隨機放 K 個點</b>當作群中心（<span class="term">Centroid</span>，demo 裡帶脈動外圈的大圓點）。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>分配（Assignment）</b><br>
+                每個資料點算到各中心的距離，<b>歸給最近的那個中心</b>（點會變成該群的顏色）。
+            </div></div>
+            <div class="step"><div class="num">3</div><div class="st-body">
+                <b>更新（Update）</b><br>
+                每群把自己的點取<b>平均位置</b>，<b>中心移動到新的平均</b>那裡。
+            </div></div>
+            <div class="step"><div class="num">4</div><div class="st-body">
+                <b>重複到收斂（Repeat）</b><br>
+                一直重複「分配 → 更新」，直到<b>中心不再移動（收斂）</b>。
+            </div></div>
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：一步步看它分群</h2>
+        <p class="lead">先按「隨機生成資料」，再<b>連續點「執行一步」</b>，看點怎麼變色、中心怎麼移動，直到收斂。</p>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            <b>小圓點</b>＝資料；<b>帶脈動外圈的大圓點</b>＝群中心。每點一下「執行一步」，會<b>輪流</b>做：<br>
+            ① <b>分配</b>——每個小點變成「最近中心」的顏色；②<b>更新</b>——大圓點滑到自己那群的平均位置。<span class="hl">兩步交替，中心越動越小，最後停住＝收斂</span>。
+        </div>
+
+        <div class="demo-card">
+            <div id="viz-container"><svg id="kmeans-svg"></svg></div>
+            <div class="status-text" id="status">準備就緒：請點擊「隨機生成資料」</div>
+            <div class="controls">
+                <button class="reset" onclick="initData()">🎲 1. 隨機生成資料</button>
+                <button id="step-btn" onclick="step()" disabled>▶ 2. 執行一步（迭代）</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 核心概念 ===== -->
+    <section class="lesson">
+        <h2>🧠 四、三個核心概念</h2>
+        <div class="keys">
+            <div class="keycard"><b>K 要自己定</b>分幾群是你決定的（demo 是 K=3）。怎麼挑見下一節。</div>
+            <div class="keycard"><b>用距離衡量相似</b>預設<b>歐氏距離</b>，所以適合連續數值、且要先標準化。</div>
+            <div class="keycard"><b>目標：群內越像越好</b>數學上最小化<b>群內變異（SSE / inertia）</b>——同群的點離自己中心越近越好。</div>
+        </div>
+    </section>
+
+    <!-- ===== 5. 怎麼選 K ===== -->
+    <section class="lesson">
+        <h2>📏 五、K 要設多少？（最常考）</h2>
+        <p class="lead">K-Means 不會自己決定群數，得靠這兩招挑。</p>
+        <div class="note def">
+            <h4>💪 手肘法（Elbow Method）</h4>
+            把不同 K 算出的<b>群內變異（SSE）</b>畫出來：K 越大 SSE 一定越小，但會在某個 K <b>急轉平緩</b>，那個「手肘轉折」就是<span class="hl">CP 值最高的 K</span>。
+        </div>
+        <div style="text-align:center; margin:6px 0">
+            <svg width="320" height="170" viewBox="0 0 320 170" style="max-width:100%;height:auto">
+                <rect x="0" y="0" width="320" height="170" fill="#fbfcfe" rx="10"/>
+                <line x1="45" y1="20" x2="45" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+                <line x1="45" y1="140" x2="300" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+                <text x="8" y="80" font-size="11" fill="#64748b" transform="rotate(-90 14 80)">SSE</text>
+                <text x="270" y="158" font-size="11" fill="#64748b">K（群數）</text>
+                <polyline points="65,35 105,70 145,108 185,122 225,130 265,134" fill="none" stroke="#0284c7" stroke-width="2.5"/>
+                <circle cx="65" cy="35" r="3.5" fill="#0284c7"/><circle cx="105" cy="70" r="3.5" fill="#0284c7"/>
+                <circle cx="145" cy="108" r="6" fill="#e11d48"/>
+                <circle cx="185" cy="122" r="3.5" fill="#0284c7"/><circle cx="225" cy="130" r="3.5" fill="#0284c7"/><circle cx="265" cy="134" r="3.5" fill="#0284c7"/>
+                <text x="150" y="100" font-size="12" fill="#e11d48" font-weight="bold">手肘 → 選這個 K</text>
+                <text x="60" y="158" font-size="10" fill="#94a3b8">1   2   3   4   5   6</text>
+            </svg>
+        </div>
+        <div class="note meta">
+            <h4>📐 輪廓係數（Silhouette）＋ 領域知識</h4>
+            <b>輪廓係數</b>同時看「群內多緊、離鄰群多遠」，值越接近 1 越好，可以幫忙挑 K。最後再結合<b>領域知識</b>（例如已知大概有 3 類客群，就從 K=3 試起）。
+        </div>
+    </section>
+
+    <!-- ===== 6. 注意事項 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、用 K-Means 一定要知道的坑</h2>
+        <div class="note warn">
+            <h4>① 對初始位置敏感 → 用 k-means++</h4>
+            隨機初始中心放得不好，可能收斂到<b>較差的局部解</b>。實務用 <b>k-means++</b>（聰明地把初始中心分散開）或<b>多次隨機初始取最好</b>，較穩定。
+        </div>
+        <div class="note warn">
+            <h4>② 務必先標準化</h4>
+            它靠距離分群，<b>尺度大的特徵會主導</b>（如年收入 vs 年齡）。用之前一定要<b>標準化</b>，並處理離群值（離群點會把中心拉歪）。
+        </div>
+        <div class="note warn">
+            <h4>③ 只擅長「球狀、大小相近」的群</h4>
+            K-Means 假設群是圓球狀、大小差不多。遇到<b>細長、環狀、密度不均</b>的分布會分錯，這時改用 <a href="dbscan.html" style="color:#075985;font-weight:700">DBSCAN</a>（密度型）或<b>高斯混合 GMM</b>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 應用 ===== -->
+    <section class="lesson">
+        <h2>🌍 七、用在哪裡？</h2>
+        <div class="keys">
+            <div class="keycard"><b>🛍️ 客戶分群</b>用消費金額、頻率把客戶分成 VIP／潛力／流失，做差異化行銷。</div>
+            <div class="keycard"><b>🖼️ 影像壓縮</b>把上萬種顏色簡化成 K 種代表色（如 K=16），大幅縮小檔案。</div>
+            <div class="keycard"><b>🚨 異常檢測</b>離所有群中心都很遠的點，可能是異常交易或雜訊。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. vs KNN ===== -->
+    <section class="lesson">
+        <h2>🆚 八、別搞混：K-Means vs KNN</h2>
+        <p class="lead">兩個都有「K」、都用距離，但根本不同——考試最愛考。</p>
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="km">K-Means</span></th><th><span class="kn">KNN</span></th></tr>
+            <tr><td>類型</td><td><b>非監督</b>（分群）</td><td><b>監督</b>（分類／迴歸）</td></tr>
+            <tr><td>需要標籤？</td><td>不需要</td><td>需要</td></tr>
+            <tr><td>K 是什麼</td><td><b>群的數量</b></td><td><b>鄰居的數量</b></td></tr>
+            <tr><td>在做什麼</td><td>把資料分成 K 群</td><td>看最近 K 個鄰居投票分類</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 一句話記</h4>
+            <b>K-Means 的 K＝要分幾「群」</b>（沒有答案，自己分）；<b>KNN 的 K＝要看幾個「鄰居」</b>（有答案，靠鄰居投票）。👉 想複習 <a href="knn.html" style="color:#075985;font-weight:700">KNN</a>。
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. K-Means 是監督還是非監督？</summary>
+                <p><b>非監督</b>。資料沒有標籤，它自己把相似的點分成 K 群。常和「監督式分類」的 KNN 搞混。</p></details>
+            <details><summary>Q2. K-Means 的迭代兩步是什麼？</summary>
+                <p><b>分配</b>（每點歸到最近的群中心）↔ <b>更新</b>（中心移到該群點的平均位置），反覆到中心不動（收斂）。</p></details>
+            <details><summary>Q3. K 要設多少怎麼決定？</summary>
+                <p><b>手肘法</b>（看 SSE 急轉平緩的轉折）、<b>輪廓係數</b>，再結合領域知識挑。</p></details>
+            <details><summary>Q4. K-Means 有哪些限制？</summary>
+                <p>要先定 K、只擅長<b>球狀且大小相近</b>的群、對<b>離群與初始值敏感</b>（用 k-means++）、要先標準化。非球狀改 DBSCAN／GMM。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>非監督分群</b>沒標籤，自己把相似資料分 K 群。</div>
+            <div class="keycard"><b>分配↔更新</b>點歸最近中心、中心移到群平均，迭代到收斂。</div>
+            <div class="keycard"><b>目標：最小化群內變異</b>SSE / inertia 越小越好。</div>
+            <div class="keycard"><b>選 K</b>手肘法、輪廓係數 + 領域知識。</div>
+            <div class="keycard"><b>注意</b>k-means++、先標準化、只擅長球狀群。</div>
+            <div class="keycard"><b>vs KNN</b>K-Means 群數（非監督）；KNN 鄰居數（監督）。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = document.getElementById('viz-container').clientWidth;
+        const height = 400;
+        const K = 3;
+        const pointCount = 150;
+        const svg = document.getElementById('kmeans-svg');
+        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D'];
+
+        let points = [];
+        let centroids = [];
+        let currentStep = 'assign';
+        let hasConverged = false;
+
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+        function createCircle(x, y, r, cls, id) {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", x);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", r);
+            circle.setAttribute("class", cls);
+            if(id) circle.id = id;
+            return circle;
+        }
+
+        function initData() {
+            svg.innerHTML = '';
+            points = [];
+            centroids = [];
+            currentStep = 'assign';
+            hasConverged = false;
+            document.getElementById('step-btn').disabled = false;
+            document.getElementById('step-btn').innerText = "▶ 2. 執行一步（分配群組）";
+            document.getElementById('status').innerText = "資料已生成，中心點已隨機放置。";
+
+            for (let i = 0; i < pointCount; i++) {
+                let x = Math.random() * (width - 40) + 20;
+                let y = Math.random() * (height - 40) + 20;
+                points.push({ x, y, group: -1 });
+                const dot = createCircle(x, y, 4, 'point cluster-unassigned', `p-${i}`);
+                svg.appendChild(dot);
+            }
+
+            for (let i = 0; i < K; i++) {
+                let x = Math.random() * (width - 40) + 20;
+                let y = Math.random() * (height - 40) + 20;
+                centroids.push({ x, y, color: colors[i] });
+
+                const cGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                cGroup.setAttribute("id", `c-group-${i}`);
+
+                const ring = createCircle(x, y, 15, 'centroid-ring');
+                ring.setAttribute("stroke", colors[i]);
+                ring.setAttribute("id", `c-ring-${i}`);
+
+                const core = createCircle(x, y, 10, 'centroid');
+                core.setAttribute("fill", colors[i]);
+                core.setAttribute("id", `c-core-${i}`);
+
+                cGroup.appendChild(ring);
+                cGroup.appendChild(core);
+                svg.appendChild(cGroup);
+            }
+        }
+
+        function dist(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        function step() {
+            if (hasConverged) return;
+
+            if (currentStep === 'assign') {
+                assignPointsToCentroids();
+                currentStep = 'update';
+                document.getElementById('step-btn').innerText = "▶ 3. 執行一步（更新中心）";
+                document.getElementById('status').innerText = "步驟：分配 (Assignment) - 每個點尋找最近的顏色中心";
+            } else {
+                updateCentroids();
+                currentStep = 'assign';
+                document.getElementById('step-btn').innerText = "▶ 2. 執行一步（分配群組）";
+                document.getElementById('status').innerText = "步驟：更新 (Update) - 中心點移動到同色點的平均位置";
+            }
+        }
+
+        function assignPointsToCentroids() {
+            let changeCount = 0;
+            points.forEach((p, index) => {
+                let minDist = Infinity;
+                let groupIndex = -1;
+
+                centroids.forEach((c, cIndex) => {
+                    const d = dist(p, c);
+                    if (d < minDist) {
+                        minDist = d;
+                        groupIndex = cIndex;
+                    }
+                });
+
+                if (p.group !== groupIndex) {
+                    p.group = groupIndex;
+                    changeCount++;
+                    const el = document.getElementById(`p-${index}`);
+                    el.setAttribute("class", `point cluster-${groupIndex}`);
+                    el.style.fill = colors[groupIndex];
+                }
+            });
+        }
+
+        function updateCentroids() {
+            let maxShift = 0;
+
+            centroids.forEach((c, i) => {
+                const groupPoints = points.filter(p => p.group === i);
+
+                if (groupPoints.length > 0) {
+                    const avgX = groupPoints.reduce((sum, p) => sum + p.x, 0) / groupPoints.length;
+                    const avgY = groupPoints.reduce((sum, p) => sum + p.y, 0) / groupPoints.length;
+
+                    const shift = dist(c, {x: avgX, y: avgY});
+                    if (shift > maxShift) maxShift = shift;
+
+                    c.x = avgX;
+                    c.y = avgY;
+
+                    const ring = document.getElementById(`c-ring-${i}`);
+                    const core = document.getElementById(`c-core-${i}`);
+
+                    ring.setAttribute("cx", avgX);
+                    ring.setAttribute("cy", avgY);
+                    core.setAttribute("cx", avgX);
+                    core.setAttribute("cy", avgY);
+                }
+            });
+
+            if (maxShift < 0.5) {
+                hasConverged = true;
+                document.getElementById('step-btn').disabled = true;
+                document.getElementById('step-btn').innerText = "✅ 已收斂（完成）";
+                document.getElementById('status').innerHTML = "<span style='color:green'>演算法已收斂！群組中心不再移動。</span>";
+            }
+        }
+
+        initData();
+
+        window.addEventListener('resize', () => {
+             initData();
+        });
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>K-means 是最常用的分群法,iPAS 高頻考點(初級科目一、中級科目三)。重點:把資料分成 K 群,反覆把點歸到最近群中心、再更新中心直到穩定。易混點:需先指定 K(用手肘法、輪廓係數挑)、只找球狀且大小相近的群、對離群與初始值敏感(用 k-means++ 改善);務必先標準化。情境:客戶分群、影像壓縮;非球狀分布改用 DBSCAN 或 GMM。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>K-means 在做什麼？</summary><p>把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。</p></details><details><summary>K 值怎麼決定？</summary><p>用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。</p></details><details><summary>K-means 有什麼限制？</summary><p>需先定 K、只找球狀且大小相近的群、對離群與初始值敏感；非球狀分布可改用 DBSCAN 或高斯混合。</p></details><details><summary>為什麼要多次初始化？</summary><p>結果受初始中心影響、可能落入較差的局部解；用 k-means++ 或多次隨機初始取最佳，較穩定。</p></details><details><summary>使用前要注意什麼？</summary><p>需先標準化特徵(否則尺度大的主導距離)，並處理離群值；距離度量預設歐氏，適合連續數值特徵。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "K-means 在做什麼？", "acceptedAnswer": {"@type": "Answer", "text": "把資料分成 K 群，讓每點歸到最近的群中心，反覆更新中心與歸屬直到穩定；是最常用的分群法。"}}, {"@type": "Question", "name": "K 值怎麼決定？", "acceptedAnswer": {"@type": "Answer", "text": "用手肘法(看 SSE 隨 k 下降的轉折)、輪廓係數等指標，再結合領域知識挑；如已知約 3 類客群就從 k=3 試起。"}}, {"@type": "Question", "name": "K-means 有什麼限制？", "acceptedAnswer": {"@type": "Answer", "text": "需先定 K、只找球狀且大小相近的群、對離群與初始值敏感；非球狀分布可改用 DBSCAN 或高斯混合。"}}, {"@type": "Question", "name": "為什麼要多次初始化？", "acceptedAnswer": {"@type": "Answer", "text": "結果受初始中心影響、可能落入較差的局部解；用 k-means++ 或多次隨機初始取最佳，較穩定。"}}, {"@type": "Question", "name": "使用前要注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "需先標準化特徵(否則尺度大的主導距離)，並處理離群值；距離度量預設歐氏，適合連續數值特徵。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="clustering.html">分群/類聚/叢集(Clustering)</a><a href="sse.html">輪廓係數、手肘法、SSE</a><a href="unsupervised_overview.html">非監督式學習</a><a href="hierarchicalclustering.html">階層式分群</a><a href="dbscan.html">DBSCAN / HDBSCAN</a><a href="knn.html">KNN</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

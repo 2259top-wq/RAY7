@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws 規模法則｜白話＋互動：Chinchilla、compute-optimal、算力成本計算機</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Scaling Laws（規模法則）＝模型的 loss 會隨參數、資料、算力以冪次律可預測地下降。互動拉桿看 Chinchilla loss、compute-optimal（每參數約 20 tokens），並用 C≈6ND 的成本計算機估算「訓一個 GPT-3 要燒多少錢」。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/scaling_laws.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Scaling Laws 規模法則 互動演示">
+    <meta property="og:description" content="拉桿看 loss 沿 Chinchilla 曲線下降，理解 compute-optimal（每參數約 20 tokens），並用成本計算機估算訓練一個大模型要多少 FLOPs、GPU 時數與金額。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/scaling_laws.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Scaling Laws 規模法則 互動演示">
+    <meta name="twitter:description" content="拉桿看 Chinchilla loss 與 compute-optimal，並用 C≈6ND 成本計算機估算訓一個 GPT-3 要燒多少錢。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Scaling Laws 規模法則 互動演示",
+  "url": "https://akira.ipas-ai.com/scaling_laws.html",
+  "description": "Scaling Laws（規模法則）＝模型的 loss 會隨參數、資料、算力以冪次律可預測地下降。互動拉桿看 Chinchilla loss、compute-optimal（每參數約 20 tokens），並用 C≈6ND 的成本計算機估算訓練一個大模型的 FLOPs、GPU 時數與金額。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-07-01",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#ecfeff; --ink:#083344; --sub:#0e7490;
+      --brand:#0891b2; --brand2:#0e7490; --brand-soft:#cffafe;
+      --card:#ffffff; --line:#a9e4ee;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#22d3ee,#0891b2 55%,#0e7490);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.9rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:680px;color:#cffafe;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(8,145,178,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#a5f3fc 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#effcfe}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#effcfe;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .lesson .formula{background:#083344;color:#cffafe;border-radius:12px;padding:16px 18px;margin:14px 0;text-align:center;overflow-x:auto}
+    .lesson .formula small{display:block;font-family:'Noto Sans TC',sans-serif;color:#67e8f9;font-size:.8rem;margin-top:8px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#effcfe}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#155e75;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（作用域限定於 .scale-demo） ===== */
+    .scale-demo{--good:#10b981;--warn2:#f59e0b;--e:#64748b;--p:#0891b2;--d:#22d3ee;margin:8px 0}
+    .scale-demo .lab-title{color:var(--brand2);font-size:1.15rem;font-weight:800;margin:0 0 6px;text-align:center}
+    .scale-demo .presets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 16px}
+    .scale-demo .presets button{border:1px solid var(--line);background:#fff;color:var(--brand2);border-radius:999px;padding:6px 13px;font-size:.84rem;font-weight:700;cursor:pointer;transition:.15s}
+    .scale-demo .presets button:hover{transform:translateY(-1px);background:var(--brand-soft)}
+    .scale-demo .ctrl{margin:12px 0}
+    .scale-demo .ctrl label{display:flex;justify-content:space-between;font-size:.9rem;font-weight:700;color:var(--sub);margin-bottom:4px}
+    .scale-demo .ctrl label b{color:var(--brand2)}
+    .scale-demo input[type=range]{width:100%;accent-color:var(--brand);cursor:pointer}
+    .scale-demo input[type=number]{width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:.9rem}
+    .scale-demo .readout{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+    @media(max-width:560px){.scale-demo .readout{grid-template-columns:1fr}}
+    .scale-demo .stat{background:#effcfe;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+    .scale-demo .stat span{display:block;font-size:.76rem;color:var(--sub);font-weight:700;margin-bottom:4px}
+    .scale-demo .stat b{font-size:1.25rem;color:var(--brand2)}
+    .scale-demo .lossbar{margin:10px 0 4px}
+    .scale-demo .lossbar .caption{font-size:.82rem;color:var(--sub);margin-bottom:5px}
+    .scale-demo .lb{display:flex;height:26px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+    .scale-demo .lb i{display:block;height:100%;transition:width .25s}
+    .scale-demo .lb .e{background:var(--e)} .scale-demo .lb .p{background:var(--p)} .scale-demo .lb .d{background:var(--d)}
+    .scale-demo .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.76rem;color:var(--sub);margin-top:6px}
+    .scale-demo .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:middle}
+    .scale-demo .optnote{border-radius:10px;padding:11px 14px;font-size:.9rem;font-weight:600;margin-top:10px}
+    .scale-demo .optnote.ok{background:var(--ok-soft);color:#065f46;border:1px solid #86efac}
+    .scale-demo .optnote.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+    .scale-demo .divider{border:0;border-top:1px dashed var(--line);margin:22px 0 14px}
+    .scale-demo .gpus{display:flex;gap:8px;justify-content:center;margin:6px 0 12px}
+    .scale-demo .gpus button{border:1.5px solid var(--line);background:#fff;color:#64748b;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer;transition:.15s}
+    .scale-demo .gpus button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .scale-demo .costout{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 4px}
+    @media(max-width:560px){.scale-demo .costout{grid-template-columns:1fr}}
+    .scale-demo .cstat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+    .scale-demo .cstat span{display:block;font-size:.76rem;color:var(--sub);font-weight:700;margin-bottom:3px}
+    .scale-demo .cstat b{font-size:1.1rem;color:var(--ink)}
+    .scale-demo .cstat.big{grid-column:1/-1;background:linear-gradient(135deg,#083344,#0e7490);border:none}
+    .scale-demo .cstat.big span{color:#a5f3fc}
+    .scale-demo .cstat.big b{color:#fff;font-size:1.7rem}
+    .scale-demo .costnote{font-size:.8rem;color:var(--sub);margin-top:10px;line-height:1.6}
+    @media(max-width:560px){.hero h1{font-size:1.5rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">生成式 AI · 訓練與算力</span>
+  <h1>Scaling Laws 規模法則</h1>
+  <p>模型變大、資料變多、算力變多，loss 會以「可預測的冪次律」下降——這就是大模型敢砸大錢的底氣。Chinchilla 再補一刀：參數和資料要「等比例」一起長才最划算。</p>
+  <div class="chips">
+    <span>冪次律</span><span>Chinchilla</span><span>compute-optimal</span><span>C≈6ND</span><span>每參數 20 tokens</span><span>訓練成本</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>Scaling Laws（規模法則）</b>＝模型的預測誤差（loss）會隨著<span class="term">參數量 N</span>、<span class="term">訓練資料 D</span>、<span class="term">算力 C</span> 變大，以<span class="hl">冪次律（power law）</span>平滑且可預測地下降。<b>Chinchilla</b> 進一步指出：在固定算力下，<b>N 與 D 要一起等比例放大</b>最有效率，經驗法則是<b>每個參數約配 20 個 token</b>。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：Scaling 沙盒 ＋ 成本計算機</h2>
+    <p>上半部拉「參數 N」「資料 D」兩根桿，看 loss 怎麼變、算力多大、是否 compute-optimal；下半部選 GPU，估算<b>要燒多少 FLOPs、GPU 時數與金額</b>。試試 <b>GPT-3 預設</b>感受一下規模。</p>
+    <div class="scale-demo">
+      <div class="lab-title">📈 Scaling 沙盒</div>
+      <div class="presets">
+        <button onclick="slPreset('gpt2')">GPT-2 (1.5B)</button>
+        <button onclick="slPreset('gpt3')">GPT-3 (175B)</button>
+        <button onclick="slPreset('chinchilla')">Chinchilla (70B)</button>
+        <button onclick="slPreset('opt7b')">7B×20（最佳）</button>
+      </div>
+
+      <div class="ctrl">
+        <label>參數量 N <b id="vN">–</b></label>
+        <input type="range" id="sN" min="0" max="1000" value="754" oninput="slRender()">
+      </div>
+      <div class="ctrl">
+        <label>訓練資料 D（tokens）<b id="vD">–</b></label>
+        <input type="range" id="sD" min="0" max="1000" value="576" oninput="slRender()">
+      </div>
+
+      <div class="readout">
+        <div class="stat"><span>預測 Loss（越低越好）</span><b id="oLoss">–</b></div>
+        <div class="stat"><span>訓練算力 C ≈ 6ND</span><b id="oC">–</b></div>
+        <div class="stat"><span>每參數 token 數</span><b id="oRatio">–</b></div>
+      </div>
+
+      <div class="lossbar">
+        <div class="caption">Loss 組成：越往右越是「訓練不足」造成，最左邊那塊是<b>語言本身的隨機性（降不下去）</b>。</div>
+        <div class="lb">
+          <i class="e" id="segE"></i><i class="p" id="segP"></i><i class="d" id="segD"></i>
+        </div>
+        <div class="legend">
+          <span><i style="background:#64748b"></i>不可約 loss E（語言熵）</span>
+          <span><i style="background:#0891b2"></i>參數不足項 A/Nᵅ</span>
+          <span><i style="background:#22d3ee"></i>資料不足項 B/Dᵝ</span>
+        </div>
+      </div>
+      <div class="optnote" id="optNote">–</div>
+
+      <hr class="divider">
+      <div class="lab-title">💸 算力成本計算機</div>
+      <p style="font-size:.88rem;color:var(--sub);text-align:center;margin:0 0 10px">沿用上面的 N、D，用 C ≈ 6ND 估算訓練成本（皆為量級估計，可自行調整）。</p>
+      <div class="gpus">
+        <button data-g="v100" onclick="slGpu('v100')">V100</button>
+        <button data-g="a100" class="on" onclick="slGpu('a100')">A100</button>
+        <button data-g="h100" onclick="slGpu('h100')">H100</button>
+      </div>
+      <div class="ctrl">
+        <label>MFU 有效利用率 <b id="vMfu">40%</b></label>
+        <input type="range" id="sMfu" min="10" max="60" value="40" oninput="slRender()">
+      </div>
+      <div class="ctrl">
+        <label>投入 GPU 數量（估牆鐘時間）<b id="vGpus">–</b></label>
+        <input type="range" id="sGpus" min="0" max="1000" value="753" oninput="slRender()">
+      </div>
+      <div class="ctrl">
+        <label for="iPrice">每顆 GPU 每小時價格（US$）</label>
+        <input type="number" id="iPrice" value="1.9" min="0" step="0.1" oninput="slRender()">
+      </div>
+
+      <div class="costout">
+        <div class="cstat big"><span>估算訓練成本</span><b id="oCost">–</b></div>
+        <div class="cstat"><span>GPU 時數</span><b id="oGpuh">–</b></div>
+        <div class="cstat"><span>牆鐘時間</span><b id="oWall">–</b></div>
+        <div class="cstat"><span>用電量</span><b id="oKwh">–</b></div>
+        <div class="cstat"><span>碳排（粗估）</span><b id="oCo2">–</b></div>
+      </div>
+      <div class="costnote" id="costNote"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📉</span>冪次律：為什麼「砸資源」有效</h2>
+    <p>Scaling law 的神奇之處是：在 log-log 圖上，loss 對算力幾乎是一條<b>直線</b>——代表你能<b>事先預測</b>「再多花 10 倍算力，loss 大概降到多少」。Chinchilla 把 loss 拆成三塊：</p>
+    <div class="formula">
+      $$ L(N, D) = \underbrace{E}_{\text{語言本身的熵}} + \underbrace{\frac{A}{N^{\alpha}}}_{\text{參數不足}} + \underbrace{\frac{B}{D^{\beta}}}_{\text{資料不足}} $$
+      <small>E≈1.69 是降不下去的「不可約 loss」；把 N、D 放大會壓低後兩項，但永遠碰不到 E。</small>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>Chinchilla：算力要「聰明花」</h2>
+    <div class="keys">
+      <div class="keycard"><span>🎯</span><b>compute-optimal</b><br>固定算力下，N 與 D <b>等比例</b>一起放大，loss 最低。</div>
+      <div class="keycard"><span>📏</span><b>20 tokens／參數</b><br>經驗甜蜜點：每個參數大約配 20 個訓練 token。</div>
+      <div class="keycard"><span>😮</span><b>GPT-3 其實欠訓練</b><br>175B 只吃 300B tokens（≈1.7×），資料太少，沒把算力用滿。</div>
+    </div>
+    <p style="margin-top:12px">同樣的算力，Chinchilla（70B×1.4T）比更大的模型 loss 還低，而且<b>更小、推論更便宜</b>。這翻轉了「越大一定越好」的直覺——<b>大，但要配夠資料</b>。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧮</span>算力怎麼估：C ≈ 6ND</h2>
+    <div class="note app">
+      訓練一個 Transformer 的總算力可用一條好記的公式估：<b>C ≈ 6 × N × D</b>（FLOPs）。其中 N＝參數量、D＝訓練 token 數；係數 6＝前向 2 ＋ 反向 4 FLOPs／每參數每 token。<br>
+      以 GPT-3 為例：$6 \times 175{\times}10^{9} \times 300{\times}10^{9} \approx 3.15 \times 10^{23}$ FLOPs——跟論文回報的數字幾乎一致。用上面的計算機可以把它換算成 GPU 時數與金額。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🤔</span>為什麼模型越做越大？又不能「只」放大？</h2>
+    <div class="note meta">
+      <b>為什麼變大：</b>因為 scaling law 幾乎保證「更多參數＋更多資料＋更多算力 → 更低 loss、更多湧現能力」，而且可預測、可規劃預算。<br>
+      <b>為什麼不能只放大模型：</b>Chinchilla 證明<b>資料常是瓶頸</b>——模型太大、資料太少只是浪費算力；而且優質資料有限、算力有成本、還會逼近不可約 loss E。所以是「大，但要配得剛剛好」。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚠️</span>規模法則的邊界</h2>
+    <div class="note warn">
+      Scaling 不是萬能：<b>①</b> loss 永遠碰不到 0，會逼近<b>不可約 loss E</b>；<b>②</b> 高品質<b>資料會用完</b>（data wall），逼出合成資料、多輪利用等做法；<b>③</b> loss 下降<b>不等於</b>所有能力線性提升，有些能力是<b>湧現</b>的、有些指標會飽和；<b>④</b> 越大則<b>訓練與推論成本、能耗、碳排</b>越高。規模是槓桿，不是免費午餐。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. Scaling Laws 是什麼？</summary>
+        <div class="ans">模型 loss 會隨參數、資料、算力變大而以冪次律平滑、可預測地下降；讓我們能事先估算「多花多少資源、loss 大概降到哪」。</div></details>
+      <details><summary>Q2. Chinchilla 的核心發現是什麼？</summary>
+        <div class="ans">固定算力下，參數 N 與資料 D 要等比例一起放大才最有效率（compute-optimal），經驗上每個參數約配 20 個 token；許多舊模型（如 GPT-3）其實資料太少、欠訓練。</div></details>
+      <details><summary>Q3. 訓練算力怎麼估算？</summary>
+        <div class="ans">用 C ≈ 6ND（FLOPs）：N 是參數量、D 是訓練 token 數，係數 6 來自前向 2＋反向 4 FLOPs／每參數每 token。</div></details>
+      <details><summary>Q4. 為什麼 loss 降不到 0？</summary>
+        <div class="ans">因為有「不可約 loss E」——語言本身的隨機性／熵。放大 N、D 只能壓低參數項與資料項，永遠逼近但碰不到 E。</div></details>
+      <details><summary>Q5. 「越大越好」對嗎？</summary>
+        <div class="ans">不完全。要大得對——資料常是瓶頸，模型太大而資料太少只是浪費算力；還要考量成本、能耗與能力是否真的提升。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>本質：</b>loss 隨 N／D／C 以冪次律可預測地下降。</li>
+      <li><b>公式：</b>L(N,D)=E+A/Nᵅ+B/Dᵝ；C≈6ND 估算算力。</li>
+      <li><b>Chinchilla：</b>compute-optimal，N 與 D 等比例放大、每參數約 20 tokens。</li>
+      <li><b>洞見：</b>GPT-3 欠訓練；資料常是瓶頸，「大」要配夠資料。</li>
+      <li><b>邊界：</b>不可約 loss、資料上限、能力湧現、成本能耗。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  // Chinchilla parametric loss: L = E + A/N^alpha + B/D^beta
+  const E=1.69, A=406.4, AL=0.34, B=410.7, BE=0.28;
+  const GPU={
+    v100:{peak:125e12, power:300, price:2.5, name:'V100'},
+    a100:{peak:312e12, power:400, price:1.9, name:'A100'},
+    h100:{peak:990e12, power:700, price:3.2, name:'H100'}
+  };
+  let gpu='a100';
+  const $=id=>document.getElementById(id);
+
+  // slider <-> value (log scale)
+  const nMin=8, nMax=12.3, dMin=9, dMax=13.3;
+  const nFrom = t => Math.pow(10, nMin + t/1000*(nMax-nMin));
+  const dFrom = t => Math.pow(10, dMin + t/1000*(dMax-dMin));
+  const nSlider = N => (Math.log10(N)-nMin)/(nMax-nMin)*1000;
+  const dSlider = D => (Math.log10(D)-dMin)/(dMax-dMin)*1000;
+  const gpusFrom = t => Math.max(1, Math.round(Math.pow(10, t/1000*4)));
+
+  const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  const sup = n => String(n).split('').map(c=>SUP[c]||c).join('');
+  function fmtCount(n){
+    if(n>=1e12) return (n/1e12).toFixed(n>=1e13?0:2)+'T';
+    if(n>=1e9)  return (n/1e9).toFixed(n>=1e10?0:1)+'B';
+    if(n>=1e6)  return (n/1e6).toFixed(0)+'M';
+    if(n>=1e3)  return (n/1e3).toFixed(0)+'K';
+    return Math.round(n).toString();
+  }
+  const fmtInt = x => Math.round(x).toLocaleString('en-US');
+  function fmtSci(x){ if(x<=0) return '0'; const e=Math.floor(Math.log10(x)); const m=x/Math.pow(10,e); return m.toFixed(1)+' × 10'+sup(e); }
+  function fmtMoney(x){
+    if(x>=1e9) return '$'+(x/1e9).toFixed(2)+'B';
+    if(x>=1e6) return '$'+(x/1e6).toFixed(2)+'M';
+    if(x>=1e3) return '$'+(x/1e3).toFixed(0)+'K';
+    return '$'+x.toFixed(0);
+  }
+  function fmtHours(h){
+    if(h>=8760) return (h/8760).toFixed(1)+' 年';
+    if(h>=24)   return (h/24).toFixed(1)+' 天';
+    if(h>=1)    return h.toFixed(0)+' 小時';
+    return (h*60).toFixed(0)+' 分';
+  }
+
+  window.slGpu = function(k){
+    gpu=k;
+    document.querySelectorAll('.scale-demo .gpus button').forEach(b=>b.classList.toggle('on', b.dataset.g===k));
+    $('iPrice').value = GPU[k].price;
+    slRender();
+  };
+
+  window.slPreset = function(k){
+    const P={ gpt2:[1.5e9,4.5e10], gpt3:[175e9,300e9], chinchilla:[70e9,1.4e12], opt7b:[7e9,1.4e11] };
+    const v=P[k]; if(!v) return;
+    $('sN').value = nSlider(v[0]);
+    $('sD').value = dSlider(v[1]);
+    slRender();
+  };
+
+  window.slRender = function(){
+    const N=nFrom(+$('sN').value), D=dFrom(+$('sD').value);
+    const pTerm=A/Math.pow(N,AL), dTerm=B/Math.pow(D,BE);
+    const L=E+pTerm+dTerm, C=6*N*D, ratio=D/N;
+
+    $('vN').textContent=fmtCount(N);
+    $('vD').textContent=fmtCount(D);
+    $('oLoss').textContent=L.toFixed(3);
+    $('oC').textContent=fmtSci(C)+' FLOPs';
+    $('oRatio').textContent=ratio.toFixed(ratio<100?1:0)+' tok/參數';
+
+    const tot=E+pTerm+dTerm;
+    $('segE').style.width=(E/tot*100)+'%';
+    $('segP').style.width=(pTerm/tot*100)+'%';
+    $('segD').style.width=(dTerm/tot*100)+'%';
+
+    const on=$('optNote');
+    if(ratio<10){ on.className='optnote warn'; on.innerHTML='⚠️ <b>模型偏大、資料偏少 → 欠訓練。</b>同樣算力，多餵資料更划算（原始 GPT-3 就是這種情況）。'; }
+    else if(ratio>40){ on.className='optnote warn'; on.innerHTML='⚠️ <b>資料很多、模型偏小。</b>還有本錢把模型放大，用同樣資料換更低 loss。'; }
+    else { on.className='optnote ok'; on.innerHTML='✅ <b>接近 compute-optimal！</b>Chinchilla 建議「每參數約 20 tokens」，你正落在甜蜜點附近。'; }
+
+    // cost
+    const g=GPU[gpu], mfu=(+$('sMfu').value)/100;
+    const price=parseFloat($('iPrice').value)||g.price;
+    const gpus=gpusFrom(+$('sGpus').value);
+    $('vMfu').textContent=(+$('sMfu').value)+'%';
+    $('vGpus').textContent=fmtInt(gpus)+' 顆';
+
+    const gpuH=C/(g.peak*mfu)/3600;
+    const cost=gpuH*price;
+    const kwh=gpuH*g.power/1000;
+    const co2=kwh*0.4/1000; // 公噸，粗估 0.4 kg/kWh
+    const wallH=gpuH/gpus;
+
+    $('oCost').textContent=fmtMoney(cost);
+    $('oGpuh').textContent=fmtInt(gpuH)+' 小時';
+    $('oWall').textContent=fmtHours(wallH);
+    $('oKwh').textContent=fmtInt(kwh)+' kWh';
+    $('oCo2').textContent=(co2>=10?fmtInt(co2):co2.toFixed(1))+' 公噸';
+    $('costNote').innerHTML='以 '+g.name+'（峰值 '+fmtCount(g.peak).replace('B','')+'× 10¹² FLOP/s、'+g.power+'W）、MFU '+(+$('sMfu').value)+'%、$'+price+'/hr 估算。數字為量級參考，實際受平行化效率、資料中心 PUE、電價與地區碳強度影響。';
+  };
+
+  // init
+  window.slGpu('a100');
+  window.slRender();
+})();
+</script>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>Scaling Laws（規模法則）與 Chinchilla 是 iPAS 生成式 AI／大模型的重要觀念。核心：模型 loss 隨參數 N、資料 D、算力 C 以冪次律可預測地下降；訓練算力可用 C≈6ND 估算（前向 2＋反向 4 FLOPs／每參數每 token）。Chinchilla 的 compute-optimal：固定算力下 N 與 D 要等比例放大，經驗上每參數約 20 tokens，故 GPT-3 屬「欠訓練」。易混點：loss 有「不可約項 E」降不到 0；「越大越好」需配夠資料，資料常是瓶頸。延伸：規模的邊界——資料上限、能力湧現、成本與能耗。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Scaling Laws 是什麼？</summary><p>模型 loss 會隨參數、資料、算力變大而以冪次律平滑、可預測地下降，讓我們能事先估算多花多少資源、loss 大概降到哪。</p></details><details><summary>Chinchilla 的核心發現？</summary><p>固定算力下，參數 N 與資料 D 要等比例一起放大最有效率（compute-optimal），經驗上每參數約配 20 個 token；GPT-3 等舊模型其實資料太少、欠訓練。</p></details><details><summary>訓練算力怎麼估算？</summary><p>用 C≈6ND（FLOPs），N 是參數量、D 是訓練 token 數，係數 6 來自前向 2＋反向 4 FLOPs／每參數每 token。</p></details><details><summary>為什麼 loss 降不到 0？</summary><p>因為有不可約 loss E（語言本身的熵）；放大 N、D 只能壓低參數項與資料項，永遠逼近但碰不到 E。</p></details><details><summary>模型越大越好嗎？</summary><p>不完全。要大得對——資料常是瓶頸，模型太大而資料太少只是浪費算力，還要考量成本、能耗與能力是否真的提升。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Scaling Laws 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "模型 loss 會隨參數、資料、算力變大而以冪次律平滑、可預測地下降，讓我們能事先估算多花多少資源、loss 大概降到哪。"}}, {"@type": "Question", "name": "Chinchilla 的核心發現？", "acceptedAnswer": {"@type": "Answer", "text": "固定算力下，參數 N 與資料 D 要等比例一起放大最有效率（compute-optimal），經驗上每參數約配 20 個 token；GPT-3 等舊模型其實資料太少、欠訓練。"}}, {"@type": "Question", "name": "訓練算力怎麼估算？", "acceptedAnswer": {"@type": "Answer", "text": "用 C≈6ND（FLOPs），N 是參數量、D 是訓練 token 數，係數 6 來自前向 2＋反向 4 FLOPs／每參數每 token。"}}, {"@type": "Question", "name": "為什麼 loss 降不到 0？", "acceptedAnswer": {"@type": "Answer", "text": "因為有不可約 loss E（語言本身的熵）；放大 N、D 只能壓低參數項與資料項，永遠逼近但碰不到 E。"}}, {"@type": "Question", "name": "模型越大越好嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不完全。要大得對——資料常是瓶頸，模型太大而資料太少只是浪費算力，還要考量成本、能耗與能力是否真的提升。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="nlp_llm.html">NLP 與 LLM</a><a href="transformer.html">Transformer</a><a href="gptbert.html">BERT vs GPT</a><a href="loss_functions.html">損失函數</a><a href="rlhf.html">RLHF 對齊</a><a href="ai_agent.html">AI Agent</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

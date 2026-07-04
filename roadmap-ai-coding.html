@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 學寫程式路線 · 學習路線</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。 AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/roadmap-ai-coding.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI 學寫程式路線 · 學習路線">
+    <meta property="og:description" content="想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。 AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/roadmap-ai-coding.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI 學寫程式路線 · 學習路線">
+    <meta name="twitter:description" content="想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。 AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "AI 學寫程式路線 · 學習路線",
+  "url": "https://akira.ipas-ai.com/roadmap-ai-coding.html",
+  "description": "想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。 AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"✓";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Learn to Code · 學習路線</span>
+    <h1><span class="en">AI 學寫程式路線</span></h1>
+    <div class="sub">從零基礎到 AI 輔助開發</div>
+    <p class="lede">專為零基礎想學程式的人：從變數迴圈、語法邏輯、工程基礎，到 AI 輔助寫程式（Vibe/Spec Coding、MCP），最後做出作品集。</p>
+    <div class="eq-hero">6 個階段：先手寫打基礎，再用 AI 加速</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 這條路線是什麼</div>
+  <h2>給「想學寫程式、用 AI 加速開發的人」的階段地圖</h2>
+  <p>專為零基礎想學程式的人：從變數迴圈、語法邏輯、工程基礎，到 AI 輔助寫程式（Vibe/Spec Coding、MCP），最後做出作品集。</p>
+  <div class="callout"><h3>怎麼用這張地圖</h3><p style="margin-bottom:0">這條路線把「學會用程式做 AI」拆成 <b>6 個階段</b>，每階段有「<b>要學什麼</b>」「<b>里程碑</b>」「<b>產出範例</b>」。特別的是它教你<b>先手寫打基礎、再用 AI 加速</b>——這樣才不會變成只會複製貼上、不懂原理的人。</p></div>
+  <p class="hint">下面時間軸可以點，看每階段的完整內容。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 互動學習地圖</div>
+  <h2>點階段，看要學什麼、達成什麼</h2>
+  <p>這條路線共 <span class="c-en hl">6 個階段</span>。點下面的階段方塊看詳細內容：</p>
+  <div class="card">
+    <div id="rmAcc" class="rm-acc"></div>
+    <p class="hint">重點提醒：階段 4 開始才導入 AI 工具，前面務必先手寫。先懂邏輯再用 AI，你才是駕馭 AI 的人，而不是被 AI 牽著走。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 里程碑總覽</div>
+  <h2>走完每一階段，你會達成</h2>
+  <p>逐一達成這些里程碑，你就從零基礎變成能用 AI 開發的人：</p>
+  <div class="card"><ul class="li pro" style="list-style:none"><li><b>階段 1 基礎入門</b>：獨立運行簡單小程式</li><li><b>階段 2 語法與邏輯</b>：寫出可讀性高程式</li><li><b>階段 3 工程基礎</b>：獨立完成中型程式</li><li><b>階段 4 AI輔助/Vibe</b>：AI 輔助建構專案</li><li><b>階段 5 Spec/整合</b>：重構並優化專案</li><li><b>程式作品集</b>：完成 GitHub 作品集</li></ul></div>
+</div></section>
+
+<style>
+.rm-acc{display:flex;flex-direction:column;gap:10px;margin:6px 0 4px}
+.rm-item{border:1px solid var(--line,#e6e9ef);border-radius:12px;background:var(--paper,#fff);overflow:hidden}
+.rm-item[open]{border-color:var(--en,#2563eb);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.rm-head{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;font-weight:700;color:var(--ink2,#2c3e50);user-select:none}
+.rm-head::-webkit-details-marker{display:none}
+.rm-head:hover{background:var(--paper2,#f6f8fc)}
+.rm-num{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff}
+.rm-label{flex:1;font-size:15px}
+.rm-chev{flex:none;transition:transform .2s;color:var(--muted,#9aa1ac)}
+.rm-item[open] .rm-chev{transform:rotate(180deg)}
+.rm-body{padding:0 18px 16px 58px}
+.rm-desc{color:var(--ink2,#475467);margin:0 0 10px}
+.rm-learn{margin:0 0 8px;color:var(--ink2,#475467);line-height:1.85}
+.rm-cap{display:inline-block;font-size:12px;font-weight:700;color:var(--muted,#9aa1ac);background:var(--paper2,#eef1f6);border-radius:6px;padding:2px 9px;margin-right:8px}
+.rm-mile{margin:8px 0 0;font-size:14px;color:var(--ink2,#475467)}
+.rm-ex{margin:6px 0 0;font-size:14px;color:var(--muted,#6b7280)}
+.rm-head{transition:background .15s}
+.rm-item[open] .rm-body{animation:rmOpen .28s cubic-bezier(.22,.61,.36,1)}
+@keyframes rmOpen{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.rm-list{margin:2px 0 0;padding-left:22px}.rm-list li{margin:6px 0;color:var(--ink2,#475467);line-height:1.75}.rm-list li b{color:var(--en,#2563eb)}
+@media(max-width:520px){.rm-body{padding-left:18px}}
+</style>
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const stages=[{"label": "階段 1 基礎入門", "desc": "了解變數、資料類型、條件式、迴圈；安裝VS Code + Python環境。手寫簡單程式（如基本計算器），掌握語法基礎與邏輯思考。", "apps": [{"t": "VS Code", "d": "免費編輯器,學會開檔、執行、裝套件。"}, {"t": "Python 安裝與執行", "d": "裝好環境、跑出第一支程式。"}, {"t": "變數與資料型別", "d": "存數字、文字、布林值。"}, {"t": "輸入與輸出", "d": "input 接收、print 顯示。"}, {"t": "運算子", "d": "算術、比較、邏輯運算。"}, {"t": "條件判斷", "d": "if/else 讓程式會做選擇。"}, {"t": "迴圈", "d": "for/while 做重複的事。"}, {"t": "邏輯思考", "d": "把問題拆成清楚步驟,比語法更重要。"}], "mile": "獨立運行簡單小程式", "ex": "Hello World/計算器"}, {"label": "階段 2 語法與邏輯", "desc": "深入函數、模組、Input/Output；手寫練習排序、猜數字；print debug；Git版本控制入門。解決簡單問題，建立自信。", "apps": [{"t": "函式", "d": "把程式打包成可重複呼叫的函式。"}, {"t": "參數與回傳", "d": "傳入資料、回傳結果。"}, {"t": "模組與套件", "d": "import 別人寫好的功能。"}, {"t": "容器資料", "d": "list、dict 存放多筆資料。"}, {"t": "字串處理", "d": "切割、組合、格式化文字。"}, {"t": "例外處理", "d": "try/except 讓程式不易崩潰。"}, {"t": "Git 入門", "d": "版本控制記錄修改、可回溯。"}, {"t": "Print 除錯", "d": "印中間值找出問題所在。"}, {"t": "演算法基礎", "d": "排序、搜尋等解題標準法。"}], "mile": "寫出可讀性高程式", "ex": "猜數字遊戲"}, {"label": "階段 3 工程基礎", "desc": "學習資料結構（清單/字典/集合）、物件導向（Class）；建構小專案（To-Do List）；手動測試與重構；錯誤處理與註解。", "apps": [{"t": "資料結構", "d": "list、dict、stack、queue 選對更有效率。"}, {"t": "OOP 基礎", "d": "類別與物件,組織大型程式。"}, {"t": "檔案讀寫", "d": "讀取與儲存檔案資料。"}, {"t": "虛擬環境", "d": "venv 隔離專案套件。"}, {"t": "套件管理", "d": "pip 安裝與 requirements 固定版本。"}, {"t": "Unit Test", "d": "自動測試小功能、改不壞。"}, {"t": "Code Review", "d": "請人或 AI 看程式給建議。"}, {"t": "命名與註解", "d": "清楚命名、適度註解,易讀好維護。"}], "mile": "獨立完成中型程式", "ex": "To-Do List 專案"}, {"label": "階段 4 AI輔助/Vibe", "desc": "引入AI工具；先手寫框架再用Vibe Coding生成輕鬆氛圍遊戲；修改AI輸出驗證邏輯；學習AI加速腦力激盪。", "apps": [{"t": "AI Coding 助手", "d": "Copilot、Cursor 補全、解釋、除錯。"}, {"t": "Vibe Coding", "d": "用自然語言描述讓 AI 生成程式。"}, {"t": "提示技巧", "d": "把需求講清楚、給脈絡讓 AI 更準。"}, {"t": "看懂 AI 程式", "d": "讀懂並驗證 AI 產生的程式碼。"}, {"t": "AI 除錯", "d": "把錯誤訊息丟給 AI 找原因。"}, {"t": "ChatGPT 當家教", "d": "問觀念、要範例、找錯。"}, {"t": "AI Code Review", "d": "讓 AI 抓問題與壞味道。"}, {"t": "判斷與取捨", "d": "學會哪些 AI 建議該採納。"}], "mile": "AI 輔助建構專案", "ex": "簡易遊戲開發"}, {"label": "階段 5 Spec/整合", "desc": "練習Spec Coding提示技巧；整合API/資料庫；AI審核但手動優化；處理邊緣案例；進階軟體工程。", "apps": [{"t": "Spec Coding", "d": "先寫清楚規格再讓 AI 實作。"}, {"t": "API 整合", "d": "串接外部服務(天氣、地圖、AI 模型)。"}, {"t": "讀 API 文件", "d": "看懂並正確呼叫第三方服務。"}, {"t": "資料庫", "d": "用 SQLite 等儲存與查詢資料。"}, {"t": "環境變數與金鑰", "d": "安全管理 API key,不寫死在程式裡。"}, {"t": "錯誤與例外", "d": "處理失敗情況讓程式穩。"}, {"t": "Edge Case", "d": "想到空值、超大輸入等邊界情況。"}, {"t": "簡單部署", "d": "把程式放上雲端讓別人能用。"}], "mile": "重構並優化專案", "ex": "整合型應用開發"}, {"label": "程式作品集", "desc": "彙整5個專案（手寫vsAI輔助）；記錄過程與AI使用比例；上傳GitHub並附README解釋。展示從基礎到AI整合的成長。", "apps": [{"t": "GitHub", "d": "放程式碼,也是工程師線上履歷。"}, {"t": "README 撰寫", "d": "說明做什麼、怎麼跑、成果如何。"}, {"t": "專案展示", "d": "用截圖、Demo 讓人看懂價值。"}, {"t": "程式碼整理", "d": "清楚結構與命名,展現素養。"}, {"t": "技術反思", "d": "寫下問題與怎麼解決、學到什麼。"}, {"t": "持續練習", "d": "用小專案累積實力與手感。"}], "mile": "完成 GitHub 作品集", "ex": "手寫 vs AI 專案對比"}];
+  const acc=document.getElementById("rmAcc");
+  const COLORS=["var(--l1)","var(--l2)","var(--en)","var(--ok)","var(--bad)"];
+  acc.innerHTML=stages.map(function(s,i){return '<details class="rm-item"'+(i===0?' open':'')+'><summary class="rm-head"><span class="rm-num" style="background:'+COLORS[i%COLORS.length]+'">'+(i+1)+'</span><span class="rm-label">'+s.label+'</span><span class="rm-chev">▾</span></summary><div class="rm-body"><p class="rm-desc">'+s.desc+'</p><div class="rm-learn"><div class="rm-cap" style="margin-bottom:6px">要學什麼</div><ul class="rm-list">'+s.apps.map(function(a){return '<li><b>'+a.t+'</b> — '+a.d+'</li>';}).join("")+'</ul></div>'+(s.mile?'<p class="rm-mile"><b>里程碑：</b>'+s.mile+'</p>':'')+(s.ex?'<p class="rm-ex">🛠️ <b>產出範例：</b>'+s.ex+'</p>':'')+'</div></details>';}).join("");
+  acc.querySelectorAll("details").forEach(function(d){d.addEventListener("toggle",function(){if(d.open)acc.querySelectorAll("details").forEach(function(o){if(o!==d)o.open=false;});});});
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>這條 AI 學寫程式路線適合誰？</summary><p>想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。</p></details><details><summary>為什麼用 AI 學程式？</summary><p>AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。</p></details><details><summary>該先學什麼語言？</summary><p>建議從 Python 起步：語法簡潔、生態完整、是資料與 AI 的主流語言；本站 Python 宇宙可互動入門。</p></details><details><summary>用 AI 寫程式要注意什麼？</summary><p>AI 會出錯或產生不安全程式；要會看懂、測試、驗證它的輸出，把 AI 當助手而非完全代勞。</p></details><details><summary>學完能銜接什麼？</summary><p>打好程式基礎後，可往資料分析、機器學習或工程主線發展；也更能理解 AI 模型背後的實作。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "這條 AI 學寫程式路線適合誰？", "acceptedAnswer": {"@type": "Answer", "text": "想用 AI 輔助、從零開始學寫程式的人；從程式基礎到善用 AI 工具，循序培養能讀、能改、能寫的能力。"}}, {"@type": "Question", "name": "為什麼用 AI 學程式？", "acceptedAnswer": {"@type": "Answer", "text": "AI 能即時解釋程式、產生範例、協助除錯，降低入門門檻；但仍要理解原理，才不會只會複製貼上。"}}, {"@type": "Question", "name": "該先學什麼語言？", "acceptedAnswer": {"@type": "Answer", "text": "建議從 Python 起步：語法簡潔、生態完整、是資料與 AI 的主流語言；本站 Python 宇宙可互動入門。"}}, {"@type": "Question", "name": "用 AI 寫程式要注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "AI 會出錯或產生不安全程式；要會看懂、測試、驗證它的輸出，把 AI 當助手而非完全代勞。"}}, {"@type": "Question", "name": "學完能銜接什麼？", "acceptedAnswer": {"@type": "Answer", "text": "打好程式基礎後，可往資料分析、機器學習或工程主線發展；也更能理解 AI 模型背後的實作。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="roadmap-data.html">資料分析主線 · 學習路線</a><a href="roadmap-designer.html">AI 美術設計師路線 · 學習路線</a><a href="roadmap-engineer.html">AI 工程師主線 · 學習路線</a><a href="roadmap-ipas-intermediate.html">iPAS 中級 AI 應用規劃師 · 學習路線</a><a href="roadmap-ipas-junior.html">iPAS 初級 AI 應用規劃師 · 學習路線</a><a href="roadmap-product.html">AI 產品主線 · 學習路線</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><p class="hint" style="margin:0 0 12px">最終目標是「程式作品集」——把手寫與 AI 輔助的專案都放上 GitHub，這是求職與展示能力最有力的證明。</p><span class="serif" style="font-style:italic">AI 學寫程式路線</span> · 互動教學</div></footer>
+</body>
+</html>

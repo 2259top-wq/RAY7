@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餘弦相似度 Cosine Similarity｜白話＋互動：只看方向不看長度</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。 餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/cosine_similarity.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="餘弦相似度 互動動畫">
+    <meta property="og:description" content="衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。 餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/cosine_similarity.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="餘弦相似度 互動動畫">
+    <meta name="twitter:description" content="衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。 餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "餘弦相似度 互動動畫",
+  "url": "https://akira.ipas-ai.com/cosine_similarity.html",
+  "description": "衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。 餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+<style>
+:root{
+  --bg:#ecf7f9; --ink:#0c2e33; --sub:#4e7c83;
+  --brand:#0891b2; --brand2:#0e7490; --brand-soft:#cff0f5;
+  --card:#ffffff; --line:#d5eaee;
+  --warn:#b45309; --warn-soft:#fef4e2;
+  --app:#0369a1; --app-soft:#e2f2fb;
+  --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+.hero{width:100%;background:linear-gradient(135deg,#06b6d4,#0891b2 55%,#0e7490);color:#fff;padding:44px 20px 40px;text-align:center}
+.hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+.hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+.hero p{margin:0 auto;max-width:640px;color:#e2fafd;font-size:1.02rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+.lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+.lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(8,145,178,.06)}
+.lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+.lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+.lesson p{margin:.5em 0}
+.term{color:var(--brand2);font-weight:700}
+.hl{background:linear-gradient(transparent 60%,#9be3ef 60%);font-weight:700}
+.note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+.note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+.note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+.note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+.note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+.cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+.cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+.cmp tbody tr:nth-child(even){background:#f2fbfc}
+.cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+.lesson .formula{background:#0c2e33;color:#e2fafd;border-radius:12px;padding:16px 18px;margin:14px 0;font-family:'Consolas','SFMono-Regular',monospace;font-size:1rem;line-height:1.9;overflow-x:auto;text-align:center}
+.lesson .formula .c{color:#67e8f9}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+.keycard{background:#f2fbfc;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.keycard b{color:var(--brand2)}
+.keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+.qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f2fbfc}
+.qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+.qa details[open] summary{color:var(--brand2)}
+.qa .ans{padding:0 0 14px;color:#356167;font-size:.95rem}
+.steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+.steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+.steps li:last-child{border-bottom:0}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+/* ===== 互動 demo（保留原始深色設計，作用域限定於 .cos-demo） ===== */
+.cos-demo{background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);border-radius:16px;padding:20px 16px;margin:14px 0;color:#e0e0e0}
+.cos-demo .demo-title{text-align:center;font-size:1.15rem;font-weight:800;margin:2px 0 .3rem;background:linear-gradient(90deg,#06b6d4,#22d3ee);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.cos-demo .subtitle{text-align:center;color:#aaa;font-size:.9rem;margin-bottom:1rem}
+.cos-demo .score-label{text-align:center;font-size:.85rem;color:#888;margin-bottom:.3rem}
+.cos-demo .score{text-align:center;font-size:2rem;font-weight:800;margin:.3rem 0}
+.cos-demo .controls{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:.8rem 0;align-items:center}
+.cos-demo .controls label{font-size:.88rem;color:#bbb}
+.cos-demo .controls input[type=range]{width:150px;accent-color:#22d3ee}
+.cos-demo .val{font-weight:700;color:#22d3ee;min-width:2.5rem;text-align:center;font-size:.95rem}
+.cos-demo .svg-wrap{background:rgba(0,0,0,.3);border-radius:12px;padding:.3rem;overflow:hidden;cursor:crosshair}
+.cos-demo svg{display:block;width:100%;height:auto}
+.cos-demo .examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin:.8rem 0}
+.cos-demo .ex{background:rgba(0,0,0,.2);border-radius:10px;padding:.7rem;text-align:center;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.cos-demo .ex:hover{border-color:#22d3ee;transform:translateY(-2px)}
+.cos-demo .ex .emoji{font-size:1.5rem}
+.cos-demo .ex .name{font-size:.85rem;font-weight:700;color:#22d3ee;margin:.2rem 0}
+.cos-demo .ex .desc{font-size:.75rem;color:#888}
+@media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 自然語言處理</span>
+  <h1>餘弦相似度 Cosine Similarity</h1>
+  <p>比較兩個向量「像不像」，看的不是長度，而是<b>方向</b>——兩支箭指同一邊就相似，垂直就無關，反向就相反。</p>
+  <div class="chips">
+    <span>看方向不看長度</span><span>cos θ</span><span>−1 ~ 1</span><span>RAG 檢索</span><span>vs 歐氏距離</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>餘弦相似度（Cosine Similarity）</b>＝ 用兩向量<span class="term">夾角的餘弦值</span>衡量方向相似度，範圍 <span class="hl">−1 到 1</span>：1＝同向（很相似）、0＝正交（無關）、−1＝反向（相反）。關鍵是<b>只看方向、不受長度影響</b>。
+    </div>
+    <div class="formula">
+cos(θ) = <span class="c">A · B</span> / ( |A| × |B| )
+    </div>
+    <div class="note meta">
+      <b>三個角度記起來：</b>0°→cos=1（完全相似）、90°→cos=0（完全無關）、180°→cos=−1（完全相反）。「國王」和「皇后」的向量方向接近，即使出現次數不同（長度不同），相似度依然很高。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：拖角度看相似度</h2>
+    <p>拉動兩支向量的<b>角度</b>與<b>長度</b>：注意分數只隨<b>夾角</b>變、跟長度無關。也可以點下方預設範例（國王vs皇后、貓vs汽車、開心vs難過…）快速體驗。</p>
+    <div class="cos-demo">
+      <div class="demo-title">📐 餘弦相似度 互動動畫</div>
+      <p class="subtitle">拖動向量看角度如何影響相似度</p>
+
+      <div class="score-label">餘弦相似度 Cosine Similarity</div>
+      <div class="score" id="simScore" style="color:#22d3ee">-</div>
+
+      <div class="controls">
+        <label>向量 A 角度：</label><input type="range" id="angleA" min="0" max="360" value="30"><span class="val" id="valA">30°</span>
+        <label>向量 B 角度：</label><input type="range" id="angleB" min="0" max="360" value="60"><span class="val" id="valB">60°</span>
+      </div>
+      <div class="controls">
+        <label>向量 A 長度：</label><input type="range" id="lenA" min="30" max="150" value="120"><span class="val" id="valLA">120</span>
+        <label>向量 B 長度：</label><input type="range" id="lenB" min="30" max="150" value="90"><span class="val" id="valLB">90</span>
+      </div>
+
+      <div class="svg-wrap">
+        <svg id="chart" viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div style="text-align:center;font-size:.85rem;color:#888;margin:.5rem 0">💡 點擊預設範例快速體驗</div>
+      <div class="examples">
+        <div class="ex" data-a="30" data-b="35"><div class="emoji">👑👸</div><div class="name">國王 vs 皇后</div><div class="desc">語意相近 ≈ 0.95</div></div>
+        <div class="ex" data-a="30" data-b="120"><div class="emoji">🐱🚗</div><div class="name">貓 vs 汽車</div><div class="desc">語意無關 ≈ 0.0</div></div>
+        <div class="ex" data-a="30" data-b="210"><div class="emoji">😊😢</div><div class="name">開心 vs 難過</div><div class="desc">語意相反 ≈ -1.0</div></div>
+        <div class="ex" data-a="45" data-b="45"><div class="emoji">🍎🍎</div><div class="name">蘋果 vs 蘋果</div><div class="desc">完全相同 = 1.0</div></div>
+        <div class="ex" data-a="10" data-b="80"><div class="emoji">🏠🏢</div><div class="name">房子 vs 大樓</div><div class="desc">有點相關 ≈ 0.5</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧭</span>為什麼「只看方向」？</h2>
+    <div class="note app">
+      在高維文字／嵌入空間裡，<b>語意相似多體現在「方向」</b>，而向量長度常反映的是<b>不相干的東西</b>（例如文件長短、某個詞出現的次數）。用餘弦就能把「長度」這個雜訊排掉、只比語意方向。<b>RAG 檢索</b>正是靠它：把問題轉成嵌入，跟資料庫每份文件算餘弦，取最相似的幾筆餵給模型。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📏</span>餘弦相似度 vs 歐氏距離</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>餘弦相似度</th><th>歐氏距離</th></tr></thead>
+      <tbody>
+        <tr><td>看什麼</td><td>兩向量的<b>方向（夾角）</b></td><td>兩點的<b>絕對距離</b></td></tr>
+        <tr><td>受長度影響</td><td>不受影響</td><td>受影響</td></tr>
+        <tr><td>值</td><td>−1～1，越大越像</td><td>≥0，越小越近</td></tr>
+        <tr><td>適用</td><td>高維文字、嵌入語意比對</td><td>座標、幾何距離問題</td></tr>
+      </tbody>
+    </table>
+    <div class="note meta"><b>易混：</b>語意搜尋幾乎都用<b>餘弦</b>（重方向）；歐氏距離重絕對距離，會被向量長度左右。</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚙️</span>餘弦距離與正規化</h2>
+    <div class="note warn">
+      <b>餘弦距離 = 1 − 餘弦相似度</b>：越小越像，方便當「距離」用於檢索排序。若向量已<b>正規化（單位長度）</b>，餘弦相似度就等於<b>內積</b>，計算更快——這也是向量資料庫常先正規化的原因。注意：<b>零向量</b>沒有方向，無法比較。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. 餘弦相似度的值域與三個關鍵角度？</summary>
+        <div class="ans">−1 到 1。0°→1（同向、最相似）、90°→0（正交、無關）、180°→−1（反向、相反）。</div></details>
+      <details><summary>Q2. 為什麼比較嵌入常用餘弦而非歐氏距離？</summary>
+        <div class="ans">餘弦只看方向、不受長度影響；高維文字語意主要在方向，長度差異（如文件長短、詞頻）不該主導相似度判斷。</div></details>
+      <details><summary>Q3. 餘弦相似度和餘弦距離差在哪？</summary>
+        <div class="ans">餘弦距離 = 1 − 餘弦相似度。相似度越大越像；距離越小越像，方便當距離用於排序檢索。</div></details>
+      <details><summary>Q4. 向量正規化後有什麼好處？</summary>
+        <div class="ans">若向量已單位長度，餘弦相似度就等於內積，計算更快。向量資料庫常先正規化以加速最近鄰搜尋。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>是什麼：</b>用夾角餘弦衡量方向相似，−1～1。</li>
+      <li><b>關鍵：</b>只看方向、不看長度。</li>
+      <li><b>公式：</b>cos(θ)=A·B/(|A|·|B|)。</li>
+      <li><b>vs 歐氏：</b>餘弦重方向、歐氏重絕對距離。</li>
+      <li><b>應用：</b>語意搜尋、RAG 檢索；正規化後＝內積。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+const W=700,H=500,CX=350,CY=280;
+const svg=document.getElementById('chart');
+const angleA=document.getElementById('angleA'),angleB=document.getElementById('angleB');
+const lenA=document.getElementById('lenA'),lenB=document.getElementById('lenB');
+
+function toRad(d){return d*Math.PI/180}
+function cosSim(a1,a2){
+  const ax=Math.cos(toRad(a1)),ay=Math.sin(toRad(a1));
+  const bx=Math.cos(toRad(a2)),by=Math.sin(toRad(a2));
+  return ax*bx+ay*by;
+}
+
+function draw(){
+  const a1=+angleA.value, a2=+angleB.value;
+  const l1=+lenA.value, l2=+lenB.value;
+  document.getElementById('valA').textContent=a1+'°';
+  document.getElementById('valB').textContent=a2+'°';
+  document.getElementById('valLA').textContent=l1;
+  document.getElementById('valLB').textContent=l2;
+
+  const sim=cosSim(a1,a2);
+  const simEl=document.getElementById('simScore');
+  simEl.textContent=sim.toFixed(4);
+  if(sim>0.7) simEl.style.color='#4ade80';
+  else if(sim>0.3) simEl.style.color='#22d3ee';
+  else if(sim>-0.3) simEl.style.color='#fbbf24';
+  else simEl.style.color='#f87171';
+
+  // Vectors endpoints (flip Y for SVG)
+  const ax=CX+l1*Math.cos(toRad(-a1)), ay=CY+l1*Math.sin(toRad(-a1));
+  const bx=CX+l2*Math.cos(toRad(-a2)), by=CY+l2*Math.sin(toRad(-a2));
+
+  let html=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+
+  // Grid circles
+  for(let r=50;r<=200;r+=50){
+    html+=`<circle cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+  }
+  // Axes
+  html+=`<line x1="${CX-220}" y1="${CY}" x2="${CX+220}" y2="${CY}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>`;
+  html+=`<line x1="${CX}" y1="${CY-220}" x2="${CX}" y2="${CY+220}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>`;
+
+  // Angle arc
+  const arcR=60;
+  const startA=Math.min(a1,a2), endA=Math.max(a1,a2);
+  let diff=endA-startA;
+  if(diff>180) diff=360-diff;
+  const midAngle=(a1+a2)/2;
+  // Draw arc between vectors
+  const sa=toRad(-Math.min(a1,a2)), ea=toRad(-Math.max(a1,a2));
+  if(diff<=180){
+    const largeArc=0;
+    const sx=CX+arcR*Math.cos(toRad(-a1)), sy=CY+arcR*Math.sin(toRad(-a1));
+    const ex=CX+arcR*Math.cos(toRad(-a2)), ey=CY+arcR*Math.sin(toRad(-a2));
+    html+=`<path d="M${CX},${CY} L${sx},${sy} A${arcR},${arcR} 0 ${largeArc},1 ${ex},${ey} Z" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.3)" stroke-width="1"/>`;
+  }
+
+  // Angle label
+  const labelAngle=toRad(-(a1+a2)/2);
+  const lx=CX+(arcR+20)*Math.cos(labelAngle), ly=CY+(arcR+20)*Math.sin(labelAngle);
+  html+=`<text x="${lx}" y="${ly}" text-anchor="middle" fill="#67e8f9" font-size="13" font-weight="700">${diff.toFixed(0)}°</text>`;
+
+  // Vector A (cyan)
+  html+=`<line x1="${CX}" y1="${CY}" x2="${ax}" y2="${ay}" stroke="#22d3ee" stroke-width="3" marker-end="url(#arrowA)"/>`;
+  html+=`<defs><marker id="arrowA" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/></marker></defs>`;
+  html+=`<text x="${ax+(ax>CX?12:-12)}" y="${ay-10}" text-anchor="${ax>CX?'start':'end'}" fill="#22d3ee" font-size="14" font-weight="700">A</text>`;
+
+  // Vector B (pink)
+  html+=`<line x1="${CX}" y1="${CY}" x2="${bx}" y2="${by}" stroke="#f472b6" stroke-width="3" marker-end="url(#arrowB)"/>`;
+  html+=`<defs><marker id="arrowB" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f472b6"/></marker></defs>`;
+  html+=`<text x="${bx+(bx>CX?12:-12)}" y="${by-10}" text-anchor="${bx>CX?'start':'end'}" fill="#f472b6" font-size="14" font-weight="700">B</text>`;
+
+  // Origin dot
+  html+=`<circle cx="${CX}" cy="${CY}" r="4" fill="#fff"/>`;
+
+  // Formula display
+  html+=`<text x="${W/2}" y="30" text-anchor="middle" fill="#888" font-size="13">cos(θ) = A·B / (|A| × |B|) = ${sim.toFixed(4)}</text>`;
+
+  // Similarity bar at bottom
+  const barY=H-40, barW=400, barX=(W-barW)/2;
+  html+=`<rect x="${barX}" y="${barY}" width="${barW}" height="16" rx="8" fill="rgba(255,255,255,0.06)"/>`;
+  const fillW=barW*((sim+1)/2);
+  const barColor=sim>0.7?'#4ade80':sim>0.3?'#22d3ee':sim>-0.3?'#fbbf24':'#f87171';
+  html+=`<rect x="${barX}" y="${barY}" width="${fillW}" height="16" rx="8" fill="${barColor}" opacity="0.7"/>`;
+  html+=`<text x="${barX-5}" y="${barY+12}" text-anchor="end" fill="#888" font-size="10">-1</text>`;
+  html+=`<text x="${barX+barW+5}" y="${barY+12}" text-anchor="start" fill="#888" font-size="10">+1</text>`;
+  html+=`<text x="${barX+barW/2}" y="${barY+12}" text-anchor="middle" fill="#888" font-size="10">0</text>`;
+  // Marker
+  const markerX=barX+fillW;
+  html+=`<circle cx="${markerX}" cy="${barY+8}" r="6" fill="#fff" stroke="${barColor}" stroke-width="2"/>`;
+
+  svg.innerHTML=html;
+}
+
+[angleA,angleB,lenA,lenB].forEach(el=>el.addEventListener('input',draw));
+document.querySelectorAll('.ex').forEach(el=>{
+  el.addEventListener('click',()=>{
+    angleA.value=el.dataset.a;
+    angleB.value=el.dataset.b;
+    draw();
+  });
+});
+draw();
+</script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>餘弦相似度是衡量兩向量語意相近的標準方法,iPAS 檢索與嵌入考點(中級科目一)。重點:看兩向量夾角的餘弦(1 為同向、0 為無關、-1 為反向),只看方向、不受向量長度影響,適合比較文件或嵌入。易混點:餘弦相似度與歐氏距離不同——前者重方向、後者重絕對距離;高維稀疏文字常用餘弦。情境:語意搜尋、RAG 檢索、推薦的相似度排序。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>餘弦相似度是什麼？</summary><p>衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。</p></details><details><summary>為什麼用餘弦而非歐氏距離？</summary><p>餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。</p></details><details><summary>在哪裡會用到？</summary><p>語意搜尋、推薦、文件比對、RAG 的向量檢索；把文字轉成嵌入後，用餘弦找最相似的內容。</p></details><details><summary>餘弦相似度和餘弦距離差在哪？</summary><p>相似度越大越像(1 為同向)；餘弦距離等於 1 減相似度、越小越像，方便當距離用於檢索排序。</p></details><details><summary>用前要注意什麼？</summary><p>嵌入品質決定一切；若向量已正規化(單位長度)，餘弦相似度就等於內積、計算更快；零向量無法比較。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "餘弦相似度是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "衡量兩向量方向相似度，用夾角餘弦值，範圍 −1 到 1：1 表方向相同(很相似)、0 表正交(無關)、−1 相反；常用於文字與嵌入比對。"}}, {"@type": "Question", "name": "為什麼用餘弦而非歐氏距離？", "acceptedAnswer": {"@type": "Answer", "text": "餘弦只看方向、不受向量長度影響；在高維文字與嵌入中，語意相似多體現在方向，長度差異(如文件長短)不該主導。"}}, {"@type": "Question", "name": "在哪裡會用到？", "acceptedAnswer": {"@type": "Answer", "text": "語意搜尋、推薦、文件比對、RAG 的向量檢索；把文字轉成嵌入後，用餘弦找最相似的內容。"}}, {"@type": "Question", "name": "餘弦相似度和餘弦距離差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "相似度越大越像(1 為同向)；餘弦距離等於 1 減相似度、越小越像，方便當距離用於檢索排序。"}}, {"@type": "Question", "name": "用前要注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "嵌入品質決定一切；若向量已正規化(單位長度)，餘弦相似度就等於內積、計算更快；零向量無法比較。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="embedding.html">詞嵌入</a><a href="embedding_demo.html">Word2Vec vs GloVe</a><a href="vector_db.html">向量資料庫</a><a href="rag.html">RAG</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="transformer.html">Transformer</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

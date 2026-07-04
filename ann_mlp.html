@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人工神經網路 (ANN/MLP) 互動演示</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="最基本的前饋神經網路，由輸入層、一或多個隱藏層與輸出層組成，層間全連接，透過非線性激活學習複雜映射。沒有非線性激活，多層線性疊加仍等於一個線性模型；ReLU、sigmoid、tanh 提供非線性，網路才有表達力。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/ann_mlp.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="人工神經網路 (ANN/MLP) 互動演示">
+    <meta property="og:description" content="最基本的前饋神經網路，由輸入、隱藏、輸出層全連接組成，靠非線性激活學複雜映射。沒有激活函數，多層線性疊加仍等於一個線性模型。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/ann_mlp.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="人工神經網路 (ANN/MLP) 互動演示">
+    <meta name="twitter:description" content="最基本的前饋神經網路，由輸入、隱藏、輸出層全連接組成，靠非線性激活學複雜映射。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "人工神經網路 (ANN/MLP) 互動演示",
+  "url": "https://akira.ipas-ai.com/ann_mlp.html",
+  "description": "最基本的前饋神經網路，由輸入層、一或多個隱藏層與輸出層組成，層間全連接，透過非線性激活學習複雜的輸入到輸出映射。沒有非線性激活，多層線性疊加仍等於一個線性模型；ReLU、sigmoid、tanh 提供非線性，網路才有表達力。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --bl:#2563eb; --bl-d:#1d4ed8; --bl-dd:#1e3a8a;
+            --red:#ef4444; --green:#16a34a; --amber:#d97706; --indigo:#4f46e5;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eaf0fb;
+            /* demo vars — 供 demo JS/CSS 使用 */
+            --primary-color:#2563eb; --positive-color:#2563eb; --negative-color:#ef4444; --text-color:#1e293b;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#60a5fa 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(37,99,235,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.8rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#bfdbfe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--bl-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#eff6ff; border-left:5px solid var(--bl)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#eef3fc; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--bl);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--bl-d)}
+
+        .formula{background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:16px; text-align:center; margin:14px 0; overflow-x:auto}
+
+        .qa{background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #d5e5fd; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--bl-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-card{background:#eff6ff; border:1px solid #bfdbfe; border-radius:14px; padding:18px; margin:14px 0}
+        .canvas-container{width:100%; height:420px; border:1px solid #cfe0fb; border-radius:10px; background:#fff; position:relative; overflow:hidden; display:flex; justify-content:center; align-items:center; user-select:none}
+        .legend{display:flex; gap:15px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:.85rem; color:#64748b}
+        .legend-item{display:flex; align-items:center; gap:5px}
+        .dot{width:10px; height:10px; border-radius:50%}
+        .demo-card .controls{margin-top:16px; padding:16px; background:#fff; border:1px solid var(--line); border-radius:10px; display:flex; gap:24px; align-items:center; justify-content:center; flex-wrap:wrap}
+        .slider-group{display:flex; flex-direction:column; width:200px}
+        .demo-card label{font-weight:bold; color:#475569; margin-bottom:5px; display:flex; justify-content:space-between; font-size:.9rem}
+        .demo-card input[type=range]{cursor:pointer; accent-color:var(--bl)}
+        .demo-card button{padding:10px 18px; border:none; border-radius:8px; cursor:pointer; font-weight:800; font-size:.95rem; background:var(--bl); color:#fff; transition:.2s}
+        .demo-card button:hover{background:var(--bl-d)}
+        .layer-label{font-size:.9rem; font-weight:bold; fill:#64748b; text-anchor:middle}
+        .final-output-row{text-align:center; margin-top:12px; font-weight:bold; color:var(--ink)}
+        .final-output-row #final-output{color:var(--bl); font-size:1.3em}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🔵 ANN / MLP · iPAS 必考基礎</span>
+        <h1>人工神經網路 (ANN/MLP)：最基礎的神經網路長什麼樣？</h1>
+        <p>MLP（多層感知器）是所有深度網路的<b>起點</b>：輸入層、隱藏層、輸出層，層與層之間<b>全連接</b>。訊號一路加權、加偏差、過激活函數往後傳，就能學會複雜的「輸入 → 輸出」對應。</p>
+        <div class="chips"><span>全連接前饋網路</span><span>權重 + 偏差</span><span>激活函數</span><span>前向傳播</span><span>通用近似定理</span></div>
+    </header>
+
+    <!-- ===== 1. 結構 ===== -->
+    <section class="lesson">
+        <h2>🧩 一、結構：三種層 + 全連接</h2>
+        <p class="lead">ANN 模仿人腦神經元：每個神經元收到很多訊號、加權整合、再決定要不要「興奮」傳下去。</p>
+        <div class="keys">
+            <div class="keycard"><b>輸入層 Input</b>接收外部資料（像素、感測器數值、特徵）。</div>
+            <div class="keycard"><b>隱藏層 Hidden</b>做特徵提取與運算——「深度」就發生在這裡，可以有很多層。</div>
+            <div class="keycard"><b>輸出層 Output</b>給出最終結果（分類機率、回歸數值）。</div>
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、動手玩：2-4-1 的迷你網路</h2>
+        <p class="lead">拖動兩個輸入 $x_1$、$x_2$，看訊號怎麼流過網路。神經元<b>越藍＝激活值越高</b>；連線<b style="color:#2563eb">藍色是正權重</b>、<b style="color:#ef4444">紅色是負權重</b>，粗細代表大小。按「隨機重置權重」換一組參數。</p>
+
+        <div class="demo-card">
+            <div class="canvas-container" id="visualizer"></div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="background:var(--positive-color)"></div> 正權重 (激發)</div>
+                <div class="legend-item"><div class="dot" style="background:var(--negative-color)"></div> 負權重 (抑制)</div>
+                <div class="legend-item"><div class="dot" style="background:#e2e8f0"></div> 神經元亮度 = 激活程度</div>
+            </div>
+
+            <div class="controls">
+                <div class="slider-group">
+                    <label>輸入 $x_1$: <span id="val-x1">0.5</span></label>
+                    <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateInputs(0, this.value)">
+                </div>
+                <div class="slider-group">
+                    <label>輸入 $x_2$: <span id="val-x2">0.5</span></label>
+                    <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="updateInputs(1, this.value)">
+                </div>
+                <div>
+                    <button onclick="randomizeWeights()">隨機重置權重</button>
+                </div>
+            </div>
+
+            <div class="final-output-row">
+                最終輸出 Output: <span id="final-output">0.00</span>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            調 $x_1$、$x_2$，隱藏層每個神經元會依「收到的加權總和」變亮或變暗，訊號一層層傳到輸出。<b>隨機重置權重</b>會換掉所有連線的正負與粗細——你會看到同樣的輸入，輸出完全不同。<b>訓練</b>做的事，就是慢慢調這些權重，讓輸出變準。
+        </div>
+    </section>
+
+    <!-- ===== 3. 前向傳播 ===== -->
+    <section class="lesson">
+        <h2>➡️ 三、前向傳播：一個神經元在算什麼</h2>
+        <p class="lead">資料怎麼從輸入變成輸出？每個神經元都做同一件事：</p>
+        <div class="formula">$$ y = \sigma\left(\sum_i (w_i \cdot x_i) + b\right) $$</div>
+        <div class="keys">
+            <div class="keycard"><b>$x_i$ 輸入</b>上一層傳來的訊號。</div>
+            <div class="keycard"><b>$w_i$ 權重 Weight</b>連接的強弱（正=激發、負=抑制）。<b>學習就是在調它。</b></div>
+            <div class="keycard"><b>$b$ 偏差 Bias</b>神經元的激活門檻，整體上下平移。</div>
+            <div class="keycard"><b>$\sigma$ 激活函數</b>加入非線性、決定神經元要不要「興奮」（demo 用 Sigmoid 壓到 0~1）。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 為何激活 ===== -->
+    <section class="lesson">
+        <h2>⚡ 四、為什麼一定要激活函數？</h2>
+        <div class="note warn">
+            <h4>沒有它，堆再多層都白搭</h4>
+            如果每層只做線性運算（沒有非線性激活），那<b>多層線性疊加起來，數學上仍然等於「一個線性模型」</b>——再深也學不到彎曲的非線性關係。<b>激活函數（ReLU、sigmoid、tanh…）</b>的作用就是在每層之間<b>塞進非線性</b>，網路才真正有「表達複雜函數」的能力。詳見 <a href="activation_functions.html" style="color:#1d4ed8;font-weight:700">激活函數</a>。
+        </div>
+    </section>
+
+    <!-- ===== 5. 通用近似 ===== -->
+    <section class="lesson">
+        <h2>🌌 五、為什麼「多層」這麼強？通用近似定理</h2>
+        <div class="note def">
+            <h4>Universal Approximation Theorem</h4>
+            這個定理說：只要隱藏層的神經元<b>夠多</b>，MLP 理論上可以<b>逼近任何連續函數</b>。這就是為什麼神經網路能學會開車、畫畫、寫作——它是個超級有彈性的「萬能曲線擬合器」。<br>
+            （實務上「夠多」可能天文數字，所以我們才會用 CNN、Transformer 這些<b>更聰明的結構</b>來省參數。）
+        </div>
+    </section>
+
+    <!-- ===== 6. 怎麼訓練 ===== -->
+    <section class="lesson">
+        <h2>🔄 六、怎麼訓練？前向 → 損失 → 反向傳播</h2>
+        <div class="keys">
+            <div class="keycard"><b>① 前向傳播</b>算出預測，和真實答案比對得到<a href="loss_functions.html" style="color:#1d4ed8">損失</a>。</div>
+            <div class="keycard"><b>② 反向傳播 Backprop</b>用<b>鏈式法則</b>算出「每個權重該負多少責任」（梯度）。</div>
+            <div class="keycard"><b>③ 梯度下降</b>沿梯度反方向<b>微調每個權重</b>，讓損失下降。見 <a href="gradient_descent.html" style="color:#1d4ed8">梯度下降</a>。</div>
+            <div class="keycard"><b>④ 反覆迭代</b>跑很多次，權重越調越好，輸出越來越準。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. vs CNN/RNN ===== -->
+    <section class="lesson">
+        <h2>⚖️ 七、MLP vs CNN / RNN：什麼時候用哪個</h2>
+        <table class="cmp">
+            <tr><th>資料型態</th><th>適合的網路</th><th>為什麼</th></tr>
+            <tr><td>表格 / 向量</td><td><b>MLP</b></td><td>一般用途、夠用</td></tr>
+            <tr><td>影像</td><td><a href="cnn.html" style="color:#1d4ed8;font-weight:700">CNN</a></td><td>局部連接、權重共享，抓空間特徵、省參數</td></tr>
+            <tr><td>序列 / 文字</td><td><a href="rnn_lstm.html" style="color:#1d4ed8;font-weight:700">RNN/LSTM</a>、<a href="transformer.html" style="color:#1d4ed8;font-weight:700">Transformer</a></td><td>處理先後順序與長距依賴</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 MLP 對影像的痛點</h4>
+            全連接 MLP 用在影像會<b>參數爆炸</b>（每個像素都連到每個神經元）、又沒利用「相鄰像素相關」的空間結構——所以影像改用 CNN。
+        </div>
+    </section>
+
+    <!-- ===== 8. 常見問題 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 八、MLP 常見的訓練問題</h2>
+        <div class="keys">
+            <div class="keycard"><b>過擬合</b>參數多易背雜訊 → <a href="dropout_demo.html" style="color:#1d4ed8">Dropout</a>、正則化、早停。</div>
+            <div class="keycard"><b>梯度消失</b>深層難訓練 → 用 <a href="relu.html" style="color:#1d4ed8">ReLU</a>、<a href="batch_norm.html" style="color:#1d4ed8">BatchNorm</a>、好的初始化。</div>
+            <div class="keycard"><b>對特徵尺度敏感</b>用前先<b>標準化</b>。</div>
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. MLP 由哪三種層組成？</summary>
+                <p><b>輸入層、隱藏層、輸出層</b>，層間<b>全連接</b>。</p></details>
+            <details><summary>Q2. 一個神經元怎麼算輸出？</summary>
+                <p>$y = \sigma(\sum w_i x_i + b)$：加權和 + 偏差，再過激活函數。</p></details>
+            <details><summary>Q3. 為什麼一定要激活函數？</summary>
+                <p>沒有非線性，<b>多層線性疊加仍等於一個線性模型</b>，學不到非線性關係。</p></details>
+            <details><summary>Q4. MLP 怎麼學習權重？</summary>
+                <p>前向傳播算損失 → <b>反向傳播</b>算梯度 → <b>梯度下降</b>更新，反覆迭代。</p></details>
+            <details><summary>Q5. 影像為什麼不用全連接 MLP？</summary>
+                <p>會<b>參數爆炸</b>又沒利用空間結構；改用 <b>CNN</b>（局部連接、權重共享）。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>MLP</b>輸入/隱藏/輸出層、全連接前饋。</div>
+            <div class="keycard"><b>神經元</b>y=σ(Σwx+b)，權重+偏差+激活。</div>
+            <div class="keycard"><b>激活函數</b>提供非線性，缺它=線性模型。</div>
+            <div class="keycard"><b>通用近似</b>夠多神經元可逼近任何連續函數。</div>
+            <div class="keycard"><b>訓練</b>前向→損失→反向傳播→梯度下降。</div>
+            <div class="keycard"><b>選型</b>表格 MLP、影像 CNN、序列 RNN/Transformer。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 800;
+        const height = 400;
+
+        // 網路架構設定
+        const architecture = [2, 4, 1]; // 輸入層2節點, 隱藏層4節點, 輸出層1節點
+        let inputs = [0.5, 0.5];
+        let weights = []; // 3D array: [layer_idx][target_node][source_node]
+        let biases = [];  // 2D array: [layer_idx][node_idx]
+        let activations = []; // 2D array: [layer_idx][node_idx] (儲存每個節點的輸出值)
+
+        // SVG 命名空間
+        const svgNS = "http://www.w3.org/2000/svg";
+
+        window.onload = () => {
+            initNetwork();
+            updateNetwork();
+        };
+
+        function initNetwork() {
+            // 初始化權重和偏差 (隨機)
+            weights = [];
+            biases = [];
+            // 從第一層隱藏層開始 (layer 1) 到 輸出層
+            for (let l = 1; l < architecture.length; l++) {
+                let layerWeights = [];
+                let layerBiases = [];
+                for (let n = 0; n < architecture[l]; n++) {
+                    let nodeWeights = [];
+                    for (let prevN = 0; prevN < architecture[l-1]; prevN++) {
+                        // 權重範圍 -2 到 2
+                        nodeWeights.push((Math.random() * 4) - 2);
+                    }
+                    layerWeights.push(nodeWeights);
+                    // 偏差範圍 -1 到 1
+                    layerBiases.push((Math.random() * 2) - 1);
+                }
+                weights.push(layerWeights);
+                biases.push(layerBiases);
+            }
+        }
+
+        function randomizeWeights() {
+            initNetwork();
+            updateNetwork();
+        }
+
+        function updateInputs(idx, val) {
+            inputs[idx] = parseFloat(val);
+            document.getElementById(`val-x${idx+1}`).innerText = inputs[idx];
+            updateNetwork();
+        }
+
+        function sigmoid(z) {
+            return 1 / (1 + Math.exp(-z));
+        }
+
+        // 前向傳播計算
+        function calculate() {
+            activations = [];
+
+            // Layer 0 (Input)
+            activations.push([...inputs]);
+
+            // Layer 1 ~ End
+            for (let l = 0; l < weights.length; l++) { // l 對應到 weights 的索引
+                let currentLayerActivations = [];
+                const prevActivations = activations[l]; // 上一層的輸出
+
+                for (let n = 0; n < weights[l].length; n++) { // 遍歷當前層的每個節點
+                    let z = biases[l][n]; // Start with bias
+                    for (let prevN = 0; prevN < prevActivations.length; prevN++) {
+                        z += prevActivations[prevN] * weights[l][n][prevN];
+                    }
+                    currentLayerActivations.push(sigmoid(z));
+                }
+                activations.push(currentLayerActivations);
+            }
+
+            // 更新最後輸出文字
+            const outputVal = activations[activations.length - 1][0];
+            document.getElementById('final-output').innerText = outputVal.toFixed(4);
+        }
+
+        function updateNetwork() {
+            calculate();
+            draw();
+        }
+
+        function draw() {
+            const container = document.getElementById('visualizer');
+            container.innerHTML = '';
+
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            container.appendChild(svg);
+
+            // 計算節點位置
+            const layerX = [];
+            const nodeY = []; // [layer][node] -> y coordinate
+
+            const spacingX = width / (architecture.length + 1);
+
+            for (let l = 0; l < architecture.length; l++) {
+                layerX.push(spacingX * (l + 1));
+
+                const layerNodesY = [];
+                const nodeCount = architecture[l];
+                // 垂直置中分配
+                const totalH = 250;
+                const startY = (height - totalH) / 2;
+                const gap = nodeCount > 1 ? totalH / (nodeCount - 1) : 0;
+
+                for (let n = 0; n < nodeCount; n++) {
+                    if (nodeCount === 1) layerNodesY.push(height / 2);
+                    else layerNodesY.push(startY + n * gap);
+                }
+                nodeY.push(layerNodesY);
+            }
+
+            // 1. 繪製連接線 (Weights)
+            for (let l = 0; l < weights.length; l++) {
+                const sourceLayerIdx = l;
+                const targetLayerIdx = l + 1;
+
+                for (let targetN = 0; targetN < architecture[targetLayerIdx]; targetN++) {
+                    for (let sourceN = 0; sourceN < architecture[sourceLayerIdx]; sourceN++) {
+                        const w = weights[l][targetN][sourceN];
+                        const x1 = layerX[sourceLayerIdx];
+                        const y1 = nodeY[sourceLayerIdx][sourceN];
+                        const x2 = layerX[targetLayerIdx];
+                        const y2 = nodeY[targetLayerIdx][targetN];
+
+                        // 視覺樣式
+                        const strokeWidth = Math.min(Math.abs(w) * 2 + 0.5, 6); // 粗細
+                        const color = w > 0 ? "var(--positive-color)" : "var(--negative-color)";
+                        const opacity = Math.min(Math.abs(w)/2 + 0.2, 1);
+
+                        const line = document.createElementNS(svgNS, "line");
+                        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+                        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+                        line.setAttribute("stroke", color);
+                        line.setAttribute("stroke-width", strokeWidth);
+                        line.setAttribute("stroke-opacity", opacity);
+
+                        // 動畫效果：如果前一個節點激活值很低，線條變淡，模擬訊號微弱
+                        const sourceActivation = activations[sourceLayerIdx][sourceN];
+                        line.setAttribute("opacity", opacity * (sourceActivation * 0.8 + 0.2));
+
+                        svg.appendChild(line);
+                    }
+                }
+            }
+
+            // 2. 繪製節點 (Neurons)
+            for (let l = 0; l < architecture.length; l++) {
+                // 加入層級標籤
+                const label = document.createElementNS(svgNS, "text");
+                label.setAttribute("x", layerX[l]);
+                label.setAttribute("y", 40);
+                label.setAttribute("class", "layer-label");
+                label.textContent = l === 0 ? "輸入層" : (l === architecture.length - 1 ? "輸出層" : "隱藏層");
+                svg.appendChild(label);
+
+                for (let n = 0; n < architecture[l]; n++) {
+                    const cx = layerX[l];
+                    const cy = nodeY[l][n];
+                    const val = activations[l][n];
+
+                    // 外圈
+                    const circle = document.createElementNS(svgNS, "circle");
+                    circle.setAttribute("cx", cx); circle.setAttribute("cy", cy);
+                    circle.setAttribute("r", 20);
+                    circle.setAttribute("stroke", "#94a3b8");
+                    circle.setAttribute("stroke-width", "2");
+                    circle.setAttribute("fill", "#fff");
+                    svg.appendChild(circle);
+
+                    // 內圈 (亮度代表數值)
+                    const innerCircle = document.createElementNS(svgNS, "circle");
+                    innerCircle.setAttribute("cx", cx); innerCircle.setAttribute("cy", cy);
+                    circle.setAttribute("r", 20);
+                    // 根據激活值填色: 越接近 1 越藍，越接近 0 越白/灰
+                    const lightness = 100 - (val * 50); // 100 -> 50
+                    innerCircle.setAttribute("fill", `hsl(217, 91%, ${lightness}%)`);
+                    innerCircle.setAttribute("r", 18);
+                    svg.appendChild(innerCircle);
+
+                    // 數值文字
+                    const text = document.createElementNS(svgNS, "text");
+                    text.setAttribute("x", cx); text.setAttribute("y", cy + 5);
+                    text.setAttribute("text-anchor", "middle");
+                    text.setAttribute("font-size", "12px");
+                    text.setAttribute("fill", val > 0.5 ? "#fff" : "#1e293b");
+                    text.textContent = val.toFixed(2);
+                    svg.appendChild(text);
+
+                    // 輸入變數標籤
+                    if (l === 0) {
+                        const inputLabel = document.createElementNS(svgNS, "text");
+                        inputLabel.setAttribute("x", cx - 35); inputLabel.setAttribute("y", cy + 5);
+                        inputLabel.setAttribute("text-anchor", "end");
+                        inputLabel.setAttribute("font-weight", "bold");
+                        inputLabel.setAttribute("fill", "#475569");
+                        inputLabel.textContent = `x${n+1}`;
+                        svg.appendChild(inputLabel);
+                    }
+
+                    // 輸出變數標籤
+                    if (l === architecture.length - 1) {
+                        const outputLabel = document.createElementNS(svgNS, "text");
+                        outputLabel.setAttribute("x", cx + 35); outputLabel.setAttribute("y", cy + 5);
+                        outputLabel.setAttribute("text-anchor", "start");
+                        outputLabel.setAttribute("font-weight", "bold");
+                        outputLabel.setAttribute("fill", "#475569");
+                        outputLabel.textContent = `y`;
+                        svg.appendChild(outputLabel);
+                    }
+                }
+            }
+        }
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>人工神經網路(ANN/MLP)是深度學習的基礎,iPAS 必考(初級科目一、中級科目三)。重點:由輸入、隱藏、輸出層的神經元組成,靠激活函數帶非線性、用反向傳播與梯度下降學參數。易混點:全連接 MLP 對影像沒有 CNN 的空間結構優勢(參數爆炸);層多不一定好(會過擬合、梯度消失)。情境:理解神經網路基本單元;表格資料可用、影像或序列改用 CNN 或 Transformer。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>多層感知器(MLP)是什麼？</summary><p>最基本的前饋神經網路，由輸入層、一或多個隱藏層與輸出層組成，層間全連接，透過非線性激活學習複雜的輸入到輸出映射。</p></details><details><summary>為什麼一定要有激活函數？</summary><p>若沒有非線性激活，多層線性疊加仍等於一個線性模型、學不到非線性關係；ReLU、sigmoid、tanh 等提供非線性，網路才有表達力。</p></details><details><summary>MLP 怎麼學習(訓練)？</summary><p>前向傳播算出預測與損失，再用反向傳播(backpropagation)沿鏈式法則算各權重梯度，並以梯度下降更新權重，反覆迭代。</p></details><details><summary>MLP 和 CNN、RNN 怎麼選？</summary><p>MLP 適合一般表格或向量資料；影像有空間結構用 CNN(局部連接、權重共享)；序列或時間相依用 RNN/LSTM 或 Transformer，效率與效果更好。</p></details><details><summary>MLP 常見的訓練問題？</summary><p>過擬合(用 Dropout、正則化、早停)、梯度消失(用 ReLU、BatchNorm、合適初始化)、對特徵尺度敏感(先標準化)。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "多層感知器(MLP)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "最基本的前饋神經網路，由輸入層、一或多個隱藏層與輸出層組成，層間全連接，透過非線性激活學習複雜的輸入到輸出映射。"}}, {"@type": "Question", "name": "為什麼一定要有激活函數？", "acceptedAnswer": {"@type": "Answer", "text": "若沒有非線性激活，多層線性疊加仍等於一個線性模型、學不到非線性關係；ReLU、sigmoid、tanh 等提供非線性，網路才有表達力。"}}, {"@type": "Question", "name": "MLP 怎麼學習(訓練)？", "acceptedAnswer": {"@type": "Answer", "text": "前向傳播算出預測與損失，再用反向傳播(backpropagation)沿鏈式法則算各權重梯度，並以梯度下降更新權重，反覆迭代。"}}, {"@type": "Question", "name": "MLP 和 CNN、RNN 怎麼選？", "acceptedAnswer": {"@type": "Answer", "text": "MLP 適合一般表格或向量資料；影像有空間結構用 CNN(局部連接、權重共享)；序列或時間相依用 RNN/LSTM 或 Transformer，效率與效果更好。"}}, {"@type": "Question", "name": "MLP 常見的訓練問題？", "acceptedAnswer": {"@type": "Answer", "text": "過擬合(用 Dropout、正則化、早停)、梯度消失(用 ReLU、BatchNorm、合適初始化)、對特徵尺度敏感(先標準化)。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="deep-learning.html">深度學習總覽</a><a href="activation_functions.html">激活函數</a><a href="loss_functions.html">損失函數</a><a href="gradient_descent.html">梯度下降</a><a href="relu.html">ReLU</a><a href="cnn.html">CNN</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

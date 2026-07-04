@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料切分 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。 若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/validation.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="資料切分 · 互動教學">
+    <meta property="og:description" content="訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。 若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/validation.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="資料切分 · 互動教學">
+    <meta name="twitter:description" content="訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。 若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "資料切分 · 互動教學",
+  "url": "https://akira.ipas-ai.com/validation.html",
+  "description": "訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。 若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Train/Val/Test · Cross-Validation</span>
+    <h1><span class="en">資料切分</span></h1>
+    <div class="sub">別讓模型偷看考卷</div>
+    <p class="lede">用同一批資料訓練又評估，分數再高也是假的。<br>切成訓練 / 驗證 / 測試，測試集只開封一次；資料少就用 K-Fold 交叉驗證。</p>
+    <div class="eq-hero">Train（讀書）· Validation（模擬考）· Test（期末考，🔒只一次）</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>為什麼不能拿考古題當期末考？</h2>
+  <p>如果用同一批資料訓練又評估，就像<span class="c-en hl">考試前先看過考卷</span>——分數很高，但完全不代表真實能力。資料切分就是把資料分成<span class="c-l1 hl">訓練集</span>（讀書用）、<span class="c-l2 hl">驗證集</span>（模擬考、調參用）、<span class="hl">測試集</span>（期末考、只看一次）。</p>
+  <div class="trio">
+    <div class="persona hi"><svg viewBox="0 0 100 100"><rect x="14" y="40" width="48" height="22" rx="4" fill="var(--l1)" opacity=".8"/></svg><div class="nm">訓練集</div><div class="tag">~60-70%</div><p>模型讀書、學規律的地方。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="30" y="40" width="40" height="22" rx="4" fill="var(--l2)" opacity=".8"/></svg><div class="nm">驗證集</div><div class="tag">~15-20%</div><p>調參、選模型用，可以反覆看。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="44" y="40" width="40" height="22" rx="4" fill="var(--en)" opacity=".8"/><text x="64" y="56" font-size="14" text-anchor="middle" fill="#fff">🔒</text></svg><div class="nm">測試集</div><div class="tag">~15-20%</div><p>最後才開封，模擬真實上線表現。</p></div>
+  </div>
+  <p class="hint">鐵則：<b>測試集只能用一次</b>。一旦你看著測試分數反覆調模型，它就被你「汙染」成第二個驗證集了。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>拖動比例 + 體驗 K-Fold 交叉驗證</h2>
+  <p>上半部：拖動滑桿調<span class="hl">三集合比例</span>。下半部：切到「K-Fold」看<span class="c-en hl">交叉驗證</span>怎麼把資料輪流當驗證集，讓評估更穩定——尤其資料量少時特別有用。</p>
+  <div class="card">
+    <div class="seg" id="vSeg" style="margin-bottom:10px">
+      <button data-m="split" class="on">三集合切分</button>
+      <button data-m="kfold">K-Fold 交叉驗證</button>
+    </div>
+    <div class="svgbox"><svg id="vSvg" viewBox="0 0 460 220"></svg></div>
+    <div id="splitCtl">
+      <div class="slider-row"><label>訓練集 %</label><input type="range" id="trainPct" min="40" max="80" step="5" value="70"><span class="val" id="trainV">70</span></div>
+    </div>
+    <div id="foldCtl" style="display:none">
+      <div class="slider-row"><label>折數 K</label><input type="range" id="kfold" min="3" max="8" step="1" value="5"><span class="val" id="kV">5</span></div>
+    </div>
+    <div class="readout">
+      <div class="ro"><div class="k" id="roLbl1">訓練 / 驗證 / 測試</div><div class="v c-en" id="vInfo" style="font-size:16px">—</div></div>
+      <div class="ro"><div class="k">狀態</div><div id="vStat" style="margin-top:2px"></div></div>
+    </div>
+    <p class="hint">K-Fold：把資料切成 K 份，每次拿 1 份當驗證、其餘 K-1 份訓練，輪 K 次再平均。沒有任何資料被浪費，評估也更不會因為「剛好切到好/壞的那批」而失真。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 陷阱與選擇</div>
+  <h2>切分階段最容易犯的錯</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>測試集隔離，才能誠實估計上線表現</li><li>交叉驗證讓小資料也能穩定評估</li><li>按時間切分，避免「看到未來」</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>資料洩漏：把測試資訊偷渡進訓練（最致命）</li><li>隨機切時間序列 → 用未來預測過去</li><li>類別不平衡時亂切，某類別全擠在一邊</li><li>反覆用測試集調參，測試集失去意義</li></ul></div>
+</div><h3 style='margin-top:26px'>典型應用場景</h3><div class="usecards"><div class="uc"><div class="ic">✂️</div><div class="t">一般切分</div><div class="d">Train/Val/Test 70/15/15</div></div><div class="uc"><div class="ic">🔁</div><div class="t">小資料</div><div class="d">K-Fold 交叉驗證榨乾每筆資料</div></div><div class="uc"><div class="ic">⏳</div><div class="t">時間序列</div><div class="d">按時間切，只能用過去預測未來</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("vSvg");
+  const seg=document.getElementById("vSeg");
+  const splitCtl=document.getElementById("splitCtl"), foldCtl=document.getElementById("foldCtl");
+  const trainS=document.getElementById("trainPct"), trainV=document.getElementById("trainV");
+  const kS=document.getElementById("kfold"), kV=document.getElementById("kV");
+  const info=document.getElementById("vInfo"), stat=document.getElementById("vStat"), roLbl=document.getElementById("roLbl1");
+  const W=460, x0=24, x1=436, y=84, h=46;
+  let mode="split", train=70, K=5;
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    if(mode==="split"){
+      roLbl.textContent="訓練 / 驗證 / 測試";
+      const rest=100-train, val=Math.round(rest/2), test=rest-val;
+      const segs=[["訓練集",train,"var(--l1)"],["驗證集",val,"var(--l2)"],["測試集",test,"var(--en)"]];
+      let cx=x0;
+      segs.forEach(([nm,pct,col])=>{
+        const w=(x1-x0)*pct/100;
+        svg.appendChild(el("rect",{x:cx,y,width:Math.max(2,w-3),height:h,rx:8,fill:col,opacity:.85}));
+        if(w>40){svg.appendChild(txt(cx+w/2-1,y+h/2+5,nm,{fill:"#fff","font-weight":700,"font-size":12}));}
+        svg.appendChild(txt(cx+w/2-1,y+h+20,pct+"%",{fill:col,"font-weight":700,"font-size":12}));
+        cx+=w;
+      });
+      svg.appendChild(txt(230,46,"一份資料，切成三段",{fill:"var(--ink)","font-weight":800,"font-size":15}));
+      svg.appendChild(el("rect",{x:x0+(x1-x0)*(train+val)/100,y:y-6,width:(x1-x0)*test/100-3,height:h+12,rx:10,fill:"none",stroke:"var(--en)","stroke-width":2,"stroke-dasharray":"4 3"}));
+      info.textContent=train+" / "+val+" / "+test;
+      stat.innerHTML='<span class="badge keep">✓ 測試集已隔離（🔒 只看一次）</span>';
+    }else{
+      roLbl.textContent="K-Fold 設定";
+      const fw=(x1-x0)/K;
+      for(let r=0;r<K;r++){
+        const ry=40+r*30;
+        for(let c=0;c<K;c++){
+          const isVal=(c===r);
+          svg.appendChild(el("rect",{x:x0+c*fw,y:ry,width:fw-3,height:22,rx:4,
+            fill:isVal?"var(--l2)":"var(--l1)",opacity:isVal?.95:.5}));
+        }
+        svg.appendChild(txt(x1+0,ry+15,"",{}));
+      }
+      svg.appendChild(txt(230,28,"K-Fold = "+K+"：每列輪流換一格當驗證(橘)",{fill:"var(--ink)","font-weight":700,"font-size":13}));
+      info.textContent=K+" 折，輪 "+K+" 次取平均";
+      stat.innerHTML='<span class="badge keep">✓ 每筆資料都當過驗證</span>';
+    }
+  }
+  seg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    [...seg.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");mode=b.dataset.m;
+    splitCtl.style.display=mode==="split"?"":"none"; foldCtl.style.display=mode==="kfold"?"":"none";
+    // adjust viewBox height for kfold
+    svg.setAttribute("viewBox", mode==="kfold"?"0 0 460 "+(40+K*30+10):"0 0 460 220");
+    build();});
+  trainS.addEventListener("input",()=>{train=+trainS.value;trainV.textContent=train;build();});
+  kS.addEventListener("input",()=>{K=+kS.value;kV.textContent=K;svg.setAttribute("viewBox","0 0 460 "+(40+K*30+10));build();});
+  build();
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>資料切分與驗證是 iPAS 最高頻的觀念考點(初級科目一、中級科目二與三)。重點:訓練集學參數、驗證集調超參數與選模型、測試集只在最後評估一次,全程不可參與調校。易混點:用測試集調參等於資料洩漏、評估虛高;前處理(標準化、重取樣)只能用訓練集統計量並在每折內做。情境:時間序列不能隨機切,要用時間順序的前向驗證,避免用到未來資訊。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>訓練、驗證、測試集各做什麼？</summary><p>訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。</p></details><details><summary>為什麼需要驗證集？</summary><p>若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。</p></details><details><summary>什麼是交叉驗證？</summary><p>把資料分成 k 折，輪流當驗證、其餘訓練，平均 k 次結果；更穩定、充分利用資料，常用於資料量有限時。</p></details><details><summary>什麼是資料洩漏？</summary><p>測試或未來資訊不當進入訓練(如先對全資料標準化或重取樣)，導致評估過度樂觀、上線後落差大。</p></details><details><summary>時間序列怎麼驗證？</summary><p>不能隨機切；要用時間順序的前向驗證(用過去預測未來)，避免用到未來資訊造成洩漏。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "訓練、驗證、測試集各做什麼？", "acceptedAnswer": {"@type": "Answer", "text": "訓練集學參數；驗證集調超參數與選模型；測試集只在最後評估真實泛化，全程不可參與訓練或調校。"}}, {"@type": "Question", "name": "為什麼需要驗證集？", "acceptedAnswer": {"@type": "Answer", "text": "若用測試集調參會洩漏資訊、高估表現；驗證集讓你在不碰測試集的情況下比較與選擇模型。"}}, {"@type": "Question", "name": "什麼是交叉驗證？", "acceptedAnswer": {"@type": "Answer", "text": "把資料分成 k 折，輪流當驗證、其餘訓練，平均 k 次結果；更穩定、充分利用資料，常用於資料量有限時。"}}, {"@type": "Question", "name": "什麼是資料洩漏？", "acceptedAnswer": {"@type": "Answer", "text": "測試或未來資訊不當進入訓練(如先對全資料標準化或重取樣)，導致評估過度樂觀、上線後落差大。"}}, {"@type": "Question", "name": "時間序列怎麼驗證？", "acceptedAnswer": {"@type": "Answer", "text": "不能隨機切；要用時間順序的前向驗證(用過去預測未來)，避免用到未來資訊造成洩漏。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="interaction_feature.html">特徵工程</a><a href="baseline.html">基準模型</a><a href="model-development.html">模型開發</a><a href="problem-definition.html">問題定義</a><a href="charts.html">資料探索 (EDA)</a><a href="imbalanced_data.html">資料清洗</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">資料切分</span> · 互動教學</div></footer>
+</body>
+</html>

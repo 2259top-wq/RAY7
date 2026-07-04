@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影像分割 (Image Segmentation) 互動演示</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。 語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/segmentation.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="影像分割 (Image Segmentation) 互動演示">
+    <meta property="og:description" content="對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。 語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/segmentation.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="影像分割 (Image Segmentation) 互動演示">
+    <meta name="twitter:description" content="對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。 語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "影像分割 (Image Segmentation) 互動演示",
+  "url": "https://akira.ipas-ai.com/segmentation.html",
+  "description": "對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。 語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #8b5cf6;
+            --secondary-color: #10b981;
+            --instance-1: #ef4444;
+            --instance-2: #f59e0b;
+            --instance-3: #3b82f6;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        h3 { color: #334155; margin-top: 25px; border-left: 4px solid var(--primary-color); padding-left: 10px; }
+
+        .viz-wrapper { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+
+        .controls { display: flex; gap: 8px; background: #f1f5f9; padding: 10px; border-radius: 8px; flex-wrap: wrap; justify-content: center; }
+
+        button {
+            padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: bold; font-size: 0.9rem; transition: all 0.2s;
+            background-color: #e2e8f0; color: #64748b;
+        }
+        button.active { background-color: var(--primary-color); color: white; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3); }
+        button:hover:not(.active) { background-color: #cbd5e1; }
+
+        .canvas-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+        .svg-box {
+            position: relative; border: 2px solid #e2e8f0; border-radius: 8px;
+            overflow: hidden; background: #e0f2fe; cursor: crosshair;
+        }
+
+        .info-panel {
+            width: 250px; background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .pixel-info {
+            font-family: monospace; background: #1e293b; color: #fff;
+            padding: 10px; border-radius: 6px; min-height: 60px; font-size: 0.85rem;
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; margin-bottom: 5px; }
+        .color-box { width: 15px; height: 15px; border-radius: 4px; }
+
+        .mode-desc {
+            background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px;
+            padding: 12px; font-size: 0.9rem; text-align: center; min-height: 40px;
+        }
+
+        path, rect, circle, line { transition: fill 0.4s ease, stroke 0.3s ease, opacity 0.3s ease; }
+
+        .bbox { fill: none; stroke-width: 2.5; stroke-dasharray: 6 3; opacity: 0; }
+        .bbox-label {
+            font-size: 11px; font-weight: bold; fill: white;
+            paint-order: stroke; stroke: rgba(0,0,0,0.6); stroke-width: 3px;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+
+        .math-block {
+            overflow-x: auto; padding: 15px; background-color: #f8fafc;
+            border-radius: 6px; margin: 10px 0; border: 1px solid #e2e8f0;
+        }
+
+        .scenario-box {
+            background-color: #f0fdfa; border: 1px solid #ccfbf1;
+            border-radius: 6px; padding: 15px; margin-top: 15px;
+        }
+        .scenario-title { font-weight: bold; color: #0d9488; display: block; margin-bottom: 5px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #e2e8f0; }
+        th { padding: 10px; border: 1px solid #e2e8f0; background: #f1f5f9; text-align: left; }
+        td { padding: 10px; border: 1px solid #e2e8f0; }
+        tr:nth-child(even) { background: #f8fafc; }
+
+        .analogy { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; border-radius: 0 6px 6px 0; margin: 8px 0; font-size: 0.95rem; }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🖼️ 影像分割 (Image Segmentation) 互動演示</h1>
+        
+        <div class="viz-wrapper">
+            <div class="controls">
+                <button class="active" onclick="setMode('original')">🖼️ 原始影像</button>
+                <button onclick="setMode('detection')">📦 物件偵測</button>
+                <button onclick="setMode('semantic')">🎨 語義分割</button>
+                <button onclick="setMode('instance')">🏷️ 實例分割</button>
+                <button onclick="setMode('panoptic')">🌐 全景分割</button>
+            </div>
+
+            <div id="mode-description" class="mode-desc">
+                原始影像：這是一張有天空、道路和三台車的街景照片。
+            </div>
+
+            <div class="canvas-container">
+                <div class="svg-box">
+                    <svg id="scene-svg" width="400" height="300" viewBox="0 0 400 300" onmousemove="handleHover(event)" onmouseleave="clearInfo()">
+                        <!-- Sky -->
+                        <rect id="obj-sky" x="0" y="0" width="400" height="200" fill="#bae6fd" data-name="Sky" />
+                        <!-- Road -->
+                        <path id="obj-road" d="M0 200 L400 200 L400 300 L0 300 Z" fill="#94a3b8" data-name="Road" />
+
+                        <!-- Car 1 (Red) -->
+                        <g id="obj-car1" data-name="Car">
+                            <path d="M20 230 L50 210 L110 210 L130 230 L130 260 L20 260 Z" fill="#dc2626" />
+                            <circle cx="45" cy="260" r="10" fill="#333" />
+                            <circle cx="105" cy="260" r="10" fill="#333" />
+                            <path d="M55 215 L105 215 L120 230 L35 230 Z" fill="#bfdbfe" />
+                        </g>
+                        <!-- Car 2 (Green) -->
+                        <g id="obj-car2" data-name="Car">
+                            <path d="M160 210 L180 195 L220 195 L240 210 L240 235 L160 235 Z" fill="#16a34a" />
+                            <circle cx="180" cy="235" r="8" fill="#333" />
+                            <circle cx="220" cy="235" r="8" fill="#333" />
+                            <path d="M185 198 L215 198 L230 210 L170 210 Z" fill="#bfdbfe" />
+                        </g>
+                        <!-- Car 3 (Blue) -->
+                        <g id="obj-car3" data-name="Car">
+                            <path d="M280 240 L310 220 L370 220 L390 240 L390 270 L280 270 Z" fill="#2563eb" />
+                            <circle cx="305" cy="270" r="10" fill="#333" />
+                            <circle cx="365" cy="270" r="10" fill="#333" />
+                            <path d="M315 225 L365 225 L380 240 L295 240 Z" fill="#bfdbfe" />
+                        </g>
+
+                        <!-- Bounding Boxes (for Detection mode) -->
+                        <rect id="bbox1" class="bbox" x="15" y="205" width="120" height="70" stroke="#ef4444" />
+                        <text id="bbox1-label" class="bbox-label" x="18" y="218">Car 0.96</text>
+                        <rect id="bbox2" class="bbox" x="155" y="190" width="90" height="50" stroke="#f59e0b" />
+                        <text id="bbox2-label" class="bbox-label" x="158" y="203">Car 0.91</text>
+                        <rect id="bbox3" class="bbox" x="275" y="215" width="120" height="60" stroke="#3b82f6" />
+                        <text id="bbox3-label" class="bbox-label" x="278" y="228">Car 0.94</text>
+                    </svg>
+                </div>
+
+                <div class="info-panel">
+                    <div style="font-weight:bold; border-bottom:1px solid #ccc; padding-bottom:5px;">即時偵測資訊</div>
+                    <div id="pixel-info" class="pixel-info">游標位置：<br>請移動到圖片上</div>
+                    <div style="font-weight:bold; margin-top:10px;">圖例 (Legend)</div>
+                    <div id="legend-container"></div>
+                </div>
+            </div>
+
+            <div style="font-size: 0.9em; color: #64748b; text-align: center;">
+                * 切換五種模式，觀察同一張圖在不同任務下的呈現差異
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>原理說明</h2>
+
+        <h3>1. 用一張圖秒懂四大任務</h3>
+        <p>想像一張照片裡有<strong>兩隻貓和一隻狗</strong>，電腦視覺的四大任務會怎麼處理？</p>
+        <div class="analogy">
+            📦 <strong>物件偵測</strong>：畫三個框框，標上「貓」「貓」「狗」→ 只管位置和類別<br>
+            🎨 <strong>語義分割</strong>：所有貓的像素塗紅色、狗塗藍色、背景塗灰色 → 分不出兩隻貓誰是誰<br>
+            🏷️ <strong>實例分割</strong>：貓A 紅色、貓B 橘色、狗 藍色 → 每個個體有自己的遮罩<br>
+            🌐 <strong>全景分割</strong>：前景用實例分割 + 背景也塗色（天空、草地各一色）→ 每個像素都有歸屬
+        </div>
+
+        <h3>2. 四大任務完整比較</h3>
+        <table>
+            <tr>
+                <th>任務</th>
+                <th>輸出</th>
+                <th>分個體？</th>
+                <th>管背景？</th>
+                <th>代表模型</th>
+            </tr>
+            <tr>
+                <td><strong>物件偵測</strong><br>Object Detection</td>
+                <td>邊界框 (Bounding Box) + 類別 + 信心分數</td>
+                <td>✅ 每個框獨立</td>
+                <td>❌</td>
+                <td>YOLO、Faster R-CNN、SSD</td>
+            </tr>
+            <tr>
+                <td><strong>語義分割</strong><br>Semantic Segmentation</td>
+                <td>每個像素的類別標籤</td>
+                <td>❌ 同類別不分</td>
+                <td>✅</td>
+                <td>U-Net、DeepLab、FCN</td>
+            </tr>
+            <tr>
+                <td><strong>實例分割</strong><br>Instance Segmentation</td>
+                <td>每個物體的精確遮罩 (Mask)</td>
+                <td>✅ 每個體獨立</td>
+                <td>❌</td>
+                <td>Mask R-CNN、YOLACT</td>
+            </tr>
+            <tr>
+                <td><strong>全景分割</strong><br>Panoptic Segmentation</td>
+                <td>前景實例遮罩 + 背景語義標籤</td>
+                <td>✅ 前景分個體</td>
+                <td>✅</td>
+                <td>Panoptic FPN、Mask2Former</td>
+            </tr>
+        </table>
+
+        <h3>3. 常用模型架構</h3>
+        <ul>
+            <li><strong>YOLO (物件偵測王者)：</strong>
+                <p>You Only Look Once，一次掃描整張圖就能同時預測所有物體的位置和類別。速度極快，適合即時應用（自動駕駛、監控）。</p>
+            </li>
+            <li><strong>U-Net (語義分割王者)：</strong>
+                <p>U 字型結構，左邊 Encoder 壓縮特徵，右邊 Decoder 還原尺寸。關鍵在於 <strong>Skip Connection</strong>，將淺層特徵直接複製到右邊，讓邊緣更清晰。原本用於醫療影像。</p>
+            </li>
+            <li><strong>Mask R-CNN (實例分割王者)：</strong>
+                <p>Faster R-CNN 的升級版，除了預測邊界框和類別外，多一個分支預測 <strong>Mask (遮罩)</strong>，精確描繪每個物體的輪廓。</p>
+            </li>
+            <li><strong>Mask2Former (全景分割新星)：</strong>
+                <p>統一架構處理語義、實例、全景三種分割任務。用 Transformer 的注意力機制取代傳統方法，一個模型搞定所有分割需求。</p>
+            </li>
+        </ul>
+
+        <h3>4. 評估指標</h3>
+        <table>
+            <tr><th>指標</th><th>用途</th><th>公式概念</th></tr>
+            <tr>
+                <td><strong>IoU</strong><br>(Intersection over Union)</td>
+                <td>所有分割任務通用</td>
+                <td>預測區域與真實區域的重疊比例</td>
+            </tr>
+            <tr>
+                <td><strong>mAP</strong><br>(mean Average Precision)</td>
+                <td>物件偵測、實例分割</td>
+                <td>各類別 AP 的平均值，綜合衡量偵測品質</td>
+            </tr>
+            <tr>
+                <td><strong>Dice Coefficient</strong></td>
+                <td>醫學影像分割常用</td>
+                <td>與 IoU 類似但對小物體更敏感</td>
+            </tr>
+            <tr>
+                <td><strong>PQ</strong><br>(Panoptic Quality)</td>
+                <td>全景分割專用</td>
+                <td>PQ = SQ × RQ（分割品質 × 辨識品質）</td>
+            </tr>
+        </table>
+
+        <div class="math-block">
+            $ IoU = \frac{\text{Area}(A \cap B)}{\text{Area}(A \cup B)} \qquad Dice = \frac{2 \times |A \cap B|}{|A| + |B|} $
+        </div>
+
+        <h3>5. 應用場景</h3>
+        <div class="scenario-box">
+            <span class="scenario-title">🚗 自動駕駛</span>
+            語義分割辨識路面/人行道；物件偵測框出車輛/行人；實例分割追蹤每台車的軌跡。三種任務協同工作。
+            <br><br>
+            <span class="scenario-title">🏥 醫療影像</span>
+            U-Net 分割腫瘤範圍、器官位置，輔助醫生精準診斷。Dice Coefficient 是醫療領域最常用的評估指標。
+            <br><br>
+            <span class="scenario-title">📹 視訊會議背景虛化</span>
+            即時人像語義分割，將「人」的像素保留，「背景」像素模糊處理（Zoom/Teams 天天在用）。
+            <br><br>
+            <span class="scenario-title">🤖 機器人視覺</span>
+            全景分割讓機器人理解整個場景：哪裡是地板可以走、哪裡是桌子要避開、桌上有哪些物品可以抓取。
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'original';
+
+        const palettes = {
+            original: { 'obj-sky': '#bae6fd', 'obj-road': '#94a3b8', 'obj-car1': '#dc2626', 'obj-car2': '#16a34a', 'obj-car3': '#2563eb' },
+            detection: { 'obj-sky': '#bae6fd', 'obj-road': '#94a3b8', 'obj-car1': '#dc2626', 'obj-car2': '#16a34a', 'obj-car3': '#2563eb' },
+            semantic: { 'obj-sky': '#cbd5e1', 'obj-road': '#475569', 'obj-car1': '#8b5cf6', 'obj-car2': '#8b5cf6', 'obj-car3': '#8b5cf6' },
+            instance: { 'obj-sky': '#1e293b', 'obj-road': '#334155', 'obj-car1': '#ef4444', 'obj-car2': '#f59e0b', 'obj-car3': '#3b82f6' },
+            panoptic: { 'obj-sky': '#7dd3fc', 'obj-road': '#475569', 'obj-car1': '#ef4444', 'obj-car2': '#f59e0b', 'obj-car3': '#3b82f6' }
+        };
+
+        const legends = {
+            original: [
+                { color: '#dc2626', label: '紅色車' }, { color: '#16a34a', label: '綠色車' },
+                { color: '#2563eb', label: '藍色車' }, { color: '#bae6fd', label: '天空' }, { color: '#94a3b8', label: '道路' }
+            ],
+            detection: [
+                { color: '#ef4444', label: '📦 Car 0.96' }, { color: '#f59e0b', label: '📦 Car 0.91' },
+                { color: '#3b82f6', label: '📦 Car 0.94' }
+            ],
+            semantic: [
+                { color: '#8b5cf6', label: 'Class: Car (全部同色)' },
+                { color: '#475569', label: 'Class: Road' }, { color: '#cbd5e1', label: 'Class: Sky' }
+            ],
+            instance: [
+                { color: '#ef4444', label: 'Car #1 (個體A)' }, { color: '#f59e0b', label: 'Car #2 (個體B)' },
+                { color: '#3b82f6', label: 'Car #3 (個體C)' }
+            ],
+            panoptic: [
+                { color: '#ef4444', label: '🏷️ Car #1' }, { color: '#f59e0b', label: '🏷️ Car #2' },
+                { color: '#3b82f6', label: '🏷️ Car #3' },
+                { color: '#7dd3fc', label: '🎨 Sky (語義)' }, { color: '#475569', label: '🎨 Road (語義)' }
+            ]
+        };
+
+        const modeDescriptions = {
+            original: '🖼️ 原始影像：一張有天空、道路和三台車的街景照片。',
+            detection: '📦 物件偵測：用框框圈出每台車的位置，標上類別和信心分數。不管背景，只找物體。',
+            semantic: '🎨 語義分割：每個像素塗上類別顏色。三台車都是「Car」類別，所以塗同一個紫色，分不出誰是誰。',
+            instance: '🏷️ 實例分割：每台車有自己的顏色和編號。背景被忽略（變暗），只關注前景個體。',
+            panoptic: '🌐 全景分割：前景用實例分割（每台車不同色），背景用語義分割（天空、道路各一色）。每個像素都有歸屬！'
+        };
+
+        window.onload = () => { updateLegend(); };
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const map = palettes[mode];
+            document.getElementById('obj-sky').setAttribute('fill', map['obj-sky']);
+            document.getElementById('obj-road').setAttribute('fill', map['obj-road']);
+            updateGroupColor('obj-car1', map['obj-car1'], mode);
+            updateGroupColor('obj-car2', map['obj-car2'], mode);
+            updateGroupColor('obj-car3', map['obj-car3'], mode);
+
+            // Bounding boxes visibility
+            const showBbox = (mode === 'detection');
+            ['bbox1', 'bbox2', 'bbox3'].forEach(id => {
+                document.getElementById(id).style.opacity = showBbox ? '1' : '0';
+            });
+            ['bbox1-label', 'bbox2-label', 'bbox3-label'].forEach(id => {
+                document.getElementById(id).style.opacity = showBbox ? '1' : '0';
+            });
+
+            document.getElementById('mode-description').textContent = modeDescriptions[mode];
+            updateLegend();
+        }
+
+        function updateGroupColor(groupId, color, mode) {
+            const group = document.getElementById(groupId);
+            const children = group.children;
+
+            if (mode === 'original' || mode === 'detection') {
+                const bodyColor = palettes['original'][groupId];
+                children[0].setAttribute('fill', bodyColor);
+                if (children.length >= 4) {
+                    children[1].setAttribute('fill', '#333');
+                    children[2].setAttribute('fill', '#333');
+                    children[3].setAttribute('fill', '#bfdbfe');
+                }
+            } else {
+                for (let i = 0; i < children.length; i++) {
+                    children[i].setAttribute('fill', color);
+                }
+            }
+        }
+
+        function updateLegend() {
+            const container = document.getElementById('legend-container');
+            container.innerHTML = '';
+            legends[currentMode].forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'legend-item';
+                div.innerHTML = `<div class="color-box" style="background:${item.color}"></div><span>${item.label}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function handleHover(e) {
+            let el = e.target;
+            if (el.tagName !== 'svg' && el.parentElement.tagName === 'g') el = el.parentElement;
+            const id = el.id;
+            const dataName = el.getAttribute('data-name') || e.target.getAttribute('data-name');
+            if (!id) return;
+
+            let info = '';
+            const m = currentMode;
+
+            if (m === 'original') {
+                info = `物體: ${dataName || '未知'}`;
+            } else if (m === 'detection') {
+                if (id === 'obj-car1') info = `偵測: Car<br>信心: 0.96<br>框: [15,205,135,275]`;
+                else if (id === 'obj-car2') info = `偵測: Car<br>信心: 0.91<br>框: [155,190,245,240]`;
+                else if (id === 'obj-car3') info = `偵測: Car<br>信心: 0.94<br>框: [275,215,395,275]`;
+                else info = `背景 (不偵測)`;
+            } else if (m === 'semantic') {
+                if (dataName === 'Car') info = `類別: Car<br>標籤 ID: 1<br>所有車同色`;
+                else if (dataName === 'Road') info = `類別: Road<br>標籤 ID: 2`;
+                else info = `類別: Sky<br>標籤 ID: 0`;
+            } else if (m === 'instance') {
+                if (id === 'obj-car1') info = `實例: Car #1<br>Mask ID: 101`;
+                else if (id === 'obj-car2') info = `實例: Car #2<br>Mask ID: 102`;
+                else if (id === 'obj-car3') info = `實例: Car #3<br>Mask ID: 103`;
+                else info = `背景 (忽略)`;
+            } else if (m === 'panoptic') {
+                if (id === 'obj-car1') info = `前景實例: Car #1<br>Mask ID: 101`;
+                else if (id === 'obj-car2') info = `前景實例: Car #2<br>Mask ID: 102`;
+                else if (id === 'obj-car3') info = `前景實例: Car #3<br>Mask ID: 103`;
+                else if (dataName === 'Road') info = `背景語義: Road<br>標籤 ID: 2`;
+                else info = `背景語義: Sky<br>標籤 ID: 0`;
+            }
+
+            document.getElementById('pixel-info').innerHTML = `模式: ${m.toUpperCase()}<br>──────────<br>${info}`;
+        }
+
+        function clearInfo() {
+            document.getElementById('pixel-info').innerHTML = '游標位置：<br>請移動到圖片上';
+        }
+    </script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>影像分割對影像逐像素標註,是 iPAS 中級科目一考點。重點:語意分割(同類歸一)、實例分割(分個體)、全景分割(兩者合),評估用 IoU、Dice 與各類平均 mIoU。易混點:分割不是物件偵測——偵測畫框、分割描輪廓;與分類(整張一個標籤)更不同。情境:U-Net(醫療)、DeepLab(空洞卷積)、Mask R-CNN(實例)、SAM(通用)。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>影像分割是什麼？</summary><p>對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。</p></details><details><summary>語意分割和實例分割差在哪？</summary><p>語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。</p></details><details><summary>常用什麼架構？</summary><p>編碼器-解碼器結構(U-Net、FCN、DeepLab)；編碼器抽特徵、解碼器還原到像素級，常用跳接保留細節。</p></details><details><summary>怎麼評估分割品質？</summary><p>用 IoU(Jaccard)與 Dice 係數衡量預測區域與真實區域的重疊；對不平衡的小區域 Dice 較敏感。</p></details><details><summary>分割的典型應用？</summary><p>醫療影像(腫瘤、器官)、自駕(道路、行人)、衛星影像、影像去背與編輯等需要像素級精度的場景。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "影像分割是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "對影像逐像素分類，標出每個像素屬於哪個物件或區域；比偵測的方框更精細，能描出物件輪廓。"}}, {"@type": "Question", "name": "語意分割和實例分割差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "語意分割只分類別(所有人都同一類)；實例分割還要區分同類的不同個體(人1、人2分開)；全景分割結合兩者。"}}, {"@type": "Question", "name": "常用什麼架構？", "acceptedAnswer": {"@type": "Answer", "text": "編碼器-解碼器結構(U-Net、FCN、DeepLab)；編碼器抽特徵、解碼器還原到像素級，常用跳接保留細節。"}}, {"@type": "Question", "name": "怎麼評估分割品質？", "acceptedAnswer": {"@type": "Answer", "text": "用 IoU(Jaccard)與 Dice 係數衡量預測區域與真實區域的重疊；對不平衡的小區域 Dice 較敏感。"}}, {"@type": "Question", "name": "分割的典型應用？", "acceptedAnswer": {"@type": "Answer", "text": "醫療影像(腫瘤、器官)、自駕(道路、行人)、衛星影像、影像去背與編輯等需要像素級精度的場景。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="deep-learning.html">深度學習</a><a href="iou_dice_perfect.html">IoU, Dice</a><a href="cnn.html">CNN</a><a href="yolo.html">YOLO</a><a href="ocr.html">OCR</a><a href="vit.html">ViT</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

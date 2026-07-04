@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAN 模式崩潰 Mode Collapse｜白話＋互動：為何只生成一種臉、WGAN 怎麼救</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。 生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/gan_mode_collapse.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="GAN 模式崩潰與 WGAN 互動圖解">
+    <meta property="og:description" content="GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。 生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/gan_mode_collapse.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GAN 模式崩潰與 WGAN 互動圖解">
+    <meta name="twitter:description" content="GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。 生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "GAN 模式崩潰與 WGAN 互動圖解",
+  "url": "https://akira.ipas-ai.com/gan_mode_collapse.html",
+  "description": "GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。 生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+    :root{
+      --bg:#fffaf0; --ink:#3a2606; --sub:#8a6a2f;
+      --brand:#d97706; --brand2:#b45309; --brand-soft:#fce7c6;
+      --card:#ffffff; --line:#f3e2c4;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#fbbf24,#d97706 55%,#b45309);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.8rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:660px;color:#fff3e0;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(217,119,6,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#fbdd9c 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#eef2ff;border-left:4px solid #6366f1}
+    .note.warn{background:#fde3e3;border-left:4px solid #dc2626}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fdf5e8}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#fdf5e8;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fdf5e8}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#7a5a24;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始 GAN vs WGAN 演示，作用域限定於 .mc-demo） ===== */
+    .mc-demo{margin:8px 0}
+    .mc-demo .lab-title{color:#b45309;font-size:1.15rem;font-weight:800;margin:0 0 14px;text-align:center}
+    .mc-demo .demo-card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.05);display:flex;flex-direction:column;align-items:center;border:1px solid #f3e2c4}
+    .mc-demo .controls{width:100%;background:#fdf7ec;padding:16px;border-radius:8px;border:1px solid #f3e2c4;margin-bottom:20px;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:12px}
+    .mc-demo .radio-group{display:flex;gap:16px;font-size:1rem;font-weight:bold;flex-wrap:wrap}
+    .mc-demo .radio-label{cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:6px;transition:.3s}
+    .mc-demo .radio-label:hover{background-color:#f7e8cf}
+    .mc-demo input[type="radio"]{transform:scale(1.4);cursor:pointer;accent-color:#d97706}
+    .mc-demo button.action-btn{padding:11px 22px;font-size:15px;background-color:#d97706;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold;transition:.2s;box-shadow:0 4px 6px rgba(217,119,6,.3)}
+    .mc-demo button.action-btn:hover{background-color:#b45309;transform:translateY(-2px)}
+    .mc-demo button.reset-btn{background-color:#64748b;box-shadow:0 4px 6px rgba(100,116,139,.3)}
+    .mc-demo button.reset-btn:hover{background-color:#475569}
+    .mc-demo .svg-container{position:relative;width:100%;max-width:600px}
+    .mc-demo svg{background-color:#fff;border:2px solid #cbd5e1;border-radius:8px;width:100%;height:auto;box-shadow:inset 0 0 20px rgba(0,0,0,.03)}
+    .mc-demo .legend{display:flex;justify-content:center;gap:24px;margin-top:15px;width:100%;flex-wrap:wrap}
+    .mc-demo .legend-item{display:flex;align-items:center;gap:8px;font-weight:bold;font-size:.92rem}
+    .mc-demo .legend-dot{width:16px;height:16px;border-radius:50%}
+    .mc-demo .real-legend{background-color:#10b981}
+    .mc-demo .fake-legend{background-color:#ef4444}
+    @media(max-width:560px){.hero h1{font-size:1.45rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">生成式 AI · GAN 的痛點</span>
+  <h1>GAN 模式崩潰 Mode Collapse</h1>
+  <p>生成器偷懶找捷徑：只要有幾種輸出能穩定騙過判別器，它就一直產同一種——結果多樣性全沒了。WGAN 用「推土機距離」把它救回來。</p>
+  <div class="chips">
+    <span>只生成少數樣本</span><span>失去多樣性</span><span>找捷徑騙 D</span><span>WGAN 推土機距離</span><span>WGAN-GP</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>模式崩潰（Mode Collapse）</b>＝GAN 訓練時，生成器只學會產生<span class="term">少數幾種</span>能騙過判別器的樣本、<span class="hl">失去多樣性</span>（例如只生成一種臉），無法涵蓋真實資料的各種模式。它是 GAN 最常見也最棘手的問題之一。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：GAN 崩潰 vs WGAN 覆蓋</h2>
+    <p>綠點是真實資料的 <b>4 種模式</b>（如男女、長短髮）。選模式後按「開始訓練」看紅色生成點怎麼跑：<b>原始 GAN</b> 全擠進<b>同一坨</b>（崩潰）；<b>WGAN</b> <b>均勻覆蓋</b>四坨（有多樣性）。</p>
+    <div class="mc-demo">
+      <div class="lab-title">🎯 GAN 模式崩潰與 WGAN 解決方案</div>
+      <div class="demo-card">
+        <div class="controls">
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="modelType" value="gan" checked> 原始 GAN (模式崩潰)
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="modelType" value="wgan"> WGAN (推土機距離)
+            </label>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="action-btn reset-btn" onclick="resetSim()">重置狀態</button>
+            <button class="action-btn" id="train-btn" onclick="startTraining()">▶ 開始訓練</button>
+          </div>
+        </div>
+
+        <div class="svg-container">
+          <svg id="canvas" viewBox="0 0 600 400"></svg>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot real-legend"></div> 真實資料分佈 (4種人臉模式)</div>
+          <div class="legend-item"><div class="legend-dot fake-legend"></div> 網路生成資料 (Generator)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🕳️</span>為什麼會發生？</h2>
+    <div class="note warn">
+      生成器找到<b>捷徑</b>——某幾個輸出能<b>穩定騙過判別器</b>，它就一直產出這些，其他真實模式全被忽略。加上兩網路<b>博弈不穩</b>、目標相反、輪流更新，很容易陷入這種<b>退化均衡</b>。模式崩潰其實是「GAN 訓練不穩」的典型症狀之一。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>原始 GAN vs WGAN</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>原始 GAN</th><th>WGAN</th></tr></thead>
+      <tbody>
+        <tr><td>損失度量</td><td>JS 散度（分布不重疊時梯度易消失）</td><td>Wasserstein／推土機距離（EMD）</td></tr>
+        <tr><td>生成行為</td><td>擠向單一模式（崩潰）</td><td>被逼均勻覆蓋所有模式</td></tr>
+        <tr><td>多樣性</td><td>低</td><td>高</td></tr>
+        <tr><td>訓練穩定度</td><td>不穩、易震盪</td><td>較穩（WGAN-GP 更佳）</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">🚜</span>WGAN 的「推土機距離」</h2>
+    <div class="note meta">
+      Wasserstein 距離（Earth Mover's Distance）衡量的是「把一堆土從生成分布<b>搬</b>成真實分布，需要的<b>整體搬運成本</b>」。這個度量<b>逼迫生成器</b>把機率質量<b>均勻鋪</b>到所有模式上，而不是全堆在一處——所以能對抗模式崩潰，梯度也更平滑好訓練。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔧</span>怎麼診斷與緩解？</h2>
+    <div class="keys">
+      <div class="keycard"><span>🔍</span><b>診斷</b><br>生成多樣性低、不同輸入卻產相似圖；用多樣性指標或跟真實分布算 <b>FID</b>。</div>
+      <div class="keycard"><span>🧪</span><b>結構技巧</b><br>minibatch discrimination、特徵匹配、unrolled GAN，讓 G 看到「整批」而非單張。</div>
+      <div class="keycard"><span>📐</span><b>損失改良</b><br><b>WGAN / WGAN-GP</b>（更穩的損失＋梯度懲罰）、加噪與多樣性正則。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. 模式崩潰是什麼？</summary>
+        <div class="ans">GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性（如只生成一種臉），無法涵蓋真實資料的各種模式。</div></details>
+      <details><summary>Q2. 為什麼會發生？</summary>
+        <div class="ans">生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。</div></details>
+      <details><summary>Q3. WGAN 為什麼能緩解？</summary>
+        <div class="ans">WGAN 用 Wasserstein（推土機）距離計算整體搬運成本，逼生成器把機率均勻鋪到所有模式、覆蓋多樣性，梯度也更平滑穩定。</div></details>
+      <details><summary>Q4. 還有哪些緩解方法？</summary>
+        <div class="ans">minibatch discrimination、特徵匹配、WGAN-GP（梯度懲罰）、unrolled GAN、加噪與多樣性正則；並可用 FID 檢查多樣性。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>症狀：</b>只生成少數樣本、失去多樣性。</li>
+      <li><b>成因：</b>找捷徑騙 D ＋ 博弈不穩。</li>
+      <li><b>診斷：</b>多樣性低、FID 檢查。</li>
+      <li><b>解法：</b>WGAN／WGAN-GP、minibatch discrimination 等。</li>
+      <li><b>本質：</b>它是 GAN 訓練不穩的典型症狀。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const svg = document.getElementById('canvas');
+        const trainBtn = document.getElementById('train-btn');
+        const width = 600;
+        const height = 400;
+
+        // 真實資料的 4 個「模式」中心點 (Modes)
+        const realModes = [
+            { x: 150, y: 120 }, { x: 450, y: 120 },
+            { x: 150, y: 280 }, { x: 450, y: 280 }
+        ];
+
+        let realPoints = [];
+        let fakePoints = [];
+        let animationId;
+        let isTraining = false;
+
+        // 產生常態分佈的隨機數
+        function randomGaussian(mean, std) {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return num * std + mean;
+        }
+
+        // 初始化畫布與資料
+        function init() {
+            svg.innerHTML = '';
+            realPoints = [];
+            fakePoints = [];
+
+            // 建立真實資料 (綠點，分佈在 4 個模式)
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 50; j++) {
+                    const px = randomGaussian(realModes[i].x, 20);
+                    const py = randomGaussian(realModes[i].y, 20);
+                    realPoints.push({ x: px, y: py });
+
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", px);
+                    circle.setAttribute("cy", py);
+                    circle.setAttribute("r", 4);
+                    circle.setAttribute("fill", "#10b981");
+                    circle.setAttribute("opacity", "0.6");
+                    svg.appendChild(circle);
+                }
+            }
+
+            // 建立生成資料 (紅點，初始集中在中央一坨，代表模型還沒訓練好)
+            for (let i = 0; i < 200; i++) {
+                const px = randomGaussian(width / 2, 30);
+                const py = randomGaussian(height / 2, 30);
+                fakePoints.push({ x: px, y: py, initialX: px, initialY: py, targetX: px, targetY: py, el: null });
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", px);
+                circle.setAttribute("cy", py);
+                circle.setAttribute("r", 5);
+                circle.setAttribute("fill", "#ef4444");
+                circle.setAttribute("opacity", "0.8");
+                circle.setAttribute("stroke", "#7f1d1d");
+                circle.setAttribute("stroke-width", "1");
+                svg.appendChild(circle);
+                fakePoints[i].el = circle;
+            }
+        }
+
+        // 計算動畫目標點
+        function calculateTargets() {
+            const modeType = document.querySelector('input[name="modelType"]:checked').value;
+
+            if (modeType === 'gan') {
+                // 模式崩潰：隨機挑選 1 個 Mode，所有紅點都往那個 Mode 跑
+                const collapsedModeIdx = Math.floor(Math.random() * 4);
+                const targetMode = realModes[collapsedModeIdx];
+
+                fakePoints.forEach(p => {
+                    p.targetX = randomGaussian(targetMode.x, 15);
+                    p.targetY = randomGaussian(targetMode.y, 15);
+                });
+            } else {
+                // WGAN：將 200 個紅點平均分配給 4 個 Mode
+                // 模擬 Earth Mover's Distance 把分佈拉平均
+                fakePoints.forEach((p, index) => {
+                    const targetMode = realModes[index % 4];
+                    p.targetX = randomGaussian(targetMode.x, 20);
+                    p.targetY = randomGaussian(targetMode.y, 20);
+                });
+            }
+        }
+
+        // 動畫循環
+        function animate() {
+            let allArrived = true;
+
+            fakePoints.forEach(p => {
+                // 簡單的緩動動畫 (Easing)
+                const dx = p.targetX - p.x;
+                const dy = p.targetY - p.y;
+
+                if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+                    allArrived = false;
+                    p.x += dx * 0.05; // 移動速度
+                    p.y += dy * 0.05;
+                    p.el.setAttribute("cx", p.x);
+                    p.el.setAttribute("cy", p.y);
+                }
+            });
+
+            if (!allArrived && isTraining) {
+                animationId = requestAnimationFrame(animate);
+            } else {
+                isTraining = false;
+                trainBtn.innerText = "▶ 開始訓練";
+                trainBtn.disabled = false;
+            }
+        }
+
+        function startTraining() {
+            if (isTraining) return;
+            isTraining = true;
+            trainBtn.innerText = "⏳ 訓練中...";
+            trainBtn.disabled = true;
+
+            calculateTargets();
+            animate();
+        }
+
+        function resetSim() {
+            cancelAnimationFrame(animationId);
+            isTraining = false;
+            trainBtn.innerText = "▶ 開始訓練";
+            trainBtn.disabled = false;
+            init();
+        }
+
+        // 啟動
+        init();
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>GAN 由生成器與判別器對抗訓練,iPAS 生成式 AI 考點(初級科目一鑑別與生成、中級科目一)。重點:生成器造假、判別器抓假,互相較勁直到生成逼真樣本。易混點:GAN 是生成新樣本、非分類;訓練不穩、常見模式崩潰(mode collapse)——生成器只產出少數幾種樣本、缺多樣性。情境:與 VAE、Diffusion 並列三大生成技術,Diffusion 近年品質與穩定性更受青睞。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>模式崩潰(mode collapse)是什麼？</summary><p>GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。</p></details><details><summary>為什麼會發生？</summary><p>生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。</p></details><details><summary>怎麼診斷？</summary><p>生成結果多樣性低、很多不同輸入卻產出相似圖；可用多樣性指標、看樣本分布，或與真實分布算 FID 檢查。</p></details><details><summary>怎麼緩解？</summary><p>minibatch discrimination、特徵匹配、WGAN 與 WGAN-GP(更穩的損失與梯度懲罰)、unrolled GAN、加噪與多樣性正則。</p></details><details><summary>和訓練不穩的關係？</summary><p>模式崩潰是 GAN 訓練不穩的典型症狀之一；改善穩定性(平衡兩網路、好的損失)通常也能減輕崩潰。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "模式崩潰(mode collapse)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "GAN 訓練時生成器只學會產生少數幾種能騙過判別器的樣本、失去多樣性(如只生成一種臉)，無法涵蓋真實資料的各種模式。"}}, {"@type": "Question", "name": "為什麼會發生？", "acceptedAnswer": {"@type": "Answer", "text": "生成器找到捷徑——某幾個輸出能穩定騙過判別器就一直產出；加上兩網路博弈不穩，容易陷入這種退化均衡。"}}, {"@type": "Question", "name": "怎麼診斷？", "acceptedAnswer": {"@type": "Answer", "text": "生成結果多樣性低、很多不同輸入卻產出相似圖；可用多樣性指標、看樣本分布，或與真實分布算 FID 檢查。"}}, {"@type": "Question", "name": "怎麼緩解？", "acceptedAnswer": {"@type": "Answer", "text": "minibatch discrimination、特徵匹配、WGAN 與 WGAN-GP(更穩的損失與梯度懲罰)、unrolled GAN、加噪與多樣性正則。"}}, {"@type": "Question", "name": "和訓練不穩的關係？", "acceptedAnswer": {"@type": "Answer", "text": "模式崩潰是 GAN 訓練不穩的典型症狀之一；改善穩定性(平衡兩網路、好的損失)通常也能減輕崩潰。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="gan.html">GAN 對抗生成</a><a href="vae.html">VAE 變分自編碼器</a><a href="diffusion.html">Diffusion 擴散模型</a><a href="lpips_visual_perfect.html">FID, IS</a><a href="generative_churn_sim.html">生成式 AI</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

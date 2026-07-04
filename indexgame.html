@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 互動學習宇宙 | 學習人工智慧的奧秘</title>
+  <!-- AKIRA-SEO-v1 -->
+  <meta name="description" content="AI 互動學習宇宙：用混淆矩陣、RAG Agent、Transformer 拼圖、AI 怪物獵人等互動遊戲與動畫，把抽象 AI 概念變成可操作的體驗。適合 iPAS AI 應用規劃師備考與 AI 初學者。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://akira.ipas-ai.com/indexgame.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AI 互動學習宇宙 | 學習人工智慧的奧秘">
+  <meta property="og:description" content="用混淆矩陣、RAG Agent、Transformer 拼圖、AI 怪物獵人等互動遊戲與動畫，把抽象 AI 概念變成可操作的體驗。適合 iPAS 備考與 AI 初學者。">
+  <meta property="og:url" content="https://akira.ipas-ai.com/indexgame.html">
+  <meta property="og:image" content="https://akira.ipas-ai.com/game/GAME.png">
+  <meta property="og:image:width" content="1925">
+  <meta property="og:image:height" content="901">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="AI 互動學習宇宙 — 用遊戲學 AI">
+  <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI 互動學習宇宙 | 學習人工智慧的奧秘">
+  <meta name="twitter:description" content="用互動遊戲與動畫理解混淆矩陣、RAG、Transformer 等 AI 概念。適合 iPAS 備考與 AI 初學者。">
+  <meta name="twitter:image" content="https://akira.ipas-ai.com/game/GAME.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "AI 互動學習宇宙",
+    "url": "https://akira.ipas-ai.com/indexgame.html",
+    "description": "用混淆矩陣、RAG Agent、Transformer 拼圖、AI 怪物獵人等互動遊戲與動畫，把抽象 AI 概念變成可操作的體驗。適合 iPAS AI 應用規劃師備考與 AI 初學者。",
+    "inLanguage": "zh-TW",
+    "isAccessibleForFree": true,
+    "learningResourceType": "interactive media",
+    "teaches": ["混淆矩陣", "RAG", "Transformer", "機器學習", "深度學習", "生成式 AI"],
+    "isPartOf": {"@type": "WebSite", "name": "AKIRA 互動式 AI 學習與考證地圖", "url": "https://akira.ipas-ai.com/"},
+    "author": {"@type": "Person", "name": "AKIRA"}
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06060e;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-hover: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.25);
+      --text: #e4e4f0;
+      --text2: #9090b0;
+      --text3: #55556e;
+      --accent1: #6c63ff; /* Purple */
+      --accent2: #00d4aa; /* Teal */
+      --accent3: #ffb830; /* Amber */
+      --accent4: #ff6b6b; /* Coral */
+      --font-ui: 'Noto Sans TC', sans-serif;
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      overflow-x: hidden;
+    }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: -1;
+      opacity: 0.5;
+      pointer-events: none;
+      animation: float 20s infinite ease-in-out alternate;
+    }
+    .glow-1 {
+      top: -10%; left: -10%;
+      width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(108,99,255,0.3) 0%, rgba(108,99,255,0) 70%);
+      animation-delay: 0s;
+    }
+    .glow-2 {
+      bottom: -20%; right: -10%;
+      width: 60vw; height: 60vw;
+      background: radial-gradient(circle, rgba(0,212,170,0.2) 0%, rgba(0,212,170,0) 70%);
+      animation-delay: -5s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(5%, 10%) scale(1.1); }
+    }
+
+    /* Header / Hero */
+    header {
+      padding: 120px 20px 80px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent2);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: inline-block;
+      padding: 6px 16px;
+      border: 1px solid rgba(0, 212, 170, 0.3);
+      border-radius: 30px;
+      background: rgba(0, 212, 170, 0.05);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 64px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #9090b0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      animation: fadeInDown 0.8s ease-out 0.1s both;
+    }
+
+    p.subtitle {
+      font-size: 18px;
+      color: var(--text2);
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInDown 0.8s ease-out 0.2s both;
+    }
+
+    .home-link {
+      position: fixed;
+      top: 18px;
+      left: clamp(16px, 4vw, 40px);
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(6, 6, 14, 0.74);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      backdrop-filter: blur(16px);
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .home-link:hover,
+    .home-link:focus-visible {
+      border-color: rgba(0, 212, 170, 0.48);
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px 100px;
+      animation: fadeIn 1s ease-out 0.4s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 8px 24px;
+      border-radius: 30px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+      border-color: var(--border-hover);
+    }
+
+    .filter-btn.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+      font-weight: 700;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    /* Game Cards */
+    .game-card {
+      text-decoration: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+      min-height: 300px;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at top right, var(--hover-color, rgba(255,255,255,0.05)) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 0;
+    }
+
+    .game-card::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      z-index: 0;
+      background:
+        linear-gradient(135deg, rgba(112, 247, 255, 0.22), transparent 42%),
+        linear-gradient(315deg, rgba(255, 49, 230, 0.2), transparent 48%),
+        radial-gradient(circle at 70% 18%, var(--hover-color, rgba(112, 247, 255, 0.22)) 0%, transparent 58%);
+      opacity: 0;
+      transition: opacity 0.28s ease;
+      pointer-events: none;
+    }
+
+    .game-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-card:hover,
+    .game-card:focus-visible {
+      transform: translateY(-8px) scale(1.02);
+      border-color: rgba(112, 247, 255, 0.72);
+      box-shadow:
+        0 0 0 1px rgba(112, 247, 255, 0.64),
+        0 0 28px rgba(112, 247, 255, 0.34),
+        0 0 72px rgba(255, 49, 230, 0.2),
+        0 24px 54px rgba(0,0,0,0.52),
+        inset 0 0 0 1px var(--hover-color, transparent);
+      outline: none;
+    }
+
+    .game-card:hover::before,
+    .game-card:focus-visible::before,
+    .game-card:hover::after,
+    .game-card:focus-visible::after {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 48px;
+      margin-bottom: 24px;
+      filter: drop-shadow(0 0 20px var(--hover-color, transparent));
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .game-card:hover .card-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .game-card h3 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .game-card p {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0.7;
+      transition: all 0.3s;
+    }
+
+    .game-card:hover .card-footer {
+      opacity: 1;
+      padding-right: 4px;
+    }
+
+    .arrow {
+      transition: transform 0.3s;
+    }
+
+    .game-card:hover .arrow {
+      transform: translateX(6px);
+    }
+
+    /* Color Themes for specific cards */
+    .card-battle { --hover-color: rgba(255,82,154,0.4); }
+    .card-battle .card-footer { color: #ff529a; }
+    .card-battle .tag { color: #ff529a; background: rgba(255,82,154,0.1); border-color: rgba(255,82,154,0.2); }
+
+    .card-transform { --hover-color: rgba(108,99,255,0.4); }
+    .card-transform .card-footer { color: var(--accent1); }
+    .card-transform .tag { color: var(--accent1); background: rgba(108,99,255,0.1); border-color: rgba(108,99,255,0.2); }
+
+    .card-rag { --hover-color: rgba(0,212,170,0.4); }
+    .card-rag .card-footer { color: var(--accent2); }
+    .card-rag .tag { color: var(--accent2); background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.2); }
+
+    .card-rlhf { --hover-color: rgba(255,184,48,0.4); }
+    .card-rlhf .tag { color: var(--accent3); background: rgba(255,184,48,0.1); border-color: rgba(255,184,48,0.2); }
+
+    .card-prompt { --hover-color: rgba(255,107,107,0.4); }
+    .card-prompt .tag { color: var(--accent4); background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.2); }
+
+    .card-metric { --hover-color: rgba(0,204,170,0.4); }
+    .card-metric .card-footer { color: #00ccaa; }
+    .card-metric .tag { color: #00ccaa; background: rgba(0,204,170,0.1); border-color: rgba(0,204,170,0.2); }
+
+    .card-cn-paper { --hover-color: rgba(245, 158, 11, 0.45); }
+    .card-cn-paper .card-footer { color: #f59e0b; }
+    .card-cn-paper .tag { color: #b45309; background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.32); }
+
+    .card-tree-gallery { --hover-color: rgba(52, 211, 153, 0.48); }
+    .card-tree-gallery .card-footer { color: #34d399; }
+    .card-tree-gallery .tag { color: #34d399; background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.26); }
+
+    .card-confusion-game { --hover-color: rgba(255, 82, 122, 0.42); }
+    .card-confusion-game .card-footer { color: #ff527a; }
+    .card-confusion-game .tag { color: #ff527a; background: rgba(255,82,122,0.1); border-color: rgba(255,82,122,0.22); }
+
+    .card-confusion-calc { --hover-color: rgba(80, 222, 255, 0.42); }
+    .card-confusion-calc .card-footer { color: #50deff; }
+    .card-confusion-calc .tag { color: #50deff; background: rgba(80,222,255,0.1); border-color: rgba(80,222,255,0.22); }
+
+    .card-human-loop { --hover-color: rgba(255,184,48,0.42); }
+    .card-human-loop .card-footer { color: var(--accent3); }
+    .card-human-loop .tag { color: var(--accent3); background: rgba(255,184,48,0.1); border-color: rgba(255,184,48,0.22); }
+
+    .card-vgg { --hover-color: rgba(112,199,216,0.42); }
+    .card-vgg .card-footer { color: #70c7d8; }
+    .card-vgg .tag { color: #70c7d8; background: rgba(112,199,216,0.1); border-color: rgba(112,199,216,0.22); }
+    .card-vgg .card-icon {
+      margin-top: 24px;
+    }
+    .card-cnn { --hover-color: rgba(56,189,248,0.42); }
+    .card-cnn .card-footer { color: #38bdf8; }
+    .card-cnn .tag { color: #38bdf8; background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.22); }
+    .new-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff2bd6, #70f7ff);
+      color: #05050c;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 0 0 18px rgba(112, 247, 255, 0.5), 0 0 28px rgba(255, 43, 214, 0.34);
+    }
+
+    /* Locked / Coming Soon Cards */
+    .game-card.locked {
+      cursor: not-allowed;
+      border: 1px dashed var(--text3);
+      background: transparent;
+    }
+    
+    .game-card.locked:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--text2);
+    }
+
+    .game-card.locked .card-icon {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .game-card.locked:hover .card-icon {
+      transform: none;
+    }
+
+    .game-card.locked .card-footer {
+      color: var(--text3);
+    }
+
+    .game-card.locked .tag {
+      color: var(--text3);
+      background: transparent;
+      border-color: var(--border);
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+  <!-- Ambient Background -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <a class="home-link" href="index.html" aria-label="回 AI 學習與考證地圖">回 AI 學習與考證地圖</a>
+
+  <!-- Hero Section -->
+  <header>
+    <div class="eyebrow">Interactive AI Learning</div>
+    <h1>AI 互動宇宙</h1>
+    <p class="subtitle">告別枯燥的理論文字！在這裡，我們把複雜的人工智慧運作原理，變成你看得見、摸得到、玩得爽的網頁互動體驗。</p>
+  </header>
+
+  <!-- Content Grid -->
+  <div class="container">
+    
+    <!-- Filters removed for now -->
+
+    <div class="game-grid">
+
+      <!-- Card: CNN Forward Pass Interactive (NEW) -->
+      <a href="game/cnn-forward-pass-interactive.html" class="game-card card-cnn">
+        <span class="new-badge">NEW</span>
+        <div class="card-icon">🐱</div>
+        <div class="card-tags">
+          <span class="tag">CNN</span>
+          <span class="tag">前向傳播</span>
+          <span class="tag">影像辨識</span>
+        </div>
+        <h3>CNN 前向傳播・影像辨識</h3>
+        <p>一張貓的照片，如何一路被 CNN 辨識出來？跟著卷積、池化、激活到全連接層，親眼看見每一層抽取的特徵與最後的分類機率，把「電腦怎麼看圖」看得一清二楚。</p>
+        <div class="card-footer">
+          <span>開始解析</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: RAG Knowledge Engine (NEW) -->
+      <a href="game/rag-knowledge-engine.html" class="game-card card-rag">
+        <span class="new-badge">NEW</span>
+        <div class="card-icon">🔎</div>
+        <div class="card-tags">
+          <span class="tag">RAG</span>
+          <span class="tag">檢索增強</span>
+          <span class="tag">互動視覺</span>
+        </div>
+        <h3>RAG Knowledge Engine</h3>
+        <p>看見 AI「先查資料、再回答」的完整過程：問題轉向量 → 到知識庫檢索最相關片段 → 注入提示 → 生成有依據的答案。一步步拆解 RAG，把「為什麼能減少幻覺」看得清清楚楚。</p>
+        <div class="card-footer">
+          <span>進入引擎</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Transformer Forward Pass (NEW) -->
+      <a href="game/transformer-forward-pass.html" class="game-card card-transform">
+        <span class="new-badge">NEW</span>
+        <div class="card-icon">🔤</div>
+        <div class="card-tags">
+          <span class="tag">Transformer</span>
+          <span class="tag">前向傳播</span>
+          <span class="tag">Next Token</span>
+        </div>
+        <h3>Transformer Forward Pass</h3>
+        <p>一句話如何被 Transformer 讀懂、並預測下一個 Token？跟著 Embedding → 位置編碼 → 自注意力 → 前饋層一路走到輸出機率，親眼看見文字在模型裡的每一步流動。</p>
+        <div class="card-footer">
+          <span>看前向傳播</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: AI 演算法激鬥 Boss Rush (NEW) -->
+      <a href="game/ai-boss-rush.html" class="game-card card-battle">
+        <span class="new-badge">NEW</span>
+        <div class="card-icon">⚔️</div>
+        <div class="card-tags">
+          <span class="tag">動作闖關</span>
+          <span class="tag">30 隻魔王</span>
+          <span class="tag">iPAS 考點</span>
+        </div>
+        <h3>AI 演算法激鬥・Boss Rush</h3>
+        <p>三十個 iPAS AI 考點化身魔王登場。讀 Boss 情報、選對剋制弱點的 AI 技術、閃過彈幕把血量打到 0；依通關時間與受創評 S/A/B/C，五大考區全破再解鎖最終魔王，在實戰中把考點刻進腦裡。</p>
+        <div class="card-footer">
+          <span>開始激鬥</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Tree Algorithms Fluid Gallery -->
+      <a href="tree-algorithms-fluid-gallery.html" class="game-card card-tree-gallery">
+        <div class="card-icon">🌳</div>
+        <div class="card-tags">
+          <span class="tag">Tree Models</span>
+          <span class="tag">WebGL</span>
+          <span class="tag">8 種演算法</span>
+        </div>
+        <h3>樹系演算法・流體圖鑑</h3>
+        <p>用流體視覺把決策樹、隨機森林、Extra Trees、GBDT、XGBoost、LightGBM、CatBoost、Isolation Forest 串成一張可互動的樹系演算法圖鑑。</p>
+        <div class="card-footer">
+          <span>進入圖鑑</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: IPAS 中文大挑戰 (NEW 2026-05) -->
+      <a href="N11-115-CGGG-paper.html" class="game-card card-cn-paper">
+        <div class="card-icon">📖</div>
+        <div class="card-tags">
+          <span class="tag">中文閱讀</span>
+          <span class="tag">2 種難度</span>
+          <span class="tag">IPAS 必玩</span>
+        </div>
+        <h3>IPAS 中文大挑戰</h3>
+        <p>兩段難度的中文閱讀地獄。<strong>簡單模式</strong>讓文字流暢易讀，舒舒服服練閱讀；<strong>困難模式</strong>讓理組懷疑該先回去重考中文 10 級檢定再來考 IPAS，文組則直接以為自己在解讀外星文。</p>
+        <div class="card-footer">
+          <span>開始挑戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Confusion Matrix Challenge -->
+      <a href="confusion_matrix_game.html" class="game-card card-confusion-game">
+        <div class="card-icon">🎯</div>
+        <div class="card-tags">
+          <span class="tag">Evaluation</span>
+          <span class="tag">Confusion Matrix</span>
+          <span class="tag">10 關</span>
+        </div>
+        <h3>AI 混淆矩陣大挑戰</h3>
+        <p>用 10 關語言陷阱把 TP、FP、FN、TN 重新刻進直覺裡。特別適合練習醫療、詐欺、篩檢這類「漏判與誤判誰更痛」的考題。</p>
+        <div class="card-footer">
+          <span>開始挑戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Confusion Matrix Calculator -->
+      <a href="confusion_matrix_calculator.html" class="game-card card-confusion-calc">
+        <div class="card-icon">🧮</div>
+        <div class="card-tags">
+          <span class="tag">Metrics</span>
+          <span class="tag">TP FP FN TN</span>
+          <span class="tag">F1</span>
+        </div>
+        <h3>混淆矩陣計算器</h3>
+        <p>直接輸入 TP、FP、FN、TN，自動算出 Accuracy、Precision、Recall、F1 等指標，並拆出公式過程，拿來驗算與考前複習最省時間。</p>
+        <div class="card-footer">
+          <span>打開計算器</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+      
+      <!-- Card: VGG16 3D Neural Network Observatory -->
+      <a href="vgg16_3d_observatory_centered_layer_info.html" class="game-card card-vgg">
+        <div class="card-icon">🛰️</div>
+        <div class="card-tags">
+          <span class="tag">CNN</span>
+          <span class="tag">VGG16</span>
+          <span class="tag">3D</span>
+        </div>
+        <h3>VGG16 3D 神經網路觀測站</h3>
+        <p>用 3D 視角穿梭 VGG16 的卷積層、池化層與分類結構，像走進模型天文台一樣觀察特徵如何一層一層被抽取。</p>
+        <div class="card-footer">
+          <span>進入觀測站</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Human XXX Loop Resistance Challenge -->
+      <a href="game/hunamxxloop/index.html" class="game-card card-human-loop">
+        <div class="card-icon">🧭</div>
+        <div class="card-tags">
+          <span class="tag">IPAS AI</span>
+          <span class="tag">Human Loop</span>
+          <span class="tag">抗性訓練</span>
+        </div>
+        <h3>Hunam XXX loop 抗性挑戰</h3>
+        <p>四位 AI 出題官把 Human-in、Human-over、Human-out、Human-in-command 做成變化考題。玩過一輪後，看到題幹偷換「誰決策、誰監督、誰能中止」會更有抵抗力。</p>
+        <div class="card-footer">
+          <span>進入挑戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+      
+      <!-- Card: Token Slicing Game -->
+      <a href="token.html" class="game-card card-rag">
+        <div class="card-icon">✂️</div>
+        <div class="card-tags">
+          <span class="tag">Tokenization</span>
+          <span class="tag">Prompt</span>
+        </div>
+        <h3>Token 切切樂</h3>
+        <p>你知道 AI 是怎麼「讀」文字的嗎？它不是一個字一個字看，而是把文字切成一塊塊的 Token！來挑戰看看，你能猜對 AI 怎麼切嗎？</p>
+        <div class="card-footer">
+          <span>開始切 Token</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: AI Monster Hunter Lite -->
+      <a href="ai-monster-hunter-lite.html" class="game-card card-prompt">
+        <div class="card-icon">🐉</div>
+        <div class="card-tags">
+          <span class="tag">Adventure</span>
+          <span class="tag">AI Knowledge</span>
+        </div>
+        <h3>AI 怪物獵人</h3>
+        <p>化身 AI 獵人，用你的人工智慧知識打敗各種怪物！每隻怪物都有弱點，只有選對正確的 AI 技術才能造成傷害。邊打怪邊學 AI，越打越聰明！</p>
+        <div class="card-footer">
+          <span>開始狩獵</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card 0: AI Model Battle -->
+      <a href="ai-model-battle.html" class="game-card card-battle">
+        <div class="card-icon">🛡️</div>
+        <div class="card-tags">
+          <span class="tag">Architecture</span>
+          <span class="tag">Strategy</span>
+        </div>
+        <h3>AI 應用規劃師戰記</h3>
+        <p>你扮演 AI 架構師，面對各種真實世界的 AI 應用場景，從候選模型中選出最適合的那一個。在 20 題內盡可能拿高分，HP 歸零則 Game Over。</p>
+        <div class="card-footer">
+          <span>接受挑戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: AI Metric Battle -->
+      <a href="ai-metric-battle.html" class="game-card card-metric">
+        <div class="card-icon">📊</div>
+        <div class="card-tags">
+          <span class="tag">Evaluation</span>
+          <span class="tag">Strategy</span>
+        </div>
+        <h3>AI 評估指標大師</h3>
+        <p>你扮演 AI 模型評估專家，面對各種模型與任務場景，從候選的評估指標中選出最適合的那一個。Accuracy、F1、AUC、BLEU、mAP⋯⋯你分得清嗎？</p>
+        <div class="card-footer">
+          <span>接受挑戰</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card 1: Transformer -->
+      <a href="transformer_game.html" class="game-card card-transform">
+        <div class="card-icon">🧠</div>
+        <div class="card-tags">
+          <span class="tag">Foundation</span>
+          <span class="tag">NLP</span>
+        </div>
+        <h3>Transformer 拼圖</h3>
+        <p>探索大腦：一步步拆解 ChatGPT 的核心運算引擎。透過拖拉步驟積木，了解 Tokenization、Self-Attention 到輸出預測的 7 大黑盒子原理。</p>
+        <div class="card-footer">
+          <span>開始遊戲</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card 2: RAG -->
+      <a href="rag_game.html" class="game-card card-rag">
+        <div class="card-icon">📚</div>
+        <div class="card-tags">
+          <span class="tag">Applied AI</span>
+          <span class="tag">Architecture</span>
+        </div>
+        <h3>RAG Agent 調度員</h3>
+        <p>知識檢索體驗：讓模型「連上外部大腦」的秘密。扮演調度員，釐清知識庫向量化與 LLM 接力作答的邏輯，體驗進階 Agentic RAG 分支判斷！</p>
+        <div class="card-footer">
+          <span>開始遊戲</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Card: Matrix Web Game -->
+      <a href="matrix-webgame/index.html" class="game-card card-transform">
+        <div class="card-icon">🕶️</div>
+        <div class="card-tags">
+          <span class="tag">Adventure</span>
+          <span class="tag">AI Concepts</span>
+        </div>
+        <h3>駭客任務</h3>
+        <p>進入 Matrix 的世界，在虛擬與現實之間穿梭！透過解謎和挑戰，探索 AI 的核心概念。你準備好吞下紅色藥丸了嗎？</p>
+        <div class="card-footer">
+          <span>進入 Matrix</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBSCAN 互動原理 (MathJax修正版)</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="以密度為基礎：用 eps(鄰域半徑)與 minPts(成為核心點所需的鄰居數)定義稠密區，把相連的稠密區聚成一群，密度不足的點標為雜訊(離群)。 不需事先指定群數、能找出任意形狀的群、能自動標出雜訊與離群點；K-means 需給 K 且假設群為球形。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dbscan.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DBSCAN 互動原理 (MathJax修正版)">
+    <meta property="og:description" content="以密度為基礎：用 eps(鄰域半徑)與 minPts(成為核心點所需的鄰居數)定義稠密區，把相連的稠密區聚成一群，密度不足的點標為雜訊(離群)。 不需事先指定群數、能找出任意形狀的群、能自動標出雜訊與離群點；K-means 需給 K 且假設群為球形。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dbscan.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DBSCAN 互動原理 (MathJax修正版)">
+    <meta name="twitter:description" content="以密度為基礎，用 eps 與 minPts 定義稠密區把相連稠密區聚成一群，密度不足標為雜訊。不需指定群數、能找任意形狀的群、自動偵測離群。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "DBSCAN 互動原理 (MathJax修正版)",
+  "url": "https://akira.ipas-ai.com/dbscan.html",
+  "description": "以密度為基礎：用 eps(鄰域半徑)與 minPts(成為核心點所需的鄰居數)定義稠密區，把相連的稠密區聚成一群，密度不足的點標為雜訊(離群)。不需事先指定群數、能找出任意形狀的群、能自動標出雜訊與離群點；K-means 需給 K 且假設群為球形。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --violet:#7e22ce; --violet-d:#6b21a8; --blue:#2563eb; --blue-d:#1d4ed8; --sky-d:#075985;
+            --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:940px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#581c87 0%,#7e22ce 55%,#c084fc 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(126,34,206,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:940px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#e9d5ff 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--violet-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#faf5ff; border-left:5px solid var(--violet)}
+        .note.meta{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .ptypes{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:14px 0}
+        .pt{border:1px solid var(--line); border-radius:13px; padding:14px 16px; background:#fbfcfe}
+        .pt b{display:flex; align-items:center; gap:8px; margin-bottom:5px}
+        .pt .sw{width:16px; height:16px; border-radius:50%; flex:0 0 auto}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:10px 12px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .db{color:var(--violet-d); font-weight:800}
+        .cmp .km{color:var(--sky-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--violet);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--violet-d)}
+
+        .qa{background:#faf5ff; border:1px solid #e9d5ff; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #ecd9fb; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--violet-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#faf5ff; border:1px solid #ead9fb; border-radius:14px; padding:18px; margin:14px 0}
+        .db-controls{display:grid; grid-template-columns:1fr 1fr; gap:18px; width:100%; background:#fff; padding:16px; border-radius:10px; margin-bottom:16px; border:1px solid var(--line)}
+        .data-controls{grid-column:span 2; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid var(--line)}
+        .db-controls button{padding:8px 15px; background:#6d5d80; color:#fff; border:none; border-radius:7px; cursor:pointer; font-weight:700; transition:.2s}
+        .db-controls button:hover{background:#5b4d6e; transform:translateY(-1px)}
+        .db-controls button.active{background:var(--violet)}
+        .slider-group{display:flex; flex-direction:column}
+        .slider-group label{font-weight:bold; margin-bottom:5px; color:#555; font-size:.92rem}
+        .slider-group input[type=range]{cursor:pointer; accent-color:var(--violet)}
+        .val-display{color:var(--violet-d); font-weight:bold; font-family:monospace; font-size:1.1em}
+        .viz-scroll{overflow-x:auto; text-align:center}
+        #viz-area{border:1px solid #e3d6f3; border-radius:8px; background:#fff; cursor:crosshair; display:inline-block}
+        #viz-area svg{max-width:100%; height:auto}
+        .point{transition:fill .2s, r .2s; stroke-width:1px}
+        .scan-circle{fill:rgba(126,34,206,.10); stroke:rgba(126,34,206,.5); stroke-width:2px; pointer-events:none}
+        .legend{display:flex; gap:18px; margin-top:12px; font-size:.88em; justify-content:center; flex-wrap:wrap}
+        .legend-item{display:flex; align-items:center; gap:6px}
+        .legend .dot{width:12px; height:12px; border-radius:50%; display:inline-block}
+        .cc{margin-top:10px; color:var(--violet-d); font-weight:bold; text-align:center}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .db-controls{grid-template-columns:1fr}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🌌 密度型分群 · iPAS 常考</span>
+        <h1>DBSCAN：靠「密度」分群，還能自動抓出雜訊</h1>
+        <p>K-Means 看「離中心多近」，DBSCAN 則看「點擠不擠」。它把<b>高密度的區域連成一群</b>、把<b>落單的點當成雜訊</b>。好處是：不必先決定群數、能分出環形/月形這種怪形狀、還會自動標出離群點。</p>
+        <div class="chips"><span>密度為基礎</span><span>核心/邊界/雜訊</span><span>ε 與 MinPts</span><span>任意形狀</span><span>不需定 K</span><span>自動抓離群</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、DBSCAN 在做什麼？</h2>
+        <p class="lead">一句話：<span class="term">把「擠在一起」的點連成一群，落單的當雜訊</span>。</p>
+        <div class="note def">
+            <h4>💡 白話定義（密度型分群）</h4>
+            想像一個廣場：<b>人潮密集的地方自然形成一團一團</b>，而在角落落單的零星幾個人，就是「雜訊」。DBSCAN 就是這樣——它不看「中心」，只看<span class="hl">每個點周圍夠不夠密集</span>，把密集區一塊塊連起來。
+        </div>
+        <div class="note app">
+            <h4>⭐ 三大強項（vs K-Means）</h4>
+            ① <b>不必先決定 K</b>（群數自己浮現）；② 能分出<b>任意形狀</b>的群（環形、月形也行，K-Means 只會切球狀）；③ 會<b>自動標出雜訊／離群點</b>，所以也常拿來做<b>異常偵測</b>。
+        </div>
+    </section>
+
+    <!-- ===== 2. 三種點 ===== -->
+    <section class="lesson">
+        <h2>🎯 二、三種點：核心、邊界、雜訊（最常考）</h2>
+        <p class="lead">DBSCAN 先用兩個參數把每個點分成三類。</p>
+        <div class="ptypes">
+            <div class="pt"><b><span class="sw" style="background:#7e22ce;border:2px solid #fff"></span>核心點 Core</b>在半徑 ε 內，鄰居數 <b>≥ MinPts</b>（含自己）。它是群聚的「種子」。</div>
+            <div class="pt"><b><span class="sw" style="background:#a78bfa;border:1px dashed #444"></span>邊界點 Border</b>自己鄰居不到 MinPts，但<b>落在某個核心點的 ε 範圍內</b>。是群的邊緣。</div>
+            <div class="pt"><b><span class="sw" style="background:#bdc3c7"></span>雜訊 Noise</b>既不是核心、也不在任何核心點的鄰域內 → 視為<b>離群值（Outlier）</b>。</div>
+        </div>
+        <div style="text-align:center; margin:6px 0">
+            <svg width="360" height="180" viewBox="0 0 360 180" style="max-width:100%;height:auto">
+                <rect x="0" y="0" width="360" height="180" fill="#fbfcfe" rx="10"/>
+                <circle cx="110" cy="92" r="50" fill="rgba(126,34,206,.08)" stroke="#7e22ce" stroke-width="1.5" stroke-dasharray="5 4"/>
+                <g fill="#a78bfa">
+                    <circle cx="90" cy="78" r="5"/><circle cx="128" cy="80" r="5"/><circle cx="95" cy="108" r="5"/><circle cx="125" cy="110" r="5"/><circle cx="78" cy="95" r="5"/>
+                </g>
+                <circle cx="110" cy="92" r="8" fill="#7e22ce" stroke="#fff" stroke-width="2"/>
+                <text x="110" y="158" font-size="12" fill="#6b21a8" text-anchor="middle" font-weight="bold">核心點（鄰居 ≥ MinPts）</text>
+                <circle cx="152" cy="118" r="6" fill="#a78bfa" stroke="#444" stroke-width="1.5" stroke-dasharray="2 1"/>
+                <text x="205" y="120" font-size="11" fill="#475569">邊界點（在核心 ε 內、自己鄰居不足）</text>
+                <circle cx="305" cy="55" r="5.5" fill="#bdc3c7" stroke="#95a5a6"/>
+                <text x="298" y="42" font-size="11" fill="#64748b" text-anchor="end">雜訊（離群）→</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- ===== 3. 兩參數 ===== -->
+    <section class="lesson">
+        <h2>🎛️ 三、兩個關鍵參數：ε 與 MinPts</h2>
+        <div class="keys">
+            <div class="keycard"><b>ε（Epsilon，鄰域半徑）</b>「搜尋鄰居的圓圈」要畫多大。ε 太小→大家都變雜訊；太大→所有點併成一坨。</div>
+            <div class="keycard"><b>MinPts（最小點數）</b>「要幾個鄰居才算核心點」。越大→越嚴格、雜訊越多；越小→越寬鬆。</div>
+        </div>
+        <div class="note meta">
+            <h4>📐 怎麼設？</h4>
+            <b>MinPts</b> 經驗上常取約 <b>2 × 維度</b>（2D 資料就用 4 左右）。<b>ε</b> 用 <span class="term">k-距離圖</span>估：把每個點到「第 k 近鄰」的距離由小到大排序畫出來，找曲線的<b>手肘轉折</b>那個距離當 ε。兩個參數要一起調。
+        </div>
+    </section>
+
+    <!-- ===== 4. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 四、動手玩：看密度怎麼分群、抓雜訊</h2>
+        <p class="lead">切換資料形狀、調 ε 與 MinPts。<b>滑鼠移到任一點</b>上，會畫出它的 ε 搜尋圈並高亮鄰居。</p>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看（一定要試「同心圓 / 雙月形」）</h4>
+            點依群上色，<b>灰色＝雜訊</b>；大點＝核心、小點＝邊界。<b>切到「同心圓」或「雙月形」</b>——DBSCAN 能漂亮地分開這些怪形狀，<span class="hl">而 K-Means 在這裡一定會分錯</span>，這就是 DBSCAN 最大的亮點。再把 ε 調很小，看大家怎麼變成雜訊。
+        </div>
+
+        <div class="demo-card">
+            <div class="db-controls">
+                <div class="data-controls">
+                    <button onclick="generateData('blobs')" class="active" id="btn-blobs">普通聚類 (Blobs)</button>
+                    <button onclick="generateData('circles')" id="btn-circles">同心圓 (Rings)</button>
+                    <button onclick="generateData('moons')" id="btn-moons">雙月形 (Moons)</button>
+                </div>
+                <div class="slider-group">
+                    <label>Epsilon ($\epsilon$) 搜尋半徑：<span id="val-eps" class="val-display">30</span></label>
+                    <input type="range" id="slider-eps" min="10" max="80" value="30">
+                    <small style="color:#7f8c8d">搜尋鄰居的圓圈大小</small>
+                </div>
+                <div class="slider-group">
+                    <label>MinPts 最小點數：<span id="val-minpts" class="val-display">4</span></label>
+                    <input type="range" id="slider-minpts" min="2" max="10" value="4">
+                    <small style="color:#7f8c8d">成為核心點所需的鄰居數量</small>
+                </div>
+            </div>
+            <div class="viz-scroll"><div id="viz-area"></div></div>
+            <div class="legend">
+                <div class="legend-item"><span class="dot" style="background:#7e22ce; border:2px solid #fff"></span> 核心點 (Core)</div>
+                <div class="legend-item"><span class="dot" style="background:#a78bfa; border:1px dashed #333"></span> 邊界點 (Border)</div>
+                <div class="legend-item"><span class="dot" style="background:#bdc3c7"></span> 雜訊 (Noise)</div>
+            </div>
+            <div class="cc">目前偵測到的群聚數量：<span id="cluster-count">0</span></div>
+        </div>
+    </section>
+
+    <!-- ===== 5. vs K-Means ===== -->
+    <section class="lesson">
+        <h2>🆚 五、DBSCAN vs K-Means</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="db">DBSCAN</span></th><th><span class="km">K-Means</span></th></tr>
+            <tr><td>依據</td><td><b>密度</b>（點擠不擠）</td><td>到中心的<b>距離</b></td></tr>
+            <tr><td>要先定 K？</td><td><b>不用</b></td><td><b>要</b></td></tr>
+            <tr><td>群形狀</td><td><b>任意</b>（環形、月形也行）</td><td>偏<b>球狀</b>、大小相近</td></tr>
+            <tr><td>雜訊／離群</td><td><b>自動標出</b>（可做異常偵測）</td><td>沒有雜訊概念、對離群<b>敏感</b></td></tr>
+            <tr><td>參數</td><td>ε、MinPts</td><td>K</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 6. 限制 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、限制與何時不要用</h2>
+        <div class="keys">
+            <div class="keycard"><b>密度差異大時吃力</b>各群密度差很多時，單一組 ε/MinPts 難同時適配 → 改用 <b>HDBSCAN</b>。</div>
+            <div class="keycard"><b>高維失效</b>維度高時距離鑑別力下降（維度詛咒），分群變難。</div>
+            <div class="keycard"><b>兩參數要調</b>ε、MinPts 設不好結果差很多，需用 k-距離圖等方法輔助。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. DBSCAN 以什麼為基礎分群？</summary>
+                <p><b>密度</b>。用 ε（鄰域半徑）與 MinPts（成為核心點所需鄰居數）定義稠密區，把相連的稠密區連成一群，密度不足的點標為雜訊。</p></details>
+            <details><summary>Q2. 核心點、邊界點、雜訊怎麼分？</summary>
+                <p><b>核心點</b>：ε 內鄰居 ≥ MinPts；<b>邊界點</b>：鄰居不足，但落在某核心點的 ε 內；<b>雜訊</b>：都不是 → 離群。</p></details>
+            <details><summary>Q3. DBSCAN 比 K-Means 強在哪？</summary>
+                <p>不需先定 K、能找<b>任意形狀</b>的群（環形/月形）、會<b>自動標出雜訊與離群</b>；K-Means 要 K、只找球狀、對離群敏感。</p></details>
+            <details><summary>Q4. ε 怎麼估？DBSCAN 有什麼限制？</summary>
+                <p>用 <b>k-距離圖</b>找手肘轉折估 ε（MinPts 約 2×維度）。限制：各群<b>密度差異大</b>時單一參數難適配（用 HDBSCAN）、高維失效。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>密度型分群</b>把擠在一起的點連成群，落單的當雜訊。</div>
+            <div class="keycard"><b>三種點</b>核心（鄰居≥MinPts）、邊界（在核心ε內）、雜訊（離群）。</div>
+            <div class="keycard"><b>兩參數</b>ε（半徑）、MinPts（最小鄰居數），用 k-距離圖估 ε。</div>
+            <div class="keycard"><b>三大強項</b>不需定 K、任意形狀、自動抓雜訊。</div>
+            <div class="keycard"><b>限制</b>密度差異大吃力（HDBSCAN）、高維失效、要調參。</div>
+            <div class="keycard"><b>vs K-Means</b>密度 vs 距離；環形/月形 DBSCAN 才分得開。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 600;
+        const height = 400;
+        let points = [];
+        let eps = 30;
+        let minPts = 4;
+        let scanCircle;
+        const svg = d3.select("#viz-area").append("svg").attr("width", width).attr("height", height);
+        const colors = d3.scaleOrdinal(d3.schemeTableau10);
+
+        function generateData(type) {
+            points = [];
+            document.querySelectorAll('.data-controls button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${type}`).classList.add('active');
+
+            if (type === 'blobs') {
+                const centers = [{x:150, y:150}, {x:450, y:150}, {x:300, y:300}];
+                centers.forEach(c => {
+                    for(let i=0; i<50; i++) points.push({ x: c.x + (Math.random()-0.5)*100, y: c.y + (Math.random()-0.5)*100, id: points.length });
+                });
+                for(let i=0; i<30; i++) points.push({x: Math.random()*width, y: Math.random()*height, id: points.length});
+            } else if (type === 'circles') {
+                for(let i=0; i<60; i++) {
+                    const angle = (i / 60) * Math.PI * 2;
+                    points.push({ x: width/2 + Math.cos(angle) * 60 + (Math.random()-0.5)*10, y: height/2 + Math.sin(angle) * 60 + (Math.random()-0.5)*10, id: points.length });
+                }
+                for(let i=0; i<100; i++) {
+                    const angle = (i / 100) * Math.PI * 2;
+                    points.push({ x: width/2 + Math.cos(angle) * 140 + (Math.random()-0.5)*15, y: height/2 + Math.sin(angle) * 140 + (Math.random()-0.5)*15, id: points.length });
+                }
+                 for(let i=0; i<20; i++) points.push({x: Math.random()*width, y: Math.random()*height, id: points.length});
+            } else if (type === 'moons') {
+                for(let i=0; i<80; i++) {
+                    const x = i * 2 + 150;
+                    const y = 150 - Math.sin(i/80 * Math.PI) * 80 + (Math.random()-0.5)*15;
+                    points.push({x, y, id: points.length});
+                }
+                for(let i=0; i<80; i++) {
+                    const x = i * 2 + 250;
+                    const y = 150 + Math.sin(i/80 * Math.PI) * 80 + (Math.random()-0.5)*15;
+                    points.push({x, y, id: points.length});
+                }
+            }
+            runDBSCAN();
+        }
+
+        function getDistance(p1, p2) { return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)); }
+
+        function runDBSCAN() {
+            points.forEach(p => { p.visited = false; p.cluster = -1; p.type = 'noise'; });
+            let clusterId = 0;
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i];
+                if (p.visited) continue;
+                p.visited = true;
+                const neighbors = regionQuery(p);
+                if (neighbors.length < minPts) { p.cluster = -1; p.type = 'noise'; }
+                else { expandCluster(p, neighbors, clusterId); clusterId++; }
+            }
+            document.getElementById("cluster-count").innerText = clusterId;
+            render();
+        }
+
+        function regionQuery(point) { return points.filter(other => getDistance(point, other) <= eps); }
+
+        function expandCluster(p, neighbors, clusterId) {
+            p.cluster = clusterId; p.type = 'core';
+            let i = 0;
+            while (i < neighbors.length) {
+                const pn = neighbors[i];
+                if (!pn.visited) {
+                    pn.visited = true;
+                    const pnNeighbors = regionQuery(pn);
+                    if (pnNeighbors.length >= minPts) { neighbors = neighbors.concat(pnNeighbors); pn.type = 'core'; }
+                    else { pn.type = 'border'; }
+                }
+                if (pn.cluster === -1) {
+                    pn.cluster = clusterId;
+                    if(pn.type === 'noise') pn.type = 'border';
+                }
+                if (pn.cluster === -1 || pn.cluster === undefined) { pn.cluster = clusterId; }
+                i++;
+            }
+        }
+
+        function render() {
+            svg.selectAll("*").remove();
+            scanCircle = svg.append("circle").attr("class", "scan-circle").attr("r", eps).attr("cx", -100).attr("cy", -100);
+            const dots = svg.selectAll(".point").data(points).enter().append("circle")
+                .attr("class", d => `point ${d.type}`)
+                .attr("cx", d => d.x).attr("cy", d => d.y)
+                .attr("r", d => d.type === 'core' ? 6 : (d.type === 'border' ? 4 : 3))
+                .attr("fill", d => d.cluster === -1 ? "#bdc3c7" : colors(d.cluster))
+                .attr("stroke", d => d.cluster === -1 ? "#95a5a6" : (d.type === 'core' ? '#fff' : '#333'))
+                .on("mouseover", function(event, d) {
+                    scanCircle.attr("cx", d.x).attr("cy", d.y).attr("r", eps);
+                    const neighbors = regionQuery(d);
+                    svg.selectAll(".point").attr("opacity", 0.3);
+                    d3.select(this).attr("opacity", 1);
+                    svg.selectAll(".point").filter(p => neighbors.includes(p)).attr("opacity", 1).attr("stroke", "#7e22ce").attr("stroke-width", 2);
+                })
+                .on("mouseout", function() {
+                    scanCircle.attr("cx", -500);
+                    svg.selectAll(".point").attr("opacity", 1).attr("stroke", d => d.cluster === -1 ? "#95a5a6" : (d.type === 'core' ? '#fff' : '#333')).attr("stroke-width", d => d.type === 'core' ? 1.5 : 1);
+                });
+        }
+
+        const sliderEps = document.getElementById("slider-eps");
+        const sliderMinPts = document.getElementById("slider-minpts");
+        sliderEps.addEventListener("input", function() { eps = parseInt(this.value); document.getElementById("val-eps").innerText = eps; runDBSCAN(); });
+        sliderMinPts.addEventListener("input", function() { minPts = parseInt(this.value); document.getElementById("val-minpts").innerText = minPts; runDBSCAN(); });
+        generateData('blobs');
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>DBSCAN 是基於密度的分群法,iPAS 中級科目三考點。重點:把高密度區連成群、低密度點視為雜訊,不需先指定群數、能找任意形狀的群並自動偵測離群。易混點:與 K-means 差很多——K-means 需定 k、只找球狀、對離群敏感;DBSCAN 靠 eps(鄰域半徑)與 minPts 兩參數,對密度差異大的資料較吃力(可用 HDBSCAN)。情境:離群偵測、不規則形狀分群。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>DBSCAN 怎麼分群？</summary><p>以密度為基礎：用 eps(鄰域半徑)與 minPts(成為核心點所需的鄰居數)定義稠密區，把相連的稠密區聚成一群，密度不足的點標為雜訊(離群)。</p></details><details><summary>DBSCAN 比 K-means 好在哪？</summary><p>不需事先指定群數、能找出任意形狀的群、能自動標出雜訊與離群點；K-means 需給 K 且假設群為球形。</p></details><details><summary>eps 和 minPts 怎麼設？</summary><p>minPts 經驗上常取約 2 倍維度；eps 可用 k-距離圖(把每點到第 k 近鄰的距離排序，找曲線的手肘轉折)來估，兩者需一起調。</p></details><details><summary>DBSCAN 的限制？</summary><p>當各群密度差異很大時，單一組 eps/minPts 難以同時適配(可改用 HDBSCAN)；高維時距離鑑別力下降也會變難。</p></details><details><summary>哪些點會被當成雜訊？</summary><p>既不是核心點、也不在任何核心點鄰域內的點；能自然處理離群值是 DBSCAN 的特色。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "DBSCAN 怎麼分群？", "acceptedAnswer": {"@type": "Answer", "text": "以密度為基礎：用 eps(鄰域半徑)與 minPts(成為核心點所需的鄰居數)定義稠密區，把相連的稠密區聚成一群，密度不足的點標為雜訊(離群)。"}}, {"@type": "Question", "name": "DBSCAN 比 K-means 好在哪？", "acceptedAnswer": {"@type": "Answer", "text": "不需事先指定群數、能找出任意形狀的群、能自動標出雜訊與離群點；K-means 需給 K 且假設群為球形。"}}, {"@type": "Question", "name": "eps 和 minPts 怎麼設？", "acceptedAnswer": {"@type": "Answer", "text": "minPts 經驗上常取約 2 倍維度；eps 可用 k-距離圖(把每點到第 k 近鄰的距離排序，找曲線的手肘轉折)來估，兩者需一起調。"}}, {"@type": "Question", "name": "DBSCAN 的限制？", "acceptedAnswer": {"@type": "Answer", "text": "當各群密度差異很大時，單一組 eps/minPts 難以同時適配(可改用 HDBSCAN)；高維時距離鑑別力下降也會變難。"}}, {"@type": "Question", "name": "哪些點會被當成雜訊？", "acceptedAnswer": {"@type": "Answer", "text": "既不是核心點、也不在任何核心點鄰域內的點；能自然處理離群值是 DBSCAN 的特色。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="clustering.html">分群/類聚/叢集(Clustering)</a><a href="dbcv.html">DBCV、群集穩定度</a><a href="unsupervised_overview.html">非監督式學習</a><a href="k-means.html">K-Means</a><a href="hierarchicalclustering.html">階層式分群</a><a href="dim-reduction.html">降維</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

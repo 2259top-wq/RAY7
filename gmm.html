@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMM 高斯混合模型互動演示</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。K-means 是硬分群、假設球形；GMM 是軟分群(給機率)、可學橢圓形狀，更有彈性，用 EM 演算法求解。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/gmm.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="GMM 高斯混合模型互動演示">
+    <meta property="og:description" content="高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。K-means 是硬分群、假設球形；GMM 是軟分群(給機率)、可學橢圓形狀，更有彈性。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/gmm.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GMM 高斯混合模型互動演示">
+    <meta name="twitter:description" content="高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。K-means 是硬分群；GMM 是軟分群、可學橢圓形狀，用 EM 演算法求解。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "GMM 高斯混合模型互動演示",
+  "url": "https://akira.ipas-ai.com/gmm.html",
+  "description": "高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。K-means 是硬分群、假設球形；GMM 是軟分群(給機率)、可學橢圓形狀，更有彈性，用 EM 演算法求解。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --pp:#9333ea; --pp-d:#6b21a8; --pp-dd:#4c1d95;
+            --blue:#2563eb; --green:#16a34a; --amber:#f59e0b; --red:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f1edf7;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#4c1d95 0%,#9333ea 55%,#c084fc 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(147,51,234,.30); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.9rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#e9d5ff 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--pp-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#faf5ff; border-left:5px solid var(--pp)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#eff6ff; border-left:5px solid var(--blue)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f5f3f8; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .k{color:var(--muted)} .cmp .g{color:var(--pp-d); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--pp);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--pp-d)}
+
+        .step{display:flex; gap:13px; margin:14px 0}
+        .step .n{flex:none; width:30px; height:30px; border-radius:50%; background:var(--pp); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:.95rem}
+        .step .b{flex:1}
+        .step .b b{color:var(--pp-d)}
+
+        .math-block{background:#faf5ff; padding:14px 16px; border-left:4px solid var(--pp); border-radius:0 10px 10px 0; margin:12px 0; overflow-x:auto; font-size:.96rem}
+        .math-block em{color:var(--muted); font-style:normal; display:block; margin-top:6px; font-size:.9rem}
+
+        .qa{background:#faf5ff; border:1px solid #e9d5ff; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #f0e6fb; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--pp-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#faf5ff; border:1px solid #e9d5ff; border-radius:14px; padding:18px; margin:14px 0}
+        .demo-card .controls{display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; justify-content:center}
+        .demo-card button{padding:10px 18px; border:none; border-radius:8px; cursor:pointer; font-weight:800;
+            transition:all .2s; background:#6b7280; color:#fff}
+        .demo-card button:hover{filter:brightness(.93); transform:translateY(-1px)}
+        .demo-card button:disabled{background:#cbd5e1; cursor:not-allowed; transform:none}
+        .demo-card .btn-run{background:var(--green)} .demo-card .btn-step{background:var(--blue)}
+        .viz-scroll{width:100%; overflow-x:auto; display:flex; justify-content:center}
+        #viz-area{border:1px solid #ddd; border-radius:10px; background:#fff; position:relative}
+        .status-panel{margin-top:12px; font-family:monospace; color:#666; display:flex; gap:20px; flex-wrap:wrap; justify-content:center}
+        .point{opacity:.7; transition:fill .5s}
+        .gaussian-ellipse{fill:none; stroke-width:2px; opacity:.65; transition:all .5s ease-in-out}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🔮 GMM 高斯混合模型 · iPAS 常考</span>
+        <h1>GMM 高斯混合模型：用「機率」分群，還能畫出橢圓</h1>
+        <p>GMM 假設資料是<b>好幾座鐘形山丘（高斯分布）</b>疊出來的。它不逼每個點二選一，而是給「<b>70% 像 A 群、30% 像 B 群</b>」這種機率——這叫<b>軟分群</b>，靠 <b>EM 演算法</b>求解。</p>
+        <div class="chips"><span>軟分群</span><span>高斯分布</span><span>EM 演算法</span><span>共變異橢圓</span><span>AIC · BIC 選 K</span></div>
+    </header>
+
+    <!-- ===== 1. 白話定義 ===== -->
+    <section class="lesson">
+        <h2>🌄 一、先用白話講：GMM 在做什麼？</h2>
+        <p class="lead">把資料想成「好幾座鐘形山丘疊在一起」，每座山丘就是一群。</p>
+        <p>GMM 全名<span class="term">高斯混合模型（Gaussian Mixture Model）</span>。它假設所有資料點，是由 <span class="hl">K 個高斯分布（常態分布、鐘形曲線）混合而成</span>。每座「鐘形山丘」代表一群，山頂最密、越往外越稀。</p>
+        <div class="note def">
+            <h4>🧍 生活比喻：一群人的身高</h4>
+            一個班的身高分布，其實是「<b>男生一座鐘形 + 女生一座鐘形</b>」疊起來的。中間 168 公分的人，可能是高個女生、也可能是矮個男生——<b>K-means 會逼你二選一</b>，GMM 則說「這人 <b>65% 像男生群、35% 像女生群</b>」。這種「給機率、不硬分」就是<span class="term">軟分群（soft clustering）</span>。
+        </div>
+    </section>
+
+    <!-- ===== 2. K-means vs GMM ===== -->
+    <section class="lesson">
+        <h2>⚖️ 二、和 K-means 比一比</h2>
+        <p class="lead">GMM 常被當成「K-means 的進階版」，差別主要在這幾點：</p>
+        <table class="cmp">
+            <tr><th>比較</th><th class="k">K-means</th><th class="g">GMM</th></tr>
+            <tr><td>分群方式</td><td>硬分群：一點只屬一群</td><td>軟分群：給每群一個機率</td></tr>
+            <tr><td>群的形狀</td><td>只能球形（圓）</td><td>可橢圓、可旋轉（靠共變異 Σ）</td></tr>
+            <tr><td>判斷依據</td><td>到中心的距離</td><td>機率密度（離哪座山丘的機率高）</td></tr>
+            <tr><td>群大小</td><td>假設差不多大</td><td>可不同大小、不同權重</td></tr>
+            <tr><td>要先定群數？</td><td>要（k）</td><td>要（成分數 K）</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 一句話</h4>
+            其實 <b>K-means 可看成 GMM 的特例</b>：當每群都強制為「正圓、硬分配」時，GMM 就退化成 K-means。GMM 多了「橢圓形狀 + 機率歸屬」的彈性。
+        </div>
+    </section>
+
+    <!-- ===== 3. 三參數 ===== -->
+    <section class="lesson">
+        <h2>🎛️ 三、每座高斯山丘的三個參數</h2>
+        <div class="keys">
+            <div class="keycard"><b>μ 均值（中心）</b>山丘的頂點在哪、群的中心位置。</div>
+            <div class="keycard"><b>Σ 共變異矩陣（形狀）</b>決定山丘是圓是扁、橢圓的胖瘦與<b>旋轉方向</b>。這是 GMM 比 K-means 強的關鍵。</div>
+            <div class="keycard"><b>π 混合係數（份量）</b>這群佔整體的「權重」，所有群的 π 加起來＝1。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. EM ===== -->
+    <section class="lesson">
+        <h2>🔄 四、求解神器：EM 演算法</h2>
+        <p class="lead">這是個「雞生蛋」難題：不知道每點屬於哪群，也不知道每群長什麼形狀。EM 就用「先猜、再互相修正」的方式逼近答案。</p>
+
+        <div class="step"><div class="n">E</div><div class="b"><b>E-Step（期望步驟 · 軟分類）</b><br>先<b>固定</b>各高斯的形狀，算每個點屬於各群的「<b>責任機率</b> γ」（Responsibility）。</div></div>
+        <div class="math-block">
+            $$ \gamma(z_{nk}) = \frac{\pi_k\, N(x_n \mid \mu_k, \Sigma_k)}{\sum_{j=1}^{K} \pi_j\, N(x_n \mid \mu_j, \Sigma_j)} $$
+            <em>白話：看這個點離哪座山丘近，給出機率（例如 70% 紅、30% 藍）。</em>
+        </div>
+
+        <div class="step"><div class="n">M</div><div class="b"><b>M-Step（最大化步驟 · 更新參數）</b><br>用剛算出的責任機率當<b>權重</b>，回頭更新每群的中心 μ、形狀 Σ、份量 π。</div></div>
+        <div class="math-block">
+            $$ \mu_k^{new} = \frac{1}{N_k} \sum_{n=1}^{N} \gamma(z_{nk})\, x_n $$
+            $$ \Sigma_k^{new} = \frac{1}{N_k} \sum_{n=1}^{N} \gamma(z_{nk})\,(x_n - \mu_k^{new})(x_n - \mu_k^{new})^T $$
+            <em>白話：依點的權重把中心移過去，再依分散程度把圓圈拉成橢圓。</em>
+        </div>
+
+        <div class="note def">
+            <h4>♻️ 反覆到收斂</h4>
+            E → M → E → M……每一輪整體的「對數似然（log-likelihood）」都會上升，直到幾乎不再變化，就停。和 K-means 的「指派→更新中心」其實是同一種精神。
+        </div>
+    </section>
+
+    <!-- ===== 5. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 五、動手玩：看橢圓一步步貼合資料</h2>
+        <p class="lead">依序點 ①→②→③，或直接按「自動執行」。看那三個橢圓（高斯）如何從亂猜的大圓，慢慢縮放、旋轉、貼合三團資料；點的顏色＝它責任機率最高的那群。</p>
+
+        <div class="demo-card">
+            <div class="controls">
+                <button onclick="generateData()">1. 隨機生成數據</button>
+                <button onclick="initGMM()">2. 初始化模型</button>
+                <button onclick="runStep()" class="btn-step" id="btn-step" disabled>3. 執行一次迭代 (Step)</button>
+                <button onclick="toggleAuto()" class="btn-run" id="btn-auto" disabled>自動執行 (Auto)</button>
+            </div>
+            <div class="viz-scroll"><div id="viz-area"></div></div>
+            <div class="status-panel">
+                <span>迭代次數: <b id="iter-count">0</b></span>
+                <span>狀態: <span id="status-text">請生成數據</span></span>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            ① 生成三團（含傾斜的橢圓團）；② 初始化會丟出三個亂放的大圓；③ 每按一次 Step 跑一輪 EM——<b>橢圓會移動、縮放、旋轉</b>去貼合資料，<b>點會依「最像哪群」變色</b>。注意它如何學出<b>傾斜的橢圓</b>，這正是 K-means 做不到的。
+        </div>
+    </section>
+
+    <!-- ===== 6. 選 K ===== -->
+    <section class="lesson">
+        <h2>🔢 六、要分成幾群（成分數 K）？</h2>
+        <div class="note def">
+            <h4>💪 用 AIC / BIC 挑</h4>
+            和 K-means 一樣要先決定群數。GMM 因為是機率模型，可用 <span class="term">AIC</span> 或 <span class="term">BIC</span>：兩者都在「擬合得多好」與「模型多複雜（參數多寡）」間取捨，<b>挑使 AIC／BIC 最小的 K</b>。BIC 對複雜度懲罰較重、偏好較精簡的模型。詳見 <a href="aicbic.html" style="color:#6b21a8;font-weight:700">AIC / BIC</a>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 限制 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 七、限制與陷阱</h2>
+        <div class="keys">
+            <div class="keycard"><b>對初始值敏感</b>可能收斂到<b>局部最佳</b>，結果隨起點而異 → 用<b>多次隨機初始化</b>取最好的。</div>
+            <div class="keycard"><b>要先指定 K</b>成分數設錯，分群就走樣。</div>
+            <div class="keycard"><b>非高斯資料擬合差</b>資料形狀嚴重不是鐘形（如環狀），GMM 會吃力 → 改用 DBSCAN 等。</div>
+            <div class="keycard"><b>可能退化崩塌</b>某群塌縮到單點（共變異趨近 0）→ 加正規化避免。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. 應用 ===== -->
+    <section class="lesson">
+        <h2>🛠️ 八、實務都用在哪？</h2>
+        <div class="note app">
+            <h4>📌 GMM 的舞台</h4>
+            <b>重疊的群</b>（邊界模糊、需要機率歸屬）、<b>密度估計</b>（描述資料整體分布）、<b>異常偵測</b>（機率密度極低的點視為異常）、以及語音辨識、影像分割等。凡是「要的不只是分到哪群，還要<b>有多確定</b>」的場景，就適合 GMM。
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. GMM 和 K-means 最大的差別？</summary>
+                <p>GMM 是<b>軟分群</b>（給每群機率）且能學<b>橢圓</b>形狀；K-means 是硬分群、只能球形。</p></details>
+            <details><summary>Q2. EM 演算法的兩個步驟在做什麼？</summary>
+                <p><b>E-step</b>：固定形狀，算每點屬各群的責任機率；<b>M-step</b>：用責任當權重，更新各群的 μ、Σ、π。反覆到收斂。</p></details>
+            <details><summary>Q3. 共變異矩陣 Σ 決定了什麼？</summary>
+                <p>群的<b>形狀</b>——是圓還是橢圓、胖瘦，以及<b>旋轉方向</b>。這是 GMM 比 K-means 有彈性的關鍵。</p></details>
+            <details><summary>Q4. 怎麼決定成分數 K？</summary>
+                <p>常用 <b>AIC／BIC</b>，挑使資訊準則最小的 K，在擬合度與複雜度間取捨。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>GMM＝K 座高斯混合</b>每座鐘形山丘是一群。</div>
+            <div class="keycard"><b>軟分群</b>給機率，不硬分；可學橢圓。</div>
+            <div class="keycard"><b>三參數</b>μ 中心、Σ 形狀、π 份量。</div>
+            <div class="keycard"><b>EM 求解</b>E 算責任、M 更新參數，循環收斂。</div>
+            <div class="keycard"><b>選 K 用 AIC／BIC</b>最小者佳。</div>
+            <div class="keycard"><b>限制</b>初始值敏感、需定 K、非高斯吃力。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 600;
+        const height = 400;
+        const margin = 20;
+        const K = 3; // Number of clusters
+
+        let points = [];
+        let clusters = []; // Stores means, covs, pis
+        let iteration = 0;
+        let isRunning = false;
+        let timer = null;
+
+        const svg = d3.select("#viz-area")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // --- 1. Data Generation ---
+        function generateData() {
+            points = [];
+            stopAuto();
+            iteration = 0;
+            updateStatus("數據已生成，請初始化模型");
+            document.getElementById("btn-step").disabled = true;
+            document.getElementById("btn-auto").disabled = true;
+
+            // Generate 3 random Gaussian blobs
+            const centers = [
+                {x: 150, y: 150, sx: 30, sy: 60, rot: 30}, // Elliptical
+                {x: 450, y: 100, sx: 50, sy: 30, rot: -20},
+                {x: 300, y: 300, sx: 40, sy: 40, rot: 0}
+            ];
+
+            centers.forEach((c, idx) => {
+                for(let i=0; i<60; i++) {
+                    // Box-Muller transform for normal distribution
+                    let u = 0, v = 0;
+                    while(u===0) u = Math.random();
+                    while(v===0) v = Math.random();
+                    let n1 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+                    let n2 = Math.sqrt(-2.0 * Math.log(u)) * Math.sin(2.0 * Math.PI * v);
+
+                    // Apply rotation and scale
+                    let rad = c.rot * Math.PI / 180;
+                    let rx = n1 * c.sx;
+                    let ry = n2 * c.sy;
+
+                    let x = c.x + rx * Math.cos(rad) - ry * Math.sin(rad);
+                    let y = c.y + rx * Math.sin(rad) + ry * Math.cos(rad);
+
+                    points.push({x: x, y: y, trueLabel: idx, p: []});
+                }
+            });
+
+            // Clear Clusters
+            clusters = [];
+            render();
+        }
+
+        // --- 2. Initialization ---
+        function initGMM() {
+            stopAuto();
+            iteration = 0;
+            updateStatus("模型已初始化 (隨機)");
+            document.getElementById("btn-step").disabled = false;
+            document.getElementById("btn-auto").disabled = false;
+
+            clusters = [];
+            for(let k=0; k<K; k++) {
+                // Random start positions
+                clusters.push({
+                    mu: { x: Math.random()*width, y: Math.random()*height },
+                    cov: [[2000, 0], [0, 2000]], // Initial large circular covariance
+                    pi: 1/K,
+                    color: colorScale(k)
+                });
+            }
+            render();
+        }
+
+        // --- 3. EM Algorithm Core ---
+
+        // Helper: Calculate Gaussian Probability Density
+        function gaussianPDF(point, mu, cov) {
+            let dx = point.x - mu.x;
+            let dy = point.y - mu.y;
+
+            // Determinant
+            let det = cov[0][0] * cov[1][1] - cov[0][1] * cov[1][0];
+            if (det <= 0) det = 0.01; // Avoid singularity
+
+            // Inverse Matrix
+            let invCov = [
+                [cov[1][1]/det, -cov[0][1]/det],
+                [-cov[1][0]/det, cov[0][0]/det]
+            ];
+
+            // Mahalanobis distance squared
+            let mDist = (dx*invCov[0][0] + dy*invCov[1][0])*dx + (dx*invCov[0][1] + dy*invCov[1][1])*dy;
+
+            let normalization = 1 / (2 * Math.PI * Math.sqrt(det));
+            return normalization * Math.exp(-0.5 * mDist);
+        }
+
+        function runStep() {
+            iteration++;
+            document.getElementById("iter-count").innerText = iteration;
+            updateStatus("執行 EM 迭代中...");
+
+            // --- E-Step: Calculate Responsibilities (Soft Clustering) ---
+            points.forEach(pt => {
+                let probs = [];
+                let sumProb = 0;
+
+                // Calculate numerator: pi * N(x|mu, cov)
+                for(let k=0; k<K; k++) {
+                    let pdf = gaussianPDF(pt, clusters[k].mu, clusters[k].cov);
+                    let val = clusters[k].pi * pdf;
+                    probs.push(val);
+                    sumProb += val;
+                }
+
+                // Normalize
+                if(sumProb > 0) {
+                    pt.responsibilities = probs.map(p => p / sumProb);
+                } else {
+                    // Fallback if too far
+                    pt.responsibilities = probs.map(() => 1/K);
+                }
+            });
+
+            // --- M-Step: Update Parameters ---
+            let totalN = points.length;
+
+            for(let k=0; k<K; k++) {
+                // 1. Calculate N_k (effective number of points in cluster k)
+                let Nk = points.reduce((sum, pt) => sum + pt.responsibilities[k], 0);
+                if (Nk < 0.001) Nk = 0.001; // Prevent div by zero
+
+                // 2. Update Mu (Mean)
+                let sumX = 0, sumY = 0;
+                points.forEach(pt => {
+                    sumX += pt.responsibilities[k] * pt.x;
+                    sumY += pt.responsibilities[k] * pt.y;
+                });
+                clusters[k].mu.x = sumX / Nk;
+                clusters[k].mu.y = sumY / Nk;
+
+                // 3. Update Covariance
+                let sxx = 0, sxy = 0, syy = 0;
+                points.forEach(pt => {
+                    let dx = pt.x - clusters[k].mu.x;
+                    let dy = pt.y - clusters[k].mu.y;
+                    let w = pt.responsibilities[k];
+                    sxx += w * dx * dx;
+                    sxy += w * dx * dy;
+                    syy += w * dy * dy;
+                });
+
+                // Add small regularization to diagonal to prevent collapse
+                clusters[k].cov = [
+                    [sxx / Nk + 1.0, sxy / Nk],
+                    [sxy / Nk, syy / Nk + 1.0]
+                ];
+
+                // 4. Update Pi (Mixing Coefficient)
+                clusters[k].pi = Nk / totalN;
+            }
+
+            render();
+        }
+
+        // --- 4. Rendering ---
+        function render() {
+            svg.selectAll("*").remove();
+
+            // Draw Clusters (Ellipses)
+            clusters.forEach((c, i) => {
+                drawEllipse(c.mu, c.cov, c.color);
+            });
+
+            // Draw Points
+            svg.selectAll(".point")
+                .data(points)
+                .enter().append("circle")
+                .attr("class", "point")
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+                .attr("r", 4)
+                .attr("fill", d => {
+                    if (!d.responsibilities) return "#999";
+                    // Color blending based on responsibilities
+                    // Simple approach: find max responsibility
+                    let maxResp = -1;
+                    let maxIdx = 0;
+                    d.responsibilities.forEach((r, idx) => {
+                        if(r > maxResp) { maxResp = r; maxIdx = idx; }
+                    });
+                    return clusters[maxIdx].color;
+                });
+        }
+
+        // Helper: Convert Covariance Matrix to SVG Ellipse parameters
+        function drawEllipse(mu, cov, color) {
+            // Calculate eigenvalues and eigenvectors of 2x2 matrix
+            // to find semi-major axis, semi-minor axis and rotation
+            let a = cov[0][0];
+            let b = cov[0][1];
+            let c = cov[1][0]; // should equal b
+            let d = cov[1][1];
+
+            let trace = a + d;
+            let det = a*d - b*c;
+            let term = Math.sqrt((a-d)*(a-d) + 4*b*c);
+
+            let lambda1 = (trace + term) / 2;
+            let lambda2 = (trace - term) / 2;
+
+            // Axis lengths (2 * std_dev) => 2 * sqrt(eigenvalue)
+            // Using 2 sigma (95% confidence) for visualization
+            let rx = 2 * Math.sqrt(lambda1);
+            let ry = 2 * Math.sqrt(lambda2);
+
+            // Rotation angle
+            let theta = 0;
+            if (b !== 0) {
+                theta = 0.5 * Math.atan2(2*b, a-d);
+            } else if (a < d) {
+                theta = Math.PI / 2;
+            }
+            let degree = theta * 180 / Math.PI;
+
+            svg.append("ellipse")
+                .attr("class", "gaussian-ellipse")
+                .attr("cx", mu.x)
+                .attr("cy", mu.y)
+                .attr("rx", rx)
+                .attr("ry", ry)
+                .attr("transform", `rotate(${degree}, ${mu.x}, ${mu.y})`)
+                .attr("stroke", color);
+
+            // Draw center
+             svg.append("path")
+                .attr("d", d3.symbol().type(d3.symbolCross).size(100))
+                .attr("transform", `translate(${mu.x},${mu.y})`)
+                .attr("fill", color);
+        }
+
+        // --- Utilities ---
+        function updateStatus(text) {
+            document.getElementById("status-text").innerText = text;
+        }
+
+        function toggleAuto() {
+            if(isRunning) {
+                stopAuto();
+            } else {
+                isRunning = true;
+                document.getElementById("btn-auto").innerText = "停止 (Stop)";
+                document.getElementById("btn-step").disabled = true;
+                timer = setInterval(runStep, 400); // 400ms per step
+            }
+        }
+
+        function stopAuto() {
+            isRunning = false;
+            document.getElementById("btn-auto").innerText = "自動執行 (Auto)";
+            if(clusters.length > 0) document.getElementById("btn-step").disabled = false;
+            clearInterval(timer);
+        }
+
+        // Initialize empty
+        updateStatus("請先生成數據");
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>高斯混合模型(GMM)是軟分群與密度估計法,iPAS 中級科目三考點。重點:假設資料由多個高斯分布混合而成,用 EM 演算法估計,並給每點屬於各群的機率(軟歸屬)。易混點:K-means 是硬分群(每點只屬一群)、GMM 是軟分群(機率),且能描述橢圓形群(K-means 只球狀);需先指定群數。情境:重疊群、要機率歸屬或做密度估計。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>GMM 是什麼？</summary><p>高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。</p></details><details><summary>GMM 和 K-means 差在哪？</summary><p>K-means 是硬分群(一點只屬一群)、假設球形且大小相近；GMM 是軟分群(給機率)、可學橢圓形狀(含共變異)，更有彈性。</p></details><details><summary>GMM 怎麼訓練？</summary><p>用 EM 演算法：E 步算每點屬各高斯的責任機率，M 步用這些機率更新各高斯的均值、共變異與權重，反覆到收斂。</p></details><details><summary>怎麼決定要幾個成分？</summary><p>常用 AIC 或 BIC，在擬合度與模型複雜度間取捨，挑使資訊準則最小的成分數。</p></details><details><summary>GMM 的限制？</summary><p>對初始值敏感、可能收斂到局部最佳(用多次初始化緩解)；成分數需先指定；資料嚴重非高斯時擬合不佳。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "GMM 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "高斯混合模型，假設資料由多個高斯分布混合而成；每個高斯代表一群，用機率描述每筆資料屬於各群的程度，屬軟分群。"}}, {"@type": "Question", "name": "GMM 和 K-means 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "K-means 是硬分群(一點只屬一群)、假設球形且大小相近；GMM 是軟分群(給機率)、可學橢圓形狀(含共變異)，更有彈性。"}}, {"@type": "Question", "name": "GMM 怎麼訓練？", "acceptedAnswer": {"@type": "Answer", "text": "用 EM 演算法：E 步算每點屬各高斯的責任機率，M 步用這些機率更新各高斯的均值、共變異與權重，反覆到收斂。"}}, {"@type": "Question", "name": "怎麼決定要幾個成分？", "acceptedAnswer": {"@type": "Answer", "text": "常用 AIC 或 BIC，在擬合度與模型複雜度間取捨，挑使資訊準則最小的成分數。"}}, {"@type": "Question", "name": "GMM 的限制？", "acceptedAnswer": {"@type": "Answer", "text": "對初始值敏感、可能收斂到局部最佳(用多次初始化緩解)；成分數需先指定；資料嚴重非高斯時擬合不佳。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="clustering.html">分群/類聚/叢集(Clustering)</a><a href="aicbic.html">BIC/AIC、對數似然</a><a href="unsupervised_overview.html">非監督式學習</a><a href="k-means.html">K-Means</a><a href="hierarchicalclustering.html">階層式分群</a><a href="dbscan.html">DBSCAN / HDBSCAN</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

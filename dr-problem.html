@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>問題定義（資料）· 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。 把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dr-problem.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="問題定義（資料）· 互動教學">
+    <meta property="og:description" content="沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。 把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dr-problem.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="問題定義（資料）· 互動教學">
+    <meta name="twitter:description" content="沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。 把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "問題定義（資料）· 互動教學",
+  "url": "https://akira.ipas-ai.com/dr-problem.html",
+  "description": "沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。 把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Problem Framing · 資料專案起點</span>
+    <h1><span class="en">問題定義</span></h1>
+    <div class="sub">目標、實驗、限制，先想清楚</div>
+    <p class="lede">資料專案最貴的錯，是急著動手卻沒問對問題。<br>先釐清目標/KPI、實驗需求、資料限制——這三根支柱缺一不可。</p>
+    <div class="eq-hero">目標(KPI) + 實驗規劃 + 資料限制 = 問對問題</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>資料專案的第一步：問對問題</h2>
+  <p>拿到資料就急著畫圖、跑模型，是新手最常見的錯。<span class="c-en hl">問題定義</span>要先想清楚三件事：要達成什麼<span class="hl">目標／指標(KPI)</span>、需不需要做<span class="hl">實驗(A/B、因果)</span>、以及有哪些<span class="hl">資料限制(隱私、成本、可取得性)</span>。這三件沒想好，後面全是白工。</p>
+  <div class="trio">
+    <div class="persona hi"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="28" fill="none" stroke="var(--en)" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="var(--en)"/></svg><div class="nm">目標/KPI</div><div class="tag">為何而做</div><p>成功長什麼樣、用什麼數字衡量。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="26" y="34" width="20" height="32" fill="var(--l1)" opacity=".7"/><rect x="54" y="34" width="20" height="32" fill="var(--l2)" opacity=".7"/></svg><div class="nm">實驗規劃</div><div class="tag">怎麼驗證</div><p>要不要 A/B？要不要因果？先想好。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="30" y="40" width="40" height="28" rx="4" fill="none" stroke="var(--l2)" stroke-width="3"/><path d="M40 40 V32 A10 10 0 0 1 60 32 V40" fill="none" stroke="var(--l2)" stroke-width="3"/></svg><div class="nm">資料限制</div><div class="tag">可不可行</div><p>隱私、成本、拿不拿得到資料。</p></div>
+  </div>
+  <p class="hint">這頁是「資料」整條路線的起點。下面點三個面向，看各自要釐清什麼。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>點三個面向，看要先釐清什麼</h2>
+  <p>一個好的問題定義，要同時回答這三組問題。點下面三塊看細節：</p>
+  <div class="card">
+    <div class="svgbox"><svg id="triSvg" viewBox="0 0 460 200"></svg></div>
+    <div class="card" id="trInfo" style="margin:14px 0 0;min-height:80px"><h3 id="trT" style="margin-top:0">點上面任一面向</h3><p id="trD" style="margin-bottom:0;color:var(--ink2)"></p></div>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 檢查清單</div>
+  <h2>問題定義的三大支柱</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>先定義可量化的成功指標，全隊有共識</li><li>預先規劃實驗，避免事後資料不足</li><li>盤點資料可行性，別做到一半才發現拿不到</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>目標模糊（『變更好』無法衡量）</li><li>沒規劃 A/B 就上線，無法證明效果</li><li>忽略隱私法規，資料根本不能用</li></ul></div>
+</div><h3 style='margin-top:26px'>三大面向</h3><div class="usecards"><div class="uc"><div class="ic">🎯</div><div class="t">目標 / KPI</div><div class="d">量化成功、設定基準線</div></div><div class="uc"><div class="ic">🧪</div><div class="t">實驗規劃</div><div class="d">A/B、樣本量、因果需求</div></div><div class="uc"><div class="ic">🔒</div><div class="t">資料限制</div><div class="d">隱私、成本、可取得性</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("triSvg");
+  const T=document.getElementById("trT"),D=document.getElementById("trD");
+  const items=[{n:"目標 / KPI",c:"var(--en)",d:"釐清：要解決什麼業務問題？成功的數字長什麼樣（如轉換率+5%）？有沒有基準線可比？"},
+    {n:"實驗規劃",c:"var(--l1)",d:"釐清：要不要 A/B 測試證明因果？需要多少樣本？對照組怎麼設？這決定你要收什麼資料。"},
+    {n:"資料限制",c:"var(--l2)",d:"釐清：需要的資料拿得到嗎？涉及個資嗎（GDPR/個資法）？取得要多少成本與時間？"}];
+  let sel=0;
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    const cx=[100,230,360],cy=100;
+    items.forEach((it,i)=>{
+      const on=i===sel;const g=el("g",{cursor:"pointer"});
+      g.appendChild(el("circle",{cx:cx[i],cy,r:on?44:38,fill:on?it.c:"var(--paper2)",stroke:it.c,"stroke-width":on?3:2,opacity:on?1:.9}));
+      g.appendChild(txt(cx[i],cy+5,it.n,{fill:on?"#fff":"var(--ink2)","font-weight":700,"font-size":13}));
+      g.addEventListener("click",()=>{sel=i;build();info();});
+      svg.appendChild(g);
+    });
+    svg.appendChild(txt(230,180,"三者都釐清，才算問對問題",{fill:"var(--muted)","font-size":12}));
+  }
+  function info(){T.textContent=items[sel].n;D.textContent=items[sel].d;}
+  build();info();
+})();
+
+</script>
+
+
+
+
+
+<style>
+  .dtbl{width:100%;border-collapse:collapse;font-size:14px}
+  .dtbl th,.dtbl td{border:1px solid var(--rule);padding:9px 11px;text-align:left;vertical-align:top}
+  .dtbl thead th{background:var(--en-soft);color:var(--en);font-weight:700;white-space:nowrap}
+  .dtbl td:first-child{font-weight:700;color:var(--ink);white-space:nowrap}
+  .dtbl tbody tr:nth-child(even){background:var(--paper)}
+  .klist{list-style:none;counter-reset:k;margin:6px 0 0}
+  .klist li{position:relative;padding-left:32px;margin-bottom:9px;color:var(--ink2);font-size:15px}
+  .klist li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:2px;width:21px;height:21px;border-radius:50%;background:var(--en);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .qbox{border:1px solid var(--rule);border-radius:12px;background:var(--paper2);padding:4px 16px;margin:10px 0}
+  .qbox summary{cursor:pointer;font-weight:700;color:var(--ink);padding:12px 0}
+  .qbox[open] summary{color:var(--en)}
+  .qbox .a{color:var(--ink2);font-size:14.5px;padding:0 0 13px}
+</style>
+<section><div class="wrap">
+  <div class="sec-num">04 — 速記與對照</div>
+  <h2>問題定義四要素對照</h2>
+  <div class="card" style="overflow-x:auto"><table class="dtbl"><thead><tr><th>要素</th><th>要問什麼</th><th>沒做好的後果</th></tr></thead><tbody><tr><td>商業目標</td><td>要解決什麼商業問題、對誰有價值</td><td>做出技術漂亮但沒人用的模型</td></tr><tr><td>資料任務</td><td>轉成明確任務(分類/迴歸/排序/分群)</td><td>目標模糊、無法評估</td></tr><tr><td>成功指標</td><td>用什麼數字判斷成功、門檻多少</td><td>做完不知算不算成功</td></tr><tr><td>資料與限制</td><td>資料拿不拿得到、法規/成本/時程</td><td>中途才發現資料不足</td></tr></tbody></table></div>
+  <h3 style="margin-top:28px">自我檢測</h3>
+  <details class="qbox"><summary>為什麼要先定義問題？</summary><div class="a">資料專案最貴的錯是急著建模卻沒問對問題;先定義才知道要蒐什麼資料、選什麼模型、怎麼算成功。</div></details><details class="qbox"><summary>怎麼把商業問題轉成資料問題？</summary><div class="a">把想提升的目標翻成可量測指標(如降低流失率),再對應任務類型(分類/迴歸/分群),並定義輸入特徵與目標變數。</div></details><details class="qbox"><summary>和 CRISP-DM 的關係？</summary><div class="a">對應 CRISP-DM 六階段第一步「商業理解」,把商業問題轉成可解的資料任務,是整個流程的起點。</div></details>
+  <div class="callout" style="margin-top:26px"><h3>🎯 重點整理</h3><ol class="klist"><li>先問對問題再動手——最貴的錯是急著建模。</li><li>把模糊商業問題轉成明確資料任務(輸入/輸出/型態)。</li><li>事前講好成功指標與門檻。</li><li>確認資料可得性、法規、成本、時程。</li><li>對應 CRISP-DM 的「商業理解」起點。</li></ol></div>
+</div></section>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>問題定義是資料專案的起點,iPAS 高頻考點(初級科目一、中級科目一與二)。重點:把模糊的商業問題轉成明確、可用資料解的任務,並先講好成功指標與限制(資料可得性、時程、法規)。易混點:常見錯誤是目標模糊、指標與商業脫節、或硬上沒有資料支撐的問題;方向錯了後面再精也沒用。情境:題目常要你判斷某需求是否適合用資料解、或挑對衡量指標。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>資料專案為什麼要先定義問題？</summary><p>沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。</p></details><details><summary>怎麼把商業問題轉成資料問題？</summary><p>把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。</p></details><details><summary>該先確認哪些事？</summary><p>目標與成功指標、可用資料與品質、限制(時間/預算/法規)、可行性，以及「不用機器學習能不能解決」(有時規則就夠)。</p></details><details><summary>常見的錯誤？</summary><p>一開始就跳進建模、目標模糊、用錯指標、忽略資料是否取得、解了技術上漂亮但商業上沒價值的問題。</p></details><details><summary>和 CRISP-DM 的關係？</summary><p>對應 CRISP-DM 六階段的第一步商業理解，把商業問題轉成可解的資料任務，是整個流程的起點。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "資料專案為什麼要先定義問題？", "acceptedAnswer": {"@type": "Answer", "text": "沒定義清楚問題，後面蒐集資料、選模型、評估都會失焦。先確認商業目標、要回答什麼、用什麼指標衡量成功，才不會做出沒人用的東西。"}}, {"@type": "Question", "name": "怎麼把商業問題轉成資料問題？", "acceptedAnswer": {"@type": "Answer", "text": "把想提升的目標翻成可量測指標(如降低流失率)，再對應到任務類型(分類、迴歸、分群、預測)，並定義輸入特徵與目標變數。"}}, {"@type": "Question", "name": "該先確認哪些事？", "acceptedAnswer": {"@type": "Answer", "text": "目標與成功指標、可用資料與品質、限制(時間/預算/法規)、可行性，以及「不用機器學習能不能解決」(有時規則就夠)。"}}, {"@type": "Question", "name": "常見的錯誤？", "acceptedAnswer": {"@type": "Answer", "text": "一開始就跳進建模、目標模糊、用錯指標、忽略資料是否取得、解了技術上漂亮但商業上沒價值的問題。"}}, {"@type": "Question", "name": "和 CRISP-DM 的關係？", "acceptedAnswer": {"@type": "Answer", "text": "對應 CRISP-DM 六階段的第一步商業理解，把商業問題轉成可解的資料任務，是整個流程的起點。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="dr-abtest.html">A/B 測試 · 互動教學</a><a href="dr-acid.html">ACID / Schema · 互動教學</a><a href="dr-causal.html">因果推論 · 互動教學</a><a href="dr-cleaning.html">資料清理 · 互動教學</a><a href="dr-consistency.html">一致性檢查 · 互動教學</a><a href="dr-constraint.html">資料需求與限制 · 互動教學</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">問題定義</span> · 互動教學</div></footer>
+</body>
+</html>

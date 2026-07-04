@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 工程師主線 · 學習路線</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。 紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/roadmap-engineer.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI 工程師主線 · 學習路線">
+    <meta property="og:description" content="從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。 紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/roadmap-engineer.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI 工程師主線 · 學習路線">
+    <meta name="twitter:description" content="從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。 紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "AI 工程師主線 · 學習路線",
+  "url": "https://akira.ipas-ai.com/roadmap-engineer.html",
+  "description": "從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。 紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"✓";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">AI Engineer · 學習路線</span>
+    <h1><span class="en">AI 工程師主線</span></h1>
+    <div class="sub">成為 AI 工程師的完整路徑</div>
+    <p class="lede">最硬核的工程路線：程式基礎、必要數學、ML/DL，一路到 MLOps 部署上線。</p>
+    <div class="eq-hero">7 個階段，循序漸進，逐一達成里程碑</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 這條路線是什麼</div>
+  <h2>給「想當 AI/ML 工程師的人」的階段地圖</h2>
+  <p>最硬核的工程路線：程式基礎、必要數學、ML/DL，一路到 MLOps 部署上線。</p>
+      <div class="callout"><h3>怎麼用這張地圖</h3><p style="margin-bottom:0">學習路線把一個大目標拆成 <b>7 個階段</b>，每階段有「<b>要學什麼</b>」「<b>里程碑</b>（學到這你就過關）」「<b>產出範例</b>（動手做什麼證明你會了）」。照順序走，不要跳關。</p></div>
+      <p class="hint">下面每個階段都可以點開（手風琴），就地展開該階段的學習內容與目標。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 互動學習地圖</div>
+  <h2>點階段，看要學什麼、達成什麼</h2>
+  <p>這條路線共 <span class="c-en hl">7 個階段</span>，循序漸進。點開下面各階段，即可就地展開該階段的學習內容：</p>
+      <div class="card">
+        <div id="rmAcc" class="rm-acc"></div>
+        <p class="hint">建議：每個階段都務必完成「產出範例」那種動手練習。看懂不等於會做，做出來才算真的學會、也才是面試/考試的本錢。</p>
+      </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 里程碑總覽</div>
+  <h2>走完每一階段，你會達成</h2>
+  <p>把各階段的里程碑串起來，就是你的成長軌跡。逐一達成，就完成這條路線：</p>
+      <div class="card"><ul class="li pro" style="list-style:none"><li><b>階段 1 基礎工具</b>：完成一份 Notebook：讀取資料→清理→視覺化→輸出結論</li><li><b>階段 2 必要數學</b>：能解釋：梯度下降、過擬合、損失函數、正則化</li><li><b>階段 3 ML 基礎</b>：完成 1-2 個端到端 ML 專題</li><li><b>階段 4 深度學習</b>：完成影像或文字 DL 專題</li><li><b>階段 5 生成式 AI</b>：完成可用的 RAG 知識庫</li><li><b>階段 6 部署 MLOps</b>：將模型或 RAG 上線成 API + Demo</li><li><b>作品集</b>：至少 1 個 ML、1 個 DL、1 個 LLM/RAG</li></ul></div>
+</div></section>
+
+<style>
+.rm-acc{display:flex;flex-direction:column;gap:10px;margin:6px 0 4px}
+.rm-item{border:1px solid var(--line,#e6e9ef);border-radius:12px;background:var(--paper,#fff);overflow:hidden}
+.rm-item[open]{border-color:var(--en,#2563eb);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.rm-head{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;font-weight:700;color:var(--ink2,#2c3e50);user-select:none}
+.rm-head::-webkit-details-marker{display:none}
+.rm-head:hover{background:var(--paper2,#f6f8fc)}
+.rm-num{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff}
+.rm-label{flex:1;font-size:15px}
+.rm-chev{flex:none;transition:transform .2s;color:var(--muted,#9aa1ac)}
+.rm-item[open] .rm-chev{transform:rotate(180deg)}
+.rm-body{padding:0 18px 16px 58px}
+.rm-desc{color:var(--ink2,#475467);margin:0 0 10px}
+.rm-learn{margin:0 0 8px;color:var(--ink2,#475467);line-height:1.85}
+.rm-cap{display:inline-block;font-size:12px;font-weight:700;color:var(--muted,#9aa1ac);background:var(--paper2,#eef1f6);border-radius:6px;padding:2px 9px;margin-right:8px}
+.rm-mile{margin:8px 0 0;font-size:14px;color:var(--ink2,#475467)}
+.rm-ex{margin:6px 0 0;font-size:14px;color:var(--muted,#6b7280)}
+.rm-head{transition:background .15s}
+.rm-item[open] .rm-body{animation:rmOpen .28s cubic-bezier(.22,.61,.36,1)}
+@keyframes rmOpen{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.rm-list{margin:2px 0 0;padding-left:22px}.rm-list li{margin:6px 0;color:var(--ink2,#475467);line-height:1.75}.rm-list li b{color:var(--en,#2563eb)}
+@media(max-width:520px){.rm-body{padding-left:18px}}
+</style>
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const stages=[{"label": "階段 1 基礎工具", "desc": "能用 Python 做資料處理與基礎分析；具備基本開發工具與版本控制能力。", "apps": [{"t": "Python 基礎語法", "d": "AI 最主流語言,先把變數、流程控制、函式練熟。"}, {"t": "資料型別與容器", "d": "list、dict、set、tuple 等,選對結構讓程式更俐落。"}, {"t": "函式與模組化", "d": "把程式拆成可重用的函式與模組,易讀好維護。"}, {"t": "虛擬環境", "d": "用 venv 或 conda 隔離專案套件,避免版本衝突。"}, {"t": "套件管理", "d": "用 pip 安裝管理第三方套件,固定版本確保可重現。"}, {"t": "NumPy", "d": "高效的數值與矩陣運算函式庫,深度學習的底層基礎。"}, {"t": "Pandas", "d": "表格資料的清理、轉換與分析主力套件。"}, {"t": "資料視覺化", "d": "Matplotlib、Seaborn 畫圖探索資料、呈現結果。"}, {"t": "Jupyter", "d": "邊寫邊看結果的互動式筆記本,適合做實驗。"}, {"t": "VS Code", "d": "主流編輯器,寫完整專案、除錯與擴充。"}, {"t": "Git/GitHub", "d": "版本控制與協作,也是工程師的線上履歷。"}], "mile": "完成一份 Notebook：讀取資料→清理→視覺化→輸出結論", "ex": "入門資料分析小專題"}, {"label": "階段 2 必要數學", "desc": "建立 ML/DL 需要的數學直覺，能理解常見公式與訓練概念。", "apps": [{"t": "向量與矩陣", "d": "資料與模型參數的表示法,深度學習的語言。"}, {"t": "矩陣運算", "d": "乘法、轉置、逆、分解,神經網路前向傳播的核心。"}, {"t": "微分與導數", "d": "衡量變化率,是模型學習(調參數)的依據。"}, {"t": "偏微分與梯度", "d": "多變數的斜率方向,梯度下降靠它更新參數。"}, {"t": "機率基礎", "d": "事件、條件機率、貝氏定理,理解不確定性。"}, {"t": "常見機率分布", "d": "常態、二項、Poisson 等,描述資料生成方式。"}, {"t": "統計推論", "d": "從樣本估計母體並給信賴區間。"}, {"t": "假設檢定", "d": "用 p 值判斷差異是否顯著,A/B 測試的基礎。"}, {"t": "最佳化", "d": "梯度下降等方法找最小損失,是訓練的本質。"}, {"t": "資訊理論", "d": "熵與交叉熵,分類損失函數的由來。"}], "mile": "能解釋：梯度下降、過擬合、損失函數、正則化", "ex": "推導/實作梯度下降"}, {"label": "階段 3 ML 基礎", "desc": "能把資料問題建模為回歸/分類/分群並完成訓練、評估與改進。", "apps": [{"t": "監督式學習", "d": "用標註資料學分類與回歸。"}, {"t": "非監督式學習", "d": "無標籤找結構,如分群、降維。"}, {"t": "線性/邏輯回歸", "d": "最基礎的回歸與分類模型,先打底。"}, {"t": "決策樹/隨機森林", "d": "易解釋的樹模型;森林用多樹投票更穩。"}, {"t": "SVM", "d": "支援向量機,找最大間隔分界。"}, {"t": "KNN", "d": "看最近鄰居投票分類,簡單直覺。"}, {"t": "集成學習", "d": "Bagging 與 Boosting(XGBoost、LightGBM)組合多模型更準。"}, {"t": "分群與降維", "d": "K-means 分群、PCA 降維找資料結構。"}, {"t": "特徵工程", "d": "設計、選取、轉換特徵,常比換模型更有效。"}, {"t": "特徵縮放與編碼", "d": "標準化數值、One-Hot 編碼類別。"}, {"t": "交叉驗證", "d": "輪流切分評估,避免高估。"}, {"t": "評估指標", "d": "準確率、精確率、召回率、F1、AUC、RMSE。"}, {"t": "過擬合與正則化", "d": "用 L1/L2、簡化模型對抗過擬合。"}], "mile": "完成 1-2 個端到端 ML 專題", "ex": "Titanic 分類；房價回歸"}, {"label": "階段 4 深度學習", "desc": "能訓練神經網路並理解訓練機制；能做基本調參與錯誤分析。", "apps": [{"t": "神經網路", "d": "神經元、層與權重,深度學習的基本結構。"}, {"t": "反向傳播", "d": "用鏈鎖法則回傳誤差、更新參數的核心演算法。"}, {"t": "激活函數", "d": "ReLU、Sigmoid、Tanh,帶來非線性表達力。"}, {"t": "損失函數", "d": "交叉熵、MSE 等,定義模型優化目標。"}, {"t": "優化器", "d": "SGD、Adam 等,決定參數怎麼更新、收斂快慢。"}, {"t": "PyTorch/TensorFlow", "d": "兩大框架,搭建與訓練神經網路。"}, {"t": "CNN", "d": "卷積網路,影像分類、偵測、分割。"}, {"t": "RNN/LSTM", "d": "處理序列;LSTM 解長期依賴問題。"}, {"t": "Transformer", "d": "自注意力架構,現代 NLP 與多模態骨幹。"}, {"t": "正規化與 Dropout", "d": "BatchNorm 穩定訓練、Dropout 防過擬合。"}, {"t": "遷移學習", "d": "借預訓練模型,少量資料快速上手。"}, {"t": "GPU 訓練", "d": "用 GPU 平行加速大模型訓練與推論。"}], "mile": "完成影像或文字 DL 專題", "ex": "MNIST/CIFAR10 分類"}, {"label": "階段 5 生成式 AI", "desc": "能把 LLM 用在真實任務；掌握 RAG 的資料整理、檢索與引用。", "apps": [{"t": "LLM 原理", "d": "大型語言模型如何用 Transformer 預測下一個 token。"}, {"t": "Tokenization", "d": "把文字切成 token,影響成本與長度限制。"}, {"t": "Prompt 工程", "d": "設計角色、脈絡、範例引導模型穩定輸出。"}, {"t": "Embedding", "d": "把文字轉向量,做語意相似與檢索。"}, {"t": "向量資料庫", "d": "存嵌入、做相似度搜尋(Pinecone、FAISS)。"}, {"t": "RAG", "d": "檢索增強生成,先撈知識再生成、減少幻覺。"}, {"t": "微調", "d": "Fine-tuning 讓模型學特定風格或任務。"}, {"t": "LoRA/PEFT", "d": "參數高效微調,省記憶體與成本。"}, {"t": "函式呼叫/Agent", "d": "讓 LLM 呼叫工具、串多步驟完成任務。"}, {"t": "評測與防幻覺", "d": "用基準、事實檢查與拒答機制確保可靠。"}, {"t": "多模態", "d": "整合文字、影像、語音的應用。"}, {"t": "開源模型部署", "d": "用 Ollama、vLLM 在本地或自架跑模型。"}], "mile": "完成可用的 RAG 知識庫", "ex": "文件知識庫 QA"}, {"label": "階段 6 部署 MLOps", "desc": "能把模型/LLM 應用以服務形式提供；具備基本部署、監控與版本觀念。", "apps": [{"t": "REST API", "d": "用 FastAPI、Flask 把模型包成可呼叫的服務。"}, {"t": "Docker", "d": "容器化打包環境,確保到處一致、好部署。"}, {"t": "CI/CD", "d": "自動化測試、建置、部署流程。"}, {"t": "模型版本管理", "d": "追蹤模型與資料版本,可回溯。"}, {"t": "雲端部署", "d": "AWS、GCP、Azure 彈性算力與托管服務。"}, {"t": "推論優化", "d": "量化、蒸餾、批次處理降低延遲與成本。"}, {"t": "監控與日誌", "d": "追蹤延遲、錯誤、資料漂移。"}, {"t": "資料/概念漂移", "d": "偵測分布變化,適時觸發再訓練。"}, {"t": "實驗追蹤", "d": "MLflow、W&B 記錄參數與結果。"}, {"t": "自動化重訓", "d": "排程或觸發式更新模型維持表現。"}], "mile": "將模型或 RAG 上線成 API + Demo", "ex": "API 服務化 + 前端"}, {"label": "作品集", "desc": "以可重現、可解釋、可演示為標準，形成可公開展示的作品集。", "apps": [{"t": "README", "d": "清楚說明專案做什麼、怎麼跑、成果如何。"}, {"t": "專案結構", "d": "有條理的資料夾與程式組織,展現工程素養。"}, {"t": "實驗紀錄", "d": "記下嘗試與結果,呈現解決問題的思路。"}, {"t": "評估與基準", "d": "用指標與對照組證明成效。"}, {"t": "互動 Demo", "d": "用 Streamlit、Gradio 做可操作的展示。"}, {"t": "程式碼品質", "d": "註解、測試、命名規範,讓人願意讀。"}, {"t": "技術寫作", "d": "用部落格或文件說明,放大影響力。"}, {"t": "開源貢獻", "d": "參與專案、發 PR,累積實戰口碑。"}], "mile": "至少 1 個 ML、1 個 DL、1 個 LLM/RAG", "ex": "ML+DL+RAG 作品集"}];
+  const acc=document.getElementById("rmAcc");
+  const COLORS=["var(--l1)","var(--l2)","var(--en)","var(--ok)","var(--bad)"];
+  acc.innerHTML=stages.map(function(s,i){return '<details class="rm-item"'+(i===0?' open':'')+'><summary class="rm-head"><span class="rm-num" style="background:'+COLORS[i%COLORS.length]+'">'+(i+1)+'</span><span class="rm-label">'+s.label+'</span><span class="rm-chev">▾</span></summary><div class="rm-body"><p class="rm-desc">'+s.desc+'</p><div class="rm-learn"><div class="rm-cap" style="margin-bottom:6px">要學什麼</div><ul class="rm-list">'+s.apps.map(function(a){return '<li><b>'+a.t+'</b> — '+a.d+'</li>';}).join("")+'</ul></div>'+(s.mile?'<p class="rm-mile"><b>里程碑：</b>'+s.mile+'</p>':'')+(s.ex?'<p class="rm-ex">🛠️ <b>產出範例：</b>'+s.ex+'</p>':'')+'</div></details>';}).join("");
+  acc.querySelectorAll("details").forEach(function(d){d.addEventListener("toggle",function(){if(d.open)acc.querySelectorAll("details").forEach(function(o){if(o!==d)o.open=false;});});});
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>AI 工程師主線涵蓋什麼？</summary><p>從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。</p></details><details><summary>需要哪些先備能力？</summary><p>紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。</p></details><details><summary>和資料分析主線差在哪？</summary><p>資料分析重洞見與決策；工程主線重建模、系統與部署——把模型做出來、訓得好、上得了線並可維運。</p></details><details><summary>這條路線怎麼讀？</summary><p>先機器學習與深度學習核心、再分流到 CV、NLP、生成式、接著評估指標與優化，最後 CI/CD、監控與 MLOps。</p></details><details><summary>和 iPAS 中級的關係？</summary><p>高度相關；中級的機器學習、大數據與技術應用規劃，正好對應工程主線的核心知識，可一併準備。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI 工程師主線涵蓋什麼？", "acceptedAnswer": {"@type": "Answer", "text": "從程式與數學基礎、機器學習與深度學習、各任務(CV、NLP、生成式)，到模型訓練、評估、部署與 MLOps 的完整技術路線。"}}, {"@type": "Question", "name": "需要哪些先備能力？", "acceptedAnswer": {"@type": "Answer", "text": "紮實的 Python、線性代數與機率統計，以及機器學習基礎；這條路線會逐步深入演算法原理與工程實作。"}}, {"@type": "Question", "name": "和資料分析主線差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "資料分析重洞見與決策；工程主線重建模、系統與部署——把模型做出來、訓得好、上得了線並可維運。"}}, {"@type": "Question", "name": "這條路線怎麼讀？", "acceptedAnswer": {"@type": "Answer", "text": "先機器學習與深度學習核心、再分流到 CV、NLP、生成式、接著評估指標與優化，最後 CI/CD、監控與 MLOps。"}}, {"@type": "Question", "name": "和 iPAS 中級的關係？", "acceptedAnswer": {"@type": "Answer", "text": "高度相關；中級的機器學習、大數據與技術應用規劃，正好對應工程主線的核心知識，可一併準備。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="roadmap-ai-coding.html">AI 學寫程式路線 · 學習路線</a><a href="roadmap-data.html">資料分析主線 · 學習路線</a><a href="roadmap-designer.html">AI 美術設計師路線 · 學習路線</a><a href="roadmap-ipas-intermediate.html">iPAS 中級 AI 應用規劃師 · 學習路線</a><a href="roadmap-ipas-junior.html">iPAS 初級 AI 應用規劃師 · 學習路線</a><a href="roadmap-product.html">AI 產品主線 · 學習路線</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><p class="hint" style="margin:0 0 12px">學習路線不是死的——你可以依自己的背景加速或補強某些階段，但「先打基礎再進階」的大方向別顛倒。</p><span class="serif" style="font-style:italic">AI 工程師主線</span> · 互動教學</div></footer>
+</body>
+</html>

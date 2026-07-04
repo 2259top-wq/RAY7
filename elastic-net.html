@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elastic Net · SVG 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。 純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/elastic-net.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Elastic Net · SVG 互動教學">
+    <meta property="og:description" content="結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。 純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/elastic-net.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Elastic Net · SVG 互動教學">
+    <meta name="twitter:description" content="結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。 純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Elastic Net · SVG 互動教學",
+  "url": "https://akira.ipas-ai.com/elastic-net.html",
+  "description": "結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。 純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec;
+    --paper2:#fbf9f4;
+    --ink:#1b1e26;
+    --ink2:#3c4250;
+    --muted:#6b7280;
+    --faint:#9aa1ac;
+    --rule:#ddd6c8;
+    --rule2:#e9e3d6;
+    --l1:#2f6fed;     /* Lasso / L1 — blue, angular */
+    --l1-soft:#dce8ff;
+    --l2:#ef7b30;     /* Ridge / L2 — warm, smooth */
+    --l2-soft:#fce4cf;
+    --en:#7c3aed;     /* Elastic Net — the blend */
+    --en-soft:#ece1ff;
+    --ok:#15976b;
+    --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{
+    display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.34em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;
+    animation:rise .7s both;
+  }
+  h1{font-size:clamp(40px,8vw,72px);font-weight:800;letter-spacing:-.02em;line-height:1.02;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:560px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  .eq-hero .b{color:var(--l1);font-weight:700}.eq-hero .r{color:var(--l2);font-weight:700}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(25px,4.4vw,36px);font-weight:800;letter-spacing:-.015em;line-height:1.18;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}
+
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+
+  /* personality trio */
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.lasso .tag{color:var(--l1)}.persona.ridge .tag{color:var(--l2)}.persona.en .tag{color:var(--en)}
+  .persona.en{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+
+  /* controls */
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px}
+  #aSlider{accent-color:var(--en)} #lamSlider,#aSlider2{accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .ramp{height:8px;border-radius:5px;background:linear-gradient(90deg,var(--l2),var(--en) 50%,var(--l1));margin-top:6px}
+  .ramp-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-family:Georgia,serif;margin-top:5px}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  .chip.l1{border-color:var(--l1);color:var(--l1)} .chip.l2{border-color:var(--l2);color:var(--l2)}
+
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"☞";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"−";position:absolute;left:5px;color:var(--l2);font-weight:800}
+
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">L1 + L2 · Regularization</span>
+    <h1><span class="en">Elastic Net</span></h1>
+    <div class="sub">彈性網路 · 兼具特徵選擇與穩定性的折衷者</div>
+    <p class="lede">Lasso 太激進、亂砍特徵;Ridge 太保守、全部留下。<br>Elastic Net 把兩種懲罰加在一起,用一個比例參數 α 決定該偏向哪一邊。</p>
+    <div class="eq-hero">min ‖y − Xβ‖² + λ[ <span class="b">α‖β‖₁</span> + <span class="r">(1−α)‖β‖²</span> ]</div>
+  </div>
+</header>
+
+<!-- SECTION 1 — personalities -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">01 — 白話直覺</div>
+    <h2>三種「個性」的正則化</h2>
+    <p>正則化就是在「擬合資料」之外,額外懲罰係數太大。懲罰的方式不同,行為就天差地遠:</p>
+    <div class="trio">
+      <div class="persona lasso">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <polygon points="50,12 88,50 50,88 12,50" fill="none" stroke="var(--l1)" stroke-width="3"/>
+          <circle cx="88" cy="50" r="5" fill="var(--l1)"/><circle cx="12" cy="50" r="5" fill="var(--l1)"/>
+          <circle cx="50" cy="12" r="5" fill="var(--l1)"/><circle cx="50" cy="88" r="5" fill="var(--l1)"/>
+        </svg>
+        <div class="nm">Lasso</div><div class="tag">L1 · 尖角</div>
+        <p>激進的裁判,直接把不重要的係數砍成 0。精簡,但相關特徵裡常只「亂選一個」,不穩定。</p>
+      </div>
+      <div class="persona ridge">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="38" fill="none" stroke="var(--l2)" stroke-width="3"/>
+        </svg>
+        <div class="nm">Ridge</div><div class="tag">L2 · 平滑</div>
+        <p>保守的好好先生,把所有係數一起縮小,但幾乎不會歸零。穩定,卻不做特徵選擇、不夠精簡。</p>
+      </div>
+      <div class="persona en">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <path d="M50 12 Q78 22 88 50 Q78 78 50 88 Q22 78 12 50 Q22 22 50 12 Z" fill="var(--en-soft)" stroke="var(--en)" stroke-width="3"/>
+        </svg>
+        <div class="nm">Elastic Net</div><div class="tag">L1 + L2</div>
+        <p>折衷者:保留 Lasso 的「能砍到 0」尖角,又帶 Ridge 的圓滑穩定。相關特徵會被一起選、一起砍。</p>
+      </div>
+    </div>
+    <p class="hint">注意三個圖形:菱形有<b class="c-l1">尖角</b>、圓形<b class="c-l2">平滑</b>、Elastic Net 是<b class="c-en">圓角菱形</b>。這個形狀差異,正是下一節的關鍵。</p>
+  </div>
+</section>
+
+<!-- SECTION 2 — constraint geometry (CENTERPIECE) -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">02 — 核心互動</div>
+    <h2>看見約束區域:為什麼能做特徵選擇?</h2>
+    <p>把問題畫成兩個係數 (β₁, β₂) 的平面。正則化等於把解限制在一塊<span class="hl">約束區域</span>內,而最佳解會落在「資料的理想解 β̂」最靠近約束邊界的點上。</p>
+    <p><span class="c-l1 hl">尖角(L1 菱形)</span>剛好長在座標軸上,解很容易被吸到角上 → 某個係數 = 0,特徵被剔除;<span class="c-l2 hl">圓形(L2)</span>沒有角,解通常落在斜對角 → 係數都保留。</p>
+
+    <div class="card">
+      <div class="svgbox">
+        <svg id="geo" viewBox="0 0 440 380"></svg>
+      </div>
+      <div class="slider-row">
+        <label>L1 比例　α</label>
+        <input type="range" id="aSlider" min="0" max="1" step="0.01" value="0.5">
+        <span class="val" id="aVal">0.50</span>
+      </div>
+      <div class="ramp"></div>
+      <div class="ramp-lbl"><span>α = 0　純 Ridge (L2 圓)</span><span>α = 1　純 Lasso (L1 菱形)</span></div>
+      <div class="readout">
+        <div class="ro"><div class="k">解的 β₁</div><div class="v" id="b1v">—</div></div>
+        <div class="ro"><div class="k">解的 β₂</div><div class="v" id="b2v">—</div></div>
+        <div class="ro"><div class="k">狀態</div><div id="geoStatus" style="margin-top:2px"></div></div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:var(--l1)"></i>L1 菱形(參考)</span>
+        <span><i style="border-color:var(--l2)"></i>L2 圓形(參考)</span>
+        <span><i style="border-color:var(--en)"></i>目前 Elastic Net 區域</span>
+      </div>
+      <p class="hint">拖曳黑色的 <b>β̂</b> 點移動「理想解」,並滑動 α。觀察:把 α 推向 1、且 β̂ 偏向某一軸時,解會「啪」地吸到尖角上,讓另一個係數歸零。</p>
+    </div>
+    <div class="callout">
+      <h3>一句話</h3>
+      <p style="margin-bottom:0">Elastic Net 的約束區域在 L2 的圓和 L1 的菱形<span class="c-en hl">之間連續變形</span>。α 越大越尖、越容易產生稀疏(特徵選擇);α 越小越圓、越穩定。你正在親手調這個權衡。</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 — coefficient shrinkage -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">03 — 係數收縮實驗</div>
+    <h2>調 α 與 λ,看特徵被怎麼處理</h2>
+    <p>下面是 8 個特徵在普通最小平方法(OLS)下的原始係數(淡色框)。調整下方參數,實心柱就是 Elastic Net 收縮後的結果——歸零的特徵會被標上 <span class="c-l2">✕ 剔除</span>。</p>
+    <div class="card">
+      <div class="svgbox"><svg id="bars" viewBox="0 0 460 240"></svg></div>
+      <div class="slider-row">
+        <label>L1 比例　α</label>
+        <input type="range" id="aSlider2" min="0" max="1" step="0.01" value="0.5">
+        <span class="val" id="aVal2">0.50</span>
+      </div>
+      <div class="slider-row">
+        <label>懲罰強度　λ</label>
+        <input type="range" id="lamSlider" min="0" max="2.6" step="0.05" value="1.0">
+        <span class="val" id="lamVal">1.00</span>
+      </div>
+      <div class="chips">
+        <button class="chip l2" data-a="0" data-l="1.0">純 Ridge (α=0)</button>
+        <button class="chip" data-a="0.5" data-l="1.0">平衡 (α=0.5)</button>
+        <button class="chip l1" data-a="1" data-l="1.0">純 Lasso (α=1)</button>
+      </div>
+      <div class="readout">
+        <div class="ro"><div class="k">保留特徵</div><div class="v c-en" id="kept">—</div></div>
+        <div class="ro"><div class="k">剔除特徵</div><div class="v c-l2" id="dropped">—</div></div>
+      </div>
+      <p class="hint">把 α 調到 0(純 Ridge):係數全部縮小但沒人歸零。把 α 調到 1(純 Lasso):小係數一個個被砍成 0。中間值就是 Elastic Net 的折衷。</p>
+    </div>
+    <div class="formula">β<sub>EN</sub> = <span style="color:var(--l1)">soft(β̂, λα)</span> / <span style="color:var(--l2)">(1 + λ(1−α))</span></div>
+    <p style="font-size:14px;color:var(--muted)">註:此為正交設計下的封閉解。<span class="c-l1">soft( )</span> 是軟門檻(L1 把小係數推向 0),分母則是 L2 的等比縮小。</p>
+  </div>
+</section>
+
+<!-- SECTION 4 — grouping / stability -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">04 — 群組效應</div>
+    <h2>相關特徵:一起選,還是亂選一個?</h2>
+    <p>真實資料常有<span class="hl">高度相關的特徵群組</span>(例如基因組學裡同一條路徑上的基因)。這時 Lasso 會出問題:它傾向只留群組裡的<span class="c-l1 hl">某一個</span>,而且每次換一批資料,留下的還不一樣——<span class="c-l1 hl">不穩定</span>。</p>
+    <p>Elastic Net 因為帶了 L2 項,會把相關特徵<span class="c-en hl">當成一群一起處理</span>,要嘛一起留、要嘛一起砍,結果穩定可重現。</p>
+    <div class="card">
+      <div class="seg" id="grpSeg" style="margin-bottom:8px">
+        <button data-mode="lasso" class="on">Lasso</button>
+        <button data-mode="en">Elastic Net</button>
+      </div>
+      <div class="svgbox"><svg id="group" viewBox="0 0 460 210"></svg></div>
+      <div class="chips" style="margin-top:14px">
+        <button class="btn" id="resample">↻ 重新抽一批資料</button>
+        <span id="grpNote" style="align-self:center;font-size:14px;color:var(--muted)"></span>
+      </div>
+      <p class="hint">在 Lasso 模式下反覆按「重新抽一批資料」,觀察相關群組(G1、G2、G3)留下來的對象一直跳動;切到 Elastic Net,三個就會穩定地一起亮起。(此為概念示意)</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5 — pros/cons + use cases -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">05 — 優缺點與場景</div>
+    <h2>什麼時候該用 Elastic Net?</h2>
+    <div class="grid2">
+      <div class="prosbox pro">
+        <h3 style="color:var(--ok)">優點</h3>
+        <ul class="li pro">
+          <li>同時做到<b>特徵選擇</b>與<b>係數穩定</b></li>
+          <li>相關特徵會被<b>一起選或一起砍</b>(群組效應)</li>
+          <li>特徵數遠多於樣本數(p ≫ n)時仍可運作</li>
+          <li>用 α 一個旋鈕,就能在 Lasso 與 Ridge 之間自由滑動</li>
+        </ul>
+      </div>
+      <div class="prosbox con">
+        <h3 style="color:var(--l2)">缺點</h3>
+        <ul class="li con">
+          <li>多了一個超參數 α(L1/L2 比例)要調</li>
+          <li>加上 λ,要同時搜尋兩個維度,<b>調參成本較高</b></li>
+          <li>解釋性比純 Lasso 稍弱(保留的特徵較多)</li>
+          <li>α、λ 沒調好時,可能兩邊優點都拿不到</li>
+        </ul>
+      </div>
+    </div>
+    <h3 style="margin-top:26px">典型應用場景</h3>
+    <div class="usecards">
+      <div class="uc"><div class="ic">🧬</div><div class="t">基因組學分析</div><div class="d">數萬個基因、樣本少,且同路徑基因高度相關</div></div>
+      <div class="uc"><div class="ic">📈</div><div class="t">高維度稀疏資料</div><div class="d">特徵極多但真正有用的少,需自動篩選</div></div>
+      <div class="uc"><div class="ic">🔗</div><div class="t">相關特徵群組選擇</div><div class="d">希望相關變數成群進出,而非任意挑一個</div></div>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+/* ============================================================
+   SECTION 2 — constraint geometry
+============================================================ */
+(function(){
+  const svg=document.getElementById("geo");
+  const aSlider=document.getElementById("aSlider"), aVal=document.getElementById("aVal");
+  const b1v=document.getElementById("b1v"), b2v=document.getElementById("b2v");
+  const status=document.getElementById("geoStatus");
+  const cx=210, cy=190, scale=78, R0=1.5;   // R0 in units; axis intercept
+  let alpha=0.5;
+  let bhat={x:1.78, y:0.92};                 // ideal solution in units (drag target)
+
+  function toPx(p){return {x:cx+p.x*scale, y:cy-p.y*scale};}
+  function toUnit(px,py){return {x:(px-cx)/scale, y:-(py-cy)/scale};}
+
+  // boundary radius for a given angle under elastic-net constraint
+  function radius(theta){
+    const c=Math.abs(Math.cos(theta))+Math.abs(Math.sin(theta));
+    const t=(1-alpha)*R0*R0 + alpha*R0;
+    if(1-alpha<1e-4) return t/(alpha*c);          // pure diamond
+    const A=1-alpha, B=alpha*c, C=-t;
+    return (-B+Math.sqrt(B*B-4*A*C))/(2*A);
+  }
+  function boundaryPts(fn){
+    const pts=[]; const N=240;
+    for(let i=0;i<N;i++){const th=i/N*2*Math.PI; const r=fn(th); pts.push({x:r*Math.cos(th), y:r*Math.sin(th)});}
+    return pts;
+  }
+  function pathFrom(pts){
+    return pts.map((p,i)=>{const q=toPx(p);return (i?"L":"M")+q.x.toFixed(1)+" "+q.y.toFixed(1);}).join(" ")+" Z";
+  }
+
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+    // axes
+    svg.appendChild(el("line",{x1:20,y1:cy,x2:420,y2:cy,stroke:"#cfc8b8","stroke-width":1.5}));
+    svg.appendChild(el("line",{x1:cx,y1:18,x2:cx,y2:362,stroke:"#cfc8b8","stroke-width":1.5}));
+    const lx=el("text",{x:415,y:cy-8,"font-size":13,fill:"#9aa1ac","font-style":"italic","text-anchor":"end","font-family":"Georgia,serif"});lx.textContent="β₁";svg.appendChild(lx);
+    const ly=el("text",{x:cx+8,y:26,"font-size":13,fill:"#9aa1ac","font-style":"italic","font-family":"Georgia,serif"});ly.textContent="β₂";svg.appendChild(ly);
+
+    // reference: L1 diamond (alpha=1) & L2 circle (alpha=0)
+    const dia=boundaryPts(th=>{const c=Math.abs(Math.cos(th))+Math.abs(Math.sin(th));return R0/c;});
+    svg.appendChild(el("path",{d:pathFrom(dia),fill:"none",stroke:"var(--l1)","stroke-width":1.4,"stroke-dasharray":"4 4",opacity:.55}));
+    svg.appendChild(el("circle",{cx:cx,cy:cy,r:R0*scale,fill:"none",stroke:"var(--l2)","stroke-width":1.4,"stroke-dasharray":"4 4",opacity:.55}));
+
+    // active elastic-net region
+    const reg=boundaryPts(radius);
+    svg.appendChild(el("path",{d:pathFrom(reg),fill:"var(--en-soft)",stroke:"var(--en)","stroke-width":2.6,"stroke-linejoin":"round",opacity:.92}));
+
+    // find solution = boundary point nearest to bhat
+    let best=null,bd=1e9;
+    for(let i=0;i<720;i++){
+      const th=i/720*2*Math.PI; const r=radius(th);
+      const p={x:r*Math.cos(th),y:r*Math.sin(th)};
+      const d=(p.x-bhat.x)**2+(p.y-bhat.y)**2;
+      if(d<bd){bd=d;best=p;}
+    }
+    const dist=Math.sqrt(bd);
+
+    // loss contours centered at bhat (concentric, faint) + touching one
+    [dist*1.9, dist*1.45].forEach(rr=>{
+      const bp=toPx(bhat);
+      svg.appendChild(el("circle",{cx:bp.x,cy:bp.y,r:rr*scale,fill:"none",stroke:"#b9b0a0","stroke-width":1,"stroke-dasharray":"2 5",opacity:.6}));
+    });
+    const bp=toPx(bhat);
+    svg.appendChild(el("circle",{cx:bp.x,cy:bp.y,r:dist*scale,fill:"none",stroke:"#8a8170","stroke-width":1.2,"stroke-dasharray":"3 4"}));
+
+    // connector bhat -> solution
+    const sp=toPx(best);
+    svg.appendChild(el("line",{x1:bp.x,y1:bp.y,x2:sp.x,y2:sp.y,stroke:"var(--en)","stroke-width":1.5,"stroke-dasharray":"2 3",opacity:.7}));
+
+    // solution point
+    svg.appendChild(el("circle",{cx:sp.x,cy:sp.y,r:7,fill:"var(--en)",stroke:"#fff","stroke-width":2}));
+    const st=el("text",{x:sp.x+ (best.x>=0?12:-12), y:sp.y-10,"font-size":12,fill:"var(--en)","font-weight":700,"text-anchor":best.x>=0?"start":"end"});st.textContent="解 β*";svg.appendChild(st);
+
+    // bhat draggable
+    const bh=el("circle",{cx:bp.x,cy:bp.y,r:8,fill:"#1b1e26",stroke:"#fff","stroke-width":2,cursor:"grab",id:"bhatDot"});
+    svg.appendChild(bh);
+    const bl=el("text",{x:bp.x+12,y:bp.y+5,"font-size":13,fill:"#1b1e26","font-weight":700,"font-family":"Georgia,serif","font-style":"italic"});bl.textContent="β̂";svg.appendChild(bl);
+
+    // readouts
+    b1v.textContent=best.x.toFixed(2);
+    b2v.textContent=best.y.toFixed(2);
+    const z1=Math.abs(best.x)<0.07, z2=Math.abs(best.y)<0.07;
+    let html="";
+    if(z1||z2){
+      html='<span class="badge drop">✕ '+(z1?"β₁":"β₂")+' = 0 · 特徵剔除</span>';
+    }else{
+      html='<span class="badge keep">✓ 兩係數皆保留</span>';
+    }
+    status.innerHTML=html;
+  }
+
+  // dragging
+  let dragging=false;
+  function ptIn(e){const p=svg.createSVGPoint();const t=e.touches?e.touches[0]:e;p.x=t.clientX;p.y=t.clientY;const m=svg.getScreenCTM().inverse();return p.matrixTransform(m);}
+  function start(e){
+    const p=ptIn(e); const bp=toPx(bhat);
+    if(Math.hypot(p.x-bp.x,p.y-bp.y)<26){dragging=true;e.preventDefault();}
+  }
+  function move(e){
+    if(!dragging)return; e.preventDefault();
+    const p=ptIn(e); let u=toUnit(p.x,p.y);
+    u.x=Math.max(-2.6,Math.min(2.6,u.x)); u.y=Math.max(-2.4,Math.min(2.4,u.y));
+    // keep bhat outside the region so a constrained solution exists
+    const minLen=R0+0.12; const len=Math.hypot(u.x,u.y);
+    if(len<minLen){const s=minLen/(len||1);u.x*=s;u.y*=s;}
+    bhat=u; build();
+  }
+  function end(){dragging=false;}
+  svg.addEventListener("mousedown",start); window.addEventListener("mousemove",move); window.addEventListener("mouseup",end);
+  svg.addEventListener("touchstart",start,{passive:false}); svg.addEventListener("touchmove",move,{passive:false}); svg.addEventListener("touchend",end);
+
+  aSlider.addEventListener("input",()=>{alpha=parseFloat(aSlider.value);aVal.textContent=alpha.toFixed(2);build();});
+  build();
+})();
+
+/* ============================================================
+   SECTION 3 — coefficient shrinkage bars
+============================================================ */
+(function(){
+  const svg=document.getElementById("bars");
+  const aS=document.getElementById("aSlider2"), aV=document.getElementById("aVal2");
+  const lS=document.getElementById("lamSlider"), lV=document.getElementById("lamVal");
+  const keptEl=document.getElementById("kept"), dropEl=document.getElementById("dropped");
+  const OLS=[2.40,-1.95,1.55,0.62,-0.40,2.10,0.28,-1.20];
+  const n=OLS.length;
+  let alpha=0.5, lam=1.0;
+  const W=460,H=240, base=130, padL=26, padR=18;
+  const slot=(W-padL-padR)/n;
+  const bw=slot*0.5;
+  const yScale=38; // px per unit
+
+  function soft(z,t){const s=Math.sign(z);const m=Math.abs(z)-t;return m>0?s*m:0;}
+  function en(o){return soft(o,lam*alpha)/(1+lam*(1-alpha));}
+
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    // baseline
+    svg.appendChild(el("line",{x1:padL-6,y1:base,x2:W-6,y2:base,stroke:"#cfc8b8","stroke-width":1.5}));
+    let kept=0,dropped=0;
+    for(let i=0;i<n;i++){
+      const o=OLS[i], b=en(o);
+      const xc=padL+slot*i+slot/2;
+      // ghost OLS
+      const oh=o*yScale;
+      svg.appendChild(el("rect",{x:xc-bw/2, y:o>=0?base-oh:base, width:bw, height:Math.abs(oh),
+        fill:"none", stroke:"#c9c1b1","stroke-width":1.3,"stroke-dasharray":"3 3", rx:3}));
+      // EN bar
+      const bh=b*yScale;
+      const isZero=Math.abs(b)<1e-9;
+      if(!isZero){
+        kept++;
+        const col = b>=0? "var(--en)":"var(--l2)";
+        const r=el("rect",{x:xc-bw/2, y:b>=0?base-bh:base, width:bw, height:Math.abs(bh),
+          fill:col, rx:3, opacity:.9});
+        svg.appendChild(r);
+      }else{
+        dropped++;
+        const m=el("text",{x:xc,y:base-4,"font-size":13,fill:"var(--l2)","text-anchor":"middle","font-weight":700});m.textContent="✕";svg.appendChild(m);
+      }
+      // feature label
+      const t=el("text",{x:xc,y:H-10,"font-size":11,fill:"#9aa1ac","text-anchor":"middle","font-family":"Georgia,serif"});
+      t.textContent="F"+(i+1); svg.appendChild(t);
+    }
+    keptEl.textContent=kept; dropEl.textContent=dropped;
+  }
+  aS.addEventListener("input",()=>{alpha=parseFloat(aS.value);aV.textContent=alpha.toFixed(2);build();});
+  lS.addEventListener("input",()=>{lam=parseFloat(lS.value);lV.textContent=lam.toFixed(2);build();});
+  document.querySelectorAll("#bars ~ .slider-row, .chip").forEach(()=>{});
+  document.querySelectorAll(".chip[data-a]").forEach(c=>c.addEventListener("click",()=>{
+    alpha=parseFloat(c.dataset.a); lam=parseFloat(c.dataset.l);
+    aS.value=alpha; lS.value=lam; aV.textContent=alpha.toFixed(2); lV.textContent=lam.toFixed(2); build();
+  }));
+  build();
+})();
+
+/* ============================================================
+   SECTION 4 — grouping / stability (illustrative)
+============================================================ */
+(function(){
+  const svg=document.getElementById("group");
+  const seg=document.getElementById("grpSeg");
+  const note=document.getElementById("grpNote");
+  const resample=document.getElementById("resample");
+  let mode="lasso";
+  // features: G1,G2,G3 correlated group; A,B independent
+  const feats=[
+    {id:"G1",grp:1},{id:"G2",grp:1},{id:"G3",grp:1},
+    {id:"A",grp:0},{id:"B",grp:0}
+  ];
+  const W=460, base=150, padL=30, n=feats.length;
+  const slot=(W-padL-20)/n;
+
+  function compute(){
+    // independent features: usually kept
+    const kept={};
+    feats.forEach(f=>{if(f.grp===0) kept[f.id]= (f.id==="A"); else kept[f.id]=false;});
+    if(mode==="lasso"){
+      // pick exactly one of the correlated group at random -> unstable
+      const pick=["G1","G2","G3"][Math.floor(Math.random()*3)];
+      kept[pick]=true;
+      note.textContent="Lasso 只留下群組中的 "+pick+" → 每次抽樣結果都會跳動,不穩定。";
+    }else{
+      kept["G1"]=kept["G2"]=kept["G3"]=true;
+      note.textContent="Elastic Net 把相關群組 G1·G2·G3 一起保留 → 結果穩定可重現。";
+    }
+    return kept;
+  }
+  function build(){
+    const kept=compute();
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    svg.appendChild(el("line",{x1:padL-8,y1:base,x2:W-8,y2:base,stroke:"#cfc8b8","stroke-width":1.5}));
+    // group bracket
+    const gx0=padL+slot*0+slot/2-22, gx1=padL+slot*2+slot/2+22;
+    svg.appendChild(el("path",{d:`M${gx0} 26 q0 -8 8 -8 H${gx1-8} q8 0 8 8`,fill:"none",stroke:"var(--l1)","stroke-width":1.5,opacity:.5}));
+    const gl=el("text",{x:(gx0+gx1)/2,y:14,"font-size":12,fill:"var(--muted)","text-anchor":"middle"});gl.textContent="相關特徵群組";svg.appendChild(gl);
+
+    feats.forEach((f,i)=>{
+      const xc=padL+slot*i+slot/2;
+      const on=kept[f.id];
+      const h= on? 88 : 16;
+      const col = f.grp===1 ? "var(--en)" : "#8a8170";
+      const r=el("rect",{x:xc-20,y:base-h,width:40,height:h,rx:7,
+        fill: on?col:"#e7e1d4", stroke: on?col:"#cfc8b8","stroke-width":1.5, opacity: on?0.92:1});
+      r.style.transition="all .35s cubic-bezier(.2,.8,.2,1)";
+      svg.appendChild(r);
+      if(on){const ok=el("text",{x:xc,y:base-h-8,"font-size":13,fill:col,"text-anchor":"middle","font-weight":700});ok.textContent="✓";svg.appendChild(ok);}
+      const t=el("text",{x:xc,y:base+22,"font-size":13,fill:f.grp===1?"var(--en)":"#9aa1ac","text-anchor":"middle","font-weight":f.grp===1?700:500,"font-family":"Georgia,serif"});
+      t.textContent=f.id; svg.appendChild(t);
+    });
+  }
+  seg.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+    [...seg.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");mode=b.dataset.mode;build();});
+  resample.addEventListener("click",build);
+  build();
+})();
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>Elastic Net 結合 L1(Lasso)與 L2(Ridge)兩種正則化,iPAS 中級科目三考點。重點:兼顧特徵選擇(稀疏)與係數穩定。易混點:純 Lasso 遇一群高度相關特徵會隨機只留一個,加入 L2 能讓相關特徵一起保留、更穩;靠 l1_ratio 調 L1 與 L2 比例,兩端退化為 Ridge 與 Lasso。情境:特徵數多且彼此相關時優於單用 Lasso 或 Ridge。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Elastic Net 是什麼？</summary><p>結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。</p></details><details><summary>為什麼要結合 L1 和 L2？</summary><p>純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。</p></details><details><summary>Elastic Net 的參數？</summary><p>一個控制整體強度(alpha 或 lambda)，一個控制 L1 與 L2 比例(l1_ratio)；兩端分別退化為 Ridge 與 Lasso。</p></details><details><summary>何時選 Elastic Net？</summary><p>特徵數多、且彼此相關時的好選擇；想要稀疏又不想犧牲穩定度時優於單用 Lasso 或 Ridge。</p></details><details><summary>怎麼調參？</summary><p>用交叉驗證同時掃 alpha 與 l1_ratio 的組合，選使驗證誤差最小者。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Elastic Net 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "結合 L1(Lasso)與 L2(Ridge)兩種正則化的線性模型；兼顧特徵選擇與係數穩定。"}}, {"@type": "Question", "name": "為什麼要結合 L1 和 L2？", "acceptedAnswer": {"@type": "Answer", "text": "純 Lasso 遇到一群高度相關特徵會隨機只留一個；加入 L2 能讓相關特徵一起被保留、結果更穩定。"}}, {"@type": "Question", "name": "Elastic Net 的參數？", "acceptedAnswer": {"@type": "Answer", "text": "一個控制整體強度(alpha 或 lambda)，一個控制 L1 與 L2 比例(l1_ratio)；兩端分別退化為 Ridge 與 Lasso。"}}, {"@type": "Question", "name": "何時選 Elastic Net？", "acceptedAnswer": {"@type": "Answer", "text": "特徵數多、且彼此相關時的好選擇；想要稀疏又不想犧牲穩定度時優於單用 Lasso 或 Ridge。"}}, {"@type": "Question", "name": "怎麼調參？", "acceptedAnswer": {"@type": "Answer", "text": "用交叉驗證同時掃 alpha 與 l1_ratio 的組合，選使驗證誤差最小者。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="regression.html">回歸問題</a><a href="overfitting_underfitting.html">監督式學習</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a><a href="l1.html">Lasso (L1)</a><a href="matrix.html">分類問題</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer>
+  <div class="wrap"><span class="serif" style="font-style:italic">Elastic Net</span> · 互動教學 · L1 與 L2 的折衷</div>
+</footer>
+</body>
+</html>

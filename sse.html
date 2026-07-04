@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE：群內誤差平方和可視化</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。 用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/sse.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SSE：群內誤差平方和可視化">
+    <meta property="og:description" content="Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。 用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/sse.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SSE：群內誤差平方和可視化">
+    <meta name="twitter:description" content="Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。 用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "SSE：群內誤差平方和可視化",
+  "url": "https://akira.ipas-ai.com/sse.html",
+  "description": "Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。 用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root { --center-color: #e74c3c; --point-color: #3498db; --bg: #fdfcfb; --text: #2c3e50; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--bg); color: var(--text); padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        
+        /* 畫布與互動區 */
+        .viz-box { position: relative; margin: 20px 0; border: 2px solid #ecf0f1; border-radius: 12px; background: #fff; touch-action: none; user-select: none; }
+        svg { width: 100%; height: 400px; cursor: default; }
+        
+        /* 數據顯示板 */
+        .stats-panel { display: flex; justify-content: space-around; background: #2c3e50; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
+        .stat-label { font-size: 0.9rem; opacity: 0.8; }
+        
+        /* 說明區塊 */
+        .explanation { margin-top: 30px; padding-top: 20px; border-top: 2px dashed #eee; }
+        .card { background: #f8f9fa; border-left: 5px solid var(--point-color); padding: 15px; margin-bottom: 15px; }
+        .card h4 { margin: 0 0 10px 0; color: var(--text); }
+        
+        /* 動畫元素 */
+        .draggable { cursor: grab; transition: fill 0.2s; }
+        .draggable:active { cursor: grabbing; fill: #2980b9; }
+        .center-point { fill: var(--center-color); stroke: white; stroke-width: 3; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+        .connector { stroke: #bdc3c7; stroke-width: 2; stroke-dasharray: 4; }
+        
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; background: white; border: 1px solid #bdc3c7; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #f0f0f0; }
+
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎯 SSE (群內誤差平方和)</h1>
+    <p>試著<strong>拖曳藍色的點</strong>，觀察 SSE 數值如何隨著距離變化。我們的目標是讓 SSE 越小越好。</p>
+
+    <div class="stats-panel">
+        <div class="stat-item">
+            <div class="stat-val" id="disp-sse">0</div>
+            <div class="stat-label">SSE 總分 (越低越好)</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-val" id="disp-avg">0</div>
+            <div class="stat-label">平均誤差距離</div>
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        <button onclick="presetTight()">場景：緊密 (低 SSE)</button>
+        <button onclick="presetLoose()">場景：鬆散 (高 SSE)</button>
+    </div>
+
+    <div class="viz-box">
+        <svg id="svg" viewBox="0 0 600 400">
+            <g id="lines-group"></g>
+            <circle cx="300" cy="200" r="12" class="center-point" />
+            <text x="300" y="235" text-anchor="middle" font-size="12" fill="#e74c3c" font-weight="bold">中心點 (Centroid)</text>
+            <g id="points-group"></g>
+        </svg>
+    </div>
+
+    <div class="explanation">
+        <h3>🧐 原理白話文解析</h3>
+        
+        <div class="card">
+            <h4>1. 什麼是 SSE (Error Sum of Squares)？</h4>
+            <p><strong>白話：</strong>「全體組員的遲到時間總和」。<br>
+            假設紅色中心點是公司，藍色點是員工的家。SSE 就是計算所有員工住家到公司的「距離平方加總」。<br>
+            如果大家都住公司隔壁，SSE 就很低（好）；如果大家住很遠，SSE 就會爆炸高（不好）。</p>
+        </div>
+
+        <div class="card" style="border-left-color: #e74c3c;">
+            <h4>2. 為什麼要「平方」 (Squared)？</h4>
+            <p><strong>白話：</strong>「嚴懲那些離群索居的人」。<br>
+            在數學上，平方會讓大的數字變得更大。<br>
+            <ul>
+                <li>距離是 2，誤差算 4。</li>
+                <li>距離是 10，誤差算 100 (而不是 10)！</li>
+            </ul>
+            這代表演算法非常討厭「離群值」，它會盡全力把那些離很遠的點拉回來。</p>
+        </div>
+
+        <div class="card" style="border-left-color: #27ae60;">
+            <h4>3. 群內變異 (Inertia) 與分群</h4>
+            <p><strong>白話：</strong>「團結度」。<br>
+            在 K-Means 演算法中，電腦一直在做一件事：<strong>移動中心點，想辦法讓 SSE 降到最低。</strong><br>
+            SSE 越小，代表這群人越團結，這個分群就越緊密。</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const svg = document.getElementById('svg');
+    const pointsGroup = document.getElementById('points-group');
+    const linesGroup = document.getElementById('lines-group');
+    const dispSSE = document.getElementById('disp-sse');
+    const dispAvg = document.getElementById('disp-avg');
+    const centerX = 300, centerY = 200;
+
+    // 初始數據點
+    let points = [
+        {x: 250, y: 180}, {x: 350, y: 220}, {x: 280, y: 250}, {x: 320, y: 150}
+    ];
+
+    let selectedPointIndex = -1;
+
+    function init() {
+        render();
+        addEventListeners();
+    }
+
+    function render() {
+        pointsGroup.innerHTML = '';
+        linesGroup.innerHTML = '';
+        let totalSSE = 0;
+        let totalDist = 0;
+
+        points.forEach((p, i) => {
+            // 計算距離
+            const dx = p.x - centerX;
+            const dy = p.y - centerY;
+            const distSquared = dx*dx + dy*dy; // 距離平方
+            const dist = Math.sqrt(distSquared); // 實際距離
+
+            totalSSE += distSquared;
+            totalDist += dist;
+
+            // 繪製連線
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", centerX); line.setAttribute("y1", centerY);
+            line.setAttribute("x2", p.x); line.setAttribute("y2", p.y);
+            line.setAttribute("class", "connector");
+            // 距離越遠，線越紅
+            const opacity = Math.min(dist / 200, 1);
+            line.setAttribute("stroke", `rgba(231, 76, 60, ${0.3 + opacity})`);
+            linesGroup.appendChild(line);
+
+            // 繪製點
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", p.x); circle.setAttribute("cy", p.y);
+            circle.setAttribute("r", 10);
+            circle.setAttribute("class", "draggable");
+            circle.setAttribute("fill", "#3498db");
+            circle.dataset.index = i;
+            pointsGroup.appendChild(circle);
+        });
+
+        // 更新數據顯示 (除以 100 是為了讓數字不要太大，方便閱讀)
+        dispSSE.innerText = Math.round(totalSSE / 100).toLocaleString(); 
+        dispAvg.innerText = Math.round(totalDist / points.length);
+    }
+
+    // 拖曳邏輯
+    function addEventListeners() {
+        svg.addEventListener('mousedown', startDrag);
+        svg.addEventListener('mousemove', drag);
+        svg.addEventListener('mouseup', endDrag);
+        svg.addEventListener('mouseleave', endDrag);
+        
+        // 支援手機觸控
+        svg.addEventListener('touchstart', startDrag, {passive: false});
+        svg.addEventListener('touchmove', drag, {passive: false});
+        svg.addEventListener('touchend', endDrag);
+    }
+
+    function getMousePosition(evt) {
+        const CTM = svg.getScreenCTM();
+        if(evt.touches) { evt = evt.touches[0]; }
+        return {
+            x: (evt.clientX - CTM.e) / CTM.a,
+            y: (evt.clientY - CTM.f) / CTM.d
+        };
+    }
+
+    function startDrag(evt) {
+        if (evt.target.classList.contains('draggable')) {
+            selectedPointIndex = evt.target.dataset.index;
+        }
+    }
+
+    function drag(evt) {
+        if (selectedPointIndex !== -1) {
+            evt.preventDefault();
+            const coord = getMousePosition(evt);
+            points[selectedPointIndex].x = coord.x;
+            points[selectedPointIndex].y = coord.y;
+            render();
+        }
+    }
+
+    function endDrag() {
+        selectedPointIndex = -1;
+    }
+
+    // 預設場景
+    function presetTight() {
+        points = [
+            {x: 290, y: 190}, {x: 310, y: 210}, {x: 300, y: 180}, {x: 305, y: 205}
+        ];
+        render();
+    }
+
+    function presetLoose() {
+        points = [
+            {x: 100, y: 100}, {x: 500, y: 300}, {x: 100, y: 350}, {x: 500, y: 50}
+        ];
+        render();
+    }
+
+    init();
+</script>
+
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>SSE(群內誤差平方和、inertia)是 K-means 的目標與評估量,iPAS 分群考點(中級科目三)。重點:各點到所屬群中心距離平方的總和,越小代表群內越緊密;手肘法就是看 SSE 隨 k 的下降轉折。易混點:SSE 必隨 k 增加而下降(k 等於樣本數時為 0),不能只追 SSE 最小;它只看群內、沒看群間分離(輪廓係數兼顧兩者)。情境:挑 K-means 的 k。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>SSE 是什麼？</summary><p>Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。</p></details><details><summary>SSE 怎麼用來選 K？</summary><p>用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。</p></details><details><summary>為什麼 SSE 不能單純越小越好？</summary><p>K 越大 SSE 一定越小(極端時每點自成一群 SSE 為 0)；所以不能只追求最小 SSE，要找報酬遞減的轉折。</p></details><details><summary>SSE 和輪廓係數差在哪？</summary><p>SSE 只看群內緊密度；輪廓係數同時看群內緊密與群間分離，更全面，常一起用來評估分群。</p></details><details><summary>SSE 在迴歸裡也有嗎？</summary><p>有，迴歸的 SSE 是預測值與真實值的殘差平方和；MSE 就是 SSE 除以樣本數，概念相通。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "SSE 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Sum of Squared Errors，組內平方和：每個點到其所屬群中心的距離平方總和；K-means 就是在最小化 SSE，值越小代表群內越緊密。"}}, {"@type": "Question", "name": "SSE 怎麼用來選 K？", "acceptedAnswer": {"@type": "Answer", "text": "用手肘法(elbow)：畫 SSE 對 K 的曲線，K 增加 SSE 會下降，找下降趨緩的手肘轉折點當合適 K。"}}, {"@type": "Question", "name": "為什麼 SSE 不能單純越小越好？", "acceptedAnswer": {"@type": "Answer", "text": "K 越大 SSE 一定越小(極端時每點自成一群 SSE 為 0)；所以不能只追求最小 SSE，要找報酬遞減的轉折。"}}, {"@type": "Question", "name": "SSE 和輪廓係數差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "SSE 只看群內緊密度；輪廓係數同時看群內緊密與群間分離，更全面，常一起用來評估分群。"}}, {"@type": "Question", "name": "SSE 在迴歸裡也有嗎？", "acceptedAnswer": {"@type": "Answer", "text": "有，迴歸的 SSE 是預測值與真實值的殘差平方和；MSE 就是 SSE 除以樣本數，概念相通。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="k-means.html">K-Means</a><a href="mae-mse-rmse-r2.html">MAE、MSE、RMSE、R²</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="roc_interactive.html">準確率、AUC-ROC、Log Loss</a><a href="matrix.html">準確率、邊界間距</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

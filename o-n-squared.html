@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O(n²) 複雜度與自注意力｜白話＋互動：為何長序列這麼貴</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="O(n²) 指運算量隨輸入規模 n 的平方成長。自注意力要讓每個 token 對所有 token 算關注，計算與記憶體隨序列長度呈 O(n²)，是長上下文的主要瓶頸；稀疏、線性注意力與 FlashAttention 可降低成本。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/o-n-squared.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="O(n²) 時間複雜度與自注意力瓶頸">
+    <meta property="og:description" content="O(n²) 指運算量隨輸入規模 n 的平方成長。自注意力要讓每個 token 對所有 token 算關注，計算與記憶體隨序列長度呈 O(n²)，是長上下文的主要瓶頸；稀疏、線性注意力與 FlashAttention 可降低成本。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/o-n-squared.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="O(n²) 時間複雜度與自注意力瓶頸">
+    <meta name="twitter:description" content="O(n²) 指運算量隨輸入規模 n 的平方成長。自注意力要讓每個 token 對所有 token 算關注，計算與記憶體隨序列長度呈 O(n²)，是長上下文的主要瓶頸。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "O(n²) 時間複雜度與自注意力瓶頸",
+  "url": "https://akira.ipas-ai.com/o-n-squared.html",
+  "description": "O(n²) 指運算量隨輸入規模 n 的平方成長。自注意力要讓每個 token 對所有 token 算關注，計算與記憶體隨序列長度呈 O(n²)，是長上下文的主要瓶頸。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+    <style>
+    :root{
+      --bg:#fdf2f2; --ink:#3a1212; --sub:#8a5252;
+      --brand:#dc2626; --brand2:#b91c1c; --brand-soft:#fbdcdc;
+      --card:#ffffff; --line:#f3dada;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#ef4444,#dc2626 55%,#b91c1c);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#ffe4e4;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(220,38,38,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#f7bcbc 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fdf4f4}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#fdf4f4;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fdf4f4}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#6b3838;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .on2-demo） ===== */
+    .on2-demo{margin:14px 0}
+    .on2-demo .demo-title{font-size:1.12rem;font-weight:800;color:#b91c1c;margin:0 0 14px;text-align:center}
+    .on2-demo .slider-container{background:#fbeaea;padding:18px;border-radius:8px;text-align:center;margin-bottom:22px}
+    .on2-demo input[type=range]{width:70%;margin:15px 0;cursor:pointer;accent-color:#dc2626}
+    .on2-demo .stats{display:flex;justify-content:center;gap:30px;font-size:17px;font-weight:bold;flex-wrap:wrap}
+    .on2-demo .highlight-n{color:#2980b9;font-size:22px}
+    .on2-demo .highlight-o{color:#dc2626;font-size:22px}
+    .on2-demo .visual-area{display:flex;gap:18px;margin-bottom:22px;flex-wrap:wrap}
+    .on2-demo .svg-box{flex:1;min-width:280px;height:340px;background:#fff;border:2px solid #f3dada;border-radius:8px;position:relative}
+    .on2-demo svg{width:100%;height:100%}
+    .on2-demo .svg-title{position:absolute;top:10px;left:0;width:100%;text-align:center;font-weight:bold;color:#7f8c8d;pointer-events:none;font-size:.9rem}
+    .on2-demo .text-panel{background:#fdf2f1;padding:20px;border-left:5px solid #dc2626;border-radius:4px;transition:all .3s ease}
+    .on2-demo .text-panel h3{margin-top:0;color:#c0392b}
+    .on2-demo .text-panel p{margin:10px 0 0;line-height:1.6;font-size:15px}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 自然語言處理</span>
+  <h1>O(n²) 複雜度與自注意力</h1>
+  <p>「每個都要跟每個比一次」——n 一大，比對次數就以平方暴增。這正是自注意力處理長序列時最貴的地方。</p>
+  <div class="chips">
+    <span>兩兩比對</span><span>n² 增長</span><span>自注意力瓶頸</span><span>長序列成本</span><span>高效注意力</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>O(n²)</b>＝ 運算量隨輸入規模 <b>n 的平方</b>成長：n 變 10 倍，運算量約變 <span class="hl">100 倍</span>。<b>自注意力</b>要讓每個 token 對序列中<span class="term">所有 token</span>算關注，n 個 token 就是 n×n 次，計算與記憶體都是 <span class="term">O(n²)</span>——這是長上下文的主要瓶頸。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔗</span>為什麼「兩兩比對」是 O(n²)？</h2>
+    <div class="note meta">
+      n 個人兩兩比對，需要 <b>n(n−1)/2</b> 次，約等於 <b>n²/2</b>。每多加一個人，他就要跟現有的所有人各比一次——所以新增的成本隨人數線性增加，總數就以平方累積。10 個人要 45 次、100 個人要約 5000 次、10 萬人則高達約 50 億次。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：拖動 n，看連線爆炸</h2>
+    <p>拉動滑桿改變 n：左圖每條線代表一次比對，右圖比較 O(n) 線性（藍）與 O(n²) 平方（紅）的增長。留意 n 一過十幾，左圖就變成「密不透風的紅網」。</p>
+    <div class="on2-demo">
+      <div class="demo-title">為什麼兩兩比對的時間複雜度是 O(n²)？</div>
+
+      <div class="slider-container">
+        <label for="n-slider" style="font-size: 17px; font-weight: bold;">拖曳改變數量 (n)</label><br>
+        <input type="range" id="n-slider" min="1" max="25" value="1" oninput="updateVisualization(this.value)">
+        <div class="stats">
+          <div>數量 (n) = <span class="highlight-n" id="val-n">1</span></div>
+          <div>需要比對的次數 = <span class="highlight-o" id="val-ops">0</span> 次</div>
+        </div>
+      </div>
+
+      <div class="visual-area">
+        <div class="svg-box">
+          <div class="svg-title">兩兩比對連線圖 (每條線代表1次比對)</div>
+          <svg id="network-svg" viewBox="0 0 400 400"></svg>
+        </div>
+
+        <div class="svg-box">
+          <div class="svg-title">運算量增長曲線</div>
+          <svg id="curve-svg" viewBox="0 0 400 400">
+            <line x1="40" y1="350" x2="380" y2="350" stroke="#bdc3c7" stroke-width="2" />
+            <line x1="40" y1="350" x2="40" y2="40" stroke="#bdc3c7" stroke-width="2" />
+            <text x="210" y="380" text-anchor="middle" font-size="14" fill="#7f8c8d">數量 (n)</text>
+            <text x="20" y="200" text-anchor="middle" font-size="14" fill="#7f8c8d" transform="rotate(-90 20 200)">比對次數 / 執行時間</text>
+
+            <path d="M 40 350 L 350 250" fill="none" stroke="#3498db" stroke-width="2" stroke-dasharray="5,5" />
+            <text x="360" y="255" font-size="12" fill="#2980b9">O(n) 線性增長</text>
+
+            <path id="n2-curve" fill="none" stroke="#dc2626" stroke-width="3" />
+            <text x="350" y="50" font-size="14" fill="#c0392b" font-weight="bold">O(n²)</text>
+
+            <circle id="curve-marker" cx="40" cy="350" r="6" fill="#c0392b" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="text-panel" id="desc-panel">
+        <h3 id="desc-title">系統狀態：完全沒有負擔</h3>
+        <p id="desc-text">目前數量很少，系統瞬間就能計算完畢。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🤖</span>這跟 Transformer 有什麼關係？</h2>
+    <div class="note app">
+      自注意力裡，每個位置都要對<b>所有位置</b>算一次注意力分數——這正是「兩兩比對」。序列長度 n 的注意力矩陣是 <b>n × n</b>，所以計算與記憶體都是 <b>O(n²)</b>。這就是為什麼<b>上下文視窗</b>有上限、處理長文件／長對話這麼貴：把上下文加長一倍，注意力成本會變成約四倍。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📈</span>O(n) vs O(n²)：數字有多可怕</h2>
+    <table class="cmp">
+      <thead><tr><th>n</th><th>O(n) 約</th><th>O(n²) 約（兩兩比對）</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>10</td><td>45</td></tr>
+        <tr><td>100</td><td>100</td><td>約 5,000</td></tr>
+        <tr><td>1,000</td><td>1,000</td><td>約 50 萬</td></tr>
+        <tr><td>100,000</td><td>10 萬</td><td><b>約 50 億</b></td></tr>
+      </tbody>
+    </table>
+    <div class="note warn"><b>易混：</b>O(n²) 講的是隨「輸入序列長度 n」的成長，跟「模型參數量」是兩回事，別搞混。</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🚀</span>怎麼降低注意力的複雜度</h2>
+    <div class="keys">
+      <div class="keycard"><span>🧱</span><b>稀疏注意力</b><br>只算部分位置對（如局部＋少數全局），降到近線性。</div>
+      <div class="keycard"><span>📏</span><b>線性注意力</b><br>用核技巧改寫，讓複雜度接近 O(n)。</div>
+      <div class="keycard"><span>🪟</span><b>滑動視窗</b><br>只關注鄰近固定範圍，長序列友善。</div>
+      <div class="keycard"><span>⚡</span><b>FlashAttention</b><br>不改複雜度但大幅省記憶體、加速實際運算。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. O(n²) 是什麼意思？</summary>
+        <div class="ans">運算量隨輸入規模 n 的平方成長。n 變 10 倍，運算量約變 100 倍。兩兩比對 n(n−1)/2 次就是典型的 O(n²)。</div></details>
+      <details><summary>Q2. 為什麼自注意力是 O(n²)？</summary>
+        <div class="ans">每個 token 都要跟序列中所有 token 算注意力分數，n 個 token 形成 n×n 的注意力矩陣，計算與記憶體都是 O(n²)。</div></details>
+      <details><summary>Q3. O(n²) 為什麼是長上下文的瓶頸？</summary>
+        <div class="ans">序列一長，計算與記憶體平方暴增（長度加倍→成本約四倍），限制了上下文視窗長度與長文處理的成本。</div></details>
+      <details><summary>Q4. 有哪些降低注意力複雜度的方法？</summary>
+        <div class="ans">稀疏注意力、線性注意力、滑動視窗等把複雜度降到近 O(n)；FlashAttention 不改複雜度但大幅省記憶體、加速實際運算。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>O(n²)：</b>運算量隨 n 平方成長，n 變 10 倍→約 100 倍。</li>
+      <li><b>兩兩比對：</b>n(n−1)/2 ≈ n²/2 次。</li>
+      <li><b>自注意力：</b>每個對所有算注意力 → n×n → O(n²)。</li>
+      <li><b>瓶頸：</b>長序列成本暴增，限制上下文視窗。</li>
+      <li><b>解法：</b>稀疏／線性注意力、滑動視窗、FlashAttention。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const networkSvg = document.getElementById('network-svg');
+        const n2Curve = document.getElementById('n2-curve');
+        const curveMarker = document.getElementById('curve-marker');
+        const valN = document.getElementById('val-n');
+        const valOps = document.getElementById('val-ops');
+
+        const descPanel = document.getElementById('desc-panel');
+        const descTitle = document.getElementById('desc-title');
+        const descText = document.getElementById('desc-text');
+
+        // Pre-calculate the O(n^2) path for the right graph
+        let pathData = "M 40 350 ";
+        for (let i = 1; i <= 25; i++) {
+            let x = 40 + (i / 25) * 310;
+            let ops = (i * (i - 1)) / 2;
+            let y = 350 - (ops / 300) * 310;
+            pathData += `L ${x} ${y} `;
+        }
+        n2Curve.setAttribute("d", pathData);
+
+        function updateVisualization(nStr) {
+            const n = parseInt(nStr);
+            const ops = (n * (n - 1)) / 2;
+
+            // Update Stats
+            valN.innerText = n;
+            valOps.innerText = ops;
+
+            // 1. Update Network Graph (Left)
+            networkSvg.innerHTML = '';
+
+            const cx = 200, cy = 200, r = 130;
+            const nodes = [];
+
+            for (let i = 0; i < n; i++) {
+                const angle = (i / n) * (2 * Math.PI) - (Math.PI / 2);
+                const nx = cx + r * Math.cos(angle);
+                const ny = cy + r * Math.sin(angle);
+                nodes.push({x: nx, y: ny});
+            }
+
+            for (let i = 0; i < n; i++) {
+                for (let j = i + 1; j < n; j++) {
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", nodes[i].x);
+                    line.setAttribute("y1", nodes[i].y);
+                    line.setAttribute("x2", nodes[j].x);
+                    line.setAttribute("y2", nodes[j].y);
+                    const opacity = n > 15 ? 0.2 : (n > 8 ? 0.4 : 0.7);
+                    line.setAttribute("stroke", `rgba(220, 38, 38, ${opacity})`);
+                    line.setAttribute("stroke-width", "1.5");
+                    networkSvg.appendChild(line);
+                }
+            }
+
+            nodes.forEach(node => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", node.x);
+                circle.setAttribute("cy", node.y);
+                circle.setAttribute("r", n > 15 ? "6" : "10");
+                circle.setAttribute("fill", "#2980b9");
+                circle.setAttribute("stroke", "white");
+                circle.setAttribute("stroke-width", "2");
+                networkSvg.appendChild(circle);
+            });
+
+            // 2. Update Curve Marker (Right)
+            const markerX = 40 + (n / 25) * 310;
+            const markerY = 350 - (ops / 300) * 310;
+            curveMarker.setAttribute("cx", markerX);
+            curveMarker.setAttribute("cy", markerY);
+
+            // 3. Update Text Panel
+            if (n < 5) {
+                descPanel.style.borderLeftColor = "#3498db";
+                descPanel.style.background = "#ebf5fb";
+                descTitle.style.color = "#2980b9";
+                descTitle.innerText = "狀態：線性期 (無感)";
+                descText.innerHTML = "當數量只有幾個時，比對次數很少。如果演算法設計得不好，在這時候是完全感覺不出來系統有效能問題的。";
+            } else if (n >= 5 && n <= 15) {
+                descPanel.style.borderLeftColor = "#f39c12";
+                descPanel.style.background = "#fef5e7";
+                descTitle.style.color = "#d35400";
+                descTitle.innerText = "狀態：開始感受到負擔";
+                descText.innerHTML = `看看左邊的連線圖！才增加到 ${n} 個，每個都要跟另外 ${n-1} 個建立連線，這使得畫面中間的線條開始變得密集。在右圖中，代表 O(n²) 的紅線也已經向上彎曲，與平緩的線性藍線分道揚鑣。`;
+            } else {
+                descPanel.style.borderLeftColor = "#dc2626";
+                descPanel.style.background = "#fdf2f1";
+                descTitle.style.color = "#c0392b";
+                descTitle.innerText = "狀態：平方級暴增 (效能瓶頸 O(n²))";
+                descText.innerHTML = `這就是 <strong>O(n²) 的恐怖之處</strong>！數量不過才 ${n}，連線數（比對次數）卻已經暴衝到 ${ops} 次。<br>左側的圖已經變成一張密不透風的紅網。換到自注意力：序列長度 10 萬時，注意力比對高達約 50 億次，這正是長上下文昂貴、上下文視窗有上限的原因。`;
+            }
+        }
+
+        // Initialize
+        updateVisualization(1);
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>O(n²) 時間複雜度在 AI 最關鍵的體現是自注意力,iPAS 中級科目一考點。重點:自注意力要每個 token 對所有 token 算關注,計算與記憶體隨序列長度 n 呈 O(n²),是長上下文的主要瓶頸、也是上下文視窗有上限的原因。易混點:O(n²) 指隨「輸入序列長度」成長,與「模型參數量」不同;高效注意力(稀疏、線性、滑動視窗、FlashAttention)可降到近線性或大幅省記憶體。情境:為何長文件、長對話成本高。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>O(n²) 是什麼意思？</summary><p>運算量隨輸入規模 n 的平方成長；n 變 10 倍、運算量約變 100 倍。兩兩比對 n(n−1)/2 次就是典型 O(n²)。</p></details><details><summary>為什麼自注意力是 O(n²)？</summary><p>每個 token 都要跟序列中所有 token 算注意力分數，n 個 token 形成 n×n 的注意力矩陣，計算與記憶體都是 O(n²)。</p></details><details><summary>O(n²) 為什麼是長上下文的瓶頸？</summary><p>序列一長，計算與記憶體平方暴增(長度加倍成本約四倍)，限制了上下文視窗長度與長文處理成本。</p></details><details><summary>怎麼降低注意力的複雜度？</summary><p>稀疏注意力、線性注意力、滑動視窗等可降到近 O(n)；FlashAttention 不改複雜度但大幅省記憶體、加速實際運算。</p></details><details><summary>O(n²) 和模型參數量一樣嗎？</summary><p>不一樣。O(n²) 講的是隨「輸入序列長度」的運算成長，參數量是模型大小，兩者是不同概念。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "O(n²) 是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "運算量隨輸入規模 n 的平方成長；n 變 10 倍、運算量約變 100 倍。兩兩比對 n(n−1)/2 次就是典型 O(n²)。"}}, {"@type": "Question", "name": "為什麼自注意力是 O(n²)？", "acceptedAnswer": {"@type": "Answer", "text": "每個 token 都要跟序列中所有 token 算注意力分數，n 個 token 形成 n×n 的注意力矩陣，計算與記憶體都是 O(n²)。"}}, {"@type": "Question", "name": "O(n²) 為什麼是長上下文的瓶頸？", "acceptedAnswer": {"@type": "Answer", "text": "序列一長，計算與記憶體平方暴增(長度加倍成本約四倍)，限制了上下文視窗長度與長文處理成本。"}}, {"@type": "Question", "name": "怎麼降低注意力的複雜度？", "acceptedAnswer": {"@type": "Answer", "text": "稀疏注意力、線性注意力、滑動視窗等可降到近 O(n)；FlashAttention 不改複雜度但大幅省記憶體、加速實際運算。"}}, {"@type": "Question", "name": "O(n²) 和模型參數量一樣嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一樣。O(n²) 講的是隨輸入序列長度的運算成長，參數量是模型大小，兩者是不同概念。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="attention.html">注意力機制</a><a href="multi-head-attention.html">多頭注意力</a><a href="big_o_trilogy.html">Big-O 三部曲</a><a href="transformer.html">Transformer</a><a href="rag.html">RAG</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dropout 視覺化 互動動畫</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="訓練時隨機關閉一部分神經元(以機率 p)，強迫網路不過度依賴特定神經元，是一種正則化、抑制過擬合。等於每次訓練一個略不同的子網路、近似多網路集成；推論時全部啟用、不再丟棄。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dropout_demo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Dropout 視覺化 互動動畫">
+    <meta property="og:description" content="訓練時隨機關閉神經元(機率 p)強迫不過度依賴、抑制過擬合，近似多網路集成；推論時全部啟用。是深度學習防過擬合首選。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dropout_demo.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dropout 視覺化 互動動畫">
+    <meta name="twitter:description" content="訓練時隨機關閉神經元抑制過擬合、近似集成；推論時全部啟用。深度學習防過擬合首選。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Dropout 視覺化 互動動畫",
+  "url": "https://akira.ipas-ai.com/dropout_demo.html",
+  "description": "訓練時隨機關閉一部分神經元(以機率 p)，強迫網路不過度依賴特定神經元，是一種正則化、抑制過擬合。等於每次訓練一個略不同的子網路、近似多網路集成；推論時全部啟用、不再丟棄。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --rd:#dc2626; --rd-d:#b91c1c; --rd-dd:#7f1d1d;
+    --green:#16a34a; --amber:#d97706; --blue:#2563eb; --indigo:#4f46e5;
+    --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f8eeee;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+    margin:0; padding:26px 14px 40px;
+    display:flex; flex-direction:column; align-items:center;
+    background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+  }
+  .hero{
+    width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+    background:linear-gradient(135deg,#7f1d1d 0%,#dc2626 55%,#f87171 100%);
+    color:#fff; box-shadow:0 14px 34px rgba(220,38,38,.28); margin-bottom:20px;
+  }
+  .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+    background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+  .hero h1{margin:0 0 10px; font-size:1.8rem; line-height:1.3}
+  .hero p{margin:0; font-size:1.05rem; opacity:.97}
+  .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+  .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+    padding:5px 11px; border-radius:999px}
+
+  .lesson{
+    width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+    box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+  }
+  .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+  .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+  .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+  .lesson p{margin:10px 0}
+  .hl{background:linear-gradient(transparent 62%,#fecaca 62%); font-weight:700; padding:0 1px}
+  .term{color:var(--rd-d); font-weight:800}
+
+  .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+  .note h4{margin:0 0 6px; font-size:1rem}
+  .note.def{background:#fef2f2; border-left:5px solid var(--rd)}
+  .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+  .note.warn{background:#fff7ed; border-left:5px solid #ea580c}
+  .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+  .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+  .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+  .cmp th{background:#fbeeee; font-weight:800}
+  .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+  .cmp .tr{color:var(--rd-d); font-weight:700} .cmp .in{color:var(--green); font-weight:700}
+
+  .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+  .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--rd);
+    border-radius:12px; padding:13px 15px; font-size:.95rem}
+  .keycard b{display:block; margin-bottom:3px; color:var(--rd-d)}
+
+  .qa{background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:6px 18px; margin:12px 0}
+  .qa details{border-bottom:1px solid #fbdada; padding:11px 0}
+  .qa details:last-child{border-bottom:none}
+  .qa summary{cursor:pointer; font-weight:800; color:var(--rd-d)}
+  .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+  /* ===== demo (preserved · dark) ===== */
+  .demo-dark{background:#171528; border-radius:16px; padding:18px; margin:14px 0; box-shadow:0 12px 30px rgba(0,0,0,.3)}
+  .demo-dark .controls{display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin:.2rem 0 1rem; align-items:center}
+  .demo-dark .controls label{font-size:.88rem; color:#cbd5e1; font-weight:700}
+  .demo-dark input[type=range]{width:180px; accent-color:#f87171}
+  .val{font-weight:700; color:#fca5a5; min-width:3rem; text-align:center}
+  .btn-row{display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; margin:.5rem 0 10px}
+  .btn{padding:.5rem 1.1rem; border-radius:999px; border:none; font-size:.85rem; font-weight:800; cursor:pointer; transition:all .2s}
+  .btn-drop{background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff}
+  .btn-drop:hover{transform:scale(1.05)}
+  .btn-infer{background:linear-gradient(135deg,#4ade80,#22c55e); color:#064e3b}
+  .btn-infer:hover{transform:scale(1.05)}
+  .mode-badge{text-align:center; font-size:1.05rem; font-weight:800; padding:.5rem; border-radius:12px; margin:.5rem 0}
+  .mode-badge.train{background:rgba(248,113,113,.15); color:#f87171}
+  .mode-badge.infer{background:rgba(74,222,128,.15); color:#4ade80}
+  .stats{display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin:.5rem 0}
+  .stat{text-align:center; background:rgba(0,0,0,.25); padding:.4rem .7rem; border-radius:10px; min-width:90px}
+  .stat .label{font-size:.7rem; color:#94a3b8}
+  .stat .value{font-size:1rem; font-weight:700}
+  .svg-wrap{background:rgba(0,0,0,.3); border-radius:12px; padding:.5rem; overflow:hidden}
+  .svg-wrap svg{display:block; width:100%; height:auto}
+
+  @media(max-width:560px){
+    .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+  }
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🔌 Dropout · iPAS 深度學習考點</span>
+        <h1>Dropout：訓練時隨機「請假」，逼每個神經元都學會做事</h1>
+        <p>神經網路太容易「靠幾個明星神經元包辦、其他躺平」——結果就是<b>過擬合</b>。Dropout 的招數簡單又狠：<b>訓練時每輪隨機關掉一部分神經元</b>，逼整個網路學會分工、不依賴任何單一節點。這是深度學習<b>防過擬合的首選</b>。</p>
+        <div class="chips"><span>隨機關閉神經元</span><span>正則化</span><span>防過擬合</span><span>近似集成</span><span>訓練 vs 推論</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>👥 一、先用白話講：像團隊做報告</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--rd)"><b style="color:var(--rd)">沒有 Dropout</b>每次都同一個學霸寫全部 → 其他人什麼都不會（<b>過擬合、太依賴少數</b>）。</div>
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">有 Dropout（訓練時）</b>每次隨機讓幾個人「請假」→ <b>逼每個人都學會做事</b>（泛化強）。</div>
+            <div class="keycard" style="border-left-color:var(--blue)"><b style="color:var(--blue)">推論時</b><b>全員到齊</b>，一起貢獻（訓練時已做過縮放補償）。</div>
+        </div>
+        <div class="note def">
+            <h4>📌 考試重點</h4>
+            Dropout <b>只在「訓練時」</b>隨機關閉神經元；<b>「推論時」全部開啟</b>、不再丟棄。這個「訓練關、推論開」的差別是最常考的點。
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、動手玩：看神經元被隨機關掉</h2>
+        <p class="lead">拖動 <b>Dropout 比率</b>，切「訓練模式」看隱藏層神經元被隨機打上 <b style="color:#dc2626">✕</b>（關閉）、存活的顯示 <b>×縮放</b>補償；按「重新抽籤」每次關的都不同；切「推論模式」看全員到齊。</p>
+
+        <div class="demo-dark">
+            <div class="controls">
+                <label>Dropout 比率：</label>
+                <input type="range" id="dropRate" min="0" max="80" value="30" step="5">
+                <span class="val" id="dropLabel">30%</span>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-drop" id="trainBtn">🎲 訓練模式（隨機關閉）</button>
+                <button class="btn btn-drop" id="reshuffleBtn">🔄 重新抽籤</button>
+                <button class="btn btn-infer" id="inferBtn">🟢 推論模式（全員到齊）</button>
+            </div>
+
+            <div class="mode-badge train" id="modeBadge">🎲 訓練模式 — 隨機關閉 30% 神經元</div>
+
+            <div class="stats">
+                <div class="stat"><div class="label">總神經元</div><div class="value" id="totalN" style="color:#60a5fa">-</div></div>
+                <div class="stat"><div class="label">啟用中</div><div class="value" id="activeN" style="color:#4ade80">-</div></div>
+                <div class="stat"><div class="label">已關閉</div><div class="value" id="droppedN" style="color:#f87171">-</div></div>
+                <div class="stat"><div class="label">Dropout 率</div><div class="value" id="actualRate" style="color:#fbbf24">-</div></div>
+            </div>
+
+            <div class="svg-wrap">
+                <svg id="nnChart" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            比率調越高，被打 ✕ 的神經元越多。每按一次<b>重新抽籤</b>，關掉的是<b>不同的組合</b>——等於每輪都在訓練一個「略不一樣的子網路」。存活神經元上的 <b>×1.4</b> 之類數字，是把輸出<b>除以 (1−p)</b> 的縮放補償（見下方數學）。切到<b>推論模式</b>，✕ 全消失、全員到齊。
+        </div>
+    </section>
+
+    <!-- ===== 3. 為什麼有效 ===== -->
+    <section class="lesson">
+        <h2>🧠 三、為什麼能防過擬合？</h2>
+        <div class="keys">
+            <div class="keycard"><b>打散「共適應」</b>神經元不能再<b>互相依賴、綁定合作</b>（co-adaptation），被迫各自學到有用、穩健的特徵。</div>
+            <div class="keycard"><b>逼出冗餘表示</b>因為隨時可能被關，網路得學出<b>多套備援</b>，泛化更好。</div>
+            <div class="keycard"><b>近似「集成」</b>每輪不同子網路，等於同時訓練<b>指數級多個網路</b>，最後平均——集成本來就能降過擬合。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 訓練 vs 推論 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 四、訓練 vs 推論（必考）</h2>
+        <table class="cmp">
+            <tr><th></th><th class="tr">訓練時 Training</th><th class="in">推論時 Inference</th></tr>
+            <tr><td>丟棄？</td><td>✅ 每個神經元有 p 機率被關（輸出設 0）</td><td>❌ <b>全部啟用</b>、不丟棄</td></tr>
+            <tr><td>縮放</td><td>存活的輸出 <b>÷ (1−p)</b> 補償（inverted dropout）</td><td>不必再縮放</td></tr>
+            <tr><td>目的</td><td>製造隨機子網路、正則化</td><td>用完整網路做穩定預測</td></tr>
+        </table>
+        <div class="note warn">
+            <h4>⚠️ 實作陷阱</h4>
+            記得推論前把模型切到 <b>eval / inference 模式</b>（如 PyTorch 的 <code>model.eval()</code>），否則會誤在推論時仍隨機丟棄，結果不穩。
+        </div>
+    </section>
+
+    <!-- ===== 5. 率怎麼設 ===== -->
+    <section class="lesson">
+        <h2>🎚️ 五、Dropout 率怎麼設？</h2>
+        <div class="note def">
+            <h4>常見 0.2 ~ 0.5</h4>
+            <b>太高</b>（如 0.8）→ 關太多、學不動、<b>欠擬合</b>；<b>太低</b>→ 正則化不足、沒效果。實務上：<b>全連接層</b>常用較高（0.5 附近）、<b>卷積層</b>用得較少或很小、<b>輸入層</b>設很小或不用。要依資料與過擬合程度調。
+        </div>
+    </section>
+
+    <!-- ===== 6. 其他正則化 ===== -->
+    <section class="lesson">
+        <h2>🧰 六、Dropout 之外的正則化手段</h2>
+        <div class="keys">
+            <div class="keycard"><b>權重衰減 L1/L2</b>懲罰過大權重。見 <a href="l2.html" style="color:#b91c1c">L2</a>、<a href="l1.html" style="color:#b91c1c">L1</a>。</div>
+            <div class="keycard"><b>資料增強</b>翻轉/裁切/加噪，讓資料更多樣。</div>
+            <div class="keycard"><b>提早停止 Early Stopping</b>驗證誤差回升就停。</div>
+            <div class="keycard"><b>BatchNorm</b>順帶有輕微正則化效果。見 <a href="batch_norm.html" style="color:#b91c1c">Batch Norm</a>。</div>
+        </div>
+        <div class="note meta">
+            <h4>🧠 一句話</h4>
+            過擬合通常<b>多管齊下</b>：Dropout + 權重衰減 + 資料增強 + early stopping。整體觀念見 <a href="overfitting_underfitting.html" style="color:#b45309;font-weight:700">過擬合 vs 欠擬合</a>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. Dropout 在做什麼？</summary>
+                <p>訓練時<b>隨機關閉一部分神經元</b>（機率 p），逼網路不過度依賴特定神經元，是一種正則化。</p></details>
+            <details><summary>Q2. 為什麼能減少過擬合？</summary>
+                <p>打散<b>共適應</b>、逼出冗餘表示，等於訓練<b>多個子網路的集成</b>。</p></details>
+            <details><summary>Q3. 訓練和推論時處理有何不同？</summary>
+                <p>訓練<b>隨機關 + 縮放 ÷(1−p)</b>；推論<b>全部啟用、不丟棄</b>。</p></details>
+            <details><summary>Q4. Dropout 率設太高會怎樣？</summary>
+                <p>關太多、學不動 → <b>欠擬合</b>；常用 0.2~0.5。</p></details>
+            <details><summary>Q5. 還有哪些防過擬合的手段？</summary>
+                <p>L1/L2 權重衰減、資料增強、early stopping、BatchNorm、集成。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>Dropout</b>訓練時隨機關神經元。</div>
+            <div class="keycard"><b>目的</b>正則化、防過擬合。</div>
+            <div class="keycard"><b>原理</b>打散共適應、近似集成。</div>
+            <div class="keycard"><b>訓練關、推論開</b>訓練縮放 ÷(1−p)。</div>
+            <div class="keycard"><b>率 0.2~0.5</b>太高會欠擬合。</div>
+            <div class="keycard"><b>常搭配</b>權重衰減、資料增強、early stop。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+<script>
+const W=800,H=500;
+const layers=[4,8,8,6,3]; // network architecture
+const svg=document.getElementById('nnChart');
+const dropSlider=document.getElementById('dropRate');
+let isTrainMode=true;
+let droppedNeurons=new Set();
+
+function generateDropout(){
+  const rate=+dropSlider.value/100;
+  droppedNeurons=new Set();
+  layers.forEach((n,li)=>{
+    if(li===0||li===layers.length-1) return; // don't drop input/output
+    for(let ni=0;ni<n;ni++){
+      if(Math.random()<rate) droppedNeurons.add(li+'-'+ni);
+    }
+  });
+}
+
+function draw(){
+  const rate=+dropSlider.value/100;
+  document.getElementById('dropLabel').textContent=Math.round(rate*100)+'%';
+
+  const totalHidden=layers.slice(1,-1).reduce((a,b)=>a+b,0);
+  const dropped=isTrainMode?droppedNeurons.size:0;
+  const active=layers.reduce((a,b)=>a+b,0)-dropped;
+
+  document.getElementById('totalN').textContent=layers.reduce((a,b)=>a+b,0);
+  document.getElementById('activeN').textContent=active;
+  document.getElementById('droppedN').textContent=dropped;
+  document.getElementById('actualRate').textContent=isTrainMode?Math.round(dropped/totalHidden*100)+'%':'0%';
+
+  const badge=document.getElementById('modeBadge');
+  if(isTrainMode){
+    badge.className='mode-badge train';
+    badge.textContent=`🎲 訓練模式 — 隨機關閉 ${Math.round(rate*100)}% 隱藏層神經元（${dropped} 個被關閉）`;
+  }else{
+    badge.className='mode-badge infer';
+    badge.textContent='🟢 推論模式 — 全部神經元啟用，權重已縮放';
+  }
+
+  let html=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+
+  // Layer labels
+  const layerNames=['輸入層','隱藏層 1','隱藏層 2','隱藏層 3','輸出層'];
+  const layerX=[];
+  const gap=W/(layers.length+1);
+  layers.forEach((_,i)=>{
+    const x=gap*(i+1);
+    layerX.push(x);
+    html+=`<text x="${x}" y="25" text-anchor="middle" fill="#888" font-size="11">${layerNames[i]}</text>`;
+  });
+
+  // Compute neuron positions
+  const neuronPos=[];
+  layers.forEach((n,li)=>{
+    const positions=[];
+    const totalH=n*40;
+    const startY=(H-totalH)/2+20;
+    for(let ni=0;ni<n;ni++){
+      positions.push({x:layerX[li],y:startY+ni*40+20});
+    }
+    neuronPos.push(positions);
+  });
+
+  // Draw connections
+  for(let li=0;li<layers.length-1;li++){
+    for(let ni=0;ni<layers[li];ni++){
+      const fromDropped=isTrainMode&&droppedNeurons.has(li+'-'+ni);
+      if(fromDropped) continue;
+      for(let nj=0;nj<layers[li+1];nj++){
+        const toDropped=isTrainMode&&droppedNeurons.has((li+1)+'-'+nj);
+        if(toDropped) continue;
+        const from=neuronPos[li][ni];
+        const to=neuronPos[li+1][nj];
+        const opacity=isTrainMode?0.15:0.08;
+        html+=`<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="rgba(255,255,255,${opacity})" stroke-width="1"/>`;
+      }
+    }
+  }
+
+  // Draw neurons
+  layers.forEach((n,li)=>{
+    for(let ni=0;ni<n;ni++){
+      const pos=neuronPos[li][ni];
+      const isDropped=isTrainMode&&droppedNeurons.has(li+'-'+ni);
+      const isIO=li===0||li===layers.length-1;
+
+      if(isDropped){
+        // Dropped neuron - X mark
+        html+=`<circle cx="${pos.x}" cy="${pos.y}" r="14" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="2" stroke-dasharray="4,3"/>`;
+        html+=`<text x="${pos.x}" y="${pos.y+5}" text-anchor="middle" fill="#f87171" font-size="16" font-weight="700">✕</text>`;
+      }else{
+        // Active neuron
+        const color=isIO?'#60a5fa':(isTrainMode?'#4ade80':'#a78bfa');
+        const scale=isTrainMode&&!isIO?1/(1-rate):1;
+        const r=isTrainMode&&!isIO?16:14;
+        html+=`<circle cx="${pos.x}" cy="${pos.y}" r="${r}" fill="${color}22" stroke="${color}" stroke-width="2"/>`;
+        if(isTrainMode&&!isIO){
+          html+=`<text x="${pos.x}" y="${pos.y+4}" text-anchor="middle" fill="${color}" font-size="8" font-weight="700">×${scale.toFixed(1)}</text>`;
+        }else{
+          html+=`<circle cx="${pos.x}" cy="${pos.y}" r="4" fill="${color}"/>`;
+        }
+      }
+    }
+  });
+
+  // Legend
+  const ly=H-25;
+  html+=`<circle cx="50" cy="${ly}" r="8" fill="#4ade8022" stroke="#4ade80" stroke-width="2"/><text x="65" y="${ly+4}" fill="#4ade80" font-size="11">啟用</text>`;
+  html+=`<circle cx="130" cy="${ly}" r="8" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="2" stroke-dasharray="4,3"/><text x="145" y="${ly+4}" fill="#f87171" font-size="11">已關閉</text>`;
+  html+=`<text x="230" y="${ly+4}" fill="#888" font-size="11">×${(1/(1-rate)).toFixed(1)} = 訓練時權重縮放補償</text>`;
+
+  svg.innerHTML=html;
+}
+
+dropSlider.addEventListener('input',()=>{
+  if(isTrainMode) generateDropout();
+  draw();
+});
+
+document.getElementById('trainBtn').addEventListener('click',()=>{
+  isTrainMode=true;
+  generateDropout();
+  draw();
+});
+
+document.getElementById('reshuffleBtn').addEventListener('click',()=>{
+  isTrainMode=true;
+  generateDropout();
+  draw();
+});
+
+document.getElementById('inferBtn').addEventListener('click',()=>{
+  isTrainMode=false;
+  draw();
+});
+
+generateDropout();
+draw();
+</script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>Dropout 是對抗過擬合的正則化技巧,iPAS 深度學習考點(中級科目三)。重點:訓練時隨機丟棄一部分神經元(設為 0),逼網路不過度依賴特定神經元、學到更穩健的表示。易混點:只在訓練時丟棄、推論時全部使用並做縮放補償;與 BatchNorm 併用要注意順序與比例。情境:全連接層常用較高丟棄率,卷積層用得較少。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Dropout 是什麼？</summary><p>訓練時隨機關閉一部分神經元(以機率 p)，強迫網路不過度依賴特定神經元，是一種正則化、用來抑制過擬合。</p></details><details><summary>為什麼能減少過擬合？</summary><p>等於每次訓練一個略不同的子網路、最後近似多個網路的集成，降低神經元間的共適應，提升泛化。</p></details><details><summary>訓練和推論時怎麼處理？</summary><p>訓練時隨機丟棄並縮放；推論時不丟棄、用全部神經元(以對應比例縮放)，確保期望輸出一致，要切到 eval 模式。</p></details><details><summary>dropout 率怎麼設？</summary><p>常見 0.2 到 0.5；太高會欠擬合、太低正則化不足，依層與資料調整，輸入層通常設較小。</p></details><details><summary>還有哪些正則化手段？</summary><p>L1/L2 權重衰減、資料增強、提早停止、BatchNorm(輕微)、集成；常多管齊下。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Dropout 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "訓練時隨機關閉一部分神經元(以機率 p)，強迫網路不過度依賴特定神經元，是一種正則化、用來抑制過擬合。"}}, {"@type": "Question", "name": "為什麼能減少過擬合？", "acceptedAnswer": {"@type": "Answer", "text": "等於每次訓練一個略不同的子網路、最後近似多個網路的集成，降低神經元間的共適應，提升泛化。"}}, {"@type": "Question", "name": "訓練和推論時怎麼處理？", "acceptedAnswer": {"@type": "Answer", "text": "訓練時隨機丟棄並縮放；推論時不丟棄、用全部神經元(以對應比例縮放)，確保期望輸出一致，要切到 eval 模式。"}}, {"@type": "Question", "name": "dropout 率怎麼設？", "acceptedAnswer": {"@type": "Answer", "text": "常見 0.2 到 0.5；太高會欠擬合、太低正則化不足，依層與資料調整，輸入層通常設較小。"}}, {"@type": "Question", "name": "還有哪些正則化手段？", "acceptedAnswer": {"@type": "Answer", "text": "L1/L2 權重衰減、資料增強、提早停止、BatchNorm(輕微)、集成；常多管齊下。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="overfitting_underfitting.html">過擬合 vs 欠擬合</a><a href="ann_mlp.html">ANN / MLP</a><a href="batch_norm.html">Batch Norm</a><a href="l2.html">L2 正則化</a><a href="activation_functions.html">激活函數</a><a href="deep-learning.html">深度學習總覽</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

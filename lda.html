@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDA vs QDA 互動視覺化 (修正版)</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。 PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/lda.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="LDA vs QDA 互動視覺化 (修正版)">
+    <meta property="og:description" content="一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。 PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/lda.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LDA vs QDA 互動視覺化 (修正版)">
+    <meta name="twitter:description" content="一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。 PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "LDA vs QDA 互動視覺化 (修正版)",
+  "url": "https://akira.ipas-ai.com/lda.html",
+  "description": "一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。 PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --amber:#d97706; --amber-d:#b45309; --blue:#2563eb; --blue-d:#1d4ed8;
+            --bluec:#3498db; --redc:#e74c3c; --green:#16a34a; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:940px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#b45309 0%,#d97706 52%,#f59e0b 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(217,119,6,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:940px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#fde68a 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--amber-d); font-weight:700}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.meta{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--amber); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.95rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .lda{color:var(--amber-d); font-weight:800}
+        .cmp .pca{color:var(--blue-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--amber);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--amber-d)}
+
+        .legend2{display:grid; gap:9px; margin:8px 0 2px}
+        .legend2 div{display:flex; align-items:flex-start; gap:10px}
+        .legend2 .mk{flex:0 0 auto; margin-top:4px; width:16px; height:16px; border-radius:50%}
+        .mk.blue{background:#2980b9} .mk.red{background:#c0392b}
+        .mk.cross{width:16px;height:16px;background:none;position:relative}
+        .mk.region{width:26px;height:14px;border-radius:3px;background:linear-gradient(90deg,#bcd6ef,#f3c0bb)}
+
+        .qa{background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #fce9b8; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--amber-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        .adv{margin:14px 0; border:1px solid var(--line); border-radius:12px; background:#fbfcfe; padding:4px 16px}
+        .adv summary{cursor:pointer; font-weight:800; color:var(--ink); padding:10px 0}
+        .math-block{background:#f8fafc; padding:13px 15px; border-left:4px solid var(--amber); margin:10px 0; overflow-x:auto; border-radius:0 8px 8px 0}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#fff8ef; border:1px solid #f3e0c4; border-radius:14px; padding:18px; margin:14px 0}
+        .lda-controls{display:grid; grid-template-columns:1fr 1fr; gap:16px; width:100%; margin-bottom:16px;
+            background:#fff; padding:15px; border-radius:10px; border:1px solid var(--line)}
+        .mode-switch{grid-column:span 2; display:flex; justify-content:center; gap:16px; flex-wrap:wrap}
+        .control-group{display:flex; flex-direction:column; gap:5px}
+        .control-group label{font-weight:bold; font-size:.92rem}
+        .lda-controls button{padding:10px 18px; border:none; border-radius:7px; cursor:pointer; font-weight:bold; transition:.2s}
+        .lda-controls button.active{box-shadow:0 0 0 3px rgba(0,0,0,0.1); transform:scale(1.04)}
+        #btn-lda{background:#3498db; color:#fff} #btn-qda{background:#e67e22; color:#fff}
+        .lda-controls button.inactive{background:#ddd; color:#666}
+        input[type=range]{width:100%; accent-color:var(--amber)}
+        #viz-wrapper{position:relative; width:600px; height:400px; max-width:100%; border:2px solid #333; border-radius:6px; overflow:hidden; margin:0 auto}
+        #viz-wrapper canvas{position:absolute; top:0; left:0; z-index:1}
+        #viz-wrapper svg{position:absolute; top:0; left:0; z-index:2}
+        .viz-scroll{overflow-x:auto; width:100%}
+        .demo-legend{margin-top:12px; font-size:.9em; display:flex; gap:16px; flex-wrap:wrap; justify-content:center}
+        .demo-legend .dot{width:10px; height:10px; display:inline-block; border-radius:50%}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .lda-controls{grid-template-columns:1fr}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">📽️ 監督式降維 + 分類 · iPAS 常考</span>
+        <h1>LDA 線性判別分析：找出「最能分開類別」的角度</h1>
+        <p>LDA 一招兩用：它能<b>分類</b>，也能<b>降維</b>。核心點子很單純——找一個「觀看角度」，讓不同類別投影下去後分得最開、同類擠最緊。這頁先用直覺帶你懂，再玩 LDA vs QDA 的決策邊界，最後釐清它和 PCA 的差別（考試最愛考）。</p>
+        <div class="chips"><span>投影直覺</span><span>類間大/類內小</span><span>LDA vs PCA</span><span>最多 k−1 維</span><span>LDA vs QDA</span><span>兩個 LDA 別搞混</span></div>
+    </header>
+
+    <!-- ===== 1. 是什麼 + 投影直覺 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、LDA 在做什麼？</h2>
+        <p class="lead">一句話：<span class="term">用「有標籤」的資料，找出一個最能把類別分開的方向</span>。</p>
+
+        <div class="note def">
+            <h4>💡 白話定義</h4>
+            LDA（Linear Discriminant Analysis，線性判別分析）會看你的資料<b>各屬於哪一類</b>，然後找一條線/方向，<b>把資料投影上去</b>，使得<span class="hl">不同類別的影子分得最開、同一類的影子擠得最緊</span>。投影後不只好分類，維度還變少了——所以它同時是分類器，也是降維工具。
+        </div>
+
+        <div class="note meta">
+            <h4>🔦 用「打光投影」想像</h4>
+            把兩群點想成空中的兩團棉花糖，你拿手電筒從某個角度照，牆上會有它們的<b>影子</b>。換不同角度，影子有時清楚分成兩坨、有時糊成一團。<b>LDA 做的，就是自動找出「讓兩團影子分最開」的那個照射角度。</b>
+        </div>
+
+        <div style="text-align:center; margin:8px 0">
+            <svg width="380" height="210" viewBox="0 0 380 210" style="max-width:100%;height:auto">
+                <rect x="0" y="0" width="380" height="210" fill="#fbfcfe" rx="10"/>
+                <!-- good axis -->
+                <line x1="40" y1="180" x2="320" y2="40" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="7 5"/>
+                <polygon points="320,40 309,42 314,51" fill="#16a34a"/>
+                <text x="246" y="40" fill="#15803d" font-size="13" font-weight="bold">LDA 找的好方向</text>
+                <!-- blue cluster (upper-left along axis) -->
+                <g fill="#2980b9">
+                    <circle cx="92" cy="92" r="5"/><circle cx="112" cy="80" r="5"/><circle cx="80" cy="108" r="5"/>
+                    <circle cx="104" cy="104" r="5"/><circle cx="124" cy="96" r="5"/><circle cx="96" cy="120" r="5"/>
+                </g>
+                <text x="70" y="64" fill="#2980b9" font-size="13" font-weight="bold">類別 A</text>
+                <!-- red cluster (lower-right along axis) -->
+                <g fill="#c0392b">
+                    <circle cx="232" cy="150" r="5"/><circle cx="252" cy="138" r="5"/><circle cx="244" cy="166" r="5"/>
+                    <circle cx="264" cy="156" r="5"/><circle cx="224" cy="170" r="5"/><circle cx="276" cy="146" r="5"/>
+                </g>
+                <text x="280" y="178" fill="#c0392b" font-size="13" font-weight="bold">類別 B</text>
+                <text x="44" y="200" fill="#64748b" font-size="11.5">沿綠色方向看，藍與紅分得最開；換成別的角度就會糊在一起。</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- ===== 2. 兩個目標 ===== -->
+    <section class="lesson">
+        <h2>🎯 二、LDA 的兩個目標：分得開、又擠得緊</h2>
+        <p class="lead">什麼叫「好的投影方向」？LDA 用兩個指標同時衡量。</p>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>類間變異「最大化」（Between-class）</b><br>
+                投影後，<b>不同類別的中心離得越遠越好</b>——這樣兩群才不會黏在一起。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>類內變異「最小化」（Within-class）</b><br>
+                投影後，<b>同一類的點要擠得越緊越好</b>——免得自己這一坨就散開、跟別類重疊。
+            </div></div>
+        </div>
+        <div class="note def">
+            <h4>🧮 一句話的數學</h4>
+            LDA 就是讓 <b>（類間距離 ÷ 類內散度）</b>這個比值<span class="hl">越大越好</span>。比值大 = 兩群分得開、各自又緊實 = 最好分類的方向。
+        </div>
+    </section>
+
+    <!-- ===== 3. LDA vs PCA ===== -->
+    <section class="lesson">
+        <h2>⚖️ 三、LDA vs PCA：差在「有沒有看標籤」</h2>
+        <p class="lead">兩個都能降維，但目標完全不同——這是考試最高頻的對比。</p>
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="lda">LDA</span></th><th><span class="pca">PCA</span></th></tr>
+            <tr><td>有沒有用標籤</td><td>✅ <b>監督式</b>（要知道每點哪一類）</td><td>❌ <b>非監督式</b>（不看類別）</td></tr>
+            <tr><td>找什麼方向</td><td>最能<b>分開類別</b>的方向</td><td>資料<b>整體變異最大</b>的方向</td></tr>
+            <tr><td>目的</td><td>分類前降維、提升可分性</td><td>壓縮、去冗餘、視覺化</td></tr>
+            <tr><td>最多降到</td><td><b>類別數 − 1</b> 維</td><td>原始特徵數（可自選）</td></tr>
+        </table>
+        <div class="note warn">
+            <h4>🎯 一個經典陷阱</h4>
+            「整體變異最大的方向」<b>不一定</b>是「最能分開類別的方向」！有時資料散得最開的軸，剛好讓兩類混在一起。PCA 看不到標籤、會選錯；<span class="hl">LDA 因為知道標籤，會選真正能分類的方向</span>。要分類就用 LDA，純壓縮/探索就用 PCA。
+        </div>
+    </section>
+
+    <!-- ===== 4. k-1 維 ===== -->
+    <section class="lesson">
+        <h2>📏 四、為什麼「最多只能降到 類別數 − 1 維」？</h2>
+        <p class="lead">這是 LDA 的固有限制、也是常考的數字。</p>
+        <div class="note def">
+            <h4>🔢 直覺理解</h4>
+            要分開 <b>2 類</b>，只需要<b>一條線（1 維）</b>就能把它們排開；要分開 <b>3 類</b>，最多<b>一個平面（2 維）</b>。所以 <b>k 類 → 最多 k−1 個有用的判別方向</b>。多出來的方向對「區分類別」沒有貢獻。<br>
+            （對比 PCA：PCA 想降幾維就降幾維，因為它跟類別數無關。）
+        </div>
+    </section>
+
+    <!-- ===== 5. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 五、動手玩：LDA vs QDA 決策邊界</h2>
+        <p class="lead">這個 demo 換個角度看 LDA——當成<b>分類器</b>時，它怎麼把平面切兩半。順便跟它的「曲線版」表親 QDA 比一比。</p>
+
+        <div class="note meta">
+            <h4>🗺️ 怎麼看這張圖</h4>
+            <div class="legend2">
+                <div><span class="mk blue"></span><span class="mk red" style="margin-left:-4px"></span><b>藍點 / 紅點 = 兩個類別</b>的資料；十字 ✚ 是各類的中心。</div>
+                <div><span class="mk region"></span><b>背景藍/紅色塊 = 模型的判定區域</b>：落在藍區就判藍、紅區就判紅。</div>
+                <div><span class="mk" style="background:#fff;border:1px solid #999"></span><b>兩色交界 = 決策邊界</b>。<b>LDA → 直線</b>（假設兩類形狀相同）；<b>QDA → 曲線</b>（允許兩類形狀不同）。</div>
+            </div>
+            <p style="margin:8px 0 0">操作：切換 <b>LDA / QDA</b> 看邊界從直線變曲線；把某一類的<b>擴散度</b>調大（變胖），QDA 的邊界會明顯彎曲、LDA 仍是直線；按「重新生成」換位置。</p>
+        </div>
+
+        <div class="demo-card">
+            <div class="lda-controls">
+                <div class="mode-switch">
+                    <button id="btn-lda" class="active" onclick="setMode('LDA')">LDA 模式（線性）</button>
+                    <button id="btn-qda" class="inactive" onclick="setMode('QDA')">QDA 模式（二次/曲線）</button>
+                </div>
+                <div class="control-group">
+                    <label>類別 A（藍）擴散度 Variance：<span id="val-std-a">30</span></label>
+                    <input type="range" id="std-a" min="10" max="80" value="30" oninput="updateParams()">
+                </div>
+                <div class="control-group">
+                    <label>類別 B（紅）擴散度 Variance：<span id="val-std-b">30</span></label>
+                    <input type="range" id="std-b" min="10" max="100" value="30" oninput="updateParams()">
+                </div>
+                <div class="control-group" style="grid-column:span 2; text-align:center;">
+                    <button onclick="generateData()" style="background:#2ecc71; color:white; width:200px; margin:0 auto;">重新生成分佈位置</button>
+                </div>
+            </div>
+
+            <div class="viz-scroll">
+                <div id="viz-wrapper">
+                    <canvas id="decision-canvas" width="600" height="400"></canvas>
+                    <div id="svg-container"></div>
+                </div>
+            </div>
+
+            <div class="demo-legend">
+                <div><span class="dot" style="background:#3498db"></span> 類別 A 區域</div>
+                <div><span class="dot" style="background:#e74c3c"></span> 類別 B 區域</div>
+                <div><strong>交界線：</strong>決策邊界</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 6. LDA vs QDA + 數學 ===== -->
+    <section class="lesson">
+        <h2>📐 六、LDA vs QDA：什麼時候用哪個？</h2>
+        <p class="lead">兩者都假設資料像高斯（橢圓）分佈，差別在<b>「各類形狀能不能不一樣」</b>。</p>
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="lda">LDA</span></th><th style="color:#c2410c">QDA</th></tr>
+            <tr><td>各類共變異數</td><td>共用同一個（形狀相同）</td><td>各自獨立（形狀可不同）</td></tr>
+            <tr><td>決策邊界</td><td><b>直線</b>／超平面</td><td><b>曲線</b>（橢圓、拋物線…）</td></tr>
+            <tr><td>參數量</td><td>少 → <b>較不易過擬合</b></td><td>多 → 需要<b>更多資料</b></td></tr>
+            <tr><td>適合時機</td><td>各類分散度差不多、資料量少</td><td>各類形狀明顯不同、資料夠多</td></tr>
+        </table>
+        <div class="note def">
+            <h4>🧩 直白記法</h4>
+            LDA 認為「大家形狀一樣、只是位置不同」→ 用一條<b>直線</b>切；QDA 放寬成「各有各的胖瘦」→ 邊界可<b>彎</b>。形狀假設越寬鬆、邊界越靈活，但也越吃資料。
+        </div>
+
+        <details class="adv">
+            <summary>🔬 進階：判別函數的數學式（想深入再點）</summary>
+            <p>兩者都從後驗機率 $P(Y=k\mid X) \propto f_k(X)\cdot \pi_k$ 出發，取 log 後得到判別函數 $\delta_k(x)$，選 $\delta_k$ 最大的類別。</p>
+            <div class="math-block">
+                <strong>LDA：</strong>
+                $$ \delta_k(x) = x^T \Sigma^{-1} \mu_k - \tfrac{1}{2}\mu_k^T \Sigma^{-1} \mu_k + \log \pi_k $$
+                <span style="font-size:.9em;color:#666;">$x$ 只有一次方項 → 邊界是線性的。</span>
+            </div>
+            <div class="math-block">
+                <strong>QDA：</strong>
+                $$ \delta_k(x) = -\tfrac{1}{2}x^T \Sigma_k^{-1} x + x^T \Sigma_k^{-1} \mu_k - \tfrac{1}{2}\mu_k^T \Sigma_k^{-1}\mu_k - \tfrac{1}{2}\log|\Sigma_k| + \log\pi_k $$
+                <span style="font-size:.9em;color:#666;">多了 $x^T\Sigma_k^{-1}x$（含 $x^2$ 二次項）→ 邊界是「二次」曲線。</span>
+            </div>
+        </details>
+    </section>
+
+    <!-- ===== 7. 別搞混 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 七、超重要：兩個「LDA」別搞混</h2>
+        <div class="note warn">
+            <h4>它們完全是兩回事</h4>
+            <b>本頁的 LDA = Linear Discriminant Analysis（線性判別分析）</b>：監督式的降維 / 分類方法。<br>
+            另一個常見的 <b>LDA = Latent Dirichlet Allocation（隱含狄利克雷分配）</b>：是<b>主題模型</b>，用來從一堆文件中找出潛在主題，跟本頁完全無關。考試看到 LDA，先看上下文是「分類/降維」還是「文字主題」。
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. LDA 和 PCA 最關鍵的差別是什麼？</summary>
+                <p>有沒有用<b>標籤</b>。LDA 是<b>監督式</b>，找「最能分開類別」的方向；PCA 是<b>非監督式</b>，找「整體變異最大」的方向。要分類用 LDA、純壓縮用 PCA。</p></details>
+            <details><summary>Q2. 有 4 個類別，LDA 最多能降到幾維？</summary>
+                <p><b>3 維</b>（類別數 − 1 = 4 − 1）。這是 LDA 的固有限制，PCA 沒有這個限制。</p></details>
+            <details><summary>Q3. 為什麼 LDA 的決策邊界是直線，QDA 卻是曲線？</summary>
+                <p>LDA 假設各類<b>共用同一個共變異數（形狀相同）</b>，判別函數只有一次項 → 邊界線性；QDA 允許各類<b>形狀不同</b>，判別函數含二次項 → 邊界是曲線。</p></details>
+            <details><summary>Q4. 看到「LDA」一定是線性判別分析嗎？</summary>
+                <p>不一定！文字/主題模型裡的 <b>LDA 是 Latent Dirichlet Allocation</b>（隱含狄利克雷分配），跟線性判別分析完全不同，要看上下文判斷。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>LDA = 監督式降維 + 分類</b>找最能分開類別的投影方向。</div>
+            <div class="keycard"><b>目標：類間大、類內小</b>不同類分得開、同類擠得緊。</div>
+            <div class="keycard"><b>vs PCA</b>LDA 看標籤找可分方向；PCA 不看標籤找最大變異。</div>
+            <div class="keycard"><b>最多降到 k−1 維</b>k 是類別數，這是固有限制。</div>
+            <div class="keycard"><b>vs QDA</b>LDA 直線邊界（形狀相同）；QDA 曲線（形狀可不同、吃資料）。</div>
+            <div class="keycard"><b>別搞混</b>另一個 LDA 是主題模型 Latent Dirichlet Allocation。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 600;
+        const height = 400;
+        let currentMode = 'LDA';
+        let dataA = [], dataB = [];
+        let meanA, meanB, covA, covB;
+
+        const svg = d3.select("#svg-container")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const canvas = document.getElementById("decision-canvas");
+        const ctx = canvas.getContext("2d");
+
+        function generateRandomPoint(cx, cy, std) {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+            return {
+                x: cx + num * std,
+                y: cy + Math.sqrt( -2.0 * Math.log( u ) ) * Math.sin( 2.0 * Math.PI * v ) * std
+            };
+        }
+
+        function generateData() {
+            dataA = [];
+            dataB = [];
+            const cxA = 150 + Math.random() * 100;
+            const cyA = 100 + Math.random() * 200;
+            const cxB = 350 + Math.random() * 100;
+            const cyB = 100 + Math.random() * 200;
+            const stdA = parseInt(document.getElementById('std-a').value);
+            const stdB = parseInt(document.getElementById('std-b').value);
+            for(let i=0; i<40; i++) dataA.push(generateRandomPoint(cxA, cyA, stdA));
+            for(let i=0; i<40; i++) dataB.push(generateRandomPoint(cxB, cyB, stdB));
+            updateViz();
+        }
+
+        function updateParams() {
+            const stdA = parseInt(document.getElementById('std-a').value);
+            const stdB = parseInt(document.getElementById('std-b').value);
+            document.getElementById('val-std-a').innerText = stdA;
+            document.getElementById('val-std-b').innerText = stdB;
+            if(dataA.length > 0) {
+                const currentMeanA = getMean(dataA);
+                const currentMeanB = getMean(dataB);
+                dataA = []; dataB = [];
+                for(let i=0; i<40; i++) dataA.push(generateRandomPoint(currentMeanA.x, currentMeanA.y, stdA));
+                for(let i=0; i<40; i++) dataB.push(generateRandomPoint(currentMeanB.x, currentMeanB.y, stdB));
+            }
+            updateViz();
+        }
+
+        function getMean(data) {
+            const sum = data.reduce((acc, p) => ({x: acc.x + p.x, y: acc.y + p.y}), {x:0, y:0});
+            return {x: sum.x / data.length, y: sum.y / data.length};
+        }
+
+        function getCovariance(data, mean) {
+            let sxx = 0, syy = 0, sxy = 0;
+            const n = data.length;
+            data.forEach(p => {
+                sxx += (p.x - mean.x) * (p.x - mean.x);
+                syy += (p.y - mean.y) * (p.y - mean.y);
+                sxy += (p.x - mean.x) * (p.y - mean.y);
+            });
+            return [[sxx/(n-1) + 0.1, sxy/(n-1)], [sxy/(n-1), syy/(n-1) + 0.1]];
+        }
+
+        function invertMatrix(m) {
+            const det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+            return [
+                [m[1][1] / det, -m[0][1] / det],
+                [-m[1][0] / det, m[0][0] / det]
+            ];
+        }
+
+        function getDeterminant(m) {
+             return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-lda').className = mode === 'LDA' ? 'active' : 'inactive';
+            document.getElementById('btn-qda').className = mode === 'QDA' ? 'active' : 'inactive';
+            document.getElementById('btn-lda').style.backgroundColor = mode === 'LDA' ? '#3498db' : '#ddd';
+            document.getElementById('btn-lda').style.color = mode === 'LDA' ? 'white' : '#666';
+            document.getElementById('btn-qda').style.backgroundColor = mode === 'QDA' ? '#e67e22' : '#ddd';
+            document.getElementById('btn-qda').style.color = mode === 'QDA' ? 'white' : '#666';
+            updateViz();
+        }
+
+        function gaussianScore(point, mean, invCov, detCov, isQDA) {
+            const dx = point.x - mean.x;
+            const dy = point.y - mean.y;
+            const md2 = (dx * invCov[0][0] + dy * invCov[1][0]) * dx +
+                        (dx * invCov[0][1] + dy * invCov[1][1]) * dy;
+            if (isQDA) {
+                return -0.5 * md2 - 0.5 * Math.log(detCov);
+            } else {
+                return -0.5 * md2;
+            }
+        }
+
+        function updateViz() {
+            meanA = getMean(dataA);
+            meanB = getMean(dataB);
+            const covA_raw = getCovariance(dataA, meanA);
+            const covB_raw = getCovariance(dataB, meanB);
+
+            let invCovA, invCovB, detA, detB;
+
+            if (currentMode === 'LDA') {
+                const pooledCov = [
+                    [(covA_raw[0][0] + covB_raw[0][0])/2, (covA_raw[0][1] + covB_raw[0][1])/2],
+                    [(covA_raw[1][0] + covB_raw[1][0])/2, (covA_raw[1][1] + covB_raw[1][1])/2]
+                ];
+                const invPooled = invertMatrix(pooledCov);
+                invCovA = invPooled;
+                invCovB = invPooled;
+                detA = 1;
+                detB = 1;
+            } else {
+                invCovA = invertMatrix(covA_raw);
+                invCovB = invertMatrix(covB_raw);
+                detA = getDeterminant(covA_raw);
+                detB = getDeterminant(covB_raw);
+            }
+
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            const pixelSize = 4;
+
+            for (let y = 0; y < height; y += pixelSize) {
+                for (let x = 0; x < width; x += pixelSize) {
+                    const scoreA = gaussianScore({x, y}, meanA, invCovA, detA, currentMode === 'QDA');
+                    const scoreB = gaussianScore({x, y}, meanB, invCovB, detB, currentMode === 'QDA');
+
+                    let color = [255, 255, 255];
+                    if (scoreA > scoreB) {
+                        const intensity = Math.min(0.2, (scoreA - scoreB) * 0.1);
+                        color = [52 + (255-52)*(1-intensity), 152 + (255-152)*(1-intensity), 219 + (255-219)*(1-intensity)];
+                    } else {
+                        const intensity = Math.min(0.2, (scoreB - scoreA) * 0.1);
+                        color = [231 + (255-231)*(1-intensity), 76 + (255-76)*(1-intensity), 60 + (255-60)*(1-intensity)];
+                    }
+
+                    for (let py = 0; py < pixelSize; py++) {
+                        for (let px = 0; px < pixelSize; px++) {
+                            if (x+px < width && y+py < height) {
+                                const index = ((y+py) * width + (x+px)) * 4;
+                                data[index] = color[0];
+                                data[index+1] = color[1];
+                                data[index+2] = color[2];
+                                data[index+3] = 255;
+                            }
+                        }
+                    }
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+
+            svg.selectAll("*").remove();
+
+            svg.selectAll(".dotA")
+                .data(dataA).enter().append("circle")
+                .attr("cx", d => d.x).attr("cy", d => d.y)
+                .attr("r", 4).attr("fill", "#2980b9").attr("stroke", "white");
+
+            svg.selectAll(".dotB")
+                .data(dataB).enter().append("circle")
+                .attr("cx", d => d.x).attr("cy", d => d.y)
+                .attr("r", 4).attr("fill", "#c0392b").attr("stroke", "white");
+
+            svg.append("path").attr("d", d3.symbol().type(d3.symbolCross).size(100))
+                .attr("transform", `translate(${meanA.x},${meanA.y})`)
+                .attr("fill", "blue");
+            svg.append("path").attr("d", d3.symbol().type(d3.symbolCross).size(100))
+                .attr("transform", `translate(${meanB.x},${meanB.y})`)
+                .attr("fill", "red");
+        }
+
+        generateData();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>LDA(線性判別分析)是監督式降維兼分類法,iPAS 中級科目三考點。重點:找讓類間分離最大、類內變異最小的投影方向,最多降到類別數減一維。易混點:LDA(監督、用標籤找最能分類的方向)與 PCA(非監督、只看整體變異)不同;且這個 LDA 別跟主題模型的 LDA(隱含狄利克雷分配)搞混。情境:分類前降維、人臉辨識。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>LDA(線性判別分析)在做什麼？</summary><p>一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。</p></details><details><summary>LDA 和 PCA 差在哪？</summary><p>PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。</p></details><details><summary>LDA 最多能降到幾維？</summary><p>最多到類別數減一維；例如 3 類最多降到 2 維，這是 LDA 的固有限制(與 PCA 不同)。</p></details><details><summary>LDA 有什麼假設？</summary><p>假設各類服從常態分布且共用相同共變異數矩陣；違反時(如各類分散度差很多)可改用 QDA。</p></details><details><summary>注意別混淆哪個 LDA？</summary><p>這裡的 LDA 是線性判別分析；主題模型裡的 LDA 是 Latent Dirichlet Allocation(隱含狄利克雷分配)，兩者完全不同。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "LDA(線性判別分析)在做什麼？", "acceptedAnswer": {"@type": "Answer", "text": "一種監督式降維兼分類法，找能讓類間分離最大、類內變異最小的投影方向；常用於分類前降維與人臉辨識。"}}, {"@type": "Question", "name": "LDA 和 PCA 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "PCA 非監督、只看整體變異最大方向；LDA 監督、利用標籤找最能區分類別的方向，故更適合分類前降維。"}}, {"@type": "Question", "name": "LDA 最多能降到幾維？", "acceptedAnswer": {"@type": "Answer", "text": "最多到類別數減一維；例如 3 類最多降到 2 維，這是 LDA 的固有限制(與 PCA 不同)。"}}, {"@type": "Question", "name": "LDA 有什麼假設？", "acceptedAnswer": {"@type": "Answer", "text": "假設各類服從常態分布且共用相同共變異數矩陣；違反時(如各類分散度差很多)可改用 QDA。"}}, {"@type": "Question", "name": "注意別混淆哪個 LDA？", "acceptedAnswer": {"@type": "Answer", "text": "這裡的 LDA 是線性判別分析；主題模型裡的 LDA 是 Latent Dirichlet Allocation(隱含狄利克雷分配)，兩者完全不同。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">分類問題</a><a href="lda-qda-metrics.html">準確率、類別分離度</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

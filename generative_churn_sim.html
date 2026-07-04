@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顧客流失預測與虛擬策略模擬 (VAE/GAN)</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="用歷史行為預測哪些客戶可能流失(分類問題)，並用生成式模型(VAE/GAN)造出虛擬顧客做留客策略沙盤推演。判別式模型只畫決策線；生成式能學資料分布、造新樣本模擬 A/B 行銷成效。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/generative_churn_sim.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="顧客流失預測與虛擬策略模擬 (VAE/GAN)">
+    <meta property="og:description" content="用歷史行為預測誰會流失(分類)，並用生成式模型(VAE/GAN)造虛擬顧客做留客策略沙盤推演。判別式只畫決策線；生成式學分布、造樣本模擬成效。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/generative_churn_sim.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="顧客流失預測與虛擬策略模擬 (VAE/GAN)">
+    <meta name="twitter:description" content="用歷史行為預測誰會流失(分類)，並用生成式模型造虛擬顧客做留客策略沙盤推演。判別式只畫決策線；生成式學分布、造樣本。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "顧客流失預測與虛擬策略模擬 (VAE/GAN)",
+  "url": "https://akira.ipas-ai.com/generative_churn_sim.html",
+  "description": "用歷史行為預測哪些客戶可能流失(分類問題)，並用生成式模型(VAE/GAN)造出虛擬顧客做留客策略沙盤推演。判別式模型只畫決策線；生成式能學資料分布、造新樣本模擬 A/B 行銷成效。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --vi:#7c3aed; --vi-d:#6d28d9; --vi-dd:#4c1d95;
+            --green:#16a34a; --red:#ef4444; --amber:#d97706; --blue:#2563eb;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f2edfb;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 55%,#a78bfa 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(124,58,237,.30); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.78rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#ddd6fe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--vi-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#f5f3ff; border-left:5px solid var(--vi)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f4f1fb; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .di{color:var(--muted); font-weight:700} .cmp .ge{color:var(--vi-d); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--vi);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--vi-d)}
+
+        .qa{background:#f5f3ff; border:1px solid #ddd6fe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #e7e1fb; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--vi-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-card{background:#f5f3ff; border:1px solid #ddd6fe; border-radius:14px; padding:18px; margin:14px 0}
+        .controls{background:#fff; padding:18px; border-radius:10px; border:1px solid var(--line); margin-bottom:16px; display:flex; flex-direction:column; gap:16px}
+        .control-row{display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+        .radio-group{display:flex; gap:14px; padding:10px; background:#f1f5f9; border-radius:8px; flex-wrap:wrap}
+        .radio-label{cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold; color:#334155; font-size:.92rem}
+        .radio-group input[type="radio"]{transform:scale(1.2); accent-color:var(--vi)}
+        .btn{padding:10px 18px; font-size:14px; background:var(--vi); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:800; transition:.2s; box-shadow:0 4px 6px rgba(124,58,237,.25)}
+        .btn:hover{background:var(--vi-d)}
+        .btn:disabled{background:#cbd5e1; cursor:not-allowed; box-shadow:none; color:#64748b}
+        .slider-group{flex:1; min-width:280px}
+        .slider-group label{display:flex; justify-content:space-between; font-weight:bold; color:#475569; margin-bottom:8px; font-size:.9rem}
+        .slider-group input[type="range"]{width:100%; cursor:pointer; accent-color:var(--vi)}
+        .svg-container{position:relative; width:100%; display:flex; justify-content:center}
+        #canvas{background:#fff; border:2px solid #cbd5e1; border-radius:10px; width:100%; height:400px; box-shadow:inset 0 0 15px rgba(0,0,0,.02)}
+        .legend{display:flex; justify-content:center; gap:22px; margin-top:14px; flex-wrap:wrap}
+        .legend-item{display:flex; align-items:center; gap:8px; font-weight:bold; font-size:13px}
+        .dot{width:14px; height:14px; border-radius:50%}
+        .dot-churn{background:#ef4444} .dot-stay{background:#10b981} .dot-virtual{background:#f59e0b; border:2px dashed #b45309}
+        .toast{position:absolute; top:16px; right:16px; background:#fee2e2; color:#b91c1c; padding:10px 15px; border-radius:8px; font-weight:bold; border:1px solid #f87171; opacity:0; transition:opacity .3s; pointer-events:none}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🔮 流失預測 + 生成式沙盤 · iPAS</span>
+        <h1>顧客流失預測：不只「預測誰會走」，還能「模擬留客策略」</h1>
+        <p>傳統模型（判別式）只回答「<b>誰會流失</b>」；生成式模型（VAE/GAN）更進一步——它學會資料的分布，能<b>造出虛擬顧客</b>，讓你在不花半毛錢的情況下先<b>沙盤推演</b>：「如果打 8 折，能救回多少人？」</p>
+        <div class="chips"><span>流失預測(分類)</span><span>判別式 vs 生成式</span><span>VAE / GAN</span><span>合成資料</span><span>A/B 情境模擬</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🧠 一、兩種模型，回答不同的問題</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:#64748b"><b style="color:#475569">判別式模型（如隨機森林）</b>只學「<b>分界線</b>」——回答「這位顧客會不會流失？」畫一條決策線就好，<b>不會造新資料</b>。</div>
+            <div class="keycard"><b>生成式模型（VAE / GAN）</b>學會「<b>資料的分布</b>」——能<b>造出逼真的虛擬顧客</b>，回答「假如做了某行銷，這群人會怎麼變？」</div>
+        </div>
+        <div class="note def">
+            <h4>📌 為什麼需要生成式？</h4>
+            要「找出誰會流失」，隨機森林就夠了。但要回答「<b>給這群高風險客戶 20% 折扣，能救回多少？</b>」——判別式無能為力，因為它<b>不會創造假設性的未來資料</b>。生成式模型才能做這種<span class="hl">「what-if」沙盤推演</span>。
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、動手玩：造虛擬顧客、模擬留客策略</h2>
+        <p class="lead">紅點＝已流失、綠點＝已留存、中間虛線＝決策邊界。先切到「生成式模型」，按「產生虛擬顧客」，再拉「行銷策略」滑桿，看橘色虛擬顧客被推過決策線、變綠（挽留成功）。</p>
+
+        <div class="demo-card">
+            <div class="controls">
+                <div class="control-row">
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="modelType" value="discriminative" onchange="updateModel()" checked>
+                            傳統預測模型 (如 Random Forest)
+                        </label>
+                        <label class="radio-label" style="color:#7c3aed;">
+                            <input type="radio" name="modelType" value="generative" onchange="updateModel()">
+                            生成式模型 (VAE / GAN)
+                        </label>
+                    </div>
+                    <button id="btn-generate" class="btn" onclick="generateVirtualData()" disabled>✨ 產生 50 筆虛擬顧客樣本</button>
+                </div>
+                <div class="control-row">
+                    <div class="slider-group">
+                        <label>A/B 測試：套用行銷策略 (如：加碼折扣、VIP升級) <span id="strategy-val">強度 0%</span></label>
+                        <input type="range" id="strategy-slider" min="0" max="100" value="0" oninput="updateStrategy()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="svg-container">
+                <div id="error-toast" class="toast">傳統模型無法生成新資料！</div>
+                <svg id="canvas" viewBox="0 0 800 400">
+                    <defs>
+                        <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#fef2f2" /> <stop offset="50%" stop-color="#ffffff" />
+                            <stop offset="100%" stop-color="#ecfdf5" /> </linearGradient>
+                    </defs>
+                    <rect x="0" y="0" width="800" height="400" fill="url(#bg-grad)"></rect>
+                    <line x1="400" y1="0" x2="400" y2="400" stroke="#94a3b8" stroke-dasharray="8" stroke-width="2"></line>
+                    <text x="200" y="30" text-anchor="middle" fill="#ef4444" font-weight="bold" font-size="18">高風險區 (預測流失)</text>
+                    <text x="600" y="30" text-anchor="middle" fill="#10b981" font-weight="bold" font-size="18">安全留存區 (預測留下)</text>
+                    <g id="real-data-group"></g>
+                    <g id="virtual-data-group"></g>
+                </svg>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="dot dot-churn"></div> 真實顧客 (已流失)</div>
+                <div class="legend-item"><div class="dot dot-stay"></div> 真實顧客 (已留存)</div>
+                <div class="legend-item"><div class="dot dot-virtual"></div> VAE/GAN 虛擬顧客 (沙盤推演)</div>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            保持在「傳統模型」時，<b>生成按鈕是灰的、滑桿也動不了</b>（會跳出提示）——因為判別式無法造資料。切到「<b>生成式</b>」→ 按生成，橘色虛擬顧客出現在高風險區 → 拉「行銷策略」滑桿，代表對他們施加挽留策略，他們會<b>往右移、越過決策線變綠</b>＝被成功挽留。這就是<span class="hl">用合成資料評估行銷活動的預期轉換率</span>。
+        </div>
+    </section>
+
+    <!-- ===== 3. 判別 vs 生成 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 三、判別式 vs 生成式 對照</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="di">判別式 Discriminative</th><th class="ge">生成式 Generative</th></tr>
+            <tr><td>學什麼</td><td>決策邊界 P(y|x)</td><td>資料分布 P(x)、P(x,y)</td></tr>
+            <tr><td>能做</td><td>分類/預測「誰會流失」</td><td>造新樣本、模擬 what-if</td></tr>
+            <tr><td>代表</td><td>隨機森林、邏輯斯回歸、SVM</td><td>VAE、GAN、Diffusion</td></tr>
+            <tr><td>能沙盤推演？</td><td>❌ 不會造資料</td><td>✅ 可情境模擬</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 4. 流失重指標 ===== -->
+    <section class="lesson">
+        <h2>📊 四、流失預測，該看哪個指標？</h2>
+        <div class="note meta">
+            <h4>流失通常是「少數類」→ 別只看準確率</h4>
+            會流失的客戶往往只佔一小部分（不平衡資料）。若只看<b>準確率</b>，盲猜「全都會留下」就能拿高分卻毫無用處。應重視 <b>召回率（盡量抓出會走的人）、F1、PR-AUC</b>。指標細節見 <a href="matrix.html" style="color:#6d28d9;font-weight:700">混淆矩陣與評估指標</a>。
+        </div>
+    </section>
+
+    <!-- ===== 5. 合成資料 ===== -->
+    <section class="lesson">
+        <h2>🧪 五、合成資料：用途與風險</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">補少數類</b>流失樣本太少，用 SMOTE 或生成模型補齊，改善不平衡。</div>
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">保護隱私</b>用合成資料代替真實個資做開發與分享。</div>
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">情境壓力測試</b>造出各種「假設情境」評估策略成效。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">風險</b>生成模型若<b>學壞了分布</b>會製造誤導；合成資料的<b>品質與偏誤</b>要嚴格把關。</div>
+        </div>
+    </section>
+
+    <!-- ===== 6. VAE vs GAN ===== -->
+    <section class="lesson">
+        <h2>🎨 六、VAE 與 GAN 差在哪？（簡介）</h2>
+        <div class="note def">
+            <h4>兩種造資料的思路</h4>
+            <b>VAE（變分自編碼器）</b>：把資料壓進一個「潛在空間（latent space）」再解碼還原，能<b>平滑地在潛在空間移動</b>來生成——demo 裡「拉策略滑桿讓顧客在潛在空間往留存方向移動」就是這個直覺。<br>
+            <b>GAN（生成對抗網路）</b>：讓「生成器」和「鑑別器」互相對抗，生成器不斷學著造出<b>以假亂真</b>的樣本。兩者都是生成式主力，細節屬深度學習範疇。
+        </div>
+    </section>
+
+    <!-- ===== 7. 實務挑戰 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 七、流失預測的實務挑戰</h2>
+        <div class="keys">
+            <div class="keycard"><b>類別不平衡</b>流失是少數，要用重採樣/加權/合適指標。</div>
+            <div class="keycard"><b>資料漂移</b>顧客行為會隨時間變，模型要定期重訓。</div>
+            <div class="keycard"><b>把預測轉成行動</b>不只知道誰會走，還要決定<b>對誰、用什麼策略</b>挽留。</div>
+            <div class="keycard"><b>衡量真實成效</b>用 A/B 測試驗證介入是否真的降低流失。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 判別式和生成式模型差在哪？</summary>
+                <p><b>判別式</b>學決策邊界、做分類/預測；<b>生成式</b>學資料分布、能造新樣本做模擬。</p></details>
+            <details><summary>Q2. 為什麼流失預測不能只看準確率？</summary>
+                <p>流失是<b>少數類</b>，盲猜多數就能拿高準確率；要看<b>召回率、F1、PR-AUC</b>。</p></details>
+            <details><summary>Q3. 合成資料有什麼用途？</summary>
+                <p>補少數類、保護隱私、情境壓力測試；但要注意品質與偏誤。</p></details>
+            <details><summary>Q4. VAE 和 GAN 都屬哪一類？</summary>
+                <p>都是<b>生成式模型</b>；VAE 靠潛在空間編解碼、GAN 靠生成器對抗鑑別器。</p></details>
+            <details><summary>Q5. 流失預測的最大實務挑戰之一？</summary>
+                <p><b>類別不平衡</b>與<b>資料漂移</b>，以及把預測<b>轉成有效行動</b>。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>流失預測＝分類</b>預測誰會取消/停用。</div>
+            <div class="keycard"><b>判別式</b>畫決策線、只做預測。</div>
+            <div class="keycard"><b>生成式(VAE/GAN)</b>學分布、造樣本、模擬 what-if。</div>
+            <div class="keycard"><b>少數類</b>重召回率/F1/PR-AUC。</div>
+            <div class="keycard"><b>合成資料</b>補類別/隱私/壓測，但防偏誤。</div>
+            <div class="keycard"><b>挑戰</b>不平衡、漂移、轉成行動。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const svgRealGroup = document.getElementById('real-data-group');
+        const svgVirtualGroup = document.getElementById('virtual-data-group');
+        const btnGenerate = document.getElementById('btn-generate');
+        const sliderStrategy = document.getElementById('strategy-slider');
+        const strategyVal = document.getElementById('strategy-val');
+        const toast = document.getElementById('error-toast');
+
+        let isGenerative = false;
+        let virtualCustomers = [];
+
+        // 產生常態分佈隨機數 (Box-Muller transform)
+        function randomGaussian(mean, std) {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return num * std + mean;
+        }
+
+        // 初始化真實資料 (背景的點)
+        function initRealData() {
+            svgRealGroup.innerHTML = '';
+
+            // 產生流失顧客 (偏左)
+            for (let i = 0; i < 40; i++) {
+                let x = randomGaussian(200, 80);
+                let y = randomGaussian(200, 80);
+                x = Math.max(20, Math.min(380, x)); // 限制在左半部
+                createCircle(svgRealGroup, x, y, '#ef4444', 4, 0.4);
+            }
+
+            // 產生留存顧客 (偏右)
+            for (let i = 0; i < 40; i++) {
+                let x = randomGaussian(600, 80);
+                let y = randomGaussian(200, 80);
+                x = Math.max(420, Math.min(780, x)); // 限制在右半部
+                createCircle(svgRealGroup, x, y, '#10b981', 4, 0.4);
+            }
+        }
+
+        function createCircle(parent, x, y, fill, r, opacity, stroke = 'none', strokeWidth = 0, strokeDash = 'none') {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', r);
+            circle.setAttribute('fill', fill);
+            circle.setAttribute('opacity', opacity);
+            if (stroke !== 'none') {
+                circle.setAttribute('stroke', stroke);
+                circle.setAttribute('stroke-width', strokeWidth);
+                circle.setAttribute('stroke-dasharray', strokeDash);
+            }
+            parent.appendChild(circle);
+            return circle;
+        }
+
+        // 切換模型
+        function updateModel() {
+            const val = document.querySelector('input[name="modelType"]:checked').value;
+            isGenerative = (val === 'generative');
+
+            btnGenerate.disabled = !isGenerative;
+
+            if (!isGenerative) {
+                // 清除虛擬資料與滑桿
+                virtualCustomers = [];
+                svgVirtualGroup.innerHTML = '';
+                sliderStrategy.value = 0;
+                strategyVal.innerText = `強度 0%`;
+            }
+        }
+
+        // 產生虛擬資料 (VAE/GAN 模擬)
+        function generateVirtualData() {
+            if (!isGenerative) {
+                showToast();
+                return;
+            }
+
+            // 清除舊的虛擬資料
+            virtualCustomers = [];
+            svgVirtualGroup.innerHTML = '';
+            sliderStrategy.value = 0;
+            strategyVal.innerText = `強度 0%`;
+
+            // 在高風險區 (左側) 邊緣產生虛擬顧客，模擬需要被挽留的群體
+            for (let i = 0; i < 50; i++) {
+                let baseX = randomGaussian(300, 50); // 靠近中線的危險區
+                let baseY = randomGaussian(200, 90);
+                baseX = Math.max(50, Math.min(390, baseX));
+                baseY = Math.max(50, Math.min(350, baseY));
+
+                const circle = createCircle(svgVirtualGroup, baseX, baseY, '#f59e0b', 6, 0.9, '#b45309', 2, '2,2');
+
+                virtualCustomers.push({
+                    element: circle,
+                    baseX: baseX,
+                    baseY: baseY,
+                    // 每個顧客對行銷策略的敏感度不同
+                    strategySensitivityX: Math.random() * 2 + 1,
+                    strategySensitivityY: (Math.random() - 0.5) * 0.5
+                });
+            }
+        }
+
+        // 套用行銷策略 (移動虛擬顧客)
+        function updateStrategy() {
+            if (!isGenerative && sliderStrategy.value > 0) {
+                sliderStrategy.value = 0;
+                showToast();
+                return;
+            }
+
+            const strength = parseInt(sliderStrategy.value);
+            strategyVal.innerText = `強度 ${strength}%`;
+
+            // 根據策略強度移動虛擬資料
+            virtualCustomers.forEach(vc => {
+                // 模擬：給予折扣策略，會使顧客特徵在 Latent Space 中向右(留存)移動
+                const newX = vc.baseX + (strength * vc.strategySensitivityX);
+                const newY = vc.baseY + (strength * vc.strategySensitivityY);
+
+                vc.element.setAttribute('cx', newX);
+                vc.element.setAttribute('cy', newY);
+
+                // 越過中線 (400) 則變更顏色樣式，代表成功挽留
+                if (newX > 400) {
+                    vc.element.setAttribute('fill', '#34d399'); // 變綠
+                    vc.element.setAttribute('stroke', '#059669');
+                } else {
+                    vc.element.setAttribute('fill', '#f59e0b'); // 保持橘黃
+                    vc.element.setAttribute('stroke', '#b45309');
+                }
+            });
+        }
+
+        function showToast() {
+            toast.style.opacity = 1;
+            setTimeout(() => { toast.style.opacity = 0; }, 2000);
+        }
+
+        // 啟動
+        initRealData();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>生成式模型可用於模擬與資料增補,iPAS 生成式 AI 應用考點(初級科目二)。重點:用學到的資料分布生成新樣本,可補足稀少類別(如流失客戶)、做情境模擬或產生保護隱私的合成資料。易混點:合成資料能緩解資料不足與隱私問題,但品質與偏誤要把關(學壞分布會誤導);生成(造資料)與鑑別(做判斷)用途不同。情境:不平衡資料增補、隱私合成、商業情境模擬。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>這個主題在示範什麼？</summary><p>用生成或模擬方法產生客戶流失情境的資料與預測，幫助理解流失預測，以及如何用模型支援留客決策。</p></details><details><summary>什麼是顧客流失(churn)預測？</summary><p>用歷史行為預測哪些客戶可能流失(取消、停用)，屬分類問題；讓企業及早介入挽留高風險客戶。</p></details><details><summary>流失預測常用什麼模型與指標？</summary><p>邏輯斯回歸、樹與集成(隨機森林、XGBoost)等；因流失通常是少數類，重視 Recall、F1、PR-AUC，而非只看 Accuracy。</p></details><details><summary>為什麼會用到生成或模擬資料？</summary><p>真實流失樣本少或敏感時，可用模擬或合成(如 SMOTE、生成模型)補充少數類，做情境推演與壓力測試。</p></details><details><summary>流失預測的實務挑戰？</summary><p>類別不平衡、資料漂移(行為會變)、把預測轉成行動(該對誰、怎麼挽留)，以及衡量介入的實際成效。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "這個主題在示範什麼？", "acceptedAnswer": {"@type": "Answer", "text": "用生成或模擬方法產生客戶流失情境的資料與預測，幫助理解流失預測，以及如何用模型支援留客決策。"}}, {"@type": "Question", "name": "什麼是顧客流失(churn)預測？", "acceptedAnswer": {"@type": "Answer", "text": "用歷史行為預測哪些客戶可能流失(取消、停用)，屬分類問題；讓企業及早介入挽留高風險客戶。"}}, {"@type": "Question", "name": "流失預測常用什麼模型與指標？", "acceptedAnswer": {"@type": "Answer", "text": "邏輯斯回歸、樹與集成(隨機森林、XGBoost)等；因流失通常是少數類，重視 Recall、F1、PR-AUC，而非只看 Accuracy。"}}, {"@type": "Question", "name": "為什麼會用到生成或模擬資料？", "acceptedAnswer": {"@type": "Answer", "text": "真實流失樣本少或敏感時，可用模擬或合成(如 SMOTE、生成模型)補充少數類，做情境推演與壓力測試。"}}, {"@type": "Question", "name": "流失預測的實務挑戰？", "acceptedAnswer": {"@type": "Answer", "text": "類別不平衡、資料漂移(行為會變)、把預測轉成行動(該對誰、怎麼挽留)，以及衡量介入的實際成效。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">混淆矩陣與指標</a><a href="rocauc.html">ROC-AUC、F1</a><a href="overfitting_underfitting.html">過擬合 vs 欠擬合</a><a href="ensemble.html">集成學習</a><a href="logistic-regression.html">邏輯斯回歸</a><a href="liner.html">線性回歸</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

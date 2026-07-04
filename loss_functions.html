@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>損失函數 Loss Functions｜白話＋互動：MSE 與交叉熵</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。 迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/loss_functions.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="損失函數 (Loss Functions) 互動演示">
+    <meta property="og:description" content="量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。 迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/loss_functions.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="損失函數 (Loss Functions) 互動演示">
+    <meta name="twitter:description" content="量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。 迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "損失函數 (Loss Functions) 互動演示",
+  "url": "https://akira.ipas-ai.com/loss_functions.html",
+  "description": "量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。 迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#fdf2f4; --ink:#3a1220; --sub:#8a5566;
+      --brand:#e11d48; --brand2:#be123c; --brand-soft:#ffe0e6;
+      --card:#ffffff; --line:#f3dde2;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#f43f5e,#e11d48 55%,#be123c);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#ffe4e9;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(225,29,72,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson h3{font-size:1.06rem;margin:20px 0 8px;color:var(--brand2)}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#ffc2ce 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fdf4f6}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .formula{background:#3a1220;color:#ffe4e9;border-radius:12px;padding:16px 18px;margin:14px 0;font-family:'Consolas','SFMono-Regular',monospace;font-size:.95rem;line-height:1.9;overflow-x:auto;text-align:center}
+    .formula .c{color:#fda4b8}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#fdf4f6;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fdf4f6}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#6b3a4a;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .loss-demo） ===== */
+    .loss-demo{margin:14px 0}
+    .loss-demo .container{max-width:100%;width:100%;background:#fbfcfe;border:1px solid #e6ecf5;border-radius:12px;padding:22px;margin-bottom:16px}
+    .loss-demo .demo-title{font-size:1.12rem;font-weight:800;color:#0f172a;margin:0 0 14px;text-align:center}
+    .loss-demo h2{color:#0f172a;border-bottom:2px solid #e2e8f0;padding-bottom:10px;font-size:1.2rem}
+    .loss-demo h3{color:#334155;margin-top:22px;border-left:4px solid #e11d48;padding-left:10px;font-size:1.02rem}
+    .loss-demo .nav-buttons{display:flex;gap:10px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}
+    .loss-demo .btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1rem;transition:all .2s;background:#e2e8f0;color:#64748b}
+    .loss-demo .btn.active{background:#e11d48;color:#fff;box-shadow:0 4px 12px rgba(225,29,72,.3)}
+    .loss-demo .canvas-container{width:100%;height:360px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;position:relative;overflow:hidden;display:flex;justify-content:center;align-items:center}
+    .loss-demo svg{width:100%;height:100%;cursor:crosshair}
+    .loss-demo .controls{margin-top:20px;padding:15px;background:#f1f5f9;border-radius:8px}
+    .loss-demo .control-row{display:flex;align-items:center;gap:15px;margin-bottom:10px;flex-wrap:wrap}
+    .loss-demo input[type=range]{flex-grow:1;cursor:pointer;min-width:150px;accent-color:#e11d48}
+    .loss-demo .value-display{font-family:monospace;font-weight:bold;min-width:60px;text-align:right;color:#e11d48}
+    .loss-demo .radio-group{display:flex;gap:15px;align-items:center}
+    .loss-demo .math-block{overflow-x:auto;padding:15px;background:#f8fafc;border-radius:6px;margin:10px 0;border:1px solid #e2e8f0;text-align:center}
+    .loss-demo .scenario-box{background:#fff1f4;border:1px solid #fbd0da;border-radius:6px;padding:15px;margin-top:15px}
+    .loss-demo .scenario-title{font-weight:bold;color:#be123c;display:block;margin-bottom:5px}
+    .loss-demo ul{padding-left:20px}
+    .loss-demo li{margin-bottom:6px}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 訓練目標</span>
+  <h1>損失函數 Loss Functions</h1>
+  <p>模型的「扣分表」。它定義了什麼叫「預測得好」，訓練就是想辦法把總扣分壓到最低。</p>
+  <div class="chips">
+    <span>定義什麼叫好</span><span>MSE</span><span>交叉熵</span><span>可微分</span><span>對離群值</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>損失函數（Loss Function）</b>＝ 量化「一筆預測與真實答案差多少」的一把尺。把所有樣本的損失加總／平均，就是模型的<span class="term">總損失</span>；<span class="hl">訓練＝調整參數讓總損失最小</span>。它決定了模型往哪個方向學。
+    </div>
+    <p>先有損失函數，梯度下降才知道「往哪走能變更好」。所以選對損失，等於幫模型定義了正確的目標。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">📝</span>用「扣分表」來想</h2>
+    <div class="note meta">
+      損失函數就像老師的<b>扣分規則</b>：答錯扣越多分，代表這種錯越不能容忍。<b>MSE</b>（迴歸）用「差距的平方」扣分，離得越遠、扣分暴增；<b>交叉熵</b>（分類）則對「很有信心卻答錯」重罰。模型的目標，就是調整自己、把被扣的總分降到最低。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：MSE 與交叉熵</h2>
+    <p>切換兩種損失。<b>MSE</b>：拖動斜率／截距，看紅色方塊（誤差平方）總面積怎麼變。<b>交叉熵</b>：把真實標籤設成正類、再把預測機率拉向 0，看損失如何急速飆高（有信心卻答錯 → 重罰）。</p>
+    <div class="loss-demo">
+      <div class="container">
+        <div class="demo-title">損失函數 (Loss Functions) 互動演示</div>
+
+        <div class="nav-buttons">
+          <button class="btn active" onclick="switchMode('mse')">MSE (回歸)</button>
+          <button class="btn" onclick="switchMode('ce')">Cross-Entropy (分類)</button>
+        </div>
+
+        <div class="canvas-container" id="visualizer"></div>
+
+        <div class="controls" id="controls"></div>
+
+        <div style="text-align: center; margin-top: 15px; font-size: 1.1rem; font-weight: bold; color: #3a1220;">
+          當前損失值 Loss = <span id="loss-value" style="color: #e11d48; font-size: 1.3em;">0.00</span>
+        </div>
+      </div>
+
+      <div class="container">
+        <div id="info-content"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📊</span>常見損失函數對照表</h2>
+    <table class="cmp">
+      <thead><tr><th>損失</th><th>任務</th><th>公式（概念）</th><th>特性</th></tr></thead>
+      <tbody>
+        <tr><td>MSE 均方誤差</td><td>迴歸</td><td>平均 (y−ŷ)²</td><td>平滑可微、好優化；<b>對離群值敏感</b>（平方放大大誤差）</td></tr>
+        <tr><td>MAE 平均絕對誤差</td><td>迴歸</td><td>平均 |y−ŷ|</td><td>對離群值穩健；但在 0 點不可微、優化較不平滑</td></tr>
+        <tr><td>Huber</td><td>迴歸</td><td>小誤差像 MSE、大誤差像 MAE</td><td>兩者折衷：既平滑又對離群穩健</td></tr>
+        <tr><td>二元交叉熵 BCE</td><td>二分類</td><td>−[y·log p +(1−y)·log(1−p)]</td><td>配 Sigmoid；對「有信心卻錯」重罰</td></tr>
+        <tr><td>類別交叉熵 CCE</td><td>多分類</td><td>−Σ yₖ·log pₖ</td><td>配 Softmax；ImageNet 等多類分類標配</td></tr>
+      </tbody>
+    </table>
+    <div class="note app"><b>選型：</b>迴歸先想 <b>MSE</b>（怕離群值換 Huber/MAE）；分類用<b>交叉熵</b>（二分類 BCE、多分類 CCE）。</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚠️</span>為什麼分類不用 MSE？（必考）</h2>
+    <p>分類問題若硬用 MSE 搭配 Sigmoid／Softmax，會有兩個麻煩：</p>
+    <div class="keys">
+      <div class="keycard"><span>🪫</span><b>梯度消失</b><br>Sigmoid 飽和區導數趨近 0，MSE 讓梯度更小，前期幾乎學不動。</div>
+      <div class="keycard"><span>🌀</span><b>非凸難優化</b><br>MSE＋Sigmoid 的損失面不是漂亮的碗形，容易卡局部極小。</div>
+      <div class="keycard"><span>🎯</span><b>交叉熵更貼合</b><br>交叉熵梯度性質好、收斂快，且直接對應「機率」輸出。</div>
+    </div>
+    <div class="note warn"><b>結論：</b>分類用<b>交叉熵</b>，不用 MSE——這是考試最愛的判斷題。</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔍</span>損失函數 ≠ 評估指標</h2>
+    <div class="note app">
+      兩者容易混淆：<b>損失函數</b>是「訓練時要最小化的目標」，必須<b>可微</b>才能梯度下降（如交叉熵、MSE）；<b>評估指標</b>是「拿給人看、判斷好壞」的分數，重<b>可解讀</b>但不一定可微（如準確率、精確率、召回率、F1）。訓練用損失、驗收看指標，常常是不同的兩個東西。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. 訓練跟損失函數是什麼關係？</summary>
+        <div class="ans">損失函數量化「預測與真實差多少」，訓練就是調整模型參數讓總損失最小。它決定了模型優化的方向與目標。</div></details>
+      <details><summary>Q2. 迴歸和分類各用什麼損失？</summary>
+        <div class="ans">迴歸常用 MSE（怕離群值可換 MAE、Huber）；分類用交叉熵（二分類 BCE、多分類 CCE）。任務不同、損失不同。</div></details>
+      <details><summary>Q3. 為什麼分類不建議用 MSE？</summary>
+        <div class="ans">MSE 搭配 Sigmoid／Softmax 容易梯度消失、損失面非凸難優化。交叉熵梯度性質好、收斂快，又直接對應機率輸出，因此是分類標配。</div></details>
+      <details><summary>Q4. MSE 為什麼對離群值敏感？Huber 怎麼改善？</summary>
+        <div class="ans">MSE 對誤差取平方，離群點的大誤差被平方後暴增，強烈拉動模型去遷就它。Huber 對小誤差像 MSE（平滑）、大誤差像 MAE（線性），因此兼顧可微與對離群穩健。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>是什麼：</b>量化預測與真實差距的函數，訓練＝最小化總損失。</li>
+      <li><b>迴歸：</b>MSE（敏感於離群）、MAE（穩健）、Huber（折衷）。</li>
+      <li><b>分類：</b>交叉熵——二分類 BCE、多分類 CCE。</li>
+      <li><b>易錯：</b>分類別用 MSE（梯度消失、非凸）；用交叉熵。</li>
+      <li><b>分清：</b>損失（可微、拿來優化）≠ 評估指標（可解讀、拿來驗收）。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        let currentMode = 'mse';
+        const width = 600;
+        const height = 350;
+        const padding = 40;
+
+        // MSE 用的固定數據點
+        const msePoints = [
+            {x: 1, y: 2}, {x: 2, y: 3}, {x: 3, y: 2.5},
+            {x: 4, y: 4.5}, {x: 5, y: 4}, {x: 6, y: 5.5}
+        ];
+
+        // 狀態變數
+        let mseState = { m: 0.5, b: 1 };
+        let ceState = { label: 1, prob: 0.7 };
+
+        window.onload = () => {
+            switchMode('mse');
+        };
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchMode('${mode}')"]`).classList.add('active');
+            renderControls();
+            draw();
+            updateInfo();
+        }
+
+        function renderControls() {
+            const controlsDiv = document.getElementById('controls');
+            controlsDiv.innerHTML = '';
+
+            if (currentMode === 'mse') {
+                controlsDiv.innerHTML = `
+                    <div class="control-row">
+                        <label>斜率 (Slope, m):</label>
+                        <input type="range" min="-1" max="2" step="0.1" value="${mseState.m}" oninput="updateMSE('m', this.value)">
+                        <span class="value-display" id="val-m">${mseState.m}</span>
+                    </div>
+                    <div class="control-row">
+                        <label>截距 (Intercept, b):</label>
+                        <input type="range" min="-1" max="5" step="0.1" value="${mseState.b}" oninput="updateMSE('b', this.value)">
+                        <span class="value-display" id="val-b">${mseState.b}</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: #64748b; margin-top:5px;">
+                        * 拖動滑桿以調整藍色預測線，觀察紅色方塊(誤差平方)的變化。
+                    </div>
+                `;
+            } else {
+                controlsDiv.innerHTML = `
+                    <div class="control-row">
+                        <label>真實標籤 (True Label, y):</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="label" value="1" ${ceState.label === 1 ? 'checked' : ''} onchange="updateCE('label', 1)"> 正類 (1)</label>
+                            <label><input type="radio" name="label" value="0" ${ceState.label === 0 ? 'checked' : ''} onchange="updateCE('label', 0)"> 負類 (0)</label>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>預測機率 (Probability, p):</label>
+                        <input type="range" min="0.01" max="0.99" step="0.01" value="${ceState.prob}" oninput="updateCE('prob', this.value)">
+                        <span class="value-display" id="val-prob">${ceState.prob}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function updateMSE(key, val) {
+            mseState[key] = parseFloat(val);
+            document.getElementById(`val-${key}`).innerText = mseState[key];
+            draw();
+        }
+
+        function updateCE(key, val) {
+            ceState[key] = parseFloat(val);
+            if (key === 'prob') document.getElementById('val-prob').innerText = ceState[key];
+            draw();
+        }
+
+        function draw() {
+            const container = document.getElementById('visualizer');
+            container.innerHTML = '';
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+            container.appendChild(svg);
+
+            if (currentMode === 'mse') {
+                drawMSE(svg, svgNS);
+            } else {
+                drawCE(svg, svgNS);
+            }
+        }
+
+        // === MSE 繪圖邏輯 ===
+        function drawMSE(svg, svgNS) {
+            // 座標映射
+            const mapX = (x) => padding + x * (width - 2 * padding) / 7;
+            const mapY = (y) => height - padding - y * (height - 2 * padding) / 7;
+
+            // 繪製座標軸
+            drawAxes(svg, svgNS, 7, 7, mapX, mapY);
+
+            // 繪製回歸線 y = mx + b
+            const x1 = 0, y1 = mseState.m * x1 + mseState.b;
+            const x2 = 7, y2 = mseState.m * x2 + mseState.b;
+            const line = document.createElementNS(svgNS, "line");
+            line.setAttribute("x1", mapX(x1)); line.setAttribute("y1", mapY(y1));
+            line.setAttribute("x2", mapX(x2)); line.setAttribute("y2", mapY(y2));
+            line.setAttribute("stroke", "#6366f1");
+            line.setAttribute("stroke-width", "3");
+            svg.appendChild(line);
+
+            // 計算誤差並繪製
+            let totalSquaredError = 0;
+
+            msePoints.forEach(p => {
+                const predictedY = mseState.m * p.x + mseState.b;
+                const error = p.y - predictedY; // 殘差
+                totalSquaredError += error * error;
+
+                const px = mapX(p.x);
+                const py = mapY(p.y);
+                const predPy = mapY(predictedY);
+
+                // 繪製殘差線
+                const resLine = document.createElementNS(svgNS, "line");
+                resLine.setAttribute("x1", px); resLine.setAttribute("y1", py);
+                resLine.setAttribute("x2", px); resLine.setAttribute("y2", predPy);
+                resLine.setAttribute("stroke", "#e11d48");
+                resLine.setAttribute("stroke-dasharray", "4");
+                svg.appendChild(resLine);
+
+                // 繪製誤差平方 (正方形)
+                const squareSize = Math.abs(mapY(p.y) - mapY(predictedY));
+                if (squareSize > 2) {
+                    const rect = document.createElementNS(svgNS, "rect");
+                    rect.setAttribute("x", px);
+                    rect.setAttribute("y", Math.min(py, predPy));
+                    rect.setAttribute("width", squareSize);
+                    rect.setAttribute("height", squareSize);
+                    rect.setAttribute("fill", "#e11d48");
+                    rect.setAttribute("opacity", "0.2");
+                    svg.appendChild(rect);
+                }
+
+                // 繪製數據點
+                const circle = document.createElementNS(svgNS, "circle");
+                circle.setAttribute("cx", px); circle.setAttribute("cy", py);
+                circle.setAttribute("r", "5");
+                circle.setAttribute("fill", "#0f172a");
+                svg.appendChild(circle);
+            });
+
+            const mse = totalSquaredError / msePoints.length;
+            document.getElementById('loss-value').innerText = mse.toFixed(4);
+        }
+
+        // === Cross-Entropy 繪圖邏輯 ===
+        function drawCE(svg, svgNS) {
+            // 座標映射 (x: 0~1, y: 0~5)
+            const mapX = (x) => padding + x * (width - 2 * padding);
+            const mapY = (y) => height - padding - (y / 5) * (height - 2 * padding);
+
+            // 繪製座標軸
+            const xAxisY = height - padding;
+            const yAxisX = padding;
+
+            // X 軸
+            const xAxis = document.createElementNS(svgNS, "line");
+            xAxis.setAttribute("x1", padding); xAxis.setAttribute("y1", xAxisY);
+            xAxis.setAttribute("x2", width - padding); xAxis.setAttribute("y2", xAxisY);
+            xAxis.setAttribute("stroke", "#94a3b8");
+            svg.appendChild(xAxis);
+
+            // X軸標籤
+            const xLabel = document.createElementNS(svgNS, "text");
+            xLabel.setAttribute("x", width - padding); xLabel.setAttribute("y", xAxisY + 30);
+            xLabel.setAttribute("text-anchor", "end");
+            xLabel.textContent = "預測機率 p";
+            svg.appendChild(xLabel);
+
+            // Y 軸
+            const yAxis = document.createElementNS(svgNS, "line");
+            yAxis.setAttribute("x1", yAxisX); yAxis.setAttribute("y1", padding);
+            yAxis.setAttribute("x2", yAxisX); yAxis.setAttribute("y2", xAxisY);
+            yAxis.setAttribute("stroke", "#94a3b8");
+            svg.appendChild(yAxis);
+
+            // Y軸標籤
+            const yLabel = document.createElementNS(svgNS, "text");
+            yLabel.setAttribute("x", padding); yLabel.setAttribute("y", padding - 10);
+            yLabel.textContent = "Loss";
+            svg.appendChild(yLabel);
+
+            // 繪製 Loss 曲線
+            let pathD = "";
+            const step = 0.01;
+
+            for (let p = 0.01; p <= 0.99; p += step) {
+                let loss = 0;
+                if (ceState.label === 1) {
+                    loss = -Math.log(p);
+                } else {
+                    loss = -Math.log(1 - p);
+                }
+
+                if (loss > 5) loss = 5;
+
+                const mx = mapX(p);
+                const my = mapY(loss);
+
+                if (p === 0.01) pathD += `M ${mx} ${my}`;
+                else pathD += ` L ${mx} ${my}`;
+            }
+
+            const path = document.createElementNS(svgNS, "path");
+            path.setAttribute("d", pathD);
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", "#94a3b8");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("stroke-dasharray", "5");
+            svg.appendChild(path);
+
+            // 繪製當前點
+            let currentLoss = 0;
+            if (ceState.label === 1) currentLoss = -Math.log(ceState.prob);
+            else currentLoss = -Math.log(1 - ceState.prob);
+
+            const cx = mapX(ceState.prob);
+            const cy = mapY(Math.min(currentLoss, 5));
+
+            // 連接線
+            const dropLine = document.createElementNS(svgNS, "line");
+            dropLine.setAttribute("x1", cx); dropLine.setAttribute("y1", cy);
+            dropLine.setAttribute("x2", cx); dropLine.setAttribute("y2", xAxisY);
+            dropLine.setAttribute("stroke", "#e11d48");
+            dropLine.setAttribute("stroke-width", "2");
+            svg.appendChild(dropLine);
+
+            const circle = document.createElementNS(svgNS, "circle");
+            circle.setAttribute("cx", cx); circle.setAttribute("cy", cy);
+            circle.setAttribute("r", "8");
+            circle.setAttribute("fill", "#e11d48");
+            svg.appendChild(circle);
+
+            document.getElementById('loss-value').innerText = currentLoss.toFixed(4);
+        }
+
+        function drawAxes(svg, svgNS, xMax, yMax, mapX, mapY) {
+            const xAxisY = mapY(0);
+            const yAxisX = mapX(0);
+
+            const xAxis = document.createElementNS(svgNS, "line");
+            xAxis.setAttribute("x1", padding); xAxis.setAttribute("y1", xAxisY);
+            xAxis.setAttribute("x2", width - padding); xAxis.setAttribute("y2", xAxisY);
+            xAxis.setAttribute("stroke", "#94a3b8");
+            svg.appendChild(xAxis);
+
+            const yAxis = document.createElementNS(svgNS, "line");
+            yAxis.setAttribute("x1", yAxisX); yAxis.setAttribute("y1", padding);
+            yAxis.setAttribute("x2", yAxisX); yAxis.setAttribute("y2", height - padding);
+            yAxis.setAttribute("stroke", "#94a3b8");
+            svg.appendChild(yAxis);
+        }
+
+        function updateInfo() {
+            const contentDiv = document.getElementById('info-content');
+            let html = "";
+
+            if (currentMode === 'mse') {
+                html = `
+                    <h2>均方誤差 (Mean Squared Error, MSE)</h2>
+                    <p>回歸問題中最常用的損失函數。它計算預測值與真實值之間差的平方，然後取平均。</p>
+
+                    <h3>數學公式</h3>
+                    <div class="math-block">
+                        $$ L = \\frac{1}{N} \\sum_{i=1}^{N} (y_i - \\hat{y}_i)^2 $$
+                    </div>
+                    <p>其中 $y_i$ 是真實值，$\\hat{y}_i$ 是預測值，$N$ 是樣本數。</p>
+
+                    <h3>特性分析</h3>
+                    <ul>
+                        <li><strong>直觀幾何意義：</strong> 如上圖所示，損失值等於所有「紅色正方形面積」的平均。我們的目標就是調整直線（模型），讓這些正方形的總面積最小。</li>
+                        <li><strong>對離群值敏感：</strong> 因為有平方 $(...)^2$ 的關係，如果有一個點離得很遠（離群值），它的誤差平方會變得非常大，強烈拉動回歸線去遷就它。</li>
+                        <li><strong>可微分：</strong> MSE 是一個開口向上的拋物線，處處可微，非常適合梯度下降法優化。</li>
+                    </ul>
+
+                    <h3>應用場景</h3>
+                    <div class="scenario-box">
+                        <span class="scenario-title">回歸預測 (Regression)</span>
+                        <ul>
+                            <li><strong>房價預測：</strong> 預測價格與真實價格的差距。</li>
+                            <li><strong>氣溫預測：</strong> 預測明日氣溫具體數值。</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <h2>交叉熵損失 (Cross-Entropy Loss)</h2>
+                    <p>分類問題的標準配置。它衡量的是「預測機率分佈」與「真實標籤分佈」之間的距離。</p>
+
+                    <h3>數學公式 (二元分類)</h3>
+                    <div class="math-block">
+                        $$ L = - [y \\log(p) + (1-y) \\log(1-p)] $$
+                    </div>
+                    <p>其中 $y \\in \\{0, 1\\}$ 是真實類別，$p$ 是模型預測該樣本為類別 1 的機率。</p>
+
+                    <h3>特性分析</h3>
+                    <ul>
+                        <li><strong>懲罰錯誤信心：</strong> 請試著將上方切換為「正類 (1)」，然後將機率 $p$ 拉向 0（代表模型很有信心地認為是負類）。你會發現 Loss 曲線急速飆高。這意味著：<strong>如果模型很有信心地預測錯了，會受到極大的懲罰。</strong></li>
+                        <li><strong>配合 Sigmoid/Softmax：</strong> 在分類任務中，交叉熵比起 MSE 更能避免梯度消失的問題，讓模型訓練更有效率。</li>
+                    </ul>
+
+                    <h3>應用場景</h3>
+                    <div class="scenario-box">
+                        <span class="scenario-title">分類任務 (Classification)</span>
+                        <ul>
+                            <li><strong>圖片分類：</strong> 貓狗辨識 (Binary Cross-Entropy) 或 ImageNet 千類分類 (Categorical Cross-Entropy)。</li>
+                            <li><strong>垃圾郵件偵測：</strong> 判斷是否為垃圾信 (0 或 1)。</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            contentDiv.innerHTML = html;
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>損失函數定義什麼叫好,是模型優化的目標,iPAS 必考(中級科目三)。重點:迴歸常用 MSE、MAE、Huber;分類常用交叉熵(對數損失)。易混點:分類不用 MSE(配 Sigmoid 或 Softmax 易梯度消失、非凸難優化),交叉熵梯度性質好、更貼合機率輸出;損失要可微以利優化、評估指標重可解讀(如 F1),兩者常分開。情境:不平衡可用加權或 Focal Loss。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>損失函數是什麼？</summary><p>量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。</p></details><details><summary>迴歸和分類各用什麼損失？</summary><p>迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。</p></details><details><summary>為什麼分類不用 MSE？</summary><p>配 Sigmoid 或 softmax 時 MSE 易使梯度消失、非凸難優化；交叉熵梯度性質好、收斂快、更貼合機率輸出。</p></details><details><summary>什麼是 Huber 損失？</summary><p>小誤差像 MSE(平滑)、大誤差像 MAE(線性)；兼顧可微與對離群穩健，是迴歸的折衷選擇。</p></details><details><summary>損失函數和評估指標一樣嗎？</summary><p>不一定；損失要可微以利優化(如交叉熵)，評估指標重在可解讀(如準確率、F1)，兩者常分開。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "損失函數是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "量化單筆預測與真實值差距的函數；訓練就是調參數讓總損失最小(迴歸用 MSE、分類用交叉熵)，它定義了什麼叫好。"}}, {"@type": "Question", "name": "迴歸和分類各用什麼損失？", "acceptedAnswer": {"@type": "Answer", "text": "迴歸常用 MSE、MAE、Huber；分類常用交叉熵(對數損失)；任務不同、損失也不同。"}}, {"@type": "Question", "name": "為什麼分類不用 MSE？", "acceptedAnswer": {"@type": "Answer", "text": "配 Sigmoid 或 softmax 時 MSE 易使梯度消失、非凸難優化；交叉熵梯度性質好、收斂快、更貼合機率輸出。"}}, {"@type": "Question", "name": "什麼是 Huber 損失？", "acceptedAnswer": {"@type": "Answer", "text": "小誤差像 MSE(平滑)、大誤差像 MAE(線性)；兼顧可微與對離群穩健，是迴歸的折衷選擇。"}}, {"@type": "Question", "name": "損失函數和評估指標一樣嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定；損失要可微以利優化(如交叉熵)，評估指標重在可解讀(如準確率、F1)，兩者常分開。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="gradient_descent.html">梯度下降</a><a href="activation_functions.html">激活函數</a><a href="ann_mlp.html">ANN / MLP</a><a href="ann-metrics.html">Loss / Accuracy</a><a href="deep-learning.html">深度學習總覽</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

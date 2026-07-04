@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>非凸函數 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。 多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/non-convex-function.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="非凸函數 · 互動教學">
+    <meta property="og:description" content="凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。 多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/non-convex-function.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="非凸函數 · 互動教學">
+    <meta name="twitter:description" content="凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。 多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "非凸函數 · 互動教學",
+  "url": "https://akira.ipas-ai.com/non-convex-function.html",
+  "description": "凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。 多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --bg:#0c0f14;
+    --bg2:#11151c;
+    --panel:#141a22;
+    --panel2:#19212b;
+    --line:#283342;
+    --ink:#eef3f8;
+    --muted:#9aa7b6;
+    --faint:#5f6c7c;
+    --teal:#2dd4bf;
+    --teal-d:#0f7d72;
+    --amber:#fbbf24;
+    --amber-d:#b97e0c;
+    --rose:#fb7185;
+    --rose-d:#9f3a4a;
+    --violet:#a78bfa;
+    --grid:#1b232e;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(45,212,191,.10), transparent 55%),
+      radial-gradient(900px 600px at 0% 30%, rgba(251,191,36,.06), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;
+    letter-spacing:.01em;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    position:relative;
+    padding:96px 0 64px;
+    text-align:center;
+    overflow:hidden;
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:13px;letter-spacing:.42em;
+    color:var(--teal);
+    border:1px solid var(--teal-d);
+    padding:7px 18px;border-radius:999px;
+    background:rgba(45,212,191,.06);
+    margin-bottom:30px;
+    animation:rise .8s cubic-bezier(.2,.8,.2,1) both;
+  }
+  h1{
+    font-size:clamp(40px,8vw,76px);
+    font-weight:800;
+    letter-spacing:-.02em;
+    line-height:1.05;
+    margin-bottom:22px;
+    animation:rise .8s .08s cubic-bezier(.2,.8,.2,1) both;
+  }
+  h1 .grad{
+    background:linear-gradient(110deg,var(--teal),var(--violet) 60%,var(--amber));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{
+    font-size:clamp(17px,2.4vw,20px);
+    color:var(--muted);max-width:560px;margin:0 auto;
+    animation:rise .8s .16s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .scrollcue{
+    margin-top:48px;color:var(--faint);font-size:13px;letter-spacing:.2em;
+    animation:rise .8s .24s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .scrollcue span{display:block;font-size:22px;margin-top:6px;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:54px 0;border-top:1px solid var(--line)}
+  .sec-num{
+    font-size:13px;letter-spacing:.3em;color:var(--teal);
+    font-variant-numeric:tabular-nums;margin-bottom:10px;
+  }
+  h2{font-size:clamp(26px,4.5vw,38px);font-weight:800;letter-spacing:-.015em;margin-bottom:16px;line-height:1.2}
+  h3{font-size:20px;font-weight:700;margin:6px 0 8px}
+  p{color:#cdd6e0;margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .teal{color:var(--teal)}.amber{color:var(--amber)}.rose{color:var(--rose)}.violet{color:var(--violet)}
+
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    margin:22px 0;
+  }
+
+  /* canvas blocks */
+  .plot-wrap{position:relative;background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  canvas{display:block;width:100%;touch-action:none}
+  .plot-tag{
+    position:absolute;top:12px;left:14px;font-size:13px;font-weight:700;
+    letter-spacing:.04em;padding:5px 12px;border-radius:999px;
+    background:rgba(0,0,0,.35);backdrop-filter:blur(6px);
+  }
+  .tag-convex{color:var(--teal);border:1px solid var(--teal-d)}
+  .tag-non{color:var(--amber);border:1px solid var(--amber-d)}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.twocol{grid-template-columns:1fr}}
+  .mini-cap{font-size:14px;color:var(--muted);margin-top:10px;text-align:center}
+  .mini-cap b{color:var(--ink)}
+
+  /* controls */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+  button.btn{
+    font-family:inherit;font-size:15px;font-weight:600;
+    color:var(--bg);background:var(--teal);
+    border:none;border-radius:11px;padding:11px 18px;cursor:pointer;
+    transition:transform .12s ease,filter .12s ease;
+  }
+  button.btn:hover{filter:brightness(1.08)}
+  button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.btn.ghost:hover{border-color:var(--teal);color:var(--teal);filter:none}
+  button.btn.amber{background:var(--amber)}
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:4px;gap:4px}
+  .seg button{
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);
+    background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s
+  }
+  .seg button.on{background:var(--panel2);color:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
+
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:96px}
+  input[type=range]{flex:1;min-width:160px;accent-color:var(--teal);height:4px}
+  .val{font-variant-numeric:tabular-nums;color:var(--teal);font-weight:700;min-width:54px;text-align:right}
+
+  /* verdict pill */
+  .verdict{
+    margin-top:16px;padding:14px 18px;border-radius:12px;font-weight:600;font-size:16px;
+    display:flex;align-items:center;gap:10px;transition:.25s
+  }
+  .verdict.ok{background:rgba(45,212,191,.10);border:1px solid var(--teal-d);color:var(--teal)}
+  .verdict.bad{background:rgba(251,113,133,.10);border:1px solid var(--rose-d);color:var(--rose)}
+  .verdict .ico{font-size:20px}
+
+  /* stat readouts */
+  .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .stat{flex:1;min-width:120px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .k{font-size:13px;color:var(--muted)}
+  .stat .v{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+  .hint{font-size:14px;color:var(--faint);margin-top:12px;display:flex;align-items:center;gap:8px}
+  .hint::before{content:"☞";color:var(--amber)}
+
+  .callout{
+    border-left:3px solid var(--amber);
+    background:rgba(251,191,36,.05);
+    padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0
+  }
+  .callout h3{margin-top:0}
+  .formula{
+    font-family:"Cambria Math","Times New Roman",Georgia,serif;
+    font-size:19px;color:var(--ink);background:var(--bg);
+    border:1px solid var(--line);border-radius:10px;
+    padding:14px 18px;text-align:center;margin:14px 0;overflow-x:auto;white-space:nowrap
+  }
+  .keypoints{list-style:none;margin:8px 0}
+  .keypoints li{position:relative;padding-left:30px;margin-bottom:12px;color:#cdd6e0}
+  .keypoints li::before{
+    content:"";position:absolute;left:0;top:10px;width:11px;height:11px;border-radius:3px;
+    background:linear-gradient(135deg,var(--teal),var(--violet))
+  }
+  footer{padding:48px 0 80px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--line)}
+  .badge-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+  .badge{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">最佳化 · 機器學習基礎</span>
+    <h1>什麼是<br><span class="grad">非凸函數</span>?</h1>
+    <p class="lede">凸函數像一個碗,球放哪都會滾到同一個底。<br>非凸函數像一片山谷地形——你可能困在一個小坑裡,卻看不見更深的谷。</p>
+    <div class="scrollcue">往下滑,親手操作<span>↓</span></div>
+  </div>
+</header>
+
+<!-- SECTION 1 -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">01 — 直覺</div>
+    <h2>一顆球,兩種命運</h2>
+    <p>想像把一顆球放到函數的曲線上,讓它沿著斜坡往下滾,停在最低處。下面兩個動畫不斷重複「隨機放球 → 滾到谷底」的過程,注意觀察兩者的差別。</p>
+
+    <div class="twocol">
+      <div>
+        <div class="plot-wrap">
+          <div class="plot-tag tag-convex">凸函數 (Convex)</div>
+          <canvas id="cvxDemo"></canvas>
+        </div>
+        <div class="mini-cap">不管從哪裡放,球<b class="teal">永遠</b>滾到同一個最低點。</div>
+      </div>
+      <div>
+        <div class="plot-wrap">
+          <div class="plot-tag tag-non">非凸函數 (Non-convex)</div>
+          <canvas id="nonDemo"></canvas>
+        </div>
+        <div class="mini-cap">球常常卡在<b class="amber">附近的小坑</b>,到不了真正的谷底。</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h3>關鍵差別</h3>
+      <p style="margin-bottom:0">凸函數只有<span class="teal hl">一個最低點(全域最小值)</span>;非凸函數則有<span class="amber hl">許多高低起伏的坑</span>——除了最深的那個「全域最小值」,還有很多較淺的「局部最小值」。卡在局部最小值,正是訓練模型時最常遇到的麻煩。</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">02 — 嚴謹定義</div>
+    <h2>弦線測試:凸性怎麼判斷?</h2>
+    <p>數學上,判斷一個函數是不是凸函數,有個很直觀的方法:在曲線上任取兩點,連成一條直線(稱為<span class="hl">弦線 / chord</span>)。</p>
+    <div class="formula">f( λa + (1−λ)b ) ≤ λ·f(a) + (1−λ)·f(b),　0 ≤ λ ≤ 1</div>
+    <p>白話翻譯:<span class="teal hl">弦線必須永遠在曲線的上方(或剛好貼著)</span>。只要存在任何一組兩點,讓弦線「跌到曲線下面」,這個函數就不是凸函數。</p>
+
+    <div class="card">
+      <div class="seg" id="chordSeg" style="margin-bottom:16px">
+        <button data-fn="cvx" class="on">凸函數</button>
+        <button data-fn="non">非凸函數</button>
+      </div>
+      <div class="plot-wrap">
+        <canvas id="chordPlot"></canvas>
+      </div>
+      <div class="verdict ok" id="chordVerdict"><span class="ico">✓</span><span id="chordText">弦線完全在曲線上方 — 符合凸性</span></div>
+      <p class="hint">拖曳曲線上的兩個圓點,改變弦線的位置。試試在「非凸函數」上,找出能讓弦線陷到曲線<span class="rose" style="font-weight:600">下方</span>的位置。</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">03 — 為什麼這很重要</div>
+    <h2>梯度下降:會卡住的旅程</h2>
+    <p>訓練模型時,我們用<span class="hl">梯度下降(Gradient Descent)</span>來找最小值——說穿了就是「往腳下最陡的下坡方向走一小步」,重複很多次。在凸函數上這保證找到答案;但在非凸地形上,球只會滾進<span class="amber hl">最靠近起點的那個坑</span>,從此停住。</p>
+
+    <div class="card">
+      <h3>實驗一:從哪裡出發,決定了結局</h3>
+      <p style="font-size:15px">點擊下方地形上的任一處放球,看它往哪裡滾。<b class="teal">星號 ★</b> 是全域最小值(真正的谷底)。</p>
+      <div class="plot-wrap">
+        <canvas id="gdPlot"></canvas>
+      </div>
+      <div class="slider-row">
+        <label>學習率 (步長)</label>
+        <input type="range" id="lrSlider" min="0.01" max="0.42" step="0.01" value="0.08">
+        <span class="val" id="lrVal">0.08</span>
+      </div>
+      <div class="controls">
+        <button class="btn ghost" id="gdReset">清除球</button>
+        <button class="btn amber" id="gdMany">一次撒下 40 顆球 ✦</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">滾到全域最小值</div><div class="v teal" id="statGlobal">0</div></div>
+        <div class="stat"><div class="k">卡在局部最小值</div><div class="v amber" id="statLocal">0</div></div>
+        <div class="stat"><div class="k">命中率</div><div class="v" id="statRate">—</div></div>
+      </div>
+      <p class="hint">把學習率拉大,觀察球如何「跨過」小坑,甚至開始劇烈彈跳——這正對應深度學習中「學習率調太大導致發散」的現象。</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <div class="wrap">
+    <div class="sec-num">04 — 連結到機器學習</div>
+    <h2>為什麼深度學習離不開非凸</h2>
+    <p>神經網路的<span class="hl">損失函數(Loss Function)</span>幾乎都是高度非凸的——而且不是二維,是動輒上百萬維的超高維地形。這帶來幾個重要的觀念:</p>
+    <ul class="keypoints">
+      <li><span class="hl">起點(初始化)很重要。</span>不同的權重初始化,可能讓模型收斂到完全不同的解,就像球放在不同位置會滾進不同的坑。</li>
+      <li><span class="hl">沒有「保證最佳解」這回事。</span>在非凸問題上,梯度下降只能找到一個「夠好的」局部最小值,而非數學上絕對的全域最小值。</li>
+      <li><span class="hl">隨機性是好朋友。</span>SGD 的雜訊、動量(Momentum)、Adam 等優化器,某種程度上就是在幫球「跳出淺坑」、有機會找到更深的谷。</li>
+      <li><span class="hl">高維裡的好消息。</span>研究發現,在超高維空間中真正糟糕的局部最小值其實不多,更常見的是「鞍點」;這也是為什麼深度學習實務上往往還是能訓練得很好。</li>
+    </ul>
+
+    <div class="callout">
+      <h3>一句話總結</h3>
+      <p style="margin-bottom:0">凸函數是「閉著眼睛都能找到底」的理想世界;<span class="amber hl">非凸函數</span>則是真實機器學習所在的崎嶇山谷——我們無法保證找到最深的谷,但靠著聰明的優化策略,通常能找到一個夠好的容身之處。</p>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+"use strict";
+/* ---------- shared plot helper ---------- */
+function setupCanvas(canvas, cssH){
+  const dpr = Math.min(window.devicePixelRatio||1, 2.5);
+  const w = canvas.parentElement.clientWidth;
+  const h = cssH;
+  canvas.style.height = h+"px";
+  canvas.width  = Math.round(w*dpr);
+  canvas.height = Math.round(h*dpr);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+function makeMapper(w,h,xmin,xmax,ymin,ymax,pad){
+  const p = pad||{l:14,r:14,t:18,b:18};
+  const iw=w-p.l-p.r, ih=h-p.t-p.b;
+  return {
+    X:x=>p.l+(x-xmin)/(xmax-xmin)*iw,
+    Y:y=>p.t+(1-(y-ymin)/(ymax-ymin))*ih,
+    invX:px=>xmin+(px-p.l)/iw*(xmax-xmin),
+    p
+  };
+}
+function drawGrid(ctx,w,h,m,xmin,xmax){
+  ctx.strokeStyle="#1b232e"; ctx.lineWidth=1;
+  for(let gx=Math.ceil(xmin);gx<=xmax;gx++){
+    const px=m.X(gx);
+    ctx.beginPath();ctx.moveTo(px,m.p.t);ctx.lineTo(px,h-m.p.b);ctx.stroke();
+  }
+}
+function plotCurve(ctx,fn,xmin,xmax,m,color,width,N){
+  N=N||260;
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const x=xmin+(xmax-xmin)*i/N;
+    const px=m.X(x),py=m.Y(fn(x));
+    i?ctx.lineTo(px,py):ctx.moveTo(px,py);
+  }
+  ctx.strokeStyle=color;ctx.lineWidth=width||3;ctx.lineJoin="round";ctx.stroke();
+}
+function ballSprite(ctx,px,py,r,color,glow){
+  ctx.save();
+  ctx.shadowColor=glow||color;ctx.shadowBlur=14;
+  const g=ctx.createRadialGradient(px-r*.35,py-r*.4,r*.2,px,py,r);
+  g.addColorStop(0,"#fff");g.addColorStop(.35,color);g.addColorStop(1,color);
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(px,py,r,0,7);ctx.fill();
+  ctx.restore();
+}
+
+/* ============================================================
+   SECTION 1 — auto looping demos
+============================================================ */
+function autoDemo(canvasId, fn, xmin, xmax, ymin, ymax, color, findLocal){
+  const canvas=document.getElementById(canvasId);
+  let env=setupCanvas(canvas,230);
+  let m=makeMapper(env.w,env.h,xmin,xmax,ymin,ymax);
+  const lr=0.06;
+  let x, vel, phase, timer, settleCount;
+  function deriv(x){const h=1e-4;return (fn(x+h)-fn(x-h))/(2*h);}
+  function reset(){
+    x = xmin+0.12*(xmax-xmin)+Math.random()*(xmax-xmin)*0.76;
+    phase="roll"; settleCount=0;
+  }
+  reset();
+  function frame(){
+    env=setupCanvas(canvas,230);
+    m=makeMapper(env.w,env.h,xmin,xmax,ymin,ymax);
+    const {ctx,w,h}=env;
+    ctx.clearRect(0,0,w,h);
+    drawGrid(ctx,w,h,m,xmin,xmax);
+    // fill under curve
+    ctx.beginPath();
+    const N=240;
+    for(let i=0;i<=N;i++){const xx=xmin+(xmax-xmin)*i/N;const px=m.X(xx),py=m.Y(fn(xx));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.lineTo(m.X(xmax),h-m.p.b);ctx.lineTo(m.X(xmin),h-m.p.b);ctx.closePath();
+    const grd=ctx.createLinearGradient(0,m.p.t,0,h);
+    grd.addColorStop(0,color+"22");grd.addColorStop(1,color+"03");
+    ctx.fillStyle=grd;ctx.fill();
+    plotCurve(ctx,fn,xmin,xmax,m,color,3);
+    // physics
+    if(phase==="roll"){
+      const g=deriv(x);
+      x -= lr*g;
+      x=Math.max(xmin+0.02,Math.min(xmax-0.02,x));
+      if(Math.abs(g)<0.02){settleCount++;}else settleCount=0;
+      if(settleCount>14){phase="rest";timer=0;}
+    } else {
+      timer++; if(timer>55){phase="out";timer=0;}
+    }
+    if(phase==="out"){timer++; if(timer>10){reset();}}
+    ballSprite(ctx,m.X(x),m.Y(fn(x))-1,8,color==="#2dd4bf"?"#5eead4":"#fcd34d",color);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+const cvxFn = x=>0.34*x*x + 0.3;
+const wobbleFn = x=>0.10*x*x + 1.15*Math.sin(1.55*x) + 1.6;
+autoDemo("cvxDemo", cvxFn, -4.4,4.4, 0, 7, "#2dd4bf");
+autoDemo("nonDemo", wobbleFn, -5,5, -0.4, 6.4, "#fbbf24");
+
+/* ============================================================
+   SECTION 2 — chord test (draggable)
+============================================================ */
+(function(){
+  const canvas=document.getElementById("chordPlot");
+  const verdict=document.getElementById("chordVerdict");
+  const vtext=document.getElementById("chordText");
+  const seg=document.getElementById("chordSeg");
+  const FNS={
+    cvx:{fn:x=>0.30*x*x+0.4, xmin:-4.5,xmax:4.5, ymin:0,ymax:7},
+    non:{fn:x=>0.09*x*x+1.2*Math.sin(1.5*x)+1.7, xmin:-5,xmax:5, ymin:-0.3,ymax:6.6}
+  };
+  let cur="cvx";
+  let A=-2.4, B=2.4;       // x positions of the two handles
+  let drag=null;
+  let env,m;
+
+  function rebuild(){env=setupCanvas(canvas,300);const c=FNS[cur];m=makeMapper(env.w,env.h,c.xmin,c.xmax,c.ymin,c.ymax);}
+  rebuild();
+
+  function nearestHandle(px,py){
+    const c=FNS[cur];
+    const ax=m.X(A),ay=m.Y(c.fn(A));
+    const bx=m.X(B),by=m.Y(c.fn(B));
+    const da=Math.hypot(px-ax,py-ay), db=Math.hypot(px-bx,py-by);
+    if(da<24&&da<=db)return "A";
+    if(db<24)return "B";
+    return null;
+  }
+  function pointerPos(e){
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return {x:t.clientX-r.left,y:t.clientY-r.top};
+  }
+  function onDown(e){const p=pointerPos(e);drag=nearestHandle(p.x,p.y);if(drag)e.preventDefault();}
+  function onMove(e){
+    if(!drag)return;e.preventDefault();
+    const c=FNS[cur];const p=pointerPos(e);
+    let x=m.invX(p.x);x=Math.max(c.xmin+0.05,Math.min(c.xmax-0.05,x));
+    if(drag==="A")A=x;else B=x;
+    draw();
+  }
+  function onUp(){drag=null;}
+  canvas.addEventListener("mousedown",onDown);
+  window.addEventListener("mousemove",onMove);
+  window.addEventListener("mouseup",onUp);
+  canvas.addEventListener("touchstart",onDown,{passive:false});
+  canvas.addEventListener("touchmove",onMove,{passive:false});
+  canvas.addEventListener("touchend",onUp);
+
+  seg.addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    [...seg.children].forEach(x=>x.classList.remove("on"));b.classList.add("on");
+    cur=b.dataset.fn;
+    A=cur==="cvx"?-2.4:-3.2; B=cur==="cvx"?2.4:1.4;
+    rebuild();draw();
+  });
+
+  function draw(){
+    rebuild();
+    const c=FNS[cur];const {ctx,w,h}=env;
+    ctx.clearRect(0,0,w,h);
+    drawGrid(ctx,w,h,m,c.xmin,c.xmax);
+
+    // check violation: chord below curve anywhere between A,B
+    const lo=Math.min(A,B), hi=Math.max(A,B);
+    const fa=c.fn(lo), fb=c.fn(hi);
+    const chordY=t=>fa+(fb-fa)*t; // param along x from lo..hi
+    let violated=false, maxGap=0, vx=0;
+    const steps=160;
+    for(let i=0;i<=steps;i++){
+      const xx=lo+(hi-lo)*i/steps;
+      const t=(hi-lo)<1e-6?0:(xx-lo)/(hi-lo);
+      const cy=chordY(t), fy=c.fn(xx);
+      const gap=fy-cy;                // curve above chord => violation
+      if(gap>0.02){violated=true; if(gap>maxGap){maxGap=gap;vx=xx;}}
+    }
+
+    // shade violation region (where curve pokes above chord)
+    if(violated){
+      ctx.beginPath();let started=false;
+      for(let i=0;i<=steps;i++){
+        const xx=lo+(hi-lo)*i/steps;const t=(xx-lo)/(hi-lo);
+        const cy=chordY(t),fy=c.fn(xx);
+        if(fy-cy>0){
+          if(!started){ctx.moveTo(m.X(xx),m.Y(cy));started=true;}
+          ctx.lineTo(m.X(xx),m.Y(fy));
+        }
+      }
+      // close back along chord
+      for(let i=steps;i>=0;i--){
+        const xx=lo+(hi-lo)*i/steps;const t=(xx-lo)/(hi-lo);
+        const cy=chordY(t),fy=c.fn(xx);
+        if(fy-cy>0) ctx.lineTo(m.X(xx),m.Y(cy));
+      }
+      ctx.closePath();ctx.fillStyle="rgba(251,113,133,.22)";ctx.fill();
+    }
+
+    // curve
+    plotCurve(ctx,c.fn,c.xmin,c.xmax,m, cur==="cvx"?"#2dd4bf":"#fbbf24",3);
+
+    // chord
+    ctx.beginPath();
+    ctx.moveTo(m.X(A),m.Y(c.fn(A)));ctx.lineTo(m.X(B),m.Y(c.fn(B)));
+    ctx.strokeStyle=violated?"#fb7185":"#a78bfa";ctx.lineWidth=2.5;
+    ctx.setLineDash([6,5]);ctx.stroke();ctx.setLineDash([]);
+
+    // handles
+    [A,B].forEach(hx=>{
+      const px=m.X(hx),py=m.Y(c.fn(hx));
+      ctx.beginPath();ctx.arc(px,py,9,0,7);
+      ctx.fillStyle="#fff";ctx.fill();
+      ctx.lineWidth=3;ctx.strokeStyle=violated?"#fb7185":"#a78bfa";ctx.stroke();
+    });
+
+    // verdict
+    if(violated){
+      verdict.className="verdict bad";
+      verdict.querySelector(".ico").textContent="✗";
+      vtext.textContent="弦線跌到曲線下方 — 違反凸性,此處為非凸";
+    }else{
+      verdict.className="verdict ok";
+      verdict.querySelector(".ico").textContent="✓";
+      vtext.textContent="弦線完全在曲線上方 — 符合凸性";
+    }
+  }
+  window.addEventListener("resize",draw);
+  draw();
+})();
+
+/* ============================================================
+   SECTION 3 — gradient descent playground
+============================================================ */
+(function(){
+  const canvas=document.getElementById("gdPlot");
+  const lrSlider=document.getElementById("lrSlider");
+  const lrVal=document.getElementById("lrVal");
+  const statG=document.getElementById("statGlobal");
+  const statL=document.getElementById("statLocal");
+  const statR=document.getElementById("statRate");
+  const btnReset=document.getElementById("gdReset");
+  const btnMany=document.getElementById("gdMany");
+
+  const xmin=-6.2,xmax=6.2,ymin=-1.2,ymax=7.4;
+  const fn=x=>0.085*x*x + 1.35*Math.sin(1.45*x) + 1.6;
+  function deriv(x){const h=1e-4;return (fn(x+h)-fn(x-h))/(2*h);}
+  let env,m;
+  function rebuild(){env=setupCanvas(canvas,320);m=makeMapper(env.w,env.h,xmin,xmax,ymin,ymax);}
+  rebuild();
+
+  // find global min by fine scan
+  let xGlobal=0,yGlobal=1e9;
+  for(let x=xmin;x<=xmax;x+=0.002){const y=fn(x);if(y<yGlobal){yGlobal=y;xGlobal=x;}}
+  let lr=parseFloat(lrSlider.value);
+
+  let balls=[]; // {x, color, done, trail:[]}
+  let countG=0,countL=0;
+
+  function spawn(x0,color){
+    balls.push({x:x0, color:color||"#fbbf24", done:false, age:0, steps:0});
+  }
+  function pointerX(e){
+    const r=canvas.getBoundingClientRect();
+    const t=e.changedTouches?e.changedTouches[0]:e;
+    return m.invX(t.clientX-r.left);
+  }
+  function dropAt(e){
+    let x=pointerX(e);x=Math.max(xmin+0.1,Math.min(xmax-0.1,x));
+    spawn(x,"#5eead4");
+  }
+  canvas.addEventListener("click",dropAt);
+  canvas.addEventListener("touchend",e=>{e.preventDefault();dropAt(e);},{passive:false});
+
+  btnReset.addEventListener("click",()=>{balls=[];countG=0;countL=0;updateStats();});
+  btnMany.addEventListener("click",()=>{
+    for(let i=0;i<40;i++){
+      const x0=xmin+0.4+(xmax-xmin-0.8)*i/39;
+      spawn(x0, "rgba(167,139,250,1)");
+    }
+  });
+  lrSlider.addEventListener("input",()=>{lr=parseFloat(lrSlider.value);lrVal.textContent=lr.toFixed(2);});
+
+  function updateStats(){
+    statG.textContent=countG;statL.textContent=countL;
+    const tot=countG+countL;
+    statR.textContent= tot? Math.round(countG/tot*100)+"%" : "—";
+  }
+
+  function frame(){
+    rebuild();
+    const {ctx,w,h}=env;
+    ctx.clearRect(0,0,w,h);
+    drawGrid(ctx,w,h,m,xmin,xmax);
+    // fill under curve
+    ctx.beginPath();const N=300;
+    for(let i=0;i<=N;i++){const xx=xmin+(xmax-xmin)*i/N;const px=m.X(xx),py=m.Y(fn(xx));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.lineTo(m.X(xmax),h-m.p.b);ctx.lineTo(m.X(xmin),h-m.p.b);ctx.closePath();
+    const grd=ctx.createLinearGradient(0,m.p.t,0,h);
+    grd.addColorStop(0,"rgba(45,212,191,.12)");grd.addColorStop(1,"rgba(45,212,191,.02)");
+    ctx.fillStyle=grd;ctx.fill();
+    plotCurve(ctx,fn,xmin,xmax,m,"#2dd4bf",3,300);
+
+    // global min star
+    const gx=m.X(xGlobal),gy=m.Y(yGlobal);
+    ctx.save();ctx.translate(gx,gy-16);ctx.fillStyle="#2dd4bf";ctx.shadowColor="#2dd4bf";ctx.shadowBlur=12;
+    ctx.beginPath();
+    for(let i=0;i<10;i++){const ang=-Math.PI/2+i*Math.PI/5;const rr=i%2?4:9;ctx.lineTo(Math.cos(ang)*rr,Math.sin(ang)*rr);}
+    ctx.closePath();ctx.fill();ctx.restore();
+    ctx.fillStyle="#2dd4bf";ctx.font="600 12px sans-serif";ctx.textAlign="center";
+    ctx.fillText("全域最小值",gx,gy-30);
+
+    // step the balls
+    balls.forEach(b=>{
+      if(!b.done){
+        b.age++;
+        const g=deriv(b.x);
+        b.x -= lr*g;
+        b.steps++;
+        // diverged?
+        if(b.x<xmin-1||b.x>xmax+1){b.done=true;b.diverged=true;countL++;updateStats();}
+        else if(Math.abs(g)<0.012 && b.steps>6){
+          b.done=true;
+          if(Math.abs(b.x-xGlobal)<0.35){b.color="#5eead4";countG++;}
+          else{b.color="#fbbf24";countL++;}
+          updateStats();
+        }
+        b.x=Math.max(xmin+0.02,Math.min(xmax-0.02,b.x));
+      }
+      if(!b.diverged){
+        const px=m.X(b.x),py=m.Y(fn(b.x))-1;
+        const col=b.done?(Math.abs(b.x-xGlobal)<0.35?"#5eead4":"#fbbf24"):"#fcd34d";
+        ballSprite(ctx,px,py,7,col,col);
+      }
+    });
+    // keep ticking; spawns trigger via interaction
+    requestAnimationFrame(frame);
+  }
+  lrVal.textContent=lr.toFixed(2);
+  requestAnimationFrame(frame);
+})();
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>非凸最佳化是深度學習的本質難題,iPAS 數學與訓練考點(中級科目三)。重點:凸函數只有單一全域最小、好優化;神經網路損失高度非凸,有許多局部最小、鞍點與平原,沒有保證找到全域最小。易混點:高維下多數局部最小品質相近、鞍點比壞的局部最小更常見更需逃離;靠 SGD 隨機性、動量、好初始化常能找到夠好的解。情境:解釋為何同模型多次訓練結果略不同。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>凸函數和非凸函數差在哪？</summary><p>凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。</p></details><details><summary>為什麼神經網路是非凸的？</summary><p>多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。</p></details><details><summary>非凸優化怎麼還能訓練成功？</summary><p>高維下多數局部最小品質相近、且多為鞍點；靠 SGD 的隨機性、動量、好的初始化與架構，常能找到夠好的解。</p></details><details><summary>什麼是鞍點？</summary><p>某些方向是極小、某些方向是極大的點；梯度為零但非最小。深度學習中鞍點比壞的局部最小更常見、更需逃離。</p></details><details><summary>怎麼應對非凸地形？</summary><p>好的初始化、動量與自適應優化器、學習率排程、批次正規化、殘差連結等，都幫助穿越複雜地形找到好解。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "凸函數和非凸函數差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "凸函數只有一個全域最小、任何局部最小都是全域最小，好優化；非凸函數有多個局部最小與鞍點，優化較難。"}}, {"@type": "Question", "name": "為什麼神經網路是非凸的？", "acceptedAnswer": {"@type": "Answer", "text": "多層非線性與大量參數讓損失地形高度複雜，存在許多局部最小、鞍點與平原；沒有保證找到全域最小。"}}, {"@type": "Question", "name": "非凸優化怎麼還能訓練成功？", "acceptedAnswer": {"@type": "Answer", "text": "高維下多數局部最小品質相近、且多為鞍點；靠 SGD 的隨機性、動量、好的初始化與架構，常能找到夠好的解。"}}, {"@type": "Question", "name": "什麼是鞍點？", "acceptedAnswer": {"@type": "Answer", "text": "某些方向是極小、某些方向是極大的點；梯度為零但非最小。深度學習中鞍點比壞的局部最小更常見、更需逃離。"}}, {"@type": "Question", "name": "怎麼應對非凸地形？", "acceptedAnswer": {"@type": "Answer", "text": "好的初始化、動量與自適應優化器、學習率排程、批次正規化、殘差連結等，都幫助穿越複雜地形找到好解。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="ann_mlp.html">ANN / MLP</a><a href="activation_functions.html">激活函數</a><a href="loss_functions.html">損失函數</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer>
+  <div class="wrap">
+    <div class="badge-row">
+      <span class="badge">凸性測試</span>
+      <span class="badge">梯度下降</span>
+      <span class="badge">局部 vs 全域最小值</span>
+      <span class="badge">損失地形</span>
+    </div>
+    互動教學 · 非凸函數 (Non-convex Function)
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深度學習 — 神經網路全連接流動動畫</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="深度學習用多層神經網路自動從資料學特徵、逐層抽象，擅長影像、語音、文字等複雜資料。傳統 ML 多靠人工設計特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力、可解釋性較低。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/deep-learning.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="深度學習 — 神經網路全連接流動動畫">
+    <meta property="og:description" content="深度學習用多層神經網路自動從資料學特徵、逐層抽象，擅長影像、語音、文字。傳統 ML 靠人工特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/deep-learning.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="深度學習 — 神經網路全連接流動動畫">
+    <meta name="twitter:description" content="深度學習用多層神經網路自動學特徵、逐層抽象。傳統 ML 靠人工特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "深度學習 — 神經網路全連接流動動畫",
+  "url": "https://akira.ipas-ai.com/deep-learning.html",
+  "description": "深度學習用多層神經網路自動從資料學特徵、逐層抽象，擅長影像、語音、文字等複雜資料。傳統 ML 多靠人工設計特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力、可解釋性較低。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --in:#4f46e5; --in-d:#4338ca; --in-dd:#312e81;
+    --cyan:#0891b2; --gold:#d97706; --green:#16a34a; --red:#ef4444; --blue:#2563eb;
+    --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef0fb;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+    margin:0; padding:26px 14px 40px;
+    display:flex; flex-direction:column; align-items:center;
+    background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+  }
+  .hero{
+    width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+    background:linear-gradient(135deg,#312e81 0%,#4f46e5 55%,#818cf8 100%);
+    color:#fff; box-shadow:0 14px 34px rgba(79,70,229,.30); margin-bottom:20px;
+  }
+  .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+    background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+  .hero h1{margin:0 0 10px; font-size:1.85rem; line-height:1.3}
+  .hero p{margin:0; font-size:1.05rem; opacity:.97}
+  .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+  .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+    padding:5px 11px; border-radius:999px}
+
+  .lesson{
+    width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+    box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+  }
+  .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+  .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+  .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+  .lesson p{margin:10px 0}
+  .hl{background:linear-gradient(transparent 62%,#c7d2fe 62%); font-weight:700; padding:0 1px}
+  .term{color:var(--in-d); font-weight:800}
+
+  .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+  .note h4{margin:0 0 6px; font-size:1rem}
+  .note.def{background:#eef2ff; border-left:5px solid var(--in)}
+  .note.meta{background:#fffbeb; border-left:5px solid var(--gold)}
+  .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+  .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+  .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+  .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+  .cmp th{background:#f1f1fa; font-weight:800}
+  .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+  .cmp .t{color:var(--muted); font-weight:700} .cmp .d{color:var(--in-d); font-weight:700}
+
+  .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+  .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--in);
+    border-radius:12px; padding:13px 15px; font-size:.95rem}
+  .keycard b{display:block; margin-bottom:3px; color:var(--in-d)}
+
+  .qa{background:#eef2ff; border:1px solid #c7d2fe; border-radius:12px; padding:6px 18px; margin:12px 0}
+  .qa details{border-bottom:1px solid #dbe1fe; padding:11px 0}
+  .qa details:last-child{border-bottom:none}
+  .qa summary{cursor:pointer; font-weight:800; color:var(--in-d)}
+  .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+  /* ===== demo (preserved · neon) ===== */
+  .demo-dark{background:#0a0a12; border-radius:16px; padding:14px; margin:14px 0; box-shadow:0 0 40px rgba(0,247,255,.12); border:1px solid #1a1a2e}
+  .demo-dark .nn-svg{display:block; width:100%; height:auto}
+
+  @media(max-width:560px){
+    .hero h1{font-size:1.45rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+  }
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🧠 深度學習 Deep Learning · iPAS 必考</span>
+        <h1>深度學習：讓機器自己「逐層」看懂複雜資料</h1>
+        <p>深度學習是機器學習的一支，用<b>很多層的神經網路</b>，讓機器<b>自己從資料裡學出特徵</b>——不必人工告訴它「貓有尖耳朵」。層層堆疊、由淺入深地抽象，讓它在影像、語音、文字這些複雜資料上表現驚人。</p>
+        <div class="chips"><span>多層神經網路</span><span>自動學特徵</span><span>逐層抽象</span><span>大數據 + GPU</span><span>CNN / Transformer</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🧠 一、先用白話講：什麼是深度學習？</h2>
+        <p class="lead">「深度」指的是<b>層數很多</b>。資料從輸入層一路傳到輸出層，每一層都把上一層的東西<b>再抽象一點</b>。</p>
+        <div class="note def">
+            <h4>🐱 逐層抽象：從像素到「貓」</h4>
+            辨識一張貓的照片：<b>第一層</b>看到的是<b>像素、邊緣</b>；<b>中間層</b>把邊緣拼成<b>耳朵、鬍鬚、眼睛</b>；<b>更深的層</b>把這些組合成「<b>這是一隻貓</b>」的概念。<span class="hl">每一層自動學會越來越高階的特徵</span>，不需要工程師手動定義——這就是深度學習最迷人的地方。
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎬 二、看動畫：訊號怎麼在網路裡流動</h2>
+        <p class="lead">一張貓的圖片從左邊 <b>Input</b> 進入，訊號沿著全連接的線路<b>一層層點亮</b>，最後在輸出層點亮「CAT」而不是「Dog」——這就是一次<b>前向傳播（forward pass）</b>的推論。</p>
+
+        <div class="demo-dark">
+  <svg xmlns="http://www.w3.org/2000/svg" class="nn-svg" viewBox="0 0 800 400" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <defs>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+
+      <g id="cat-icon">
+        <path d="M10,30 L5,5 L25,15 L45,5 L40,30 Z" fill="none" stroke="#00f7ff" stroke-width="2"/>
+        <circle cx="18" cy="22" r="3" fill="#00f7ff"/>
+        <circle cx="32" cy="22" r="3" fill="#00f7ff"/>
+      </g>
+    </defs>
+
+    <style>
+      .node { fill: #1a1a24; stroke: #555; stroke-width: 2; r: 11; transition: all 0.3s ease; }
+      .connection-base { stroke: #333; stroke-width: 1; fill: none; opacity: 0.4; }
+      .connection-flow { fill: none; stroke-linecap: round; opacity: 0; }
+      .nn-svg text { fill: #777; font-size: 13px; text-anchor: middle; font-weight: 500; }
+      .nn-svg text.label-text { fill: #00f7ff; font-weight: bold; font-size: 16px; text-anchor: start; }
+
+      @keyframes inputFlash { 0%, 100% { opacity: 0.5; filter: none; } 50% { opacity: 1; filter: url(#glow); } }
+      @keyframes nodeActivate { 0% { fill: #1a1a24; stroke: #555; } 20% { fill: #00f7ff; stroke: #fff; filter: url(#glow); r: 14; } 100% { fill: #1a1a24; stroke: #555; } }
+      @keyframes flowPulse { 0% { stroke-dasharray: 0, 1000; stroke-dashoffset: 0; opacity: 0; } 10% { opacity: 1; } 100% { stroke-dasharray: 100, 1000; stroke-dashoffset: -300; opacity: 0; } }
+      @keyframes finalResultActivate { 0% { fill: #1a1a24; stroke: #555; } 100% { fill: #ffb300; stroke: #fff; filter: url(#glow); r: 18; stroke-width: 3; } }
+      @keyframes textFadeIn { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+
+      .input-icon-anim { animation: inputFlash 2s ease-in-out infinite both; }
+      .input-node-anim { animation: nodeActivate 1.5s ease-in-out both; animation-delay: 1s; }
+      .flow-L1 { stroke: #00f7ff; stroke-width: 2.5; filter: url(#glow); animation: flowPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: 2.0s; }
+      .h1-node-anim { animation: nodeActivate 1.5s ease-in-out both; animation-delay: 3.0s; }
+      .flow-L2 { stroke: #00f7ff; stroke-width: 2.5; filter: url(#glow); animation: flowPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: 4.0s; }
+      .h2-node-anim { animation: nodeActivate 1.5s ease-in-out both; animation-delay: 5.0s; }
+      .flow-L3-dog { stroke: #666; stroke-width: 1.5; animation: flowPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: 6.0s; opacity: 0.5; }
+      .flow-L3-cat { stroke: #ffb300; stroke-width: 4; filter: url(#glow); animation: flowPulse 1.8s cubic-bezier(0.4, 0, 0.2, 1) both; animation-delay: 6.0s; }
+      .dog-node-anim { animation: nodeActivate 1s ease-in-out both; animation-delay: 6.8s; opacity: 0.6; }
+      .cat-node-final { animation: finalResultActivate 1.5s ease-out both; animation-delay: 7.0s; }
+      .result-text-anim { animation: textFadeIn 1.2s ease-out both; animation-delay: 7.8s; }
+    </style>
+
+    <g opacity="0.1" stroke="#00f7ff" stroke-dasharray="4 6">
+      <line x1="0" y1="50" x2="800" y2="50"/>
+      <line x1="0" y1="350" x2="800" y2="350"/>
+      <line x1="100" y1="0" x2="100" y2="400"/>
+      <line x1="700" y1="0" x2="700" y2="400"/>
+    </g>
+
+    <g transform="translate(30, 180)" class="input-icon-anim">
+      <rect x="-10" y="-10" width="70" height="50" fill="#1a1a24" stroke="#00f7ff" stroke-width="1.5" rx="6"/>
+      <use href="#cat-icon" x="0" y="0"/>
+      <text x="25" y="62" fill="#00f7ff" font-weight="bold">Input</text>
+    </g>
+
+    <g>
+      <line class="connection-base" x1="130" y1="150" x2="300" y2="120"/>
+      <line class="connection-base" x1="130" y1="150" x2="300" y2="200"/>
+      <line class="connection-base" x1="130" y1="150" x2="300" y2="280"/>
+      <line class="connection-base" x1="130" y1="200" x2="300" y2="120"/>
+      <line class="connection-base" x1="130" y1="200" x2="300" y2="200"/>
+      <line class="connection-base" x1="130" y1="200" x2="300" y2="280"/>
+      <line class="connection-base" x1="130" y1="250" x2="300" y2="120"/>
+      <line class="connection-base" x1="130" y1="250" x2="300" y2="200"/>
+      <line class="connection-base" x1="130" y1="250" x2="300" y2="280"/>
+      <line class="connection-flow flow-L1" x1="130" y1="150" x2="300" y2="120"/>
+      <line class="connection-flow flow-L1" x1="130" y1="150" x2="300" y2="200"/>
+      <line class="connection-flow flow-L1" x1="130" y1="150" x2="300" y2="280"/>
+      <line class="connection-flow flow-L1" x1="130" y1="200" x2="300" y2="120"/>
+      <line class="connection-flow flow-L1" x1="130" y1="200" x2="300" y2="200"/>
+      <line class="connection-flow flow-L1" x1="130" y1="200" x2="300" y2="280"/>
+      <line class="connection-flow flow-L1" x1="130" y1="250" x2="300" y2="120"/>
+      <line class="connection-flow flow-L1" x1="130" y1="250" x2="300" y2="200"/>
+      <line class="connection-flow flow-L1" x1="130" y1="250" x2="300" y2="280"/>
+    </g>
+
+    <g>
+      <line class="connection-base" x1="300" y1="120" x2="500" y2="120"/>
+      <line class="connection-base" x1="300" y1="120" x2="500" y2="180"/>
+      <line class="connection-base" x1="300" y1="120" x2="500" y2="260"/>
+      <line class="connection-base" x1="300" y1="200" x2="500" y2="120"/>
+      <line class="connection-base" x1="300" y1="200" x2="500" y2="180"/>
+      <line class="connection-base" x1="300" y1="200" x2="500" y2="260"/>
+      <line class="connection-base" x1="300" y1="280" x2="500" y2="120"/>
+      <line class="connection-base" x1="300" y1="280" x2="500" y2="180"/>
+      <line class="connection-base" x1="300" y1="280" x2="500" y2="260"/>
+      <line class="connection-flow flow-L2" x1="300" y1="120" x2="500" y2="120"/>
+      <line class="connection-flow flow-L2" x1="300" y1="120" x2="500" y2="180"/>
+      <line class="connection-flow flow-L2" x1="300" y1="120" x2="500" y2="260"/>
+      <line class="connection-flow flow-L2" x1="300" y1="200" x2="500" y2="120"/>
+      <line class="connection-flow flow-L2" x1="300" y1="200" x2="500" y2="180"/>
+      <line class="connection-flow flow-L2" x1="300" y1="200" x2="500" y2="260"/>
+      <line class="connection-flow flow-L2" x1="300" y1="280" x2="500" y2="120"/>
+      <line class="connection-flow flow-L2" x1="300" y1="280" x2="500" y2="180"/>
+      <line class="connection-flow flow-L2" x1="300" y1="280" x2="500" y2="260"/>
+    </g>
+
+    <g>
+      <line class="connection-base" x1="500" y1="120" x2="700" y2="160"/>
+      <line class="connection-base" x1="500" y1="120" x2="700" y2="240"/>
+      <line class="connection-base" x1="500" y1="180" x2="700" y2="160"/>
+      <line class="connection-base" x1="500" y1="180" x2="700" y2="240"/>
+      <line class="connection-base" x1="500" y1="260" x2="700" y2="160"/>
+      <line class="connection-base" x1="500" y1="260" x2="700" y2="240"/>
+      <line class="connection-flow flow-L3-dog" x1="500" y1="120" x2="700" y2="160"/>
+      <line class="connection-flow flow-L3-dog" x1="500" y1="180" x2="700" y2="160"/>
+      <line class="connection-flow flow-L3-dog" x1="500" y1="260" x2="700" y2="160"/>
+      <line class="connection-flow flow-L3-cat" x1="500" y1="120" x2="700" y2="240"/>
+      <line class="connection-flow flow-L3-cat" x1="500" y1="180" x2="700" y2="240"/>
+      <line class="connection-flow flow-L3-cat" x1="500" y1="260" x2="700" y2="240"/>
+    </g>
+
+    <g>
+      <circle class="node input-node-anim" cx="130" cy="150"/>
+      <circle class="node input-node-anim" cx="130" cy="200"/>
+      <circle class="node input-node-anim" cx="130" cy="250"/>
+      <text x="130" y="300">Input Layer</text>
+    </g>
+
+    <g>
+      <circle class="node h1-node-anim" cx="300" cy="120"/>
+      <circle class="node h1-node-anim" cx="300" cy="200"/>
+      <circle class="node h1-node-anim" cx="300" cy="280"/>
+      <text x="300" y="320">Hidden 1</text>
+    </g>
+
+    <g>
+      <circle class="node h2-node-anim" cx="500" cy="120"/>
+      <circle class="node h2-node-anim" cx="500" cy="180"/>
+      <circle class="node h2-node-anim" cx="500" cy="260"/>
+      <text x="500" y="320">Hidden 2</text>
+    </g>
+
+    <g>
+      <circle class="node dog-node-anim" cx="700" cy="160"/>
+      <text x="740" y="165" class="label-text" fill="#777">Dog</text>
+
+      <circle class="node cat-node-final" cx="700" cy="240"/>
+      <text x="740" y="245" class="label-text" style="font-size: 20px;">CAT</text>
+
+      <text x="700" y="300">Output Layer</text>
+    </g>
+
+    <g class="result-text-anim" transform="translate(700, 360)">
+      <text x="0" y="0" fill="#ffb300" font-size="22px" font-weight="bold" filter="url(#glow)">CAT DETECTED</text>
+      <text x="0" y="25" fill="#00f7ff" font-size="14px" letter-spacing="1px">Confidence: 98.5%</text>
+    </g>
+  </svg>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            左邊輸入層代表圖片的原始特徵；中間兩層 Hidden 逐一亮起，代表訊號被<b>加權、轉換、往後傳</b>；到輸出層，通往 <b style="color:#c99700">CAT</b> 的路徑又粗又亮（權重大、機率高）、通往 Dog 的路徑又細又暗——模型於是判定「這是貓，信心 98.5%」。真正的網路有<b>成千上萬個節點</b>，原理一模一樣。
+        </div>
+    </section>
+
+    <!-- ===== 3. DL vs ML ===== -->
+    <section class="lesson">
+        <h2>⚖️ 三、深度學習 vs 傳統機器學習</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="t">傳統 ML</th><th class="d">深度學習</th></tr>
+            <tr><td>特徵怎麼來</td><td>靠<b>人工設計</b>（工程師定義）</td><td><b>自動學</b>（模型自己抽出）</td></tr>
+            <tr><td>資料量</td><td>少量也能運作</td><td>需要<b>大量</b>資料才發威</td></tr>
+            <tr><td>算力</td><td>一般 CPU 即可</td><td>常需 <b>GPU</b></td></tr>
+            <tr><td>可解釋性</td><td>較高</td><td>較低（黑盒）</td></tr>
+            <tr><td>強項</td><td>表格、小資料</td><td>影像、語音、文字等複雜資料</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 一句話</h4>
+            <b>資料多、又是非結構化（影像/語音/文字）時，深度學習通常勝出；資料少、要可解釋時，傳統 ML 反而更合適。</b>深度學習<b>不是第四種學習範式</b>，它可套用在監督、非監督、強化學習上。
+        </div>
+    </section>
+
+    <!-- ===== 4. 為何爆發 ===== -->
+    <section class="lesson">
+        <h2>🚀 四、為什麼近年才爆發？三個條件到位</h2>
+        <div class="keys">
+            <div class="keycard"><b>① 大數據</b>網路時代累積了海量標註資料（如 ImageNet），餵得飽深層網路。</div>
+            <div class="keycard"><b>② GPU 算力</b>矩陣運算高度可平行，GPU 讓訓練從幾個月縮到幾天。</div>
+            <div class="keycard"><b>③ 更好的演算法</b>ReLU、Dropout、批次正規化、注意力機制…讓深層網路<b>訓練得起來、不發散</b>。</div>
+        </div>
+    </section>
+
+    <!-- ===== 5. 架構地圖 ===== -->
+    <section class="lesson">
+        <h2>🗺️ 五、常見架構地圖（依資料型態選）</h2>
+        <div class="keys">
+            <div class="keycard"><b>CNN 卷積網路 → 影像</b>用卷積抓局部特徵，影像辨識主力。見 <a href="cnn.html" style="color:#4338ca">CNN</a>、<a href="resnet.html" style="color:#4338ca">ResNet</a>。</div>
+            <div class="keycard"><b>RNN / LSTM → 序列</b>處理有先後順序的資料（文字、時間序列）。見 <a href="rnn_lstm.html" style="color:#4338ca">RNN/LSTM</a>。</div>
+            <div class="keycard"><b>Transformer → 語言/多模態</b>靠注意力機制，撐起 GPT、BERT。見 <a href="transformer.html" style="color:#4338ca">Transformer</a>、<a href="attention.html" style="color:#4338ca">注意力</a>。</div>
+            <div class="keycard"><b>GAN / Diffusion → 生成</b>造出逼真影像、聲音。見 <a href="gan.html" style="color:#4338ca">GAN</a>、<a href="diffusion.html" style="color:#4338ca">Diffusion</a>。</div>
+        </div>
+    </section>
+
+    <!-- ===== 6. 限制 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、深度學習的限制</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">吃資料與算力</b>資料/GPU 不足時難以發揮。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">黑盒難解釋</b>決策過程不透明，高風險領域是隱憂。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">易過擬合</b>參數多，需 Dropout、正則化、增資料。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">對抗樣本脆弱</b>刻意加的微小雜訊就能騙過它。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 深度學習的「深度」指什麼？</summary>
+                <p>神經網路的<b>層數多</b>，能<b>逐層抽象</b>出越來越高階的特徵。</p></details>
+            <details><summary>Q2. 和傳統機器學習最大的差別？</summary>
+                <p>傳統 ML 靠<b>人工設計特徵</b>；深度學習<b>自動學特徵</b>，資料越多越強。</p></details>
+            <details><summary>Q3. 為什麼近年才爆發？</summary>
+                <p><b>大數據 + GPU 算力 + 更好的演算法</b>（ReLU/Dropout/BatchNorm/Attention）三者到位。</p></details>
+            <details><summary>Q4. 影像、序列、生成各常用什麼架構？</summary>
+                <p>影像 <b>CNN</b>、序列 <b>RNN/LSTM/Transformer</b>、生成 <b>GAN/Diffusion</b>。</p></details>
+            <details><summary>Q5. 深度學習的主要限制？</summary>
+                <p>吃資料算力、<b>黑盒難解釋</b>、易過擬合、對抗樣本脆弱。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>深度學習</b>多層神經網路、自動學特徵、逐層抽象。</div>
+            <div class="keycard"><b>vs 傳統 ML</b>自動特徵、吃資料算力、黑盒。</div>
+            <div class="keycard"><b>三條件</b>大數據 + GPU + 好演算法。</div>
+            <div class="keycard"><b>架構</b>CNN/RNN/Transformer/GAN/Diffusion。</div>
+            <div class="keycard"><b>非第四範式</b>可套用於監督/非監督/強化。</div>
+            <div class="keycard"><b>限制</b>資料算力、黑盒、過擬合、對抗樣本。</div>
+        </div>
+    </section>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>深度學習是 iPAS 必考的大主題(初級科目一、中級科目三)。重點:用多層神經網路自動從資料學特徵、逐層抽象,擅長影像、語音、文字等複雜資料。易混點:與傳統 ML 差在自動學特徵(傳統多靠人工設計);需大量資料與算力、可解釋性低、易過擬合、對對抗樣本脆弱。情境:CNN(影像)、RNN 與 Transformer(序列)、GAN 與 Diffusion(生成)依資料型態選用。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>深度學習是什麼？</summary><p>用多層神經網路自動從資料中學特徵的機器學習分支；層數深、能逐層抽象，擅長影像、語音、文字等複雜資料。</p></details><details><summary>和傳統機器學習差在哪？</summary><p>傳統 ML 多靠人工設計特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力、可解釋性較低。</p></details><details><summary>為什麼近年才爆發？</summary><p>大數據、GPU 算力，以及更好的演算法(ReLU、Dropout、批次正規化、注意力機制等)三者到位，才讓深層網路可訓練。</p></details><details><summary>常見的網路架構有哪些？</summary><p>CNN(影像)、RNN 與 LSTM(序列)、Transformer(語言與多模態)、GAN 與擴散模型(生成)；依資料型態選擇。</p></details><details><summary>深度學習的限制？</summary><p>吃資料與算力、易過擬合、像黑盒難解釋、對對抗樣本脆弱；小資料或需高可解釋時未必比傳統方法好。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "深度學習是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "用多層神經網路自動從資料中學特徵的機器學習分支；層數深、能逐層抽象，擅長影像、語音、文字等複雜資料。"}}, {"@type": "Question", "name": "和傳統機器學習差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "傳統 ML 多靠人工設計特徵；深度學習自動學特徵、資料越多越強，但需大量資料與算力、可解釋性較低。"}}, {"@type": "Question", "name": "為什麼近年才爆發？", "acceptedAnswer": {"@type": "Answer", "text": "大數據、GPU 算力，以及更好的演算法(ReLU、Dropout、批次正規化、注意力機制等)三者到位，才讓深層網路可訓練。"}}, {"@type": "Question", "name": "常見的網路架構有哪些？", "acceptedAnswer": {"@type": "Answer", "text": "CNN(影像)、RNN 與 LSTM(序列)、Transformer(語言與多模態)、GAN 與擴散模型(生成)；依資料型態選擇。"}}, {"@type": "Question", "name": "深度學習的限制？", "acceptedAnswer": {"@type": "Answer", "text": "吃資料與算力、易過擬合、像黑盒難解釋、對對抗樣本脆弱；小資料或需高可解釋時未必比傳統方法好。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="cnn.html">CNN 卷積網路</a><a href="rnn_lstm.html">RNN / LSTM</a><a href="transformer.html">Transformer</a><a href="gan.html">GAN</a><a href="diffusion.html">Diffusion</a><a href="ann_mlp.html">ANN / MLP</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>人類介入程度四層級｜Human-in／on／over／out-of-the-loop 白話＋範例</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="依人類介入 AI 決策的程度分四級：Human-in-the-loop(人做每個最終決定)、Human-on-the-loop(AI 自主運作、人監控必要時介入)、Human-over-the-loop(人設目標與政策、宏觀監督多系統)、Human-out-of-the-loop(完全自動、人不介入)。附 AI 聊天／IDE／Agent 對照與 iPAS 治理考點。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/xx_loop.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="人類介入程度四層級：Human-in／on／over／out-of-the-loop">
+    <meta property="og:description" content="用比喻與 AI 工具實例，一次搞懂人類介入 AI 的四個層級：從全程把關到完全放手。適合 iPAS AI 治理與倫理備考。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/xx_loop.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="人類介入程度四層級：Human-in／on／over／out-of-the-loop">
+    <meta name="twitter:description" content="用比喻與 AI 工具實例，一次搞懂人類介入 AI 的四個層級：從全程把關到完全放手。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "人類介入程度四層級：Human-in／on／over／out-of-the-loop",
+  "url": "https://akira.ipas-ai.com/xx_loop.html",
+  "description": "依人類介入 AI 決策的程度分四級：Human-in-the-loop、Human-on-the-loop、Human-over-the-loop、Human-out-of-the-loop；附比喻、AI 工具實例與 iPAS 治理考點。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-07-01",
+  "learningResourceType": "article",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+    :root{
+      --bg:#f0fbf9; --ink:#08302b; --sub:#3f7a70;
+      --brand:#0d9488; --brand2:#0f766e; --brand-soft:#c9eee8;
+      --card:#ffffff; --line:#cdeae4;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --bad:#b91c1c;
+      --in:#0d9488; --on:#0369a1; --over:#7c3aed; --out:#b45309;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#2dd4bf,#0d9488 55%,#0f766e);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.85rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:660px;color:#dbfaf4;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(13,148,136,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#a3e5db 60%);font-weight:700}
+    .figure{background:#0f1012;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;margin:6px 0 2px}
+    .figure img{display:block;width:100%;max-width:1100px;height:auto;margin:0 auto;border-radius:8px}
+    .figcap{font-size:.85rem;color:var(--sub);text-align:center;margin-top:10px}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid var(--over)}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.88rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.86rem}
+    .cmp tbody tr:nth-child(even){background:#eefaf7}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#eefaf7;border:1px solid var(--line);border-radius:13px;padding:15px 16px;border-top:4px solid var(--brand)}
+    .keycard.k-in{border-top-color:var(--in)} .keycard.k-on{border-top-color:var(--on)} .keycard.k-over{border-top-color:var(--over)} .keycard.k-out{border-top-color:var(--out)}
+    .keycard b{color:var(--brand2)} .keycard .lv{font-family:Georgia,serif;font-size:.78rem;color:var(--sub);letter-spacing:.03em}
+    .keycard span.em{display:block;font-size:1.7rem;margin-bottom:4px}
+    .keycard p{font-size:.9rem;color:#38635a;margin:6px 0 0}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#eefaf7}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#38635a;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+    @media(max-width:560px){.hero h1{font-size:1.5rem}.lesson section{padding:20px 16px}.cmp{font-size:.82rem}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">方法論 · AI 治理與倫理</span>
+  <h1>人類介入程度四層級</h1>
+  <p>同樣用 AI，「人到底管多少」差很多。從你盯著每一步、到完全放手不管——這四個層級決定了誰在把關、出事誰負責。</p>
+  <div class="chips">
+    <span>Human-in-the-loop</span><span>Human-on-the-loop</span><span>Human-over-the-loop</span><span>Human-out-of-the-loop</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      這是一條<span class="term">人類介入程度</span>的光譜：依「人類還要不要參與 AI 的決策迴圈、參與到什麼程度」，由多到少分成四級——<b>in（人做每個決定）→ on（AI 自主、人監控）→ over（人設目標、宏觀監督）→ out（完全自動、人不介入）</b>。<span class="hl">風險越高、後果越不可逆，人就該站得越「靠近迴圈」。</span>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🗺️</span>一張圖看四層級</h2>
+    <div class="figure">
+      <img src="xx_loop.png" alt="人類介入程度四層級：Human-in-the-loop、Human-on-the-loop、Human-over-the-loop、Human-out-of-the-loop 圖解">
+    </div>
+    <p class="figcap">人類與 AI 決策迴圈的四種關係：從「在迴圈裡」逐步退到「迴圈外」。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>四層級對照表</h2>
+    <table class="cmp">
+      <thead><tr><th>層級</th><th>人類角色</th><th>比喻</th><th>AI 工具實例</th></tr></thead>
+      <tbody>
+        <tr><td>Human-in-the-loop（人在迴圈內）</td><td>AI 給建議，<b>每個</b>最終決定都由人做／核可</td><td>學開車，教練坐旁邊，你每個動作都要他點頭</td><td>AI 聊天（ChatGPT／Claude）：你讀每則回覆、決定要不要用</td></tr>
+        <tr><td>Human-on-the-loop（人在迴圈上）</td><td>AI <b>自主運作</b>，人在旁監控、必要時才介入或喊停</td><td>看自動化工廠，機器自己跑，亮紅燈才去按暫停</td><td>AI IDE（Copilot／Cursor）：它自動改程式，你監看、接受或退回</td></tr>
+        <tr><td>Human-over-the-loop（人在迴圈之上）</td><td>人設<b>目標與界線</b>、宏觀監督多個系統，不碰單一決策</td><td>廠長巡多條產線，不管每台機器怎麼跑，只看整體產能與品質</td><td>Claude 目標／Agent 模式：你給一個目標，它自主跑多步，你在目標層監督</td></tr>
+        <tr><td>Human-out-of-the-loop（人在迴圈外）</td><td><b>完全自動</b>，運作時人完全不介入</td><td>掃地機器人，你出門上班，它自己在家掃</td><td>排程自動代理、垃圾郵件過濾、詐欺即時攔截</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.9rem;color:var(--sub)">越往下，AI 自主性越高、人介入越少——同時「出錯沒人擋」的風險也越高。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎭</span>四個比喻，秒懂差別</h2>
+    <div class="keys">
+      <div class="keycard k-in"><span class="em">🚗</span><span class="lv">IN THE LOOP</span><br><b>人在迴圈內</b><p>學開車：教練在旁，你每個決定都要他點頭。AI 只是建議，拍板的是你。</p></div>
+      <div class="keycard k-on"><span class="em">🏭</span><span class="lv">ON THE LOOP</span><br><b>人在迴圈上</b><p>自動化工廠：機器自己跑，你只在亮紅燈時去按暫停。平時放手、出事才接手。</p></div>
+      <div class="keycard k-over"><span class="em">👔</span><span class="lv">OVER THE LOOP</span><br><b>人在迴圈之上</b><p>廠長巡產線：不管每台機器細節，只看整體產能與品質、設定方向。</p></div>
+      <div class="keycard k-out"><span class="em">🤖</span><span class="lv">OUT OF THE LOOP</span><br><b>人在迴圈外</b><p>掃地機器人：你出門，它自己掃，完全不用管。全自動、零介入。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧭</span>用你天天在用的 AI 對照</h2>
+    <div class="note app">
+      <b>AI 聊天 → in the loop：</b>每一則回覆你都在讀、判斷、決定下一步，你在每個決策點裡。<br>
+      <b>AI IDE 編輯 → on the loop：</b>它主動補全／改動程式碼，你在旁監看、接受或退回——它自己動，你把關。<br>
+      <b>Claude 目標／Agent 模式 → over the loop：</b>你給一個目標，它自主拆解、連跑多步；你在「目標層」監督，不逐步核可。<br>
+      <b>排程自動代理 → out of the loop：</b>設好就跑（如每天自動整理、即時攔詐欺），運作時完全不用你。<br>
+      <span style="font-size:.88rem;color:var(--sub)">小提醒：同一工具會隨「設定」在層級間移動——IDE 的單項自動補全（逐項接受）其實偏 in-the-loop，放手讓它整段代改才是 on-the-loop。層級看的是「人實際介入多少」，不是工具本身。</span>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🛡️</span>為什麼要分級？（治理重點）</h2>
+    <div class="note meta">
+      介入層級是<b>「自主性 ↔ 風險」的取捨</b>：自動化程度越高越有效率與規模，但出錯時<b>沒有人擋</b>、也更難歸責。原則是<b>風險越高、後果越不可逆，人就要站得越靠近迴圈</b>（醫療、司法、金流傾向 in／on；低風險、可回復的雜事才放到 out）。<br>
+      這也是法規要求：<b>EU AI Act</b> 明訂<b>高風險 AI 必須具備「人為監督（human oversight）」</b>——這四級正是設計人類監督程度的框架。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📌</span>常見誤解與校正</h2>
+    <div class="note warn">
+      <b>①「監控＝介入每個決策」？</b>不是。on-the-loop 的人平時<b>不</b>參與決策，只在異常時介入；in-the-loop 才是每個決定都要人。<br>
+      <b>② 經典其實是三級。</b>最常見的框架是 in／on／out-the-loop；<b>over-the-loop</b> 是把「宏觀、跨系統的目標層監督」獨立出來的延伸說法，觀念上很實用但名稱較新、不同文獻用法略有出入。<br>
+      <b>③ 這是連續光譜、不是硬分四格。</b>實務會依任務風險在其間滑動，同一系統不同環節也可能落在不同層級。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. Human-in、on、out-of-the-loop 最大的差別？</summary>
+        <div class="ans">in：人參與「每一個」決策、AI 只建議；on：AI 自主運作、人只監控並在必要時介入；out：完全自動、運作時人不介入。</div></details>
+      <details><summary>Q2. Human-over-the-loop 是什麼？</summary>
+        <div class="ans">人站在系統「之上」設定目標與界線、宏觀監督多個 AI／流程，但不碰單一決策——像廠長巡產線、或你給 Agent 一個目標讓它自跑。</div></details>
+      <details><summary>Q3. 該用哪一級怎麼判斷？</summary>
+        <div class="ans">看風險與後果：高風險、不可逆（醫療、司法、金流）用 in／on；成熟穩定、低風險、可回復的才放到 over／out。是「自主性 vs 風險」的取捨。</div></details>
+      <details><summary>Q4. 和 EU AI Act 有什麼關係？</summary>
+        <div class="ans">EU AI Act 要求高風險 AI 具備「人為監督」；這四級就是描述與設計人類監督程度的框架，屬 AI 治理常見考點。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>一條光譜：</b>in → on → over → out，人介入由多到少。</li>
+      <li><b>in：</b>人做每個決定；<b>on：</b>AI 自主、人監控。</li>
+      <li><b>over：</b>人設目標宏觀監督；<b>out：</b>完全自動不介入。</li>
+      <li><b>原則：</b>風險越高、越不可逆 → 人站得越靠近迴圈。</li>
+      <li><b>治理：</b>EU AI Act 要求高風險 AI 具人為監督。</li>
+    </ul>
+  </section>
+
+</main>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>「人類介入程度」是 AI 治理與倫理考點(中級科目一、治理相關)。重點:依人介入 AI 決策的程度分 in／on／over／out-of-the-loop 四級,自主性由低到高、人介入由多到少;風險越高、越不可逆,人就要站得越靠近迴圈。易混點:on-the-loop 是「監控、必要時才介入」,不是參與每個決策;out-of-the-loop 是運作時完全不介入。情境:替不同風險的任務選合適的人機監督層級;連結 EU AI Act 要求高風險 AI 具「人為監督」。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Human-in、on、out-of-the-loop 差在哪？</summary><p>in:人參與每一個決策、AI 只提供建議;on:AI 自主運作、人只監控並在必要時介入;out:完全自動化、運作時人不介入。介入程度由多到少。</p></details><details><summary>Human-over-the-loop 是什麼？</summary><p>人站在系統之上設定目標與界線、宏觀監督多個 AI 或流程,但不參與單一決策——像廠長巡產線、或給 AI Agent 一個目標讓它自主執行。</p></details><details><summary>怎麼判斷該用哪一級？</summary><p>看風險與後果:高風險、不可逆(醫療、司法、金流)用 in／on;成熟穩定、低風險、可回復的雜事才放到 over／out。這是「自主性 vs 風險」的取捨。</p></details><details><summary>和 EU AI Act 有什麼關係？</summary><p>EU AI Act 要求高風險 AI 必須具備「人為監督(human oversight)」;這四層級正是描述與設計人類監督程度的框架,是 AI 治理常見題材。</p></details><details><summary>能用 AI 工具舉例嗎？</summary><p>AI 聊天=in(你決定每則回覆怎麼用);AI IDE 自動改程式=on(它動、你把關);Claude 目標／Agent 模式=over(你給目標、它自跑、你在目標層監督);排程自動代理=out(設好就跑、不用你)。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Human-in、on、out-of-the-loop 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "in:人參與每一個決策、AI 只提供建議;on:AI 自主運作、人只監控並在必要時介入;out:完全自動化、運作時人不介入。介入程度由多到少。"}}, {"@type": "Question", "name": "Human-over-the-loop 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "人站在系統之上設定目標與界線、宏觀監督多個 AI 或流程,但不參與單一決策——像廠長巡產線、或給 AI Agent 一個目標讓它自主執行。"}}, {"@type": "Question", "name": "怎麼判斷該用哪一級？", "acceptedAnswer": {"@type": "Answer", "text": "看風險與後果:高風險、不可逆(醫療、司法、金流)用 in／on;成熟穩定、低風險、可回復的雜事才放到 over／out。這是自主性與風險的取捨。"}}, {"@type": "Question", "name": "和 EU AI Act 有什麼關係？", "acceptedAnswer": {"@type": "Answer", "text": "EU AI Act 要求高風險 AI 必須具備人為監督(human oversight);這四層級正是描述與設計人類監督程度的框架,是 AI 治理常見題材。"}}, {"@type": "Question", "name": "能用 AI 工具舉例嗎？", "acceptedAnswer": {"@type": "Answer", "text": "AI 聊天=in(你決定每則回覆怎麼用);AI IDE 自動改程式=on(它動、你把關);Claude 目標／Agent 模式=over(你給目標、它自跑、你在目標層監督);排程自動代理=out(設好就跑、不用你)。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="human.html">人機協作模式</a><a href="eu_ai_act.html">EU AI Act 風險分級</a><a href="trustworthy-ai.html">可信賴 AI</a><a href="fairness.html">公平性與去偏見</a><a href="mlops-overview.html">MLOps</a><a href="differential-privacy.html">差分隱私</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

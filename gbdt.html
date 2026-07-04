@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBDT 梯度提升樹：互動視覺化與原理深度解析</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。 把擬合殘差一般化為沿損失函數的負梯度方向前進；每棵新樹近似當前損失的負梯度，因此可用於各種可微損失(回歸、分類)。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/gbdt.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="GBDT 梯度提升樹：互動視覺化與原理深度解析">
+    <meta property="og:description" content="串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。 把擬合殘差一般化為沿損失函數的負梯度方向前進；每棵新樹近似當前損失的負梯度，因此可用於各種可微損失(回歸、分類)。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/gbdt.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GBDT 梯度提升樹：互動視覺化與原理深度解析">
+    <meta name="twitter:description" content="串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。每棵新樹近似當前損失的負梯度。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "GBDT 梯度提升樹：互動視覺化與原理深度解析",
+  "url": "https://akira.ipas-ai.com/gbdt.html",
+  "description": "串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。把擬合殘差一般化為沿損失函數的負梯度方向前進；每棵新樹近似當前損失的負梯度，因此可用於各種可微損失(回歸、分類)。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --slate:#475569; --slate-d:#334155; --blue:#2563eb; --blue-d:#1d4ed8;
+            --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#1e293b 0%,#475569 55%,#94a3b8 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(71,85,105,.3); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#bae6fd 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--slate-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#f1f5f9; border-left:5px solid var(--slate)}
+        .note.meta{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--slate); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .math-block{overflow-x:auto; text-align:center; padding:8px 10px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; margin:10px 0}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.94rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .rf{color:var(--green); font-weight:800}
+        .cmp .gb{color:var(--slate-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--slate);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--slate-d)}
+
+        .qa{background:#f1f5f9; border:1px solid #cbd5e1; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #dde3ea; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--slate-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-card{background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:18px; margin:14px 0}
+        .controls{display:flex; gap:18px; align-items:center; flex-wrap:wrap; background:#fff; padding:16px; border-radius:10px; margin-bottom:16px; border:1px solid var(--line)}
+        .control-group{display:flex; flex-direction:column}
+        .control-group label{font-weight:bold; font-size:.9em; margin-bottom:5px; color:var(--slate-d)}
+        .control-group input[type=range]{width:180px; cursor:pointer; accent-color:var(--slate)}
+        .demo-card button{background:var(--slate); color:#fff; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight:800; transition:.2s}
+        .demo-card button:hover{background:var(--slate-d); transform:translateY(-1px)}
+        #btn-reset{background:#94a3b8 !important}
+        .viz-wrapper{display:flex; flex-wrap:wrap; justify-content:center; gap:20px}
+        .chart-box{text-align:center}
+        .chart-title{font-weight:bold; margin-bottom:8px; color:#555; font-size:.95rem}
+        .viz-wrapper svg{max-width:100%; height:auto}
+        .demo-cap{text-align:center; font-size:.88rem; color:#888; margin-top:10px}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🌳 梯度提升樹 · iPAS 常考</span>
+        <h1>GBDT 梯度提升樹：一群「專門修錯」的樹</h1>
+        <p>GBDT 不是訓練一個天才，而是訓練一排笨笨的小樹——每一棵都只負責<b>修正前面所有樹犯的錯</b>，把它們加起來就變得又準又強。這頁用高爾夫比喻、互動模擬，再到「為什麼叫梯度」的數學，一次講透。</p>
+        <div class="chips"><span>殘差修正</span><span>加法模型</span><span>負梯度=殘差</span><span>是 Boosting</span><span>vs 隨機森林</span><span>學習率</span></div>
+    </header>
+
+    <!-- ===== 1. 高爾夫 ===== -->
+    <section class="lesson">
+        <h2>⛳ 一、直觀理解：打高爾夫的比喻</h2>
+        <p class="lead">把預測想成「打高爾夫球進洞」（預測值 = 真實值）。</p>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>第一桿（基礎模型）</b><br>
+                先輕鬆揮一桿，球到了果嶺邊緣——離洞還有一段距離，這段距離就是<span class="term">殘差（Residual）</span>。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>第二桿（第 1 棵樹）</b><br>
+                這一桿<b>不看球洞在哪</b>，只看「球現在的位置到洞口的差距」，瞄準這個<b>差距</b>輕輕推一桿。
+            </div></div>
+            <div class="step"><div class="num">3</div><div class="st-body">
+                <b>第三桿、第四桿…（更多樹）</b><br>
+                球越來越近，每一桿都只修正<b>上一桿剩下的差距</b>，一點一點逼近洞口。
+            </div></div>
+        </div>
+        <div class="note def">
+            <h4>🎯 一句話</h4>
+            單一決策樹想「一桿進洞」，常常偏掉；GBDT 則是<span class="hl">一群只負責「補上一次差距」的小樹接力</span>，最後把每一桿加起來，就非常準。
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、動手玩：看每棵樹怎麼「補殘差」</h2>
+        <p class="lead">拖「迭代次數（樹的數量）」滑桿，或按自動播放，看模型一棵棵樹加上去後怎麼變準。</p>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看這兩張圖</h4>
+            <b>左圖（累積預測）</b>：灰點是真實資料、<b style="color:#dc2626">紅線</b>是目前所有樹加起來的預測。樹越多，紅線越貼合灰點。<br>
+            <b>右圖（當前殘差）</b>：<b style="color:#2563eb">藍點</b>是目前還沒修好的「錯誤（殘差）」、<b style="color:#16a34a">綠虛線</b>是<b>下一棵樹打算怎麼擬合這些殘差</b>。每加一棵樹，<span class="hl">藍點就被往中線（0）壓一點</span>——殘差越來越小。
+        </div>
+
+        <div class="demo-card">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="slider-iterations">迭代次數（Trees）：<span id="val-iterations" style="color:var(--slate-d)">0</span></label>
+                    <input type="range" id="slider-iterations" min="0" max="20" value="0" step="1">
+                </div>
+                <div class="control-group">
+                    <label for="slider-lr">學習率（Learning Rate）：<span id="val-lr" style="color:var(--slate-d)">0.3</span></label>
+                    <input type="range" id="slider-lr" min="0.1" max="1.0" value="0.3" step="0.1">
+                </div>
+                <button id="btn-play">▶ 自動播放</button>
+                <button id="btn-reset">⟳ 重置</button>
+            </div>
+            <div class="viz-wrapper">
+                <div class="chart-box">
+                    <div class="chart-title">累積預測結果 (Prediction)</div>
+                    <div id="main-chart"></div>
+                </div>
+                <div class="chart-box">
+                    <div class="chart-title">當前擬合的殘差 (Residuals)</div>
+                    <div id="residual-chart"></div>
+                </div>
+            </div>
+            <p class="demo-cap">🔵 藍點：當前殘差（錯誤）　🟢 綠虛線：下一棵樹嘗試擬合的樣子　🔴 紅線：累積預測</p>
+        </div>
+
+        <div class="note meta">
+            <h4>🐢 玩玩學習率</h4>
+            把<b>學習率調小</b>（如 0.1），每棵樹的貢獻變小、紅線收斂變慢，但通常<b>更穩、更不過擬合</b>；調大則收斂快但容易暴衝。這就是「<span class="hl">小學習率 + 多棵樹</span>」更穩的原因。
+        </div>
+    </section>
+
+    <!-- ===== 3. 為什麼叫梯度 ===== -->
+    <section class="lesson">
+        <h2>📐 三、為什麼叫「梯度」提升？</h2>
+        <p class="lead">這是 GBDT 最核心、也最常考的數學觀念——其實沒那麼難。</p>
+        <p>訓練時我們想最小化「損失函數」，例如均方誤差（MSE）：</p>
+        <div class="math-block">$$Loss(y, \hat{y}) = \frac{1}{2}(y - \hat{y})^2$$</div>
+        <p>對它求導數（也就是求<b>梯度</b>）：</p>
+        <div class="math-block">$$\frac{\partial Loss}{\partial \hat{y}} = -(y - \hat{y})$$</div>
+        <div class="note def">
+            <h4>💡 關鍵發現</h4>
+            <span class="hl">負梯度 \(-\frac{\partial Loss}{\partial \hat{y}} = (y-\hat{y})\) 剛好就等於「殘差」</span>！所以「擬合殘差」其實是「沿著損失下降最快的方向走」的特例。
+            <ul style="margin:8px 0 0">
+                <li><b>梯度下降：</b>在<b>參數</b>空間，沿梯度反方向移動來減少錯誤。</li>
+                <li><b>GBDT：</b>在<b>函數</b>空間，<b>訓練新的樹去擬合這個負梯度</b>。</li>
+            </ul>
+            把「殘差」一般化成「負梯度」，GBDT 就能用在各種可微的損失（不只回歸，也能分類）。
+        </div>
+    </section>
+
+    <!-- ===== 4. 加法模型 ===== -->
+    <section class="lesson">
+        <h2>➕ 四、關鍵機制：加法模型</h2>
+        <p class="lead">最終預測，是所有樹的輸出<b>累加</b>起來。</p>
+        <div class="math-block">$$\hat{y}_i = \sum_{k=1}^{K} f_k(x_i)$$</div>
+        <p>訓練第 \(t\) 棵樹時，前面 \(t-1\) 棵都已固定，新樹 \(f_t\) 只要去擬合<b>目前的殘差</b>：</p>
+        <div class="math-block">$$\text{Residual}_t = y_i - \sum_{k=1}^{t-1} f_k(x_i)$$</div>
+        <p>每棵新樹的貢獻再乘上<b>學習率</b>（縮小步伐），就是 demo 裡看到的逐步逼近。</p>
+    </section>
+
+    <!-- ===== 5. vs RF ===== -->
+    <section class="lesson">
+        <h2>⚖️ 五、GBDT vs 隨機森林（最常考的對比）</h2>
+        <p class="lead">兩個都是「很多樹」的集成，但思路完全相反。</p>
+        <table class="cmp">
+            <tr><th>特性</th><th><span class="rf">隨機森林 Random Forest</span></th><th><span class="gb">GBDT</span></th></tr>
+            <tr><td>訓練方式</td><td><b>平行</b>：樹之間互不影響、同時訓練</td><td><b>序列</b>：後一棵依賴前一棵的錯誤</td></tr>
+            <tr><td>核心策略</td><td><b>Bagging</b>：投票降<b>變異</b></td><td><b>Boosting</b>：修錯降<b>偏差</b></td></tr>
+            <tr><td>樹的深度</td><td>通常很深（fully grown）</td><td>通常很淺（stumps / shallow）</td></tr>
+            <tr><td>優點</td><td>不易過擬合、好調、可平行快</td><td>準確度通常更高、競賽常勝</td></tr>
+        </table>
+        <div class="note warn">
+            <h4>⚠️ 一秒分辨</h4>
+            看到「<b>平行、投票、降變異、深樹</b>」→ 隨機森林（Bagging）；看到「<b>序列、修殘差、降偏差、淺樹</b>」→ GBDT（Boosting）。這是陷阱題最愛考的對比。
+        </div>
+    </section>
+
+    <!-- ===== 6. 現代變形 ===== -->
+    <section class="lesson">
+        <h2>🚀 六、現代化變形：XGBoost / LightGBM / CatBoost</h2>
+        <p class="lead">工業界與 Kaggle 競賽很少手刻 GBDT，而是用這些優化過的高效實作。</p>
+        <div class="keys">
+            <div class="keycard"><b>XGBoost</b>加入 L1/L2 正則化防過擬合、二階導數優化、缺失值處理、平行化。👉 <a href="xgboost.html" style="color:#334155;font-weight:700">看 XGBoost 專頁</a></div>
+            <div class="keycard"><b>LightGBM</b>微軟出品，葉子優先 + 直方圖，速度極快，適合海量資料。</div>
+            <div class="keycard"><b>CatBoost</b>專門把<b>類別型特徵</b>處理得很好，省去繁瑣前處理。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 超參數 ===== -->
+    <section class="lesson">
+        <h2>🎛️ 七、重要超參數</h2>
+        <div class="keys">
+            <div class="keycard"><b>樹數量 n_estimators</b>多→更準但更慢、可能過擬合；配合早停。</div>
+            <div class="keycard"><b>學習率 learning rate</b>小→穩、需更多樹；與樹數一起調。</div>
+            <div class="keycard"><b>樹深度 / 葉數</b>控制單棵複雜度；GBDT 常用淺樹。</div>
+            <div class="keycard"><b>子抽樣 subsample</b>< 1 增加隨機性、抗過擬合（stochastic GBDT）。</div>
+            <div class="keycard"><b>正則化</b>XGBoost 的 gamma / lambda / alpha 進一步收斂。</div>
+            <div class="keycard"><b>早停 early stopping</b>驗證分數不再進步就停，省時又防過擬合。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. GBDT 的核心想法是什麼？</summary>
+                <p>序列訓練多棵樹，每棵新樹<b>專門擬合前面所有樹剩下的殘差</b>，累加起來逐步修正、越來越準，屬 Boosting、主要降偏差。</p></details>
+            <details><summary>Q2. 為什麼叫「梯度」提升？</summary>
+                <p>對 MSE 損失求<b>負梯度，剛好等於殘差</b>。把「擬合殘差」一般化成「擬合負梯度」，就能用在各種可微損失（回歸、分類）。</p></details>
+            <details><summary>Q3. GBDT 和隨機森林差在哪？</summary>
+                <p>隨機森林＝<b>Bagging</b>（平行、獨立樹、投票、降變異、深樹）；GBDT＝<b>Boosting</b>（序列、修殘差、降偏差、淺樹），通常更準但較易過擬合。</p></details>
+            <details><summary>Q4. GBDT 容易過擬合嗎？怎麼防？</summary>
+                <p>會（樹太多/太深時）。用<b>小學習率＋早停</b>、限制樹深、子抽樣、正則化（如 XGBoost）。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>一群樹接力修錯</b>每棵擬合前面剩下的殘差，加起來變強。</div>
+            <div class="keycard"><b>負梯度＝殘差</b>所以「梯度提升」＝沿損失下降方向加樹。</div>
+            <div class="keycard"><b>加法模型</b>最終預測＝所有樹輸出 × 學習率的累加。</div>
+            <div class="keycard"><b>是 Boosting（序列、降偏差）</b>別跟隨機森林（Bagging、平行）搞混。</div>
+            <div class="keycard"><b>小學習率 + 多樹 + 早停</b>更穩、更不過擬合。</div>
+            <div class="keycard"><b>高效實作</b>XGBoost、LightGBM、CatBoost。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const width = 400;
+        const height = 250;
+        const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+        const nPoints = 80;
+        const data = [];
+        for (let i = 0; i < nPoints; i++) {
+            const x = (i / nPoints) * 10;
+            const noise = (Math.random() - 0.5) * 1.5;
+            const y = Math.sin(x) * 3 + noise + 5;
+            data.push({ x, y, originalY: y });
+        }
+
+        let iterations = 0;
+        let learningRate = 0.3;
+        let maxIterations = 20;
+
+        function trainTree(residuals) {
+            let bestSplit = -1;
+            let bestError = Infinity;
+            let bestLeftMean = 0;
+            let bestRightMean = 0;
+            for(let i=1; i<residuals.length-1; i++) {
+                const splitVal = residuals[i].x;
+                const leftSet = residuals.filter(d => d.x <= splitVal);
+                const rightSet = residuals.filter(d => d.x > splitVal);
+                if(leftSet.length === 0 || rightSet.length === 0) continue;
+                const leftMean = d3.mean(leftSet, d => d.r);
+                const rightMean = d3.mean(rightSet, d => d.r);
+                const error = d3.sum(leftSet, d => (d.r - leftMean)**2) +
+                              d3.sum(rightSet, d => (d.r - rightMean)**2);
+                if (error < bestError) {
+                    bestError = error;
+                    bestSplit = splitVal;
+                    bestLeftMean = leftMean;
+                    bestRightMean = rightMean;
+                }
+            }
+            return { split: bestSplit, leftVal: bestLeftMean, rightVal: bestRightMean };
+        }
+
+        function predict(x, currentTrees) {
+            let prediction = d3.mean(data, d => d.originalY);
+            currentTrees.forEach(tree => {
+                const pred = (x <= tree.split) ? tree.leftVal : tree.rightVal;
+                prediction += learningRate * pred;
+            });
+            return prediction;
+        }
+
+        const svgMain = d3.select("#main-chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const svgRes = d3.select("#residual-chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const xScale = d3.scaleLinear().domain([0, 10]).range([0, width]);
+        const yScaleMain = d3.scaleLinear().domain([0, 10]).range([height, 0]);
+        const yScaleRes = d3.scaleLinear().domain([-3, 3]).range([height, 0]);
+
+        svgMain.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(5));
+        svgMain.append("g").call(d3.axisLeft(yScaleMain).ticks(5));
+        svgRes.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(xScale).ticks(5));
+        svgRes.append("g").call(d3.axisLeft(yScaleRes).ticks(5));
+        svgRes.append("line")
+            .attr("x1", 0).attr("x2", width)
+            .attr("y1", yScaleRes(0)).attr("y2", yScaleRes(0))
+            .attr("stroke", "#ccc").attr("stroke-dasharray", "4");
+
+        function update() {
+            document.getElementById("val-iterations").innerText = iterations;
+            document.getElementById("val-lr").innerText = learningRate;
+
+            let currentTrees = [];
+            let currentResiduals = data.map(d => ({ x: d.x, r: d.originalY - d3.mean(data, z=>z.originalY) }));
+
+            for (let i = 0; i < iterations; i++) {
+                const tree = trainTree(currentResiduals);
+                currentTrees.push(tree);
+                currentResiduals = currentResiduals.map(r => {
+                    const pred = (r.x <= tree.split) ? tree.leftVal : tree.rightVal;
+                    return { x: r.x, r: r.r - (learningRate * pred) };
+                });
+            }
+
+            const predictionData = data.map(d => ({ x: d.x, y: predict(d.x, currentTrees) }));
+
+            svgMain.selectAll("circle").data(data).join("circle")
+                .attr("cx", d => xScale(d.x))
+                .attr("cy", d => yScaleMain(d.originalY))
+                .attr("r", 2.5)
+                .attr("fill", "#bdc3c7");
+
+            const line = d3.line().x(d => xScale(d.x)).y(d => yScaleMain(d.y)).curve(d3.curveStepAfter);
+
+            svgMain.selectAll(".pred-line").data([predictionData]).join("path")
+                .attr("class", "pred-line")
+                .attr("d", line)
+                .attr("fill", "none")
+                .attr("stroke", "#e74c3c")
+                .attr("stroke-width", 2);
+
+            svgRes.selectAll("circle").data(currentResiduals).join("circle")
+                .attr("cx", d => xScale(d.x))
+                .attr("cy", d => yScaleRes(d.r))
+                .attr("r", 2.5)
+                .attr("fill", "#3498db");
+
+            if (iterations < maxIterations) {
+                 const nextTree = trainTree(currentResiduals);
+                 const nextTreeLineData = data.map(d => ({
+                     x: d.x,
+                     y: (d.x <= nextTree.split) ? nextTree.leftVal : nextTree.rightVal
+                 }));
+                 const lineRes = d3.line().x(d => xScale(d.x)).y(d => yScaleRes(d.y)).curve(d3.curveStepAfter);
+                 svgRes.selectAll(".fit-line").data([nextTreeLineData]).join("path")
+                    .attr("class", "fit-line")
+                    .attr("d", lineRes)
+                    .attr("fill", "none")
+                    .attr("stroke", "#2ecc71")
+                    .attr("stroke-width", 2)
+                    .attr("stroke-dasharray", "5,5");
+            } else {
+                svgRes.selectAll(".fit-line").remove();
+            }
+        }
+
+        document.getElementById("slider-iterations").addEventListener("input", (e) => {
+            iterations = +e.target.value;
+            update();
+        });
+        document.getElementById("slider-lr").addEventListener("input", (e) => {
+            learningRate = +e.target.value;
+            update();
+        });
+        document.getElementById("btn-reset").addEventListener("click", () => {
+            iterations = 0;
+            document.getElementById("slider-iterations").value = 0;
+            update();
+        });
+
+        let playTimer;
+        document.getElementById("btn-play").addEventListener("click", () => {
+            if (playTimer) {
+                clearInterval(playTimer);
+                playTimer = null;
+                document.getElementById("btn-play").innerText = "▶ 自動播放";
+                return;
+            }
+            document.getElementById("btn-play").innerText = "⏸ 暫停";
+            iterations = 0;
+            document.getElementById("slider-iterations").value = 0;
+            update();
+            playTimer = setInterval(() => {
+                iterations++;
+                if (iterations > maxIterations) {
+                    clearInterval(playTimer);
+                    playTimer = null;
+                    document.getElementById("btn-play").innerText = "▶ 自動播放";
+                } else {
+                    document.getElementById("slider-iterations").value = iterations;
+                    update();
+                }
+            }, 400);
+        });
+
+        update();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>梯度提升樹(GBDT)是表格資料的強力模型,iPAS 中級科目三考點。重點:序列地訓練多棵樹,每棵修正前一棵的殘差,屬 Boosting、降低偏差。易混點:Boosting(序列、降偏差)與 Bagging 或隨機森林(平行、降變異)不同;GBDT 較易過擬合,需調學習率、樹數與深度。情境:結構化資料競賽常勝;XGBoost、LightGBM、CatBoost 是其高效實作。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>梯度提升(GBDT)的核心想法？</summary><p>串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。</p></details><details><summary>為什麼叫「梯度」提升？</summary><p>把擬合殘差一般化為沿損失函數的負梯度方向前進；每棵新樹近似當前損失的負梯度，因此可用於各種可微損失(回歸、分類)。</p></details><details><summary>GBDT 和隨機森林差在哪？</summary><p>隨機森林是 Bagging(多棵獨立樹並行、投票、主要降變異)；GBDT 是 Boosting(樹一棵接一棵修正殘差、主要降偏差)，通常更準但較易過擬合、需細調。</p></details><details><summary>重要超參數有哪些？</summary><p>樹數量、學習率(越小越穩但需更多樹)、樹深度或葉數(控制複雜度)、子抽樣比例與正則化；學習率與樹數常一起調。</p></details><details><summary>GBDT 容易過擬合嗎、怎麼防？</summary><p>會，尤其樹太多或太深。用較小學習率配合早停、限制樹深、子抽樣(stochastic)、L1/L2 正則化(如 XGBoost)來抑制。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "梯度提升(GBDT)的核心想法？", "acceptedAnswer": {"@type": "Answer", "text": "串行訓練多棵決策樹，每棵新樹專門擬合前面所有樹的殘差(預測誤差)，逐步把錯誤修正下來，屬於 Boosting。"}}, {"@type": "Question", "name": "為什麼叫「梯度」提升？", "acceptedAnswer": {"@type": "Answer", "text": "把擬合殘差一般化為沿損失函數的負梯度方向前進；每棵新樹近似當前損失的負梯度，因此可用於各種可微損失(回歸、分類)。"}}, {"@type": "Question", "name": "GBDT 和隨機森林差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "隨機森林是 Bagging(多棵獨立樹並行、投票、主要降變異)；GBDT 是 Boosting(樹一棵接一棵修正殘差、主要降偏差)，通常更準但較易過擬合、需細調。"}}, {"@type": "Question", "name": "重要超參數有哪些？", "acceptedAnswer": {"@type": "Answer", "text": "樹數量、學習率(越小越穩但需更多樹)、樹深度或葉數(控制複雜度)、子抽樣比例與正則化；學習率與樹數常一起調。"}}, {"@type": "Question", "name": "GBDT 容易過擬合嗎、怎麼防？", "acceptedAnswer": {"@type": "Answer", "text": "會，尤其樹太多或太深。用較小學習率配合早停、限制樹深、子抽樣(stochastic)、L1/L2 正則化(如 XGBoost)來抑制。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="xgboost.html">XGBoost</a><a href="ensemble.html">集成學習</a><a href="matrix.html">分類問題</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

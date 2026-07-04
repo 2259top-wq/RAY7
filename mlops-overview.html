@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLOps 總覽 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。 多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/mlops-overview.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="MLOps 總覽 · 互動教學">
+    <meta property="og:description" content="把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。 多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/mlops-overview.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MLOps 總覽 · 互動教學">
+    <meta name="twitter:description" content="把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。 多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "MLOps 總覽 · 互動教學",
+  "url": "https://akira.ipas-ai.com/mlops-overview.html",
+  "description": "把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。 多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">MLOps · 讓模型長期穩定運轉</span>
+    <h1><span class="en">MLOps</span></h1>
+    <div class="sub">模型上線後的維運生命週期</div>
+    <p class="lede">訓練好模型只是開始。MLOps 把 ML × DevOps × 資料工程結合，<br>讓模型能自動部署、持續監控、資料變了還能自動重訓——像一條永遠在轉的生產線。</p>
+    <div class="eq-hero">資料 → 訓練 → CI/CD → 部署 → 監控 →（回饋）→ 資料…</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>模型訓練好，才是麻煩的開始</h2>
+  <p>很多人以為模型訓練完就結束了。其實上線後才是真正的挑戰：怎麼<span class="c-en hl">穩定部署</span>、怎麼<span class="c-l2 hl">持續監控</span>、資料變了怎麼<span class="c-l1 hl">自動重訓</span>。MLOps 就是把 ML、軟體工程 (DevOps)、資料工程結合起來，讓模型像一條<span class="hl">能長期運轉的生產線</span>，而不是放著就壞掉的一次性實驗。</p>
+  <div class="trio">
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="24" y="30" width="52" height="40" rx="6" fill="none" stroke="var(--l1)" stroke-width="3"/><path d="M34 50 H66" stroke="var(--l1)" stroke-width="3"/></svg><div class="nm">ML</div><div class="tag">模型</div><p>訓練、評估、調參。</p></div>
+    <div class="persona hi"><svg viewBox="0 0 100 100"><path d="M30 35 A22 22 0 1 0 70 35" fill="none" stroke="var(--en)" stroke-width="3"/><path d="M30 35 L24 28 M30 35 L38 30" stroke="var(--en)" stroke-width="3"/></svg><div class="nm">DevOps</div><div class="tag">自動化</div><p>CI/CD、版本控制、自動部署。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><path d="M24 64 L24 44 L40 44 L40 30 L60 30 L60 50 L76 50 L76 64" fill="none" stroke="var(--l2)" stroke-width="3"/></svg><div class="nm">Data</div><div class="tag">資料工程</div><p>資料管線、版本、品質監控。</p></div>
+  </div>
+  <p class="hint">一句話：MLOps = 讓模型「上得了線、活得久、壞了能自動修」。下面點流程看每一環在做什麼。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>看 MLOps 的循環怎麼轉</h2>
+  <p>MLOps 不是一條直線，而是一個<span class="c-en hl">永不停止的循環</span>。點任一階段看它的職責；特別注意最後「監控」會把問題回饋到「資料／訓練」，形成自動迭代。</p>
+  <div class="card">
+    <div class="svgbox"><svg id="loopSvg" viewBox="0 0 460 300"></svg></div>
+    <div class="card" id="opInfo" style="margin:14px 0 0;min-height:92px">
+      <h3 id="opTitle" style="margin-top:0">點上面任一階段</h3>
+      <p id="opDesc" style="margin-bottom:0;color:var(--ink2)">每一環都有它的角色，點一下看說明。</p>
+    </div>
+    <p class="hint">關鍵差異：一般軟體部署後大致穩定；ML 模型會因為「資料分布改變（data drift）」而慢慢退化，所以監控與自動重訓特別重要。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 為什麼需要 MLOps</div>
+  <h2>沒有 MLOps 會發生什麼？</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>部署自動化、可重現，不靠某個人手動操作</li><li>持續監控，及早抓到模型退化</li><li>資料/程式/模型都有版本，可隨時回滾</li><li>資料漂移時能自動觸發重訓</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>手動部署：換人就不會弄、容易出錯</li><li>模型默默退化卻沒人發現</li><li>出問題無法回到上一個正常版本</li><li>『在我電腦上跑得動』but 上線就壞</li></ul></div>
+</div><h3 style='margin-top:26px'>MLOps 五大環節</h3><div class="usecards"><div class="uc"><div class="ic">🔁</div><div class="t">CI/CD</div><div class="d">自動建置、測試、部署</div></div><div class="uc"><div class="ic">🚀</div><div class="t">部署服務化</div><div class="d">模型包成 API 對外服務</div></div><div class="uc"><div class="ic">📡</div><div class="t">監控</div><div class="d">追蹤效能與資料漂移</div></div><div class="uc"><div class="ic">♻️</div><div class="t">自動重訓</div><div class="d">資料變了就重新訓練</div></div><div class="uc"><div class="ic">🗂️</div><div class="t">版本管理</div><div class="d">資料/程式/模型都可回滾</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("loopSvg");
+  const titleE=document.getElementById("opTitle"), descE=document.getElementById("opDesc");
+  const steps=[
+    {n:"資料準備", c:"var(--l2)", d:"收集、清洗、版本化資料，建立可重現的資料管線。"},
+    {n:"訓練模型", c:"var(--l1)", d:"在資料上訓練、評估模型，並把模型存進 Model Registry（模型倉庫）。"},
+    {n:"CI/CD", c:"var(--en)", d:"自動建置、自動測試、自動部署。程式或模型一更新就跑整套流程。"},
+    {n:"部署服務", c:"var(--l1)", d:"把模型包成 API 或服務對外提供預測，能擴展、能回滾。"},
+    {n:"監控", c:"var(--bad)", d:"追蹤線上效能、延遲與『資料漂移』。發現退化就回饋觸發重訓。"},
+  ];
+  const cx=230, cy=150, R=98, bw=92, bh=40;
+  let sel=0;
+  function pos(i){const a=-Math.PI/2 + i/steps.length*2*Math.PI; return {x:cx+R*Math.cos(a)-bw/2, y:cy+R*Math.sin(a)-bh/2};}
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    const defs=el("defs",{});const m=el("marker",{id:"a",markerWidth:8,markerHeight:8,refX:6,refY:3,orient:"auto"});
+    m.appendChild(el("path",{d:"M0 0 L6 3 L0 6 Z",fill:"var(--en)"}));defs.appendChild(m);svg.appendChild(defs);
+    // circular arrows
+    for(let i=0;i<steps.length;i++){
+      const a0=-Math.PI/2 + i/steps.length*2*Math.PI + 0.42;
+      const a1=-Math.PI/2 + (i+1)/steps.length*2*Math.PI - 0.42;
+      const r=R;
+      const x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0), x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+      svg.appendChild(el("path",{d:`M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`,
+        fill:"none",stroke:"var(--en)","stroke-width":1.8,opacity:.6,"marker-end":"url(#a)"}));
+    }
+    svg.appendChild(txt(cx,cy-4,"MLOps",{fill:"var(--en)","font-weight":800,"font-size":17}));
+    svg.appendChild(txt(cx,cy+16,"持續循環",{fill:"var(--muted)","font-size":12}));
+    steps.forEach((s,i)=>{
+      const p=pos(i), on=i===sel;
+      const g=el("g",{cursor:"pointer"});
+      g.appendChild(el("rect",{x:p.x,y:p.y,width:bw,height:bh,rx:9,fill:on?s.c:"var(--paper2)",stroke:s.c,"stroke-width":on?2.6:1.6}));
+      g.appendChild(txt(p.x+bw/2,p.y+bh/2+1,(i+1)+". "+s.n,{fill:on?"#fff":"var(--ink2)","font-weight":700,"font-size":12.5}));
+      g.addEventListener("click",()=>{sel=i;build();info();});
+      svg.appendChild(g);
+    });
+  }
+  function info(){const s=steps[sel];titleE.textContent=(sel+1)+". "+s.n;descE.textContent=s.d;}
+  build();info();
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>MLOps 是什麼？</summary><p>把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。</p></details><details><summary>MLOps 和傳統 DevOps 差在哪？</summary><p>多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。</p></details><details><summary>ML 系統上線後要監控什麼？</summary><p>服務面(延遲、錯誤率)、資料面(輸入分布是否漂移)、模型面(準確率或業務指標是否下滑)；劣化時要能告警並觸發再訓練。</p></details><details><summary>為什麼需要模型與資料版本控管？</summary><p>為了可重現與可追溯——出問題時能還原是哪份資料、哪組超參數、哪個模型版本造成的，並能安全回滾到舊版本。</p></details><details><summary>CI/CD 在 ML 裡是什麼？</summary><p>持續整合與部署的延伸，常稱 CI/CD/CT：除了測試與部署程式，還包含自動化的資料驗證、模型訓練(CT)與評估後再上線。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "MLOps 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "把 DevOps 精神套到機器學習，涵蓋資料、訓練、部署、監控、再訓練的完整生命週期管理，目標是讓模型能可靠、可重現、可持續地上線運作。"}}, {"@type": "Question", "name": "MLOps 和傳統 DevOps 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "多了資料與模型兩個會變動的維度：不只程式碼要版控，資料與模型版本、訓練流程、以及上線後的效能漂移都要管理與監控。"}}, {"@type": "Question", "name": "ML 系統上線後要監控什麼？", "acceptedAnswer": {"@type": "Answer", "text": "服務面(延遲、錯誤率)、資料面(輸入分布是否漂移)、模型面(準確率或業務指標是否下滑)；劣化時要能告警並觸發再訓練。"}}, {"@type": "Question", "name": "為什麼需要模型與資料版本控管？", "acceptedAnswer": {"@type": "Answer", "text": "為了可重現與可追溯——出問題時能還原是哪份資料、哪組超參數、哪個模型版本造成的，並能安全回滾到舊版本。"}}, {"@type": "Question", "name": "CI/CD 在 ML 裡是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "持續整合與部署的延伸，常稱 CI/CD/CT：除了測試與部署程式，還包含自動化的資料驗證、模型訓練(CT)與評估後再上線。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="crisp_dm.html">方法論</a><a href="knowledge_distillation.html">模型優化</a><a href="cicd.html">建立 CI/CD</a><a href="deployment_strategies.html">部署與服務化</a><a href="datadrift.html">監控與維護</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">MLOps</span> · 互動教學</div></footer>
+</body>
+</html>

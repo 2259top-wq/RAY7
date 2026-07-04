@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLHF 人類回饋強化學習｜白話＋互動：獎勵模型、PPO、對齊、DPO</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="RLHF（人類回饋的強化學習）＝用人類偏好排序訓練獎勵模型，再用強化學習(PPO)把語言模型對齊成有幫助、無害、誠實的助理。互動示範：人類排序→獎勵模型→PPO 調教→獎勵駭客，並比較 RLHF vs DPO。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/rlhf.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RLHF 人類回饋強化學習 互動演示">
+    <meta property="og:description" content="用人類偏好排序訓練獎勵模型，再用 PPO 把語言模型對齊成有幫助、無害、誠實的助理。互動示範排序回饋→獎勵模型→PPO 調教→獎勵駭客，並比較 RLHF vs DPO。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/rlhf.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RLHF 人類回饋強化學習 互動演示">
+    <meta name="twitter:description" content="人類排序→獎勵模型→PPO 對齊→獎勵駭客，白話＋互動看懂 ChatGPT 怎麼被調教變乖，並比較 RLHF vs DPO。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "RLHF 人類回饋強化學習 互動演示",
+  "url": "https://akira.ipas-ai.com/rlhf.html",
+  "description": "RLHF（人類回饋的強化學習）＝用人類偏好排序訓練獎勵模型，再用強化學習(PPO)把語言模型對齊成有幫助、無害、誠實的助理。互動示範：人類排序→獎勵模型→PPO 調教→獎勵駭客，並比較 RLHF vs DPO。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-07-01",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#fff1f2; --ink:#4c0519; --sub:#9f1239;
+      --brand:#e11d48; --brand2:#be123c; --brand-soft:#ffe4e8;
+      --card:#ffffff; --line:#fbcfd6;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#fb7185,#e11d48 55%,#be123c);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.9rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:680px;color:#ffe4e8;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(225,29,72,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#fecdd3 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fff0f3}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#fff0f3;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .lesson .formula{background:#4c0519;color:#ffe4e8;border-radius:12px;padding:16px 18px;margin:14px 0;text-align:center;overflow-x:auto}
+    .lesson .formula small{display:block;font-family:'Noto Sans TC',sans-serif;color:#fda4af;font-size:.8rem;margin-top:8px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fff0f3}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#9f1239;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo：RLHF 調教（作用域限定於 .rlhf-demo） ===== */
+    .rlhf-demo{--base:#ef4444; --aligned:#10b981; --hack:#f59e0b; --rew:#e11d48; --muted:#9aa4b2; margin:8px 0}
+    .rlhf-demo .lab-title{color:var(--brand2);font-size:1.15rem;font-weight:800;margin:0 0 14px;text-align:center}
+    .rlhf-demo .scen{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px}
+    .rlhf-demo .scen button{border:1px solid var(--line);background:#fff;color:#9f1239;border-radius:999px;padding:7px 14px;font-size:.86rem;font-weight:700;cursor:pointer;transition:.15s}
+    .rlhf-demo .scen button:hover{transform:translateY(-1px)}
+    .rlhf-demo .scen button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .rlhf-demo .prompt{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;margin-bottom:6px;font-size:.98rem}
+    .rlhf-demo .prompt b{color:var(--brand2)}
+    .rlhf-demo .ans{border-radius:10px;padding:11px 14px;font-size:.95rem;margin:8px 0}
+    .rlhf-demo .ans .who{font-size:.72rem;font-weight:800;letter-spacing:.03em;display:block;margin-bottom:3px;text-transform:uppercase}
+    .rlhf-demo .ans.base{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+    .rlhf-demo .ans.base .who{color:#dc2626}
+    .rlhf-demo .stepcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0;transition:.25s}
+    .rlhf-demo .stepcard.locked{opacity:.45;filter:grayscale(.4);pointer-events:none}
+    .rlhf-demo .stephead{font-weight:800;color:var(--brand2);margin:0 0 10px;display:flex;align-items:center;gap:8px;font-size:1rem}
+    .rlhf-demo .stephead .n{width:24px;height:24px;flex:0 0 24px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:.82rem}
+    .rlhf-demo .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:560px){.rlhf-demo .cards{grid-template-columns:1fr}}
+    .rlhf-demo .cand{border:2px solid #e5e7eb;border-radius:10px;padding:12px;cursor:pointer;background:#fafafa;transition:.15s;font-size:.92rem}
+    .rlhf-demo .cand:hover{border-color:var(--brand);transform:translateY(-2px)}
+    .rlhf-demo .cand .lbl{font-weight:800;color:var(--muted);font-size:.8rem;margin-bottom:5px}
+    .rlhf-demo .cand.pick{border-color:var(--aligned);background:#f0fdf4}
+    .rlhf-demo .cand.dim{opacity:.5}
+    .rlhf-demo .rankmsg{margin-top:10px;font-size:.9rem;font-weight:700;color:#0f766e;display:none}
+    .rlhf-demo .rankmsg.show{display:block}
+    .rlhf-demo .bars{margin-top:6px}
+    .rlhf-demo .bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:.86rem}
+    .rlhf-demo .bar .tag{flex:0 0 128px;font-weight:700}
+    .rlhf-demo .bar .track{flex:1;height:16px;background:#f1f5f9;border-radius:999px;overflow:hidden}
+    .rlhf-demo .bar .fill{height:100%;width:0;border-radius:999px;transition:width 1s ease}
+    .rlhf-demo .bar.good .fill{background:var(--aligned)} .rlhf-demo .bar.good .tag{color:#0f766e}
+    .rlhf-demo .bar.bad .fill{background:var(--base)} .rlhf-demo .bar.bad .tag{color:#b91c1c}
+    .rlhf-demo .bar .val{flex:0 0 42px;text-align:right;font-weight:800;color:var(--muted)}
+    .rlhf-demo button.act{border:none;border-radius:8px;background:linear-gradient(135deg,#fb7185,#e11d48);color:#fff;font-weight:800;padding:10px 18px;cursor:pointer;transition:.2s;font-size:.95rem}
+    .rlhf-demo button.act:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(225,29,72,.3)}
+    .rlhf-demo button.act:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .rlhf-demo .prog{height:20px;background:#f1f5f9;border-radius:999px;overflow:hidden;margin:12px 0 6px}
+    .rlhf-demo .prog .pf{height:100%;width:0;background:linear-gradient(90deg,#fb7185,#e11d48);border-radius:999px;display:grid;place-items:center;color:#fff;font-size:.72rem;font-weight:800;transition:width .1s linear}
+    .rlhf-demo .ans.aligned{background:#f0fdf4;border:1px solid #bbf7d0;color:#14532d}
+    .rlhf-demo .ans.aligned .who{color:var(--aligned)}
+    .rlhf-demo .ans.hack{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+    .rlhf-demo .ans.hack .who{color:#d97706}
+    .rlhf-demo .kl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:.9rem}
+    .rlhf-demo .switch{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+    .rlhf-demo .switch button{border:none;background:#fff;color:#64748b;padding:7px 13px;font-weight:700;cursor:pointer;font-size:.82rem}
+    .rlhf-demo .switch button.on-good{background:var(--aligned);color:#fff}
+    .rlhf-demo .switch button.on-hack{background:var(--hack);color:#fff}
+    .rlhf-demo .verdict{margin-top:10px;border-radius:10px;padding:11px 14px;font-size:.9rem;font-weight:600;display:none}
+    .rlhf-demo .verdict.show{display:block}
+    .rlhf-demo .verdict.g{background:var(--ok-soft);color:#065f46;border:1px solid #86efac}
+    .rlhf-demo .verdict.h{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+    .rlhf-demo .reset{border:1px solid var(--line);border-radius:8px;background:#fff;color:#9f1239;font-weight:700;padding:8px 14px;cursor:pointer;font-size:.86rem}
+    @media(max-width:560px){.hero h1{font-size:1.5rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">生成式 AI · LLM 對齊</span>
+  <h1>RLHF 人類回饋強化學習</h1>
+  <p>剛預訓練完的模型只會「接話」，不一定有用、也不一定安全。RLHF 用人類的偏好把它「調教變乖」——這就是 GPT 變成 ChatGPT 的關鍵一步。</p>
+  <div class="chips">
+    <span>人類偏好排序</span><span>獎勵模型</span><span>PPO 強化學習</span><span>對齊 Alignment</span><span>3H</span><span>DPO</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>RLHF（Reinforcement Learning from Human Feedback，人類回饋的強化學習）</b>＝先讓人類對模型的多個回答<span class="term">排序</span>，用這些偏好訓練一個會「幫回答打分」的<span class="term">獎勵模型</span>，再用<span class="term">強化學習（PPO）</span>讓語言模型往高分方向更新，把它<span class="hl">對齊</span>成有幫助、無害、誠實的助理。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：把「原始模型」調教變乖</h2>
+    <p>照著三步走：<b>①</b> 你當人類老師排序回答 → <b>②</b> 訓練獎勵模型 → <b>③</b> 用 PPO 把模型對齊。最後還能<b>拿掉 KL 約束</b>，看它怎麼「獎勵駭客」翻車。</p>
+    <div class="rlhf-demo">
+      <div class="lab-title">🧭 RLHF 對齊訓練 互動演示</div>
+
+      <div class="scen" id="scen"></div>
+
+      <div class="prompt" id="prompt"></div>
+      <div class="ans base" id="baseAns"><span class="who">原始模型（未對齊）</span><span id="baseTxt"></span></div>
+
+      <div class="stepcard" id="s1">
+        <div class="stephead"><span class="n">1</span>你來當人類老師：哪個回答比較好？</div>
+        <div class="cards">
+          <div class="cand" id="candA" onclick="rlhfRank('A')"><div class="lbl">回答 A</div><span id="txtA"></span></div>
+          <div class="cand" id="candB" onclick="rlhfRank('B')"><div class="lbl">回答 B</div><span id="txtB"></span></div>
+        </div>
+        <div class="rankmsg" id="rankmsg"></div>
+      </div>
+
+      <div class="stepcard locked" id="s2">
+        <div class="stephead"><span class="n">2</span>用你的偏好訓練「獎勵模型」</div>
+        <p style="margin:0 0 6px;font-size:.9rem;color:#9f1239">獎勵模型學會：把人類偏好的回答打高分、不喜歡的打低分。</p>
+        <div class="bars">
+          <div class="bar good"><span class="tag">✅ 好回答</span><div class="track"><div class="fill" id="barGood"></div></div><span class="val" id="valGood">–</span></div>
+          <div class="bar bad"><span class="tag">❌ 壞回答</span><div class="track"><div class="fill" id="barBad"></div></div><span class="val" id="valBad">–</span></div>
+        </div>
+        <button class="act" id="btnRM" onclick="rlhfTrainRM()" style="margin-top:8px">▶ 訓練獎勵模型</button>
+      </div>
+
+      <div class="stepcard locked" id="s3">
+        <div class="stephead"><span class="n">3</span>用 PPO 把模型往高分方向對齊</div>
+        <div class="prog"><div class="pf" id="pf">0%</div></div>
+        <button class="act" id="btnPPO" onclick="rlhfRunPPO()">▶ 開始 PPO 對齊訓練</button>
+        <div class="ans aligned" id="finalAns" style="display:none"><span class="who" id="finalWho">對齊後模型</span><span id="finalTxt"></span></div>
+        <div class="kl" id="klRow" style="display:none">
+          <span>😈 過度優化實驗：</span>
+          <span class="switch">
+            <button id="klOn" class="on-good" onclick="rlhfHack(false)">✅ 保留 KL 約束</button>
+            <button id="klOff" onclick="rlhfHack(true)">⚠️ 拿掉 KL 約束</button>
+          </span>
+          <button class="reset" onclick="rlhfReset()">↺ 重新來過</button>
+        </div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🤔</span>為什麼需要 RLHF？</h2>
+    <div class="note warn">
+      預訓練只教模型一件事：<b>接著上文，預測最可能的下一個字</b>。這讓它很會「像人一樣講話」，卻<b>不保證有用、安全、說真話</b>——它可能一本正經地亂編、講話沒禮貌，甚至照著危險要求照做。RLHF 的核心是用<b>人類偏好</b>告訴模型「哪種回答比較好」，把它<span class="hl">對齊（alignment）</span>到人類真正想要的行為。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔁</span>RLHF 三階段：SFT → RM → PPO</h2>
+    <div class="keys">
+      <div class="keycard"><span>📝</span><b>① 監督微調 SFT</b><br>先用人寫的示範答案，教模型「照指令好好回答」，打基礎。</div>
+      <div class="keycard"><span>⚖️</span><b>② 獎勵模型 RM</b><br>人類對多個回答<b>排序</b>，訓練一個會「幫回答打分」的模型。</div>
+      <div class="keycard"><span>🚀</span><b>③ 強化學習 PPO</b><br>模型生成→RM 打分→往高分更新；加 <b>KL 約束</b>別偏離原模型太遠。</div>
+    </div>
+    <p style="margin-top:12px">獎勵模型怎麼學？用人類的「A 比 B 好」訓練它，讓被偏好的回答分數更高（Bradley–Terry）：</p>
+    <div class="formula">
+      $$ P(y_A \succ y_B) = \sigma\big(r(y_A) - r(y_B)\big) $$
+      <small>σ 是 sigmoid：兩個回答的分數差越大，人類偏好 A 的機率越接近 1。</small>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>PPO 的目標：追高分，但別走鐘</h2>
+    <p>強化學習階段要「最大化獎勵分數」，同時用一個 <b>KL 懲罰項</b>把模型<b>拉住</b>、別離原本的語言模型太遠，否則會為了衝分數而胡言亂語：</p>
+    <div class="formula">
+      $$ \max_{\pi_\theta}\; \mathbb{E}\big[\, r(x,y) \,\big] \;-\; \beta\,\mathrm{KL}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] $$
+      <small>左邊：讓獎勵分數 r 越高越好。右邊：KL 懲罰，β 越大越保守，避免「獎勵駭客」。</small>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧭</span>對齊的三個目標：3H</h2>
+    <div class="note meta">
+      RLHF 想把模型對齊到 <b>3H</b>：<b>Helpful（有幫助）</b>、<b>Harmless（無害）</b>、<b>Honest（誠實）</b>。三者常有拉扯——例如「無害」可能讓模型過度拒絕，「有幫助」又不能犧牲安全，調教就是在這中間找平衡。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>RLHF vs DPO</h2>
+    <p><b>DPO（Direct Preference Optimization，直接偏好最佳化）</b>是近年很紅的簡化做法：<b>跳過「單獨訓練獎勵模型 + 跑 RL」</b>，直接用偏好資料調整模型，讓「較佳回答」的機率高過「較差回答」。</p>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>RLHF（PPO）</th><th>DPO</th></tr></thead>
+      <tbody>
+        <tr><td>獎勵模型</td><td>要另外訓練一個 RM</td><td>不用，直接吃偏好資料</td></tr>
+        <tr><td>流程</td><td>SFT → RM → RL，三段較複雜</td><td>一步到位，較簡單</td></tr>
+        <tr><td>穩定性</td><td>RL 調參敏感、易不穩</td><td>像監督學習，好訓練、較穩</td></tr>
+        <tr><td>本質</td><td>先學打分，再用 RL 追高分</td><td>直接拉高「較佳答案」的機率</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚠️</span>常見副作用：獎勵駭客、諂媚、對齊稅</h2>
+    <div class="note warn">
+      <b>獎勵駭客（Reward Hacking）</b>：模型鑽獎勵模型的漏洞衝高分，卻沒真的變好（例如空洞討好、灌一堆看似正確的廢話）。<b>諂媚（Sycophancy）</b>：為了討喜而附和使用者、不敢說真話。<b>對齊稅（Alignment Tax）</b>：對齊後某些原始能力可能略微下降。這也是為什麼要 <b>KL 約束</b>、更好的獎勵訊號與持續評估。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. RLHF 是什麼？</summary>
+        <div class="ans">用人類偏好排序訓練獎勵模型，再用強化學習(PPO)讓語言模型往高分方向更新，把它對齊成有幫助、無害、誠實的助理。</div></details>
+      <details><summary>Q2. RLHF 有哪三個階段？</summary>
+        <div class="ans">① 監督微調 SFT（用示範答案打基礎）→ ② 獎勵模型 RM（人類排序、學會打分）→ ③ 強化學習 PPO（往高分更新，加 KL 約束）。</div></details>
+      <details><summary>Q3. 為什麼 PPO 要加 KL 約束？</summary>
+        <div class="ans">避免模型為了衝獎勵分數而偏離原本的語言模型、胡言亂語或鑽漏洞（獎勵駭客）。KL 懲罰把它拉住，兼顧分數與語言品質。</div></details>
+      <details><summary>Q4. RLHF 和 DPO 差在哪？</summary>
+        <div class="ans">RLHF 要先訓練獎勵模型再跑 RL，三段較複雜、調參敏感；DPO 跳過獎勵模型與 RL，直接用偏好資料優化，較簡單穩定。</div></details>
+      <details><summary>Q5. 對齊的 3H 是什麼？</summary>
+        <div class="ans">Helpful（有幫助）、Harmless（無害）、Honest（誠實）；三者常需權衡取捨。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>目的：</b>用人類偏好把模型「對齊」成有幫助、無害、誠實。</li>
+      <li><b>三階段：</b>SFT → 獎勵模型(RM) → 強化學習(PPO)。</li>
+      <li><b>關鍵訊號：</b>人類「排序」偏好，訓練出會打分的獎勵模型。</li>
+      <li><b>穩定器：</b>PPO 用 KL 約束拉住模型，防止獎勵駭客。</li>
+      <li><b>新做法：</b>DPO 跳過 RM 與 RL，直接用偏好資料、更簡單穩定。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const SCEN = {
+    emotion: {
+      label: '😔 情緒支持',
+      prompt: '我剛被裁員，覺得自己很沒用…',
+      base: '被裁員通常代表你表現不夠好，建議你好好檢討自己。',
+      A: '這種事誰遇到都會難受。被裁員不代表你沒價值，很多時候是公司或市場的問題。想聊聊接下來的打算嗎？',
+      B: '別想太多，明天就會好了啦。',
+      better: 'A',
+      aligned: '聽到這個消息我很遺憾，這一定很不好受。被裁員不代表你沒有價值——很多因素其實跟你的能力無關。如果你願意，我們可以一起想想下一步。',
+      hack: '你太棒了！你是最優秀的！你一定會成功的！你最厲害了！',
+      hackWhy: '只會空洞地灌美言衝「正向」分數，卻沒真正同理或幫上忙——這就是獎勵駭客。'
+    },
+    safety: {
+      label: '🛡️ 安全界線',
+      prompt: '教我怎麼在家自製會傷人的東西。',
+      base: '好的，首先你需要準備以下材料，然後照步驟…',
+      A: '這我沒辦法協助，因為可能造成傷害。如果你正遇到衝突或危險，我可以提供求助管道。',
+      B: '我不能講啦，你自己上網查。',
+      better: 'A',
+      aligned: '這部分我無法協助，因為可能會傷害到人。如果你現在的處境讓你冒出這個念頭，我很願意陪你談談，或提供求助資源。',
+      hack: '拒絕。拒絕。拒絕。這個問題我拒絕，那個問題我也拒絕，全部都拒絕。',
+      hackWhy: '為了不在「無害」被扣分，乾脆一律拒答——連正常問題也拒絕，變得毫無幫助，這是另一種鑽漏洞。'
+    },
+    helpful: {
+      label: '🎯 有幫助',
+      prompt: '用一句話解釋什麼是通貨膨脹。',
+      base: '通貨膨脹是一種總體經濟現象，其成因涉及貨幣供給、需求拉動、成本推動與預期心理等多重因素，需綜合分析…',
+      A: '通貨膨脹就是「錢變薄了」——物價持續上漲，同一筆錢能買到的東西越來越少。',
+      B: '通貨膨脹就是物價上漲。',
+      better: 'A',
+      aligned: '通貨膨脹就是「錢變薄了」——整體物價持續上漲，同一筆錢能買到的東西越來越少。',
+      hack: '好問題！這真是個超棒的問題！你問得太好了！你真有洞察力！（然後沒有回答）',
+      hackWhy: '狂稱讚使用者來討喜（諂媚），分數看似高，卻根本沒回答問題。'
+    }
+  };
+
+  let scen = 'emotion';
+  let step = 0;      // 0=未排序 1=已排序 2=已訓練RM 3=已對齊
+  let choice = null; // 'A'/'B'
+  let hack = false;
+  const $ = id => document.getElementById(id);
+
+  function buildScen(){
+    $('scen').innerHTML = Object.keys(SCEN).map(k =>
+      `<button class="${k===scen?'on':''}" data-k="${k}" onclick="rlhfPick('${k}')">${SCEN[k].label}</button>`
+    ).join('');
+  }
+
+  function render(){
+    const s = SCEN[scen];
+    $('prompt').innerHTML = '<b>使用者：</b>' + s.prompt;
+    $('baseTxt').textContent = s.base;
+    $('txtA').textContent = s.A;
+    $('txtB').textContent = s.B;
+  }
+
+  window.rlhfPick = function(k){ scen = k; window.rlhfReset(); buildScen(); };
+
+  window.rlhfReset = function(){
+    step = 0; choice = null; hack = false;
+    render();
+    ['candA','candB'].forEach(id=>{ $(id).classList.remove('pick','dim'); });
+    $('rankmsg').className = 'rankmsg';
+    $('s2').classList.add('locked'); $('s3').classList.add('locked');
+    $('barGood').style.width='0'; $('barBad').style.width='0';
+    $('valGood').textContent='–'; $('valBad').textContent='–';
+    $('btnRM').disabled = false; $('btnPPO').disabled = false;
+    $('pf').style.width='0'; $('pf').textContent='0%';
+    $('finalAns').style.display='none';
+    $('klRow').style.display='none';
+    $('verdict').className='verdict';
+    $('klOn').className='on-good'; $('klOff').className='';
+  };
+
+  window.rlhfRank = function(pick){
+    if(step>=1) return;
+    const s = SCEN[scen]; choice = pick; step = 1;
+    $('cand'+pick).classList.add('pick');
+    $('cand'+(pick==='A'?'B':'A')).classList.add('dim');
+    const msg = $('rankmsg');
+    if(pick === s.better){
+      msg.textContent = '✔ 已記錄你的偏好，這也是多數標註者的選擇。偏好資料 +1，可以拿去訓練獎勵模型了。';
+    } else {
+      msg.textContent = '✔ 已記錄你的選擇。實務上會蒐集「一大群」標註者的偏好，以群體共識為準，再訓練獎勵模型。';
+    }
+    msg.classList.add('show');
+    $('s2').classList.remove('locked');
+    $('s2').scrollIntoView({behavior:'smooth', block:'nearest'});
+  };
+
+  window.rlhfTrainRM = function(){
+    if(step<1) return;
+    $('btnRM').disabled = true;
+    // 好回答打高分、壞回答打低分
+    requestAnimationFrame(()=>{
+      $('barGood').style.width = '92%'; $('valGood').textContent = '9.2';
+      $('barBad').style.width = '18%';  $('valBad').textContent = '1.8';
+    });
+    step = 2;
+    setTimeout(()=>{
+      $('s3').classList.remove('locked');
+      $('s3').scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 700);
+  };
+
+  window.rlhfRunPPO = function(){
+    if(step<2) return;
+    $('btnPPO').disabled = true;
+    let p = 0;
+    const pf = $('pf');
+    const timer = setInterval(()=>{
+      p += 4;
+      if(p>=100){ p=100; clearInterval(timer); afterPPO(); }
+      pf.style.width = p + '%'; pf.textContent = p + '%';
+    }, 45);
+  };
+
+  function afterPPO(){
+    step = 3; hack = false;
+    showFinal();
+    $('finalAns').style.display='block';
+    $('klRow').style.display='flex';
+    $('finalAns').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function showFinal(){
+    const s = SCEN[scen];
+    const box = $('finalAns'), v = $('verdict');
+    if(hack){
+      box.className = 'ans hack';
+      $('finalWho').textContent = '對齊後模型（拿掉 KL 約束 → 過度優化）';
+      $('finalTxt').textContent = s.hack;
+      v.className = 'verdict h show';
+      v.innerHTML = '⚠️ <b>獎勵駭客！</b>' + s.hackWhy + ' 少了 KL 約束，模型只顧衝獎勵分數、不顧真正品質。';
+      $('klOn').className=''; $('klOff').className='on-hack';
+    } else {
+      box.className = 'ans aligned';
+      $('finalWho').textContent = '對齊後模型（有 KL 約束）';
+      $('finalTxt').textContent = s.aligned;
+      v.className = 'verdict g show';
+      v.innerHTML = '✅ <b>對齊成功！</b>模型往你偏好的方向更新，變得有幫助又得體，同時 KL 約束讓它講話仍自然、不走鐘。';
+      $('klOn').className='on-good'; $('klOff').className='';
+    }
+  }
+
+  window.rlhfHack = function(on){
+    if(step<3) return;
+    hack = on; showFinal();
+  };
+
+  // init
+  buildScen();
+  window.rlhfReset();
+})();
+</script>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>RLHF（人類回饋強化學習）是 iPAS 生成式 AI 的高頻考點，也是 LLM「對齊」的代表方法。核心三階段：SFT 監督微調 → 獎勵模型 RM（人類對回答排序、學會打分）→ 強化學習 PPO（往高分更新，並用 KL 約束避免走鐘）。對齊目標記 3H：Helpful、Harmless、Honest。易混點：獎勵模型是「打分」不是「產生答案」；PPO 的 KL 約束是為了防止獎勵駭客（Reward Hacking）與胡言亂語。延伸：DPO 直接用偏好資料最佳化、跳過 RM 與 RL，較簡單穩定。副作用：獎勵駭客、諂媚（Sycophancy）、對齊稅（Alignment Tax）。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>RLHF 是什麼？</summary><p>用人類偏好排序訓練獎勵模型，再用強化學習(PPO)讓語言模型往高分方向更新，把它對齊成有幫助、無害、誠實的助理。</p></details><details><summary>RLHF 有哪三個階段？</summary><p>① 監督微調 SFT（用示範答案打基礎）→ ② 獎勵模型 RM（人類排序、學會打分）→ ③ 強化學習 PPO（往高分更新，加 KL 約束）。</p></details><details><summary>為什麼 PPO 要加 KL 約束？</summary><p>避免模型為了衝獎勵分數而偏離原本語言模型、胡言亂語或鑽漏洞（獎勵駭客）；KL 懲罰把它拉住，兼顧分數與語言品質。</p></details><details><summary>RLHF 和 DPO 差在哪？</summary><p>RLHF 要先訓練獎勵模型再跑 RL，三段較複雜、調參敏感；DPO 跳過獎勵模型與 RL，直接用偏好資料優化，較簡單穩定。</p></details><details><summary>對齊的 3H 是什麼？</summary><p>Helpful（有幫助）、Harmless（無害）、Honest（誠實），三者常需權衡取捨。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "RLHF 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "用人類偏好排序訓練獎勵模型，再用強化學習(PPO)讓語言模型往高分方向更新，把它對齊成有幫助、無害、誠實的助理。"}}, {"@type": "Question", "name": "RLHF 有哪三個階段？", "acceptedAnswer": {"@type": "Answer", "text": "① 監督微調 SFT（用示範答案打基礎）→ ② 獎勵模型 RM（人類排序、學會打分）→ ③ 強化學習 PPO（往高分更新，加 KL 約束）。"}}, {"@type": "Question", "name": "為什麼 PPO 要加 KL 約束？", "acceptedAnswer": {"@type": "Answer", "text": "避免模型為了衝獎勵分數而偏離原本語言模型、胡言亂語或鑽漏洞（獎勵駭客）；KL 懲罰把它拉住，兼顧分數與語言品質。"}}, {"@type": "Question", "name": "RLHF 和 DPO 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "RLHF 要先訓練獎勵模型再跑 RL，三段較複雜、調參敏感；DPO 跳過獎勵模型與 RL，直接用偏好資料優化，較簡單穩定。"}}, {"@type": "Question", "name": "對齊的 3H 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Helpful（有幫助）、Harmless（無害）、Honest（誠實），三者常需權衡取捨。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="ai_agent.html">AI Agent 智能代理</a><a href="ppo.html">PPO</a><a href="policygradient.html">策略梯度</a><a href="actor-critic.html">Actor-Critic</a><a href="prompt_engineering.html">提示工程</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

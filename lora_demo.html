@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoRA 原理視覺化</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。 大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/lora_demo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="LoRA 原理視覺化">
+    <meta property="og:description" content="Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。 大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/lora_demo.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LoRA 原理視覺化">
+    <meta name="twitter:description" content="Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。 大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "LoRA 原理視覺化",
+  "url": "https://akira.ipas-ai.com/lora_demo.html",
+  "description": "Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。 大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);color:#e0e0e0;min-height:100vh;padding:1.2rem}
+h1{text-align:center;font-size:1.6rem;margin-bottom:.3rem;background:linear-gradient(90deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#aaa;font-size:.92rem;margin-bottom:1rem}
+.container{max-width:1000px;margin:0 auto}
+.card{background:rgba(255,255,255,.06);border-radius:16px;padding:1.2rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,.08)}
+.card h2{font-size:1.15rem;margin-bottom:.6rem;color:#34d399}
+.card p,.card li{font-size:.93rem;line-height:1.7;color:#ccc}
+.card ul{padding-left:1.2rem}.card li{margin-bottom:.3rem}
+.highlight{background:rgba(52,211,153,.12);border-left:3px solid #34d399;padding:.6rem .8rem;border-radius:8px;margin:.6rem 0;font-size:.9rem;color:#6ee7b7}
+.svg-wrap{background:rgba(0,0,0,.3);border-radius:12px;padding:.5rem;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.controls{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:.8rem 0;align-items:center}
+.controls label{font-size:.88rem;color:#bbb}
+.controls input[type=range]{width:160px;accent-color:#34d399}
+.val{font-weight:700;color:#34d399;min-width:3rem;text-align:center}
+.metrics{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:center;margin:.8rem 0}
+.metric{text-align:center;background:rgba(0,0,0,.2);padding:.5rem .8rem;border-radius:10px;min-width:110px}
+.metric .label{font-size:.72rem;color:#888}
+.metric .value{font-size:1.1rem;font-weight:700}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin:1rem 0}
+.compare-item{background:rgba(0,0,0,.2);border-radius:12px;padding:.8rem;text-align:center;border:2px solid rgba(255,255,255,.08)}
+.compare-item h4{font-size:.9rem;margin-bottom:.3rem}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+<div class="container">
+<h1>🔧 LoRA 原理視覺化</h1>
+<p class="subtitle">Low-Rank Adaptation — 只調一小部分就能適應新領域</p>
+
+<div class="card">
+<h2>💡 白話說明</h2>
+<p>想像你有一本百科全書（大模型），要讓它變成醫學專家：</p>
+<ul>
+<li><strong>全量微調</strong>：把整本百科全書重寫一遍 → 超貴、超慢、需要超大書桌（GPU）</li>
+<li><strong>LoRA</strong>：在百科全書旁邊貼一本薄薄的「醫學便利貼」→ 便宜、快速、小書桌就夠</li>
+<li><strong>原理</strong>：原本的大矩陣 W 不動，旁邊加兩個小矩陣 A×B，訓練時只調 A 和 B</li>
+<li><strong>數學</strong>：W' = W + A×B，其中 A 是 d×r、B 是 r×d，r 很小（4~64）所以參數超少</li>
+</ul>
+<div class="highlight">📌 考試重點：LoRA 不是從零訓練，也不是改整個模型。它是在原始權重「旁邊」加少量可訓練參數。屬於 PEFT（參數高效微調）方法。</div>
+</div>
+
+<div class="controls">
+<label>原始維度 d：</label>
+<input type="range" id="dimSlider" min="64" max="4096" value="768" step="64">
+<span class="val" id="dimLabel">768</span>
+<label>LoRA Rank r：</label>
+<input type="range" id="rankSlider" min="1" max="64" value="8" step="1">
+<span class="val" id="rankLabel">8</span>
+</div>
+
+<div class="metrics">
+<div class="metric"><div class="label">原始參數量</div><div class="value" id="origParams" style="color:#f87171">-</div></div>
+<div class="metric"><div class="label">LoRA 參數量</div><div class="value" id="loraParams" style="color:#4ade80">-</div></div>
+<div class="metric"><div class="label">節省比例</div><div class="value" id="savings" style="color:#fbbf24">-</div></div>
+<div class="metric"><div class="label">記憶體估算</div><div class="value" id="memory" style="color:#a78bfa">-</div></div>
+</div>
+
+<div class="svg-wrap">
+<svg id="chart" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="compare">
+<div class="compare-item" style="border-color:#f8717144">
+<h4 style="color:#f87171">❌ 全量微調</h4>
+<p style="font-size:.82rem;color:#aaa">調整所有參數<br>需要大量 GPU<br>訓練時間長<br>每個任務存一份完整模型</p>
+</div>
+<div class="compare-item" style="border-color:#4ade8044">
+<h4 style="color:#4ade80">✅ LoRA</h4>
+<p style="font-size:.82rem;color:#aaa">只調 A、B 兩個小矩陣<br>單張 GPU 就能跑<br>訓練快很多<br>每個任務只存小矩陣（幾 MB）</p>
+</div>
+<div class="compare-item" style="border-color:#60a5fa44">
+<h4 style="color:#60a5fa">🔄 QLoRA</h4>
+<p style="font-size:.82rem;color:#aaa">LoRA + 4-bit 量化<br>更省記憶體<br>消費級 GPU 也能微調 LLM<br>效果幾乎不損失</p>
+</div>
+</div>
+
+<div class="card">
+<h2>🧠 LoRA 家族</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem">
+<div style="background:rgba(52,211,153,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#34d399">LoRA</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">低秩矩陣注入，PEFT 主流方法</p>
+</div>
+<div style="background:rgba(96,165,250,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#60a5fa">QLoRA</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">量化 + LoRA，4-bit 更省記憶體</p>
+</div>
+<div style="background:rgba(167,139,250,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#a78bfa">Adapter</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">在層之間插入小模組</p>
+</div>
+<div style="background:rgba(244,114,182,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#f472b6">Prompt Tuning</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">只調 soft prompt 向量</p>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const W=800,H=450,svg=document.getElementById('chart');
+const dimSlider=document.getElementById('dimSlider');
+const rankSlider=document.getElementById('rankSlider');
+
+function formatNum(n){
+  if(n>=1e9) return (n/1e9).toFixed(1)+'B';
+  if(n>=1e6) return (n/1e6).toFixed(1)+'M';
+  if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toString();
+}
+
+function draw(){
+  const d=+dimSlider.value, r=+rankSlider.value;
+  document.getElementById('dimLabel').textContent=d;
+  document.getElementById('rankLabel').textContent=r;
+
+  const origP=d*d;
+  const loraP=d*r+r*d; // A: d×r, B: r×d
+  const ratio=loraP/origP;
+
+  document.getElementById('origParams').textContent=formatNum(origP);
+  document.getElementById('loraParams').textContent=formatNum(loraP);
+  document.getElementById('savings').textContent=(ratio*100).toFixed(2)+'%';
+  document.getElementById('memory').textContent=(loraP*4/1024/1024).toFixed(1)+' MB';
+
+  let html=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+
+  // Original weight matrix W (frozen)
+  const wX=60,wY=60,wW=200,wH=200;
+  html+=`<rect x="${wX}" y="${wY}" width="${wW}" height="${wH}" rx="8" fill="rgba(248,113,113,0.08)" stroke="#f87171" stroke-width="2"/>`;
+  // Grid pattern inside W
+  for(let i=0;i<8;i++){
+    for(let j=0;j<8;j++){
+      const cx=wX+12+i*(wW-24)/7, cy=wY+12+j*(wH-24)/7;
+      html+=`<circle cx="${cx}" cy="${cy}" r="3" fill="#f87171" opacity="0.2"/>`;
+    }
+  }
+  html+=`<text x="${wX+wW/2}" y="${wY-10}" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">W（原始權重）</text>`;
+  html+=`<text x="${wX+wW/2}" y="${wY+wH/2}" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700">${d} × ${d}</text>`;
+  html+=`<text x="${wX+wW/2}" y="${wY+wH/2+18}" text-anchor="middle" fill="#fca5a5" font-size="11">${formatNum(origP)} 參數</text>`;
+  html+=`<text x="${wX+wW/2}" y="${wY+wH+20}" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">🔒 凍結不訓練</text>`;
+
+  // Plus sign
+  html+=`<text x="300" y="${wY+wH/2+5}" text-anchor="middle" fill="#fbbf24" font-size="28" font-weight="700">+</text>`;
+
+  // LoRA matrices A and B
+  const aX=350,aY=wY,aW=60,aH=wH;
+  const bX=450,bY=wY,bW=wW,bH=60;
+
+  // Scale A height and B width based on rank
+  const rScale=Math.max(20,Math.min(180,r*3));
+
+  // Matrix A: d × r
+  html+=`<rect x="${aX}" y="${aY}" width="${Math.max(30,rScale*0.4)}" height="${wH}" rx="6" fill="rgba(74,222,128,0.15)" stroke="#4ade80" stroke-width="2"/>`;
+  html+=`<text x="${aX+Math.max(30,rScale*0.4)/2}" y="${aY-10}" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">A</text>`;
+  html+=`<text x="${aX+Math.max(30,rScale*0.4)/2}" y="${aY+wH/2}" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">${d}×${r}</text>`;
+
+  // × sign
+  const mulX=aX+Math.max(30,rScale*0.4)+15;
+  html+=`<text x="${mulX}" y="${aY+wH/2+5}" text-anchor="middle" fill="#fbbf24" font-size="20" font-weight="700">×</text>`;
+
+  // Matrix B: r × d
+  const bStartX=mulX+20;
+  html+=`<rect x="${bStartX}" y="${aY+wH/2-Math.max(15,rScale*0.2)}" width="${Math.min(200,wW)}" height="${Math.max(30,rScale*0.4)}" rx="6" fill="rgba(96,165,250,0.15)" stroke="#60a5fa" stroke-width="2"/>`;
+  html+=`<text x="${bStartX+Math.min(200,wW)/2}" y="${aY+wH/2-Math.max(15,rScale*0.2)-10}" text-anchor="middle" fill="#60a5fa" font-size="12" font-weight="700">B</text>`;
+  html+=`<text x="${bStartX+Math.min(200,wW)/2}" y="${aY+wH/2+5}" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700">${r}×${d}</text>`;
+
+  // = sign and result
+  const eqX=bStartX+Math.min(200,wW)+20;
+  html+=`<text x="${eqX}" y="${aY+wH/2+5}" text-anchor="middle" fill="#fbbf24" font-size="20" font-weight="700">=</text>`;
+
+  // ΔW result
+  html+=`<rect x="${eqX+15}" y="${aY+wH/2-30}" width="80" height="60" rx="8" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="2"/>`;
+  html+=`<text x="${eqX+55}" y="${aY+wH/2}" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">ΔW</text>`;
+  html+=`<text x="${eqX+55}" y="${aY+wH/2+15}" text-anchor="middle" fill="#fde68a" font-size="10">${d}×${d}</text>`;
+
+  // LoRA params label
+  html+=`<text x="${(aX+bStartX+Math.min(200,wW))/2}" y="${aY+wH+20}" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">🔓 只訓練 A 和 B = ${formatNum(loraP)} 參數（${(ratio*100).toFixed(2)}%）</text>`;
+
+  // Formula
+  html+=`<text x="400" y="${H-50}" text-anchor="middle" fill="#aaa" font-size="14">W' = W + A × B</text>`;
+  html+=`<text x="400" y="${H-30}" text-anchor="middle" fill="#888" font-size="12">凍結 W，只訓練 A(${d}×${r}) 和 B(${r}×${d})</text>`;
+
+  // Size comparison bar
+  const barY=H-15;
+  html+=`<rect x="150" y="${barY}" width="500" height="8" rx="4" fill="rgba(248,113,113,0.3)"/>`;
+  html+=`<rect x="150" y="${barY}" width="${Math.max(3,500*ratio)}" height="8" rx="4" fill="#4ade80"/>`;
+  html+=`<text x="145" y="${barY+6}" text-anchor="end" fill="#888" font-size="9">0%</text>`;
+  html+=`<text x="655" y="${barY+6}" text-anchor="start" fill="#888" font-size="9">100%</text>`;
+
+  svg.innerHTML=html;
+}
+
+dimSlider.addEventListener('input',draw);
+rankSlider.addEventListener('input',draw);
+draw();
+</script>
+
+
+
+
+
+<style>
+.mxwrap{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;max-width:900px;margin:26px auto 0;padding:0 16px;box-sizing:border-box}
+.mxwrap .mxc{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.mxwrap .mxh{font-size:1.05rem;color:#0f766e;margin:0 0 11px;font-weight:800}
+.mxtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mxtbl th,.mxtbl td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top;color:#334155;line-height:1.6}
+.mxtbl thead th{background:#e8f2fe;color:#1565C0;font-weight:700;white-space:nowrap}
+.mxtbl td:first-child{font-weight:700;color:#1a2233;white-space:nowrap}
+.mxtbl tbody tr:nth-child(even){background:#f7f9fc}
+.mxq{border-top:1px solid #f0f2f5;padding:10px 0}
+.mxq:first-of-type{border-top:0}
+.mxq summary{cursor:pointer;font-weight:700;color:#2c3e50}
+.mxq .a{margin-top:7px;color:#475467;font-size:.93rem;line-height:1.7}
+.mxk{list-style:none;counter-reset:k;margin:2px 0 0;padding:0}
+.mxk li{position:relative;padding-left:30px;margin-bottom:8px;color:#334155;font-size:14.5px;line-height:1.6}
+.mxk li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+<div class="mxwrap">
+  <div class="mxc"><div class="mxh">📊 LoRA vs 全參數微調</div><div style="overflow-x:auto"><table class="mxtbl"><thead><tr><th>面向</th><th>全參數微調</th><th>LoRA</th></tr></thead><tbody><tr><td>更新</td><td>更新全部權重</td><td>凍結原權重、只學低秩增量</td></tr><tr><td>參數量</td><td>龐大</td><td>極少(常 <1%)</td></tr><tr><td>記憶體</td><td>高</td><td>低</td></tr><tr><td>產出</td><td>整份大模型</td><td>小小的 adapter</td></tr></tbody></table></div></div>
+  <div class="mxc"><div class="mxh">✅ 自我檢測</div><details class="mxq"><summary>LoRA 是什麼？</summary><div class="a">Low-Rank Adaptation:凍結預訓練權重,只在旁邊插入一對小的低秩矩陣(A×B)來學任務增量,大幅減少可訓練參數。</div></details><details class="mxq"><summary>為什麼用低秩矩陣？</summary><div class="a">微調的權重變化常是「低秩」的;用兩個小矩陣近似增量 ΔW=A·B,參數少很多卻能保留大部分效果。</div></details><details class="mxq"><summary>LoRA 和 QLoRA 差在哪？</summary><div class="a">QLoRA 先把基座模型「量化」到 4-bit 再套 LoRA,記憶體更省,能在單張消費級 GPU 微調大模型。</div></details></div>
+  <div class="mxc"><div class="mxh">🎯 重點整理</div><ol class="mxk"><li>LoRA=凍結原權重、只學低秩增量。</li><li>可訓練參數常 <1%,省記憶體。</li><li>產出小 adapter、可插拔切換任務。</li><li>效果接近全參數微調。</li><li>QLoRA 加 4-bit 量化更省。</li></ol></div>
+</div>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>LoRA 是參數高效微調(PEFT)的代表,iPAS 生成式 AI 落地考點(中級科目一)。重點:凍結原模型權重,只在旁路注入少量低秩矩陣來學新任務,訓練參數常不到 1%,大幅省記憶體與儲存、可隨插隨用。易混點:LoRA 是微調(改行為、內化技能)、不是 RAG(外掛知識);QLoRA 再加量化,讓單張消費級 GPU 也能微調大模型。情境:用少量資料把通用 LLM 客製到特定領域或風格。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>LoRA 是什麼？</summary><p>Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。</p></details><details><summary>LoRA 解決什麼問題？</summary><p>大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。</p></details><details><summary>為什麼用低秩矩陣？</summary><p>微調帶來的權重變化常是低秩的；用兩個小矩陣相乘近似這個變化，就能以很少參數捕捉適應所需。</p></details><details><summary>LoRA 的優點？</summary><p>訓練快、省資源、可為不同任務存多組小的 LoRA 權重隨插隨用，且推論時可合併回原權重不增延遲。</p></details><details><summary>LoRA 和 QLoRA 差在哪？</summary><p>QLoRA 在 LoRA 基礎上把基礎模型量化(如 4-bit)，進一步降低記憶體，讓單張消費級 GPU 也能微調大模型。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "LoRA 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Low-Rank Adaptation，一種參數高效微調法；凍結原模型權重，只在旁路注入少量低秩矩陣來學習新任務。"}}, {"@type": "Question", "name": "LoRA 解決什麼問題？", "acceptedAnswer": {"@type": "Answer", "text": "大模型全參數微調昂貴又佔空間；LoRA 只訓練極少參數(常不到 1%)，大幅省記憶體與儲存。"}}, {"@type": "Question", "name": "為什麼用低秩矩陣？", "acceptedAnswer": {"@type": "Answer", "text": "微調帶來的權重變化常是低秩的；用兩個小矩陣相乘近似這個變化，就能以很少參數捕捉適應所需。"}}, {"@type": "Question", "name": "LoRA 的優點？", "acceptedAnswer": {"@type": "Answer", "text": "訓練快、省資源、可為不同任務存多組小的 LoRA 權重隨插隨用，且推論時可合併回原權重不增延遲。"}}, {"@type": "Question", "name": "LoRA 和 QLoRA 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "QLoRA 在 LoRA 基礎上把基礎模型量化(如 4-bit)，進一步降低記憶體，讓單張消費級 GPU 也能微調大模型。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="mlops-overview.html">MLOps</a><a href="cicd.html">建立 CI/CD</a><a href="deployment_strategies.html">部署與服務化</a><a href="datadrift.html">監控與維護</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

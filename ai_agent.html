@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent 智能代理｜白話＋互動：ReAct 迴圈、工具呼叫、MCP</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="AI Agent（智能代理）＝以 LLM 為大腦，透過「思考→行動→觀察」的 ReAct 迴圈自主呼叫工具、拆解並完成任務。互動示範有工具 vs 沒工具的差別、function calling 與 MCP 標準介面。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/ai_agent.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI Agent 智能代理 互動演示">
+    <meta property="og:description" content="AI Agent＝以 LLM 為大腦，用「思考→行動→觀察」的 ReAct 迴圈呼叫工具、自主完成任務。互動比較有工具 vs 沒工具、function calling 與 MCP。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/ai_agent.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI Agent 智能代理 互動演示">
+    <meta name="twitter:description" content="AI Agent＝以 LLM 為大腦，用 ReAct 迴圈呼叫工具、自主完成任務。互動比較有工具 vs 沒工具、function calling 與 MCP。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "AI Agent 智能代理 互動演示",
+  "url": "https://akira.ipas-ai.com/ai_agent.html",
+  "description": "AI Agent（智能代理）＝以 LLM 為大腦，透過「思考→行動→觀察」的 ReAct 迴圈自主呼叫工具、拆解並完成任務。互動示範有工具 vs 沒工具的差別、function calling 與 MCP 標準介面。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-07-01",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#eef2ff; --ink:#1e1b4b; --sub:#4f46e5;
+      --brand:#6366f1; --brand2:#4338ca; --brand-soft:#e0e7ff;
+      --card:#ffffff; --line:#dbe0ff;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#6366f1,#4f46e5 55%,#7c3aed);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:1.9rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:680px;color:#e0e7ff;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(99,102,241,.07)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#c7d2fe 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#f2f4ff}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f2f4ff;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .lesson .formula{background:#1e1b4b;color:#e0e7ff;border-radius:12px;padding:16px 18px;margin:14px 0;text-align:center;overflow-x:auto}
+    .lesson .formula small{display:block;font-family:'Noto Sans TC',sans-serif;color:#a5b4fc;font-size:.8rem;margin-top:8px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f2f4ff}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#3730a3;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo：ReAct 迴圈（作用域限定於 .agent-demo） ===== */
+    .agent-demo{
+      --think:#6366f1; --act:#f59e0b; --obs:#0ea5e9;
+      --good:#10b981; --bad:#ef4444; --muted:#94a3b8;
+      margin:8px 0;
+    }
+    .agent-demo .lab-title{color:var(--brand2);font-size:1.15rem;font-weight:800;margin:0 0 14px;text-align:center}
+    .agent-demo .goalbar{background:#f2f4ff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+    .agent-demo .goal-label{font-size:.82rem;font-weight:700;color:var(--brand2);margin-bottom:8px}
+    .agent-demo .task-btns{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    .agent-demo .task-btn{border:1px solid var(--line);background:#fff;color:#475467;border-radius:999px;padding:7px 14px;font-size:.86rem;font-weight:600;cursor:pointer;transition:.15s}
+    .agent-demo .task-btn:hover{transform:translateY(-1px)}
+    .agent-demo .task-btn.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .agent-demo .question{background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;font-size:.98rem;color:var(--ink);margin-bottom:12px}
+    .agent-demo .question b{color:var(--brand2)}
+    .agent-demo .run-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .agent-demo .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+    .agent-demo .toggle button{border:none;background:#fff;color:#64748b;padding:8px 14px;font-size:.84rem;font-weight:700;cursor:pointer;transition:.15s}
+    .agent-demo .toggle button.on{background:var(--good);color:#fff}
+    .agent-demo .toggle button.off-on{background:var(--bad);color:#fff}
+    .agent-demo .run{margin-left:auto;border:none;border-radius:8px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-weight:800;font-size:1rem;padding:11px 22px;cursor:pointer;transition:.2s}
+    .agent-demo .run:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(99,102,241,.35)}
+    .agent-demo .run:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .agent-demo .reset{border:1px solid var(--line);border-radius:8px;background:#fff;color:#64748b;font-weight:700;padding:11px 16px;cursor:pointer}
+
+    .agent-demo .loop{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 12px;margin:16px 0}
+    .agent-demo .phase{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:96px;padding:10px 8px;border-radius:12px;border:2px solid #eef2ff;background:#f8faff;transition:.25s}
+    .agent-demo .phase .em{font-size:1.6rem;line-height:1}
+    .agent-demo .phase .nm{font-size:.82rem;font-weight:800;color:#475467}
+    .agent-demo .phase .en{font-size:.66rem;color:var(--muted);letter-spacing:.04em}
+    .agent-demo .phase.think.hot{border-color:var(--think);background:#eef2ff;box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+    .agent-demo .phase.act.hot{border-color:var(--act);background:#fff7ed;box-shadow:0 0 0 4px rgba(245,158,11,.15)}
+    .agent-demo .phase.obs.hot{border-color:var(--obs);background:#ecfeff;box-shadow:0 0 0 4px rgba(14,165,233,.15)}
+    .agent-demo .phase.hot{transform:translateY(-3px) scale(1.04)}
+    .agent-demo .arrow{font-size:1.3rem;color:var(--muted);font-weight:900}
+    .agent-demo .loopback{width:100%;text-align:center;font-size:.78rem;color:var(--muted);margin-top:6px}
+    .agent-demo .cyc{display:inline-block;background:var(--brand-soft);color:var(--brand2);font-weight:800;font-size:.78rem;border-radius:999px;padding:3px 11px;margin-left:6px}
+
+    .agent-demo .tools{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:8px 0 16px}
+    .agent-demo .tool{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:.85rem;font-weight:700;color:#64748b;transition:.2s}
+    .agent-demo .tool .te{font-size:1.15rem}
+    .agent-demo .tool.hot{border-color:var(--act);color:#b45309;background:#fff7ed;transform:translateY(-2px) scale(1.05);box-shadow:0 4px 12px rgba(245,158,11,.22)}
+
+    .agent-demo .trace{background:#0f1030;border-radius:12px;padding:14px 16px;min-height:120px;max-height:340px;overflow-y:auto;font-size:.92rem;line-height:1.55}
+    .agent-demo .trace .empty{color:#8b90c9;text-align:center;padding:30px 0}
+    .agent-demo .row{display:flex;gap:10px;margin:9px 0;opacity:0;transform:translateY(6px);animation:agRise .35s ease forwards}
+    @keyframes agRise{to{opacity:1;transform:translateY(0)}}
+    .agent-demo .row .badge{flex:0 0 auto;font-size:.72rem;font-weight:800;border-radius:6px;padding:2px 8px;height:fit-content;margin-top:2px;white-space:nowrap}
+    .agent-demo .row .body{color:#e6e8ff}
+    .agent-demo .row.think .badge{background:rgba(99,102,241,.2);color:#c7d2fe}
+    .agent-demo .row.act .badge{background:rgba(245,158,11,.2);color:#fcd34d}
+    .agent-demo .row.act .body{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#fde68a}
+    .agent-demo .row.obs .badge{background:rgba(14,165,233,.2);color:#7dd3fc}
+    .agent-demo .row.obs .body{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#bae6fd}
+    .agent-demo .row.final .badge{background:rgba(16,185,129,.22);color:#6ee7b7}
+    .agent-demo .row.final .body{color:#d1fae5;font-weight:700}
+    .agent-demo .row.final.bad .badge{background:rgba(239,68,68,.22);color:#fca5a5}
+    .agent-demo .row.final.bad .body{color:#fecaca;font-weight:700}
+    .agent-demo .verdict{margin-top:14px;border-radius:10px;padding:13px 16px;font-weight:700;font-size:.98rem;display:none}
+    .agent-demo .verdict.good{display:block;background:var(--ok-soft);color:#065f46;border:1px solid #86efac}
+    .agent-demo .verdict.bad{display:block;background:var(--bad-soft);color:#991b1b;border:1px solid #fca5a5}
+    @media(max-width:560px){
+      .hero h1{font-size:1.5rem}.lesson section{padding:20px 16px}
+      .agent-demo .arrow{display:none}
+      .agent-demo .phase{min-width:80px}
+      .agent-demo .run{margin-left:0;width:100%}
+    }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">生成式 AI · LLM 應用</span>
+  <h1>AI Agent 智能代理</h1>
+  <p>聊天機器人只會「回話」，Agent 會「動手做事」——它把 LLM 當大腦，用「思考→行動→觀察」的迴圈自己查資料、算數字、呼叫工具，一步步把任務做完。</p>
+  <div class="chips">
+    <span>ReAct 迴圈</span><span>工具呼叫</span><span>Function Calling</span><span>MCP</span><span>自主拆解任務</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>AI Agent（智能代理）</b>＝以 <span class="term">LLM 為大腦</span>，透過<span class="hl">「思考(Thought) → 行動(Action) → 觀察(Observation)」的迴圈</span>，自主呼叫外部<b>工具</b>（搜尋、計算、API…），把一個目標拆成多步、邊做邊修正，直到得出<b>最終答案</b>。關鍵差別：一般 LLM 只會「輸出文字」，Agent 會「採取行動並看結果」。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：ReAct 迴圈（有工具 vs 沒工具）</h2>
+    <p>選一個任務，切換「<b>給工具</b>」或「<b>不給工具</b>」，按 <b>▶ 執行</b>，看 Agent 怎麼一圈一圈把事情做完。沒工具時它只能憑記憶硬猜，很容易<b>幻覺</b>；有工具時它會實際去查、拿到證據再回答。</p>
+    <div class="agent-demo">
+      <div class="lab-title">🤖 ReAct 智能代理 互動演示</div>
+
+      <div class="goalbar">
+        <div class="goal-label">① 選一個任務</div>
+        <div class="task-btns" id="taskBtns"></div>
+        <div class="question" id="question"></div>
+        <div class="goal-label">② 給不給工具　③ 開始</div>
+        <div class="run-row">
+          <div class="toggle">
+            <button id="tgOn" class="on" onclick="setMode(true)">✅ 給工具</button>
+            <button id="tgOff" onclick="setMode(false)">❌ 不給工具</button>
+          </div>
+          <button class="reset" onclick="resetDemo()">↺ 重置</button>
+          <button class="run" id="runBtn" onclick="runAgent()">▶ 執行</button>
+        </div>
+      </div>
+
+      <div class="loop">
+        <div class="phase think" id="phThink"><span class="em">💭</span><span class="nm">思考</span><span class="en">THOUGHT</span></div>
+        <span class="arrow">→</span>
+        <div class="phase act" id="phAct"><span class="em">⚡</span><span class="nm">行動</span><span class="en">ACTION</span></div>
+        <span class="arrow">→</span>
+        <div class="phase obs" id="phObs"><span class="em">👁️</span><span class="nm">觀察</span><span class="en">OBSERVATION</span></div>
+        <div class="loopback">↩ 回到思考，直到資訊足夠 → ✅ 最終答案　<span class="cyc" id="cyc">第 0 圈</span></div>
+      </div>
+
+      <div class="tools" id="tools"></div>
+
+      <div class="trace" id="trace"><div class="empty">推理軌跡會顯示在這裡。按「▶ 執行」開始。</div></div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🤔</span>Agent 跟聊天機器人差在哪？</h2>
+    <div class="note warn">
+      <b>聊天機器人</b>：你問一句、它答一句，只會「生成文字」，答不出來就可能瞎掰。<br>
+      <b>Agent</b>：拿到目標後會<b>自己拆步驟</b>、<b>實際採取行動</b>（查資料庫、算數學、叫 API、寫檔案），把工具回傳的結果當「觀察」再<b>修正下一步</b>——像一個會用電腦、會查資料的實習生，而不只是一張嘴。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔁</span>核心：ReAct（Reason + Act）迴圈</h2>
+    <p>Agent 最經典的運作骨架叫 <span class="term">ReAct</span>＝把「推理(Reasoning)」與「行動(Acting)」交錯進行，一圈一圈跑：</p>
+    <div class="keys">
+      <div class="keycard"><span>💭</span><b>Thought 思考</b><br>盤點現況、決定「下一步該做什麼、該用哪個工具」。</div>
+      <div class="keycard"><span>⚡</span><b>Action 行動</b><br>實際呼叫工具，並帶上參數（例：<i>天氣API(台北, 明天)</i>）。</div>
+      <div class="keycard"><span>👁️</span><b>Observation 觀察</b><br>把工具回傳的結果讀進來，當作下一輪思考的依據。</div>
+    </div>
+    <p style="margin-top:12px">這三步<b>重複循環</b>，直到 Agent 判斷「資訊夠了」，才輸出 <b>Final Answer</b>。多步驟任務（先查 A 才能查 B）就是靠這個迴圈一圈一圈接起來的。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧰</span>工具呼叫與 Function Calling</h2>
+    <div class="note app">
+      LLM 本身<b>只會輸出文字</b>，不會真的上網或運算。<b>工具呼叫（Tool Use / Function Calling）</b>的做法是：先告訴模型「你有哪些工具、各自需要什麼參數」，模型在需要時就輸出一段<b>結構化指令</b>（要呼叫哪個函式、參數是什麼，通常是 JSON）；由外部程式<b>實際執行</b>，再把結果（Observation）餵回模型。模型負責「決定做什麼」，工具負責「真的把它做到」。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔌</span>MCP：工具界的「USB 插座」</h2>
+    <div class="note meta">
+      <b>MCP（Model Context Protocol，模型脈絡協定）</b>＝一套<b>標準介面</b>，讓任何 Agent 用<b>同一種方式</b>連接任何工具或資料源（資料庫、檔案、雲端服務…）。就像 USB：以前每個工具都要客製一條專屬接線，有了 USB 標準後「插上就能用」。MCP 讓工具生態<b>可插拔、可重用</b>，是 2024–2025 年 Agent 應用爆發的重要推手。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🆚</span>最多人搞混：Function Calling vs MCP</h2>
+    <p>兩者名字都跟「工具」有關，但其實是<b>不同層</b>的東西、而且<b>互補</b>。一句話先記住：<span class="hl">Function Calling 管「模型怎麼說」，MCP 管「工具怎麼接」</span>。</p>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>Function Calling（工具呼叫）</th><th>MCP（模型脈絡協定）</th></tr></thead>
+      <tbody>
+        <tr><td>是什麼</td><td>模型的一種<b>能力／輸出格式</b></td><td>一套開放的<b>連接標準／協定</b></td></tr>
+        <tr><td>負責的層</td><td>模型端：模型「怎麼<b>表達</b>」要呼叫工具</td><td>整合端：工具與資料源「怎麼<b>被接上</b>」模型</td></tr>
+        <tr><td>解決什麼</td><td>讓模型輸出結構化指令（呼叫哪個函式、參數為何）</td><td>讓任何 Agent 用同一種方式發現並連上各種工具／資料源</td></tr>
+        <tr><td>架構</td><td>模型輸出 JSON → 你的程式負責執行</td><td>Client–Server：MCP 客戶端 ↔ MCP 伺服器（包裝工具）</td></tr>
+        <tr><td>通用性</td><td>各家格式不同（OpenAI／Anthropic…），較綁模型</td><td>跨模型、跨應用的開放標準</td></tr>
+        <tr><td>重用性</td><td>每個應用各自定義工具 schema</td><td>寫一次 server，任何相容 client 都能重用</td></tr>
+        <tr><td>一句類比</td><td>你說出「我要用這工具、參數是…」的<b>那句話</b></td><td><b>USB 標準插座</b>，讓各種工具即插即用</td></tr>
+      </tbody>
+    </table>
+    <div class="note meta">
+      <b>互補、不是二選一：</b>Agent 通常<b>用 Function Calling 觸發</b>某個工具，而那個工具可以<b>透過 MCP 以標準方式被接上</b>。你可以只用 Function Calling、不接 MCP（自己把每個工具寫死）；也可以用 MCP 當統一接線，模型端照樣用 Function Calling 風格去觸發。<b>一個是「怎麼說」，一個是「怎麼接」。</b>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>純 LLM vs AI Agent</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>純 LLM（聊天機器人）</th><th>AI Agent</th></tr></thead>
+      <tbody>
+        <tr><td>能力</td><td>只會生成文字</td><td>生成文字 ＋ 採取行動（呼叫工具）</td></tr>
+        <tr><td>步驟</td><td>一問一答（單步）</td><td>自主拆解、多步驟迴圈</td></tr>
+        <tr><td>資料時效</td><td>受限訓練截止日</td><td>可即時查詢外部資料</td></tr>
+        <tr><td>算術／精確操作</td><td>逐字生成、容易算錯</td><td>交給計算機／程式工具</td></tr>
+        <tr><td>風險</td><td>幻覺</td><td>幻覺 ＋ 誤用工具、失控、被注入攻擊</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚠️</span>自主性的代價：Agent 的風險</h2>
+    <div class="note warn">
+      能自己行動，就代表可能<b>做錯事</b>：呼叫錯工具、陷入<b>無限迴圈</b>、被惡意內容<b>提示注入（Prompt Injection）</b>而執行危險操作、或在真實系統上造成不可逆後果。實務上要加<b>護欄</b>：限制可用工具與權限、設定<b>步數／成本上限</b>、危險動作需<b>人類確認（human-in-the-loop）</b>、並記錄可追溯的推理軌跡。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. AI Agent 和一般聊天機器人差在哪？</summary>
+        <div class="ans">聊天機器人只會生成文字（一問一答）；Agent 以 LLM 為大腦，能自主拆解任務、呼叫工具採取行動，並根據觀察修正，直到完成目標。</div></details>
+      <details><summary>Q2. ReAct 迴圈是哪三步？</summary>
+        <div class="ans">Thought（思考，決定下一步）→ Action（行動，呼叫工具）→ Observation（觀察，讀取工具結果），重複循環直到輸出 Final Answer。</div></details>
+      <details><summary>Q3. 什麼是 Function Calling（工具呼叫）？</summary>
+        <div class="ans">讓模型輸出結構化指令（呼叫哪個函式、參數為何），由外部程式實際執行後把結果回傳給模型。模型決定「做什麼」，工具負責「真的做到」。</div></details>
+      <details><summary>Q4. MCP 是什麼？解決什麼問題？</summary>
+        <div class="ans">Model Context Protocol，一套讓 Agent 以標準方式連接各種工具／資料源的協定；像 USB 標準，讓工具可插拔、可重用，不必為每個工具客製接法。</div></details>
+      <details><summary>Q5. Agent 有哪些風險、怎麼控制？</summary>
+        <div class="ans">誤用工具、無限迴圈、提示注入、危險操作。對策：限制工具與權限、設步數／成本上限、危險動作需人類確認、保留可追溯軌跡。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>本質：</b>LLM 當大腦 ＋ 會呼叫工具 ＋ 會迴圈修正 ＝ 會「做事」的 Agent。</li>
+      <li><b>骨架：</b>ReAct＝Thought → Action → Observation，循環到 Final Answer。</li>
+      <li><b>行動力：</b>靠 Function Calling 輸出結構化指令，由外部工具實際執行。</li>
+      <li><b>標準化：</b>MCP 像 USB，讓工具可插拔、可重用。</li>
+      <li><b>代價：</b>自主＝更強也更危險，需護欄、步數上限與人類確認。</li>
+    </ul>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const TASKS = {
+    weather: {
+      label: "🌤️ 明天要不要帶傘？",
+      q: "台北明天會不會下雨？我要帶傘嗎？",
+      withTools: [
+        {type:'think', text:'使用者想知道明天要不要帶傘。降雨資訊超出我的記憶，我該呼叫「天氣」工具。'},
+        {type:'act', tool:'weather', text:'天氣API(城市="台北", 日期="明天")'},
+        {type:'obs', text:'{ 降雨機率: 80%, 高溫: 28°C }'},
+        {type:'think', text:'降雨機率 80%，很可能下雨，應該建議帶傘。資訊足夠，可以回答。'},
+        {type:'final', text:'台北明天降雨機率約 80%，建議帶把傘再出門 ☔'}
+      ],
+      noTools: [
+        {type:'think', text:'使用者問明天台北的天氣。我沒有「明天」的即時資料，只能憑訓練印象猜。'},
+        {type:'final', bad:true, text:'明天台北應該是晴天，不太需要帶傘吧！'}
+      ],
+      good: '有工具：Agent 去查了真實降雨機率再回答，答案有所本。',
+      bad: '沒工具：模型根本沒有「明天」的資料，這是憑印象瞎猜，可能完全猜錯。'
+    },
+    math: {
+      label: "🧮 精確計算",
+      q: "23 × 47 + 100 等於多少？",
+      withTools: [
+        {type:'think', text:'這是精確算術，與其心算出錯，不如交給「計算機」工具。'},
+        {type:'act', tool:'calc', text:'計算機("23*47+100")'},
+        {type:'obs', text:'1181'},
+        {type:'think', text:'工具算出 1181，可以直接回答。'},
+        {type:'final', text:'23 × 47 + 100 = 1181'}
+      ],
+      noTools: [
+        {type:'think', text:'我來心算… 23×47 大概一千出頭，再加 100…'},
+        {type:'final', bad:true, text:'大概是 1,080 左右吧。'}
+      ],
+      good: '有工具：把精確運算外包給計算機，答案 1181 正確無誤。',
+      bad: '沒工具：LLM 是逐字「生成」數字、不是真的運算，很容易算錯（正解是 1181）。'
+    },
+    search: {
+      label: "🔍 多步驟查詢",
+      q: "《沙丘 2》的導演是誰？他還拍過哪些片？",
+      withTools: [
+        {type:'think', text:'要回答兩件事，先查第一件：《沙丘 2》的導演是誰。'},
+        {type:'act', tool:'search', text:'網路搜尋("沙丘2 導演")'},
+        {type:'obs', text:'丹尼·維勒納夫（Denis Villeneuve）'},
+        {type:'think', text:'導演是維勒納夫。接著查他還拍過哪些作品。'},
+        {type:'act', tool:'search', text:'網路搜尋("Denis Villeneuve 代表作")'},
+        {type:'obs', text:'《異星入境》《銀翼殺手 2049》《怒火邊界》'},
+        {type:'think', text:'兩項資訊都齊了，可以整理成完整回答。'},
+        {type:'final', text:'《沙丘 2》導演是丹尼·維勒納夫，他也執導過《異星入境》《銀翼殺手 2049》《怒火邊界》。'}
+      ],
+      noTools: [
+        {type:'think', text:'這要多步查證，但我沒有搜尋工具，只能靠記憶硬拼…'},
+        {type:'final', bad:true, text:'導演好像是⋯諾蘭？他拍過《全面啟動》吧。'}
+      ],
+      good: '有工具：迴圈跑了兩圈——先查導演、再查作品，接力完成多步驟任務。',
+      bad: '沒工具：多步驟又要時效資訊，模型容易記錯、張冠李戴（導演其實是維勒納夫，不是諾蘭）。'
+    }
+  };
+
+  const TOOLS = [
+    {id:'search', em:'🔍', name:'搜尋'},
+    {id:'calc',   em:'🧮', name:'計算機'},
+    {id:'weather',em:'🌤️', name:'天氣'},
+    {id:'cal',    em:'📅', name:'行事曆'}
+  ];
+
+  let curTask = 'weather';
+  let useTools = true;
+  let runId = 0;
+  let running = false;
+
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function buildTaskBtns(){
+    $('taskBtns').innerHTML = Object.keys(TASKS).map(k =>
+      `<button class="task-btn${k===curTask?' on':''}" data-k="${k}" onclick="pickTask('${k}')">${TASKS[k].label}</button>`
+    ).join('');
+    $('question').innerHTML = '<b>任務：</b>' + TASKS[curTask].q;
+  }
+  function buildTools(){
+    $('tools').innerHTML = TOOLS.map(t =>
+      `<div class="tool" id="tool-${t.id}"><span class="te">${t.em}</span>${t.name}</div>`
+    ).join('');
+  }
+
+  window.pickTask = function(k){
+    if(running) return;
+    curTask = k; resetDemo();
+    document.querySelectorAll('.task-btn').forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+    $('question').innerHTML = '<b>任務：</b>' + TASKS[k].q;
+  };
+  window.setMode = function(on){
+    if(running) return;
+    useTools = on;
+    $('tgOn').classList.toggle('on', on);
+    $('tgOff').classList.toggle('off-on', !on);
+    resetDemo();
+  };
+  window.resetDemo = function(){
+    runId++; running = false;
+    $('runBtn').disabled = false;
+    $('trace').innerHTML = '<div class="empty">推理軌跡會顯示在這裡。按「▶ 執行」開始。</div>';
+    $('verdict').className = 'verdict'; $('verdict').textContent = '';
+    $('cyc').textContent = '第 0 圈';
+    ['phThink','phAct','phObs'].forEach(p=>$(p).classList.remove('hot'));
+    TOOLS.forEach(t=>$('tool-'+t.id).classList.remove('hot'));
+  };
+
+  function hotPhase(type){
+    ['phThink','phAct','phObs'].forEach(p=>$(p).classList.remove('hot'));
+    if(type==='think') $('phThink').classList.add('hot');
+    else if(type==='act') $('phAct').classList.add('hot');
+    else if(type==='obs') $('phObs').classList.add('hot');
+  }
+  function hotTool(id){
+    TOOLS.forEach(t=>$('tool-'+t.id).classList.toggle('hot', t.id===id));
+  }
+  const BADGE = {think:'💭 Thought', act:'⚡ Action', obs:'👁️ Observation', final:'✅ Final Answer'};
+
+  function addRow(step){
+    const t = $('trace');
+    if(t.querySelector('.empty')) t.innerHTML='';
+    const badge = step.type==='final' && step.bad ? '⚠️ Answer' : BADGE[step.type];
+    const div = document.createElement('div');
+    div.className = 'row ' + step.type + (step.bad?' bad':'');
+    div.innerHTML = `<span class="badge">${badge}</span><span class="body"></span>`;
+    div.querySelector('.body').textContent = step.text;
+    t.appendChild(div);
+    t.scrollTop = t.scrollHeight;
+  }
+
+  window.runAgent = async function(){
+    if(running) return;
+    resetDemo();
+    running = true; $('runBtn').disabled = true;
+    const myRun = runId;
+    const task = TASKS[curTask];
+    const steps = useTools ? task.withTools : task.noTools;
+
+    let cycle = 0;
+    for(const step of steps){
+      if(myRun !== runId) return;            // 被重置/切換就中止
+      if(step.type==='think'){ cycle++; $('cyc').textContent = '第 ' + cycle + ' 圈'; }
+      hotPhase(step.type==='final' ? null : step.type);
+      if(step.type==='act') hotTool(step.tool); else hotTool(null);
+      addRow(step);
+      await sleep(step.type==='final' ? 500 : 1150);
+      if(myRun !== runId) return;
+    }
+    ['phThink','phAct','phObs'].forEach(p=>$(p).classList.remove('hot'));
+    hotTool(null);
+    const v = $('verdict');
+    if(useTools){ v.className='verdict good'; v.textContent = '✅ ' + task.good; }
+    else { v.className='verdict bad'; v.textContent = '❌ ' + task.bad; }
+    running = false; $('runBtn').disabled = false;
+  };
+
+  // init
+  buildTaskBtns();
+  buildTools();
+})();
+</script>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>AI Agent（智能代理）是 iPAS 生成式 AI 的新興高頻考點。核心：以 LLM 為大腦，透過 ReAct 迴圈（Thought 思考→Action 行動→Observation 觀察）自主呼叫工具、拆解多步驟任務，直到輸出 Final Answer。重點名詞：Function Calling（工具呼叫，模型輸出結構化指令、外部實際執行）、MCP（Model Context Protocol，工具的標準介面／像 USB）。易混點：Agent 會「採取行動」而不只生成文字，與一般聊天機器人不同。風險：提示注入、無限迴圈、誤用工具，需護欄與人類確認。情境：自動化客服、研究助理、資料分析代理。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>AI Agent 是什麼？</summary><p>以 LLM 為大腦，透過「思考→行動→觀察」的 ReAct 迴圈自主呼叫工具、拆解並完成任務的系統；能採取行動，而不只是生成文字。</p></details><details><summary>ReAct 迴圈是哪三步？</summary><p>Thought（思考，決定下一步）→ Action（行動，呼叫工具）→ Observation（觀察，讀取結果），重複循環直到輸出最終答案。</p></details><details><summary>Function Calling（工具呼叫）是什麼？</summary><p>讓模型輸出結構化指令（呼叫哪個函式、參數為何），由外部程式實際執行後把結果回傳；模型決定做什麼，工具負責做到。</p></details><details><summary>MCP 是什麼？</summary><p>Model Context Protocol，一套讓 Agent 以標準方式連接各種工具與資料源的協定，像 USB 讓工具可插拔、可重用。</p></details><details><summary>Function Calling 和 MCP 差在哪？</summary><p>Function Calling 是模型端的能力：模型輸出結構化指令、決定要呼叫哪個工具與參數。MCP 是連接端的開放標準：讓 Agent 用統一方式發現並連上各種工具與資料源。前者管「模型怎麼說」，後者管「工具怎麼接」，兩者互補、常一起用。</p></details><details><summary>AI Agent 有哪些風險？</summary><p>誤用工具、無限迴圈、提示注入、造成不可逆操作；需限制權限、設步數／成本上限、危險動作由人類確認。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AI Agent 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "以 LLM 為大腦，透過「思考→行動→觀察」的 ReAct 迴圈自主呼叫工具、拆解並完成任務的系統；能採取行動，而不只是生成文字。"}}, {"@type": "Question", "name": "ReAct 迴圈是哪三步？", "acceptedAnswer": {"@type": "Answer", "text": "Thought（思考，決定下一步）→ Action（行動，呼叫工具）→ Observation（觀察，讀取結果），重複循環直到輸出最終答案。"}}, {"@type": "Question", "name": "Function Calling（工具呼叫）是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "讓模型輸出結構化指令（呼叫哪個函式、參數為何），由外部程式實際執行後把結果回傳；模型決定做什麼，工具負責做到。"}}, {"@type": "Question", "name": "MCP 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Model Context Protocol，一套讓 Agent 以標準方式連接各種工具與資料源的協定，像 USB 讓工具可插拔、可重用。"}}, {"@type": "Question", "name": "Function Calling 和 MCP 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "Function Calling 是模型端的能力：模型輸出結構化指令、決定要呼叫哪個工具與參數。MCP 是連接端的開放標準：讓 Agent 用統一方式發現並連上各種工具與資料源。前者管「模型怎麼說」，後者管「工具怎麼接」，兩者互補、常一起用。"}}, {"@type": "Question", "name": "AI Agent 有哪些風險？", "acceptedAnswer": {"@type": "Answer", "text": "誤用工具、無限迴圈、提示注入、造成不可逆操作；需限制權限、設步數／成本上限、危險動作由人類確認。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="rag.html">RAG 檢索增強生成</a><a href="prompt_engineering.html">提示工程</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="transformer.html">Transformer</a><a href="vector_db.html">向量資料庫</a><a href="temperature.html">溫度 Temperature</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

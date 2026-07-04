@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影像生成指標互動教學：FID & CLIP Score</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。 Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/diffusion_metrics_perfect.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="影像生成指標互動教學：FID &amp; CLIP Score">
+    <meta property="og:description" content="看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。 Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/diffusion_metrics_perfect.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="影像生成指標互動教學：FID &amp; CLIP Score">
+    <meta name="twitter:description" content="看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。 Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "影像生成指標互動教學：FID & CLIP Score",
+  "url": "https://akira.ipas-ai.com/diffusion_metrics_perfect.html",
+  "description": "看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。 Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent-clip: #f59e0b; /* CLIP Score 琥珀橘 */
+            --accent-fid: #2563eb;  /* FID 藍色 */
+            --accent-is: #06b6d4;   /* IS 數位青 */
+            --success: #10b981;     /* 完美對齊 綠色 */
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+            line-height: 1.6;
+            color: var(--primary);
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 { color: var(--accent-clip); margin-bottom: 10px; }
+        h2 { color: var(--primary); border-left: 5px solid var(--accent-clip); padding-left: 10px; margin-top: 30px; }
+
+        /* 頁籤樣式 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #e2e8f0;
+            color: var(--primary);
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active { display: block; }
+
+        /* 互動實驗室佈局 */
+        .interactive-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            justify-content: center;
+        }
+
+        .selector-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .action-btn.active-clip {
+            border-color: var(--accent-clip);
+            background: #fffbeb;
+            color: var(--accent-clip);
+        }
+
+        /* 看板 */
+        .panel {
+            flex: 1;
+            min-width: 320px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .svg-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            flex: 1.2;
+            min-width: 340px;
+        }
+
+        .metric-badge {
+            padding: 12px;
+            border-radius: 6px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .bold-num {
+            font-family: monospace;
+            font-size: 24px;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background: var(--light);
+        }
+        .card h3 { margin-top: 0; }
+
+        .desc-highlight {
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-clip);
+            background: #fffbeb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Diffusion 擴散模型指標新手村 (排版修正版)</h1>
+        <p>進入跨模態幾何空間，秒懂 AI 圖像品質（FID）與圖文不合判定（CLIP Score）的科學標準！</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'playground')">1. CLIP 跨模態圖文一致性實驗室</button>
+        <button class="tab-btn" onclick="switchTab(event, 'history_tab')">2. 宏觀評估：FID 品質與 IS 多樣性</button>
+    </div>
+
+    <div id="playground" class="tab-content active">
+        <h2>文字提示詞與生成圖像的契合度判定</h2>
+        <p class="desc-highlight">
+            <strong>核心白話：</strong>文生圖模型（Diffusion）最怕「答非所問」。CLIP 模型將<b>文字提示詞</b>與<b>生成圖片</b>分別轉換成特徵向量。如果兩者的**夾角越小、餘弦相似度越高**，代表圖文越一致！
+        </p>
+
+        <div style="margin-bottom: 10px; font-weight: bold;">提示詞 (Prompt)：『 一隻穿西裝的紳士貓咪 』</div>
+        <div style="margin-bottom: 10px; font-style: italic; color: #475569;">👇 請切換測試不同的 Diffusion 模型生成結果：</div>
+        <div class="selector-box">
+            <button class="action-btn active-clip" onclick="changeModel(event, 'smart_diffusion')">🔥 優秀的模型 (精準畫出穿西裝的貓)</button>
+            <button class="action-btn" onclick="changeModel(event, 'dumb_diffusion')">❌ 跑題的模型 (只畫了背景，忘了西裝)</button>
+        </div>
+
+        <div class="interactive-container">
+            <div class="svg-card">
+                <h3 style="margin-top:0; color: #475569; font-size: 15px;">🌌 CLIP 跨模態潛在空間向量夾角 (Cosine Similarity)</h3>
+                <div style="border: 1px solid var(--border); border-radius: 6px; display: inline-block; background: #0f172a;">
+                    <svg id="clipSvg" width="420" height="280">
+                        <line x1="130" y1="230" x2="330" y2="230" stroke="var(--accent-clip)" stroke-width="3" stroke-linecap="round" />
+                        <polygon points="330,225 342,230 330,235" fill="var(--accent-clip)" />
+                        <text x="240" y="250" fill="var(--accent-clip)" font-size="12" font-weight="bold" text-anchor="middle">文字提示詞向量 (Text)</text>
+
+                        </svg>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <h3 style="margin-top:0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">📊 跨模態即時判定數據</h3>
+                
+                <div class="metric-badge" style="background: var(--accent-clip);">
+                    🎯 CLIP Score (圖文一致性) — 越高越好
+                    <span class="bold-num" id="lblCLIP">0.00</span>
+                </div>
+
+                <div class="metric-badge" style="background: var(--accent-fid);">
+                    🖼️ FID (圖像品質誤差) — 越低越精緻
+                    <span class="bold-num" id="lblFID">0.00</span>
+                </div>
+
+                <div id="playgroundInsight" style="padding: 12px; background: #f8fafc; border-radius:6px; font-size: 13px; font-weight: bold; border-left: 4px solid var(--accent-clip); min-height: 65px;">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="history_tab" class="tab-content">
+        <h2>宏觀統計：FID 圖像品質與 IS 多樣性</h2>
+        <p>評估擴散模型時，我們不能只抽樣一張好看的圖，必須生成一萬張圖進行集團統計。以下圖表展示了歷代文生圖模型在**圖像品質（FID）**上的進步趨勢：</p>
+        
+        <div class="interactive-container" style="align-items: center;">
+            <div class="svg-card" style="padding: 20px; flex: 1.2;">
+                <h3 style="margin-top:0; color: #475569; font-size: 15px;">📈 歷代 Diffusion 模型 FID 走勢（越低越逼真）</h3>
+                <svg width="400" height="200" style="background: white; overflow: visible; display: block; margin: 0 auto;">
+                    <line x1="50" y1="170" x2="360" y2="170" stroke="#475569" stroke-width="1.5"/>
+                    <line x1="50" y1="20" x2="50" y2="170" stroke="#475569" stroke-width="1.5"/>
+                    
+                    <text x="35" y="25" fill="#64748b" font-size="10">30.0 (差)</text>
+                    <text x="35" y="150" fill="#64748b" font-size="10">8.0 (強)</text>
+                    
+                    <path d="M 70,35 L 190,100 L 310,148" fill="none" stroke="var(--accent-fid)" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <circle cx="70" cy="35" r="5" fill="var(--primary)"/>
+                    <text x="75" y="30" font-size="11" font-weight="bold">早期概念款 (28.0)</text>
+
+                    <circle cx="190" cy="100" r="5" fill="var(--primary)"/>
+                    <text x="195" y="95" font-size="11" font-weight="bold">SD v1.5 (14.0)</text>
+
+                    <circle cx="310" cy="148" r="5" fill="var(--success)"/>
+                    <text x="250" y="140" font-size="11" font-weight="bold" fill="var(--success)">現代頂尖模型 (8.2)</text>
+                </svg>
+            </div>
+
+            <div class="panel">
+                <h3>💡 擴散模型兩大客觀評估標準</h3>
+                <ul>
+                    <li><b>FID (Fréchet Inception Distance)：圖像品質</b><br>將一萬張 AI 生成的圖片與一萬張真實世界的照片同時餵進特徵網路，計算兩個集團分佈的「幾何距離」。<b>FID 越低，代表生成圖片的逼真度越好</b>。</li>
+                    <li><b>IS (Inception Score)：生成多樣性</b><br>專注於看模型「有沒有創意思維」。一個優秀的 Diffusion 模型必須能同時畫出豐富多樣的類別，IS 分數才會高。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card" style="border-top: 4px solid var(--accent-fid);">
+                <h3>🔷 FID (圖像品質)</h3>
+                <p>評估模型生成畫面的精緻度與逼真度。目前全世界公認最權威的硬核指標，數值越低越完美。</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent-clip);">
+                <h3>🔶 CLIP Score (圖文一致性)</h3>
+                <p>評估模型有沒有「聽懂人話」、畫出正確的提示詞語義。利用跨模態網路在同一個大腦維度裡進行餘弦夾角比對，是文生圖模型的黃金標準。</p>
+            </div>
+            <div class="card" style="border-top: 4px solid var(--accent-is);">
+                <h3>🔮 IS (Inception Score 多樣性)</h3>
+                <p>防範模型產生「模式崩塌」或單一輸出。越高代表模型生成的物體既清晰明確，種類又豐富多樣。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 跨瀏覽器安全頁籤切換
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        if (e && e.currentTarget) {
+            e.currentTarget.classList.add('active');
+        }
+        if(tabId === 'playground') { updatePlayground(); }
+    }
+
+    // ================= 1. CLIP 幾何空間數據庫 =================
+    const modelDataset = {
+        smart_diffusion: {
+            clip: 0.325, fid: 8.20,
+            angle: 35, 
+            desc: "🔥 <b>優異的擴散模型表現：</b> 生成圖像特徵（藍線）與你的提示詞文字語義（橘線）<b>夾角非常小 (僅 35 度)</b>！這在數學上代表兩者餘弦相似度極高，CLIP Score 拿到了 0.325 的高分，AI 完美聽懂人話並畫出了穿西裝的貓！"
+        },
+        dumb_diffusion: {
+            clip: 0.110, fid: 24.50,
+            angle: 78, 
+            desc: "❌ <b>跑題的模型表現：</b> 模型完全畫歪了！生成圖像的向量直接往偏上方偏移，<b>與提示詞夾角高達 78 度 (幾近垂直無關)</b>。CLIP Score 暴跌至 0.110，AI 漏掉了『穿西裝』的核心語義，圖文嚴重不符！"
+        }
+    };
+
+    let currentModel = 'smart_diffusion';
+
+    function changeModel(e, key) {
+        document.querySelectorAll('.selector-box button').forEach(btn => btn.classList.remove('active-clip'));
+        if(e && e.currentTarget) e.currentTarget.classList.add('active-clip');
+        currentModel = key;
+        updatePlayground();
+    }
+
+    function updatePlayground() {
+        const d = modelDataset[currentModel];
+        
+        document.getElementById('lblCLIP').innerText = d.clip.toFixed(3);
+        document.getElementById('lblFID').innerText = d.fid.toFixed(2);
+        document.getElementById('playgroundInsight').innerHTML = d.desc;
+
+        const svg = document.getElementById('clipSvg');
+        
+        // 保留底部的文字固定參考橫軸主線與文字，清除舊的動態線
+        const baseTextLine = svg.querySelector('line').outerHTML;
+        const baseArrow = svg.querySelector('polygon').outerHTML;
+        const baseLabel = svg.querySelector('text').outerHTML;
+        svg.innerHTML = baseTextLine + baseArrow + baseLabel;
+
+        // 已修正幾何比例：原點同步移位至 (130, 230)，向量長度維持 180 像素提供絕佳舒適感
+        const rad = (d.angle * Math.PI) / 100; 
+        const vectorLength = 170;
+        
+        const endX = 130 + vectorLength * Math.cos(rad);
+        const endY = 230 - vectorLength * Math.sin(rad);
+
+        // 1. 繪製動態藍色圖片特徵向量線 (增加了 text-anchor 控制排版避免貼邊)
+        svg.innerHTML += `
+            <line x1="130" y1="230" x2="${endX}" y2="${endY}" stroke="var(--accent-fid)" stroke-width="3" stroke-linecap="round" />
+            <polygon points="${endX},${endY+5} ${endX+8},${endY-2} ${endX-2},${endY-6}" fill="var(--accent-fid)" transform="rotate(${-d.angle} ${endX} ${endY})" />
+            <text x="${endX - 8}" y="${endY - 12}" fill="var(--accent-fid)" font-size="11" font-weight="bold" text-anchor="middle">生成圖像向量 (Image)</text>
+        `;
+
+        // 2. 繪製兩者之間的動態紅色夾角弧線 (原點同步對齊 130)
+        const arcRadius = 55;
+        const arcEndX = 130 + arcRadius * Math.cos(rad);
+        const arcEndY = 230 - arcRadius * Math.sin(rad);
+        
+        svg.innerHTML += `
+            <path d="M ${130 + arcRadius},230 A ${arcRadius},${arcRadius} 0 0,0 ${arcEndX},${arcEndY}" fill="none" stroke="var(--danger)" stroke-width="2" />
+            <text x="${130 + arcRadius + 12}" y="${230 - 18}" fill="var(--danger)" font-size="11" font-weight="bold">夾角 θ = ${d.angle}°</text>
+        `;
+    }
+
+    // 初始化執行
+    updatePlayground();
+</script>
+
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>擴散模型(Diffusion)是當前主流影像生成技術,iPAS 生成式 AI 考點(中級科目一)。重點:加噪再學去噪、逐步從雜訊生成,品質高、訓練比 GAN 穩,是 Stable Diffusion、Midjourney 的底層。易混點:評估生成影像看 FID(與真實分布距離,越低越好)與 IS,別用準確率;Diffusion 取樣步驟多、較慢。情境:文字生圖、影像編輯;與 GAN、VAE 並列三大生成法。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>生成影像怎麼評估品質？</summary><p>看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。</p></details><details><summary>FID 是什麼？</summary><p>Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。</p></details><details><summary>Inception Score(IS)衡量什麼？</summary><p>同時看單張清晰可辨(分類有信心)與整體多樣(類別分布均勻)；但有局限(不比對真實分布、易被鑽)，常與 FID 並用。</p></details><details><summary>為什麼自動指標不夠？</summary><p>FID 與 IS 抓不到語意正確(如文字生圖是否符合提示)與細節合理性；需人工評估或用 CLIP 分數看圖文對齊。</p></details><details><summary>評估生成模型常見陷阱？</summary><p>只看單一指標、忽略多樣性(模式崩潰會讓 FID 看似不錯但內容單調)、樣本數不足、與真實分布不可比。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "生成影像怎麼評估品質？", "acceptedAnswer": {"@type": "Answer", "text": "看逼真度與多樣性兩面向；常用 FID、Inception Score(IS)等自動指標，搭配人工觀感判斷。"}}, {"@type": "Question", "name": "FID 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Fréchet Inception Distance，比較生成影像與真實影像在特徵空間的分布距離；越低代表越逼真且分布越接近真實，是最常用指標。"}}, {"@type": "Question", "name": "Inception Score(IS)衡量什麼？", "acceptedAnswer": {"@type": "Answer", "text": "同時看單張清晰可辨(分類有信心)與整體多樣(類別分布均勻)；但有局限(不比對真實分布、易被鑽)，常與 FID 並用。"}}, {"@type": "Question", "name": "為什麼自動指標不夠？", "acceptedAnswer": {"@type": "Answer", "text": "FID 與 IS 抓不到語意正確(如文字生圖是否符合提示)與細節合理性；需人工評估或用 CLIP 分數看圖文對齊。"}}, {"@type": "Question", "name": "評估生成模型常見陷阱？", "acceptedAnswer": {"@type": "Answer", "text": "只看單一指標、忽略多樣性(模式崩潰會讓 FID 看似不錯但內容單調)、樣本數不足、與真實分布不可比。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="diffusion.html">Diffusion</a><a href="mae-mse-rmse-r2.html">MAE、MSE、RMSE、R²</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="roc_interactive.html">準確率、AUC-ROC、Log Loss</a><a href="matrix.html">準確率、邊界間距</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

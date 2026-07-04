@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVM (支持向量機) 互動式</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，對新資料的泛化通常越好。真正決定邊界的只有最靠近邊界的少數樣本，稱為支援向量。 當資料在原空間線性不可分時，核函數(如 RBF、多項式)會隱式地把資料映到更高維空間，在那裡找線性邊界，等於在原空間畫出非線性邊界，而且不必真的算出高維座標。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/svm.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SVM (支持向量機) 互動式">
+    <meta property="og:description" content="找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，對新資料的泛化通常越好。真正決定邊界的只有最靠近邊界的少數樣本，稱為支援向量。 當資料在原空間線性不可分時，核函數(如 RBF、多項式)會隱式地把資料映到更高維空間，在那裡找線性邊界，等於在原空間畫出非線性邊界。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/svm.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SVM (支持向量機) 互動式">
+    <meta name="twitter:description" content="找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，泛化通常越好。真正決定邊界的只有少數支援向量。核技巧把線性不可分的資料映到高維再找線性邊界。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "SVM (支持向量機) 互動式",
+  "url": "https://akira.ipas-ai.com/svm.html",
+  "description": "找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，對新資料的泛化通常越好。真正決定邊界的只有最靠近邊界的少數樣本，稱為支援向量。當資料在原空間線性不可分時，核函數(如 RBF、多項式)會隱式地把資料映到更高維空間，在那裡找線性邊界，等於在原空間畫出非線性邊界，而且不必真的算出高維座標。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --orange:#ea580c; --orange-d:#c2410c; --blue:#2563eb; --blue-d:#1d4ed8;
+            --redc:#d32f2f; --bluec:#1976d2; --green:#16a34a; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:940px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#9a3412 0%,#ea580c 52%,#fb923c 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(234,88,12,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:940px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#fed7aa 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--orange-d); font-weight:700}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#fff7ed; border-left:5px solid var(--orange)}
+        .note.meta{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.95rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .sm{color:var(--blue-d); font-weight:800}
+        .cmp .lg{color:var(--rose); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--orange);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--orange-d)}
+
+        .qa{background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #fde4c8; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--orange-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-card{background:#fff7ed; border:1px solid #fadcc0; border-radius:14px; padding:18px; margin:14px 0; text-align:center}
+        .viz-scroll{overflow-x:auto}
+        #svm-svg{border:1px solid #e7d8c8; border-radius:8px; background:#fffdfb; cursor:crosshair; max-width:100%; height:auto}
+        .sv-highlight{fill:none; stroke:#FFD700; stroke-width:3; stroke-dasharray:5,3; animation:pulse 1s infinite}
+        @keyframes pulse{0%{stroke-width:3; opacity:.6} 50%{stroke-width:6; opacity:1} 100%{stroke-width:3; opacity:.6}}
+        #slider-container{margin:18px auto 0; max-width:460px}
+        #slider-container label{font-weight:700}
+        #angle-slider{width:70%; accent-color:var(--orange); vertical-align:middle}
+        #margin-display{font-weight:bold; color:#2e7d32; font-size:1.25em; display:block; margin-top:10px; min-height:30px}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🛣️ 最大間隔分類器 · iPAS 常考</span>
+        <h1>SVM 支援向量機：在兩類之間，畫一條最寬的「安全道路」</h1>
+        <p>很多條線都能把兩類分開，但 SVM 要找<b>最好的那一條</b>——讓兩類之間的「空白走廊」最寬。走廊越寬，新資料就越不容易踩錯邊。這頁帶你看懂最大間隔、支援向量，以及讓 SVM 能處理彎曲邊界的「核技巧」。</p>
+        <div class="chips"><span>最大間隔</span><span>支援向量</span><span>超平面</span><span>核技巧 Kernel</span><span>C 與 γ</span><span>標準化</span></div>
+    </header>
+
+    <!-- ===== 1. 白話 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、SVM 在做什麼？</h2>
+        <p class="lead">一句話：<span class="term">在兩類之間，找一條讓「間隔（margin）最大」的分界線</span>。</p>
+        <div class="note def">
+            <h4>💡 白話定義：找最寬的馬路</h4>
+            要把紅、藍兩群分開，能畫的線有無限多條。SVM 的標準是：<b>在兩群中間鋪一條「馬路」，馬路要越寬越好</b>。馬路的<b>正中線</b>就是決策邊界（超平面）。為什麼要最寬？因為<span class="hl">馬路越寬，預留的容錯空間越大</span>，新資料掉進來時越不容易被分錯——也就是泛化越好。
+        </div>
+    </section>
+
+    <!-- ===== 2. 支援向量 ===== -->
+    <section class="lesson">
+        <h2>📌 二、什麼是「支援向量」？</h2>
+        <p class="lead">SVM 的名字就來自這個關鍵概念。</p>
+        <div class="note def">
+            <h4>頂住馬路邊的那幾個點</h4>
+            決定這條馬路能畫多寬的，<b>只有最靠近馬路邊、「頂住」邊界的那少數幾個點</b>——它們就是<span class="term">支援向量（Support Vectors）</span>。神奇的是：<span class="hl">其他離邊界遠的點，移動它、甚至刪掉它，邊界完全不變</span>。所以 SVM 只靠少數關鍵樣本撐起整個模型，這讓它對「非邊界的雜訊點」很穩健，也是它名字的由來。
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：旋轉線，找最寬的馬路</h2>
+        <p class="lead">拖動滑桿旋轉分界線，看「道路寬度（Margin）」怎麼變，找出讓它最大的角度。</p>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            🔴紅點 / 🔵藍點 = 兩個類別；<b>黑線</b>＝決策邊界（馬路中線）；<b>黃色區帶</b>＝馬路（margin），兩側虛線是邊界；<b>金色發光圈</b>＝<b>支援向量</b>（頂住邊界的點）。旋轉到讓<b>道路寬度最大</b>的角度，就是 SVM 想找的答案。若角度讓兩類重疊，會顯示「此角度無法分割」。
+        </div>
+
+        <div class="demo-card">
+            <div class="viz-scroll">
+                <svg id="svm-svg" width="500" height="500" viewBox="-250 -250 500 500">
+                    <defs>
+                        <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect x="-250" y="-250" width="500" height="500" fill="url(#grid)" />
+                    <g id="margin-area" opacity="0.1"></g>
+                    <g id="decision-boundary"></g>
+                    <g id="points-group"></g>
+                    <g id="sv-highlights"></g>
+                </svg>
+            </div>
+            <div id="slider-container">
+                <label for="angle-slider">分隔線角度：</label>
+                <input type="range" id="angle-slider" min="0" max="180" value="90" step="1">
+                <span id="angle-text">90°</span>
+                <span id="margin-display">道路寬度 (Margin): 0.00</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 核技巧 ===== -->
+    <section class="lesson">
+        <h2>🌀 四、線性分不開怎麼辦？核技巧（Kernel Trick）</h2>
+        <p class="lead">真實資料常常一條直線怎麼擺都分不開（例如一類被另一類包在中間）。SVM 有一招很漂亮。</p>
+
+        <div class="note def">
+            <h4>🎈 把資料「升維」，就能用平面切開</h4>
+            想像桌上一排球：紅、藍、紅交錯排，<b>在這條線（1 維）上，一刀怎麼切都分不開</b>。但如果把<b>外側的紅球往上抬起來</b>（升到 2 維），紅球變高、藍球留低——這時<b>一條水平線就能把上下分開</b>了！<br>
+            <span class="term">核函數（Kernel）</span>就是在做這件事：把線性不可分的資料<b>隱式地映到更高維空間</b>，在那裡找一個線性邊界（超平面），對應回原空間就成了一條<b>彎曲</b>的邊界。
+        </div>
+
+        <div style="text-align:center; margin:8px 0">
+            <svg width="380" height="220" viewBox="0 0 380 220" style="max-width:100%;height:auto">
+                <rect x="0" y="0" width="380" height="220" fill="#fbfcfe" rx="10"/>
+                <!-- original 1D line -->
+                <text x="20" y="200" font-size="12" fill="#64748b">升維前（1 維）：一刀切不開</text>
+                <line x1="40" y1="180" x2="340" y2="180" stroke="#cbd5e1" stroke-width="2"/>
+                <g><circle cx="80" cy="180" r="6" fill="#d32f2f"/><circle cx="110" cy="180" r="6" fill="#d32f2f"/>
+                   <circle cx="170" cy="180" r="6" fill="#1976d2"/><circle cx="190" cy="180" r="6" fill="#1976d2"/><circle cx="210" cy="180" r="6" fill="#1976d2"/>
+                   <circle cx="270" cy="180" r="6" fill="#d32f2f"/><circle cx="300" cy="180" r="6" fill="#d32f2f"/></g>
+                <!-- parabola lift -->
+                <path d="M 60 28 Q 190 300 320 28" fill="none" stroke="#fdba74" stroke-width="2"/>
+                <!-- lifted points (red high, blue low) -->
+                <g>
+                    <circle cx="80" cy="120" r="6" fill="#d32f2f"/><circle cx="110" cy="78" r="6" fill="#d32f2f"/>
+                    <circle cx="170" cy="40" r="6" fill="#1976d2"/><circle cx="190" cy="34" r="6" fill="#1976d2"/><circle cx="210" cy="40" r="6" fill="#1976d2"/>
+                    <circle cx="270" cy="78" r="6" fill="#d32f2f"/><circle cx="300" cy="120" r="6" fill="#d32f2f"/>
+                </g>
+                <!-- separating line -->
+                <line x1="50" y1="62" x2="330" y2="62" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4"/>
+                <text x="150" y="56" font-size="11" fill="#15803d" font-weight="bold">升維後：一條線就分開 ✅</text>
+            </svg>
+        </div>
+
+        <div class="note meta">
+            <h4>🔑 為什麼叫「trick」？三種常見核</h4>
+            最妙的是：它<b>不必真的算出高維座標</b>，靠核函數直接算「兩點在高維的相似度」就好，省下大量運算。常見核：<b>線性核</b>（資料本來就好分時用）、<b>多項式核</b>、<b>RBF（高斯）核</b>（最常用、能畫很彎的邊界）。
+        </div>
+    </section>
+
+    <!-- ===== 5. C 與 γ ===== -->
+    <section class="lesson">
+        <h2>🎚️ 五、兩個關鍵參數：C 與 γ</h2>
+        <p class="lead">用 SVM（尤其 RBF 核）一定會碰到這兩個旋鈕，太大都會過擬合。</p>
+        <table class="cmp">
+            <tr><th>參數</th><th><span class="sm">設小</span></th><th><span class="lg">設大</span></th></tr>
+            <tr><td><b>C</b>（容錯／軟間隔）</td><td>容許較多誤分、間隔寬、較平滑 → 可能<b>欠擬合</b></td><td>嚴格不容錯、間隔窄、貼合訓練 → 易<b>過擬合</b></td></tr>
+            <tr><td><b>γ</b>（RBF 核寬）</td><td>單點影響範圍大、邊界平滑 → 可能<b>欠擬合</b></td><td>單點影響範圍小、邊界彎曲貼點 → 易<b>過擬合</b></td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🔧 怎麼調</h4>
+            <b>C</b> 管「要多嚴格地把每個點分對」；<b>γ</b> 管「每個點的影響能傳多遠、邊界能多彎」。兩個一起用<b>網格搜尋 + 交叉驗證</b>找最佳組合。記住口訣：<span class="hl">C 大、γ 大 → 越貼訓練資料 → 越容易過擬合</span>。
+        </div>
+    </section>
+
+    <!-- ===== 6. 優缺點 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 六、優缺點與注意事項</h2>
+        <div class="note warn">
+            <h4>⚠️ 用 SVM 前一定要標準化</h4>
+            SVM 以<b>距離與內積</b>為基礎，若特徵尺度差很多，大尺度特徵會主導結果。<b>務必先標準化</b>，讓每個特徵公平參與。
+        </div>
+        <div class="keys">
+            <div class="keycard"><b>✅ 高維、樣本不多時很強</b>有「最大間隔」的理論基礎，文字、影像等高維問題表現好。</div>
+            <div class="keycard"><b>✅ 對非邊界雜訊穩健</b>只靠少數支援向量，遠處的點不影響。</div>
+            <div class="keycard"><b>✅ 核技巧處理非線性</b>RBF 核能畫出很彎的邊界。</div>
+            <div class="keycard"><b>⚠️ 資料量大時訓練慢</b>大規模資料較不適合。</div>
+            <div class="keycard"><b>⚠️ 要調參、要標準化</b>核與 C、γ 需細調。</div>
+            <div class="keycard"><b>⚠️ 機率輸出需校準</b>原生不直接給可靠機率。</div>
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. SVM 的目標是什麼？為什麼要「最大間隔」？</summary>
+                <p>找能分開兩類、且<b>間隔（margin）最大</b>的決策邊界。間隔越大，容錯空間越大，對沒見過的資料<b>泛化通常越好</b>。</p></details>
+            <details><summary>Q2. 什麼是支援向量？</summary>
+                <p>最靠近邊界、<b>「頂住」margin</b> 的少數樣本。只有它們決定邊界；其他點移動或刪除都不影響邊界——這也是 SVM 名字的由來。</p></details>
+            <details><summary>Q3. 核技巧（kernel trick）在做什麼？</summary>
+                <p>資料線性不可分時，核函數<b>隱式地把它映到更高維空間</b>、在那裡找線性邊界（＝原空間的非線性邊界），而且<b>不必真的算高維座標</b>，省運算。常用 RBF、多項式核。</p></details>
+            <details><summary>Q4. C 和 γ 設太大會怎樣？</summary>
+                <p>兩者都傾向<b>過擬合</b>：C 大＝不容錯、邊界貼訓練資料；γ 大＝單點影響範圍小、邊界彎曲貼每個點。要用交叉驗證調。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>最大間隔</b>在兩類間找最寬的馬路，中線就是決策邊界。</div>
+            <div class="keycard"><b>支援向量</b>只有頂住邊界的少數點決定邊界，其他點不影響。</div>
+            <div class="keycard"><b>核技巧</b>線性不可分 → 升維找線性邊界 = 原空間非線性邊界。</div>
+            <div class="keycard"><b>C 與 γ</b>都設太大會過擬合；用交叉驗證調。</div>
+            <div class="keycard"><b>務必標準化</b>SVM 靠距離/內積，怕尺度不一。</div>
+            <div class="keycard"><b>主場</b>高維、樣本不多；大資料較慢。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const slider = document.getElementById('angle-slider');
+        const angleText = document.getElementById('angle-text');
+        const marginDisplay = document.getElementById('margin-display');
+
+        const pointsGroup = document.getElementById('points-group');
+        const svHighlightsGroup = document.getElementById('sv-highlights');
+        const boundaryGroup = document.getElementById('decision-boundary');
+        const marginAreaGroup = document.getElementById('margin-area');
+
+        const pointsClassA = []; // Red
+        const pointsClassB = []; // Blue
+        const numPoints = 20;
+
+        function randomNormal() {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+        }
+
+        function setupData() {
+            pointsGroup.innerHTML = '';
+            for (let i = 0; i < numPoints; i++) {
+                let x = -80 + randomNormal() * 30;
+                let y = -80 + randomNormal() * 30;
+                if (x + y > -40) { x -= 20; y -= 20; }
+                pointsClassA.push({x, y});
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", 4);
+                circle.setAttribute("fill", "#d32f2f");
+                pointsGroup.appendChild(circle);
+            }
+            for (let i = 0; i < numPoints; i++) {
+                let x = 80 + randomNormal() * 30;
+                let y = 80 + randomNormal() * 30;
+                if (x + y < 40) { x += 20; y += 20; }
+                pointsClassB.push({x, y});
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                circle.setAttribute("r", 4);
+                circle.setAttribute("fill", "#1976d2");
+                pointsGroup.appendChild(circle);
+            }
+        }
+
+        function updateSVM(angleDeg) {
+            angleText.textContent = angleDeg + "°";
+            const rad = angleDeg * Math.PI / 180;
+            const w = { x: Math.cos(rad), y: Math.sin(rad) };
+
+            const projsA = pointsClassA.map(p => ({val: p.x * w.x + p.y * w.y, p}));
+            const projsB = pointsClassB.map(p => ({val: p.x * w.x + p.y * w.y, p}));
+            projsA.sort((a,b) => a.val - b.val);
+            projsB.sort((a,b) => a.val - b.val);
+
+            const maxA = projsA[projsA.length-1].val;
+            const minA = projsA[0].val;
+            const maxB = projsB[projsB.length-1].val;
+            const minB = projsB[0].val;
+
+            let margin = 0;
+            let boundaryOffset = 0;
+            let svPoints = [];
+            let isValidSeparation = true;
+
+            if (maxA < minB) {
+                margin = minB - maxA;
+                boundaryOffset = (maxA + minB) / 2;
+                svPoints = [
+                    ...projsA.filter(item => Math.abs(item.val - maxA) < 0.1).map(i => i.p),
+                    ...projsB.filter(item => Math.abs(item.val - minB) < 0.1).map(i => i.p)
+                ];
+            } else if (maxB < minA) {
+                margin = minA - maxB;
+                boundaryOffset = (maxB + minA) / 2;
+                svPoints = [
+                    ...projsB.filter(item => Math.abs(item.val - maxB) < 0.1).map(i => i.p),
+                    ...projsA.filter(item => Math.abs(item.val - minA) < 0.1).map(i => i.p)
+                ];
+            } else {
+                isValidSeparation = false;
+            }
+
+            render(w, boundaryOffset, margin, svPoints, isValidSeparation);
+        }
+
+        function render(w, offset, margin, svPoints, isValid) {
+            boundaryGroup.innerHTML = '';
+            svHighlightsGroup.innerHTML = '';
+            marginAreaGroup.innerHTML = '';
+
+            if (!isValid) {
+                marginDisplay.textContent = "重疊！此角度無法分割";
+                marginDisplay.style.color = "red";
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", -250 * -w.y);
+                line.setAttribute("y1", -250 * w.x);
+                line.setAttribute("x2", 250 * -w.y);
+                line.setAttribute("y2", 250 * w.x);
+                line.setAttribute("stroke", "red");
+                line.setAttribute("stroke-width", "2");
+                boundaryGroup.appendChild(line);
+                return;
+            }
+
+            marginDisplay.textContent = `道路寬度 (Margin): ${margin.toFixed(2)}`;
+            marginDisplay.style.color = "#2e7d32";
+
+            svPoints.forEach(p => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", p.x);
+                circle.setAttribute("cy", p.y);
+                circle.setAttribute("r", 10);
+                circle.setAttribute("class", "sv-highlight");
+                svHighlightsGroup.appendChild(circle);
+            });
+
+            function drawLine(cValue, color, dash) {
+                const p0x = cValue * w.x;
+                const p0y = cValue * w.y;
+                const len = 400;
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", p0x - len * w.y);
+                line.setAttribute("y1", p0y + len * w.x);
+                line.setAttribute("x2", p0x + len * w.y);
+                line.setAttribute("y2", p0y - len * w.x);
+                line.setAttribute("stroke", color);
+                line.setAttribute("stroke-width", dash ? "1" : "3");
+                if (dash) line.setAttribute("stroke-dasharray", "5,5");
+                boundaryGroup.appendChild(line);
+            }
+
+            drawLine(offset, "#333", false);
+            drawLine(offset - margin/2, "#666", true);
+            drawLine(offset + margin/2, "#666", true);
+
+            const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            const half = margin/2;
+            const len = 400;
+            const p0x = (offset - half) * w.x; const p0y = (offset - half) * w.y;
+            const p1x = (offset + half) * w.x; const p1y = (offset + half) * w.y;
+            const points = [
+                `${p0x - len * w.y},${p0y + len * w.x}`,
+                `${p1x - len * w.y},${p1y + len * w.x}`,
+                `${p1x + len * w.y},${p1y - len * w.x}`,
+                `${p0x + len * w.y},${p0y - len * w.x}`
+            ].join(" ");
+            poly.setAttribute("points", points);
+            poly.setAttribute("fill", "gold");
+            marginAreaGroup.appendChild(poly);
+        }
+
+        slider.addEventListener('input', (e) => updateSVM(parseInt(e.target.value)));
+
+        setupData();
+        slider.value = 135;
+        updateSVM(135);
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>SVM(支援向量機)找讓兩類間隔最大的決策邊界,iPAS 中級科目三考點。重點:邊界由少數支援向量決定、泛化佳;用核技巧(RBF、多項式)把資料映到高維處理非線性。易混點:核函數讓線性不可分變可分;C(容錯)與 gamma(核寬)要細調、影響過擬合與欠擬合;中小型高維資料表現好、大資料較慢。情境:文字分類、影像等高維問題。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>SVM 的核心想法是什麼？</summary><p>找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，對新資料的泛化通常越好。真正決定邊界的只有最靠近邊界的少數樣本，稱為支援向量。</p></details><details><summary>什麼是核技巧(kernel trick)？</summary><p>當資料在原空間線性不可分時，核函數(如 RBF、多項式)會隱式地把資料映到更高維空間，在那裡找線性邊界，等於在原空間畫出非線性邊界，而且不必真的算出高維座標。</p></details><details><summary>參數 C 和 γ 各控制什麼？</summary><p>C 控制「容忍誤分 vs 間隔大小」的取捨：C 大趨向不容錯(易過擬合)、C 小容許部分誤分(間隔大、較泛化)。γ(RBF)控制單一樣本的影響範圍：γ 大邊界彎曲(易過擬合)、γ 小較平滑。</p></details><details><summary>SVM 的優缺點？</summary><p>優點：高維、樣本不多時表現好，有最大間隔的理論基礎，較不受非邊界點影響。缺點：資料量大時訓練慢、對特徵縮放敏感、核與參數需調校、機率輸出需額外校準。</p></details><details><summary>SVM 一定要先標準化嗎？</summary><p>建議要。SVM 以距離與內積為基礎，若特徵尺度差異大，大尺度特徵會主導，標準化能讓各特徵公平參與。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "SVM 的核心想法是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "找一條能把兩類分開、且「間隔(margin)最大」的決策邊界(超平面)；間隔越大，對新資料的泛化通常越好。真正決定邊界的只有最靠近邊界的少數樣本，稱為支援向量。"}}, {"@type": "Question", "name": "什麼是核技巧(kernel trick)？", "acceptedAnswer": {"@type": "Answer", "text": "當資料在原空間線性不可分時，核函數(如 RBF、多項式)會隱式地把資料映到更高維空間，在那裡找線性邊界，等於在原空間畫出非線性邊界，而且不必真的算出高維座標。"}}, {"@type": "Question", "name": "參數 C 和 γ 各控制什麼？", "acceptedAnswer": {"@type": "Answer", "text": "C 控制「容忍誤分 vs 間隔大小」的取捨：C 大趨向不容錯(易過擬合)、C 小容許部分誤分(間隔大、較泛化)。γ(RBF)控制單一樣本的影響範圍：γ 大邊界彎曲(易過擬合)、γ 小較平滑。"}}, {"@type": "Question", "name": "SVM 的優缺點？", "acceptedAnswer": {"@type": "Answer", "text": "優點：高維、樣本不多時表現好，有最大間隔的理論基礎，較不受非邊界點影響。缺點：資料量大時訓練慢、對特徵縮放敏感、核與參數需調校、機率輸出需額外校準。"}}, {"@type": "Question", "name": "SVM 一定要先標準化嗎？", "acceptedAnswer": {"@type": "Answer", "text": "建議要。SVM 以距離與內積為基礎，若特徵尺度差異大，大尺度特徵會主導，標準化能讓各特徵公平參與。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">分類問題</a><a href="knn.html">KNN</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>決策樹 vs. 隨機森林 互動圖解</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="決策樹像一連串 if-else：每個節點挑特徵與門檻把資料分得最純(用資訊增益/熵或吉尼不純度)。單樹易過擬合、不穩；隨機森林用 bagging + 隨機特徵訓練多棵樹再投票，降變異、更準更穩。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/decision-tree-forest.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="決策樹 vs. 隨機森林 互動圖解">
+    <meta property="og:description" content="決策樹像一連串 if-else，用吉尼/熵把資料分最純。單樹易過擬合；隨機森林用 bagging + 隨機特徵訓練多棵樹再投票，降變異、更穩。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/decision-tree-forest.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="決策樹 vs. 隨機森林 互動圖解">
+    <meta name="twitter:description" content="決策樹像 if-else 用吉尼/熵分最純。單樹易過擬合；隨機森林用 bagging + 隨機特徵多棵樹投票，降變異、更穩。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "決策樹 vs. 隨機森林 互動圖解",
+  "url": "https://akira.ipas-ai.com/decision-tree-forest.html",
+  "description": "決策樹像一連串 if-else：每個節點挑特徵與門檻把資料分得最純(用資訊增益/熵或吉尼不純度)。單樹易過擬合、不穩；隨機森林用 bagging + 隨機特徵訓練多棵樹再投票，降變異、更準更穩。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+  <style>
+    :root{
+        --gr:#16a34a; --gr-d:#15803d; --gr-dd:#14532d;
+        --amber:#d97706; --red:#ef4444; --blue:#2563eb; --slate:#475569;
+        --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef5ef;
+    }
+    *{box-sizing:border-box}
+    body{
+        font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+        margin:0; padding:26px 14px 40px;
+        display:flex; flex-direction:column; align-items:center;
+        background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+    }
+    .hero{
+        width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+        background:linear-gradient(135deg,#14532d 0%,#16a34a 55%,#4ade80 100%);
+        color:#fff; box-shadow:0 14px 34px rgba(22,163,74,.28); margin-bottom:20px;
+    }
+    .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+        background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+    .hero h1{margin:0 0 10px; font-size:1.8rem; line-height:1.3}
+    .hero p{margin:0; font-size:1.05rem; opacity:.97}
+    .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+    .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+        padding:5px 11px; border-radius:999px}
+
+    .lesson{
+        width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+        box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+    }
+    .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+    .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+    .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+    .lesson p{margin:10px 0}
+    .hl{background:linear-gradient(transparent 62%,#bbf7d0 62%); font-weight:700; padding:0 1px}
+    .term{color:var(--gr-d); font-weight:800}
+
+    .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+    .note h4{margin:0 0 6px; font-size:1rem}
+    .note.def{background:#f0fdf4; border-left:5px solid var(--gr)}
+    .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+    .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+    .note.app{background:#eff6ff; border-left:5px solid var(--blue)}
+
+    .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+    .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+    .cmp th{background:#eef6f1; font-weight:800}
+    .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+    .cmp .t{color:var(--muted); font-weight:700} .cmp .f{color:var(--gr-d); font-weight:700}
+
+    .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+    .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--gr);
+        border-radius:12px; padding:13px 15px; font-size:.95rem}
+    .keycard b{display:block; margin-bottom:3px; color:var(--gr-d)}
+
+    .qa{background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:6px 18px; margin:12px 0}
+    .qa details{border-bottom:1px solid #d3f3dd; padding:11px 0}
+    .qa details:last-child{border-bottom:none}
+    .qa summary{cursor:pointer; font-weight:800; color:var(--gr-d)}
+    .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+    /* ===== demo (preserved) ===== */
+    .demo-card{background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:14px; margin:14px 0}
+    .demo-card svg{max-width:100%; height:auto; display:block; margin:0 auto}
+
+    @media(max-width:560px){
+        .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🌳 決策樹 vs 隨機森林 · iPAS 常考對比</span>
+        <h1>決策樹 vs 隨機森林：一棵樹，還是一片森林投票？</h1>
+        <p>決策樹像一連串「是非題」，直觀好懂但<b>容易鑽牛角尖（過擬合）</b>。隨機森林則是<b>「三個臭皮匠勝過一個諸葛亮」</b>——種很多棵不一樣的樹，讓它們<b>投票</b>，結果更穩更準。</p>
+        <div class="chips"><span>if-else 分裂</span><span>吉尼/熵</span><span>過擬合</span><span>Bagging</span><span>多樹投票</span></div>
+    </header>
+
+    <!-- ===== 1. 決策樹白話 ===== -->
+    <section class="lesson">
+        <h2>🌲 一、決策樹：一連串「是非題」</h2>
+        <p class="lead">決策樹就像玩「<b>20 個問題</b>」猜謎：一路問是非題，把可能性越縮越小，最後給出答案。</p>
+        <div class="note def">
+            <h4>怎麼決定「問哪個問題」？</h4>
+            每個節點挑一個<b>特徵＋門檻</b>來切，目標是切完之後<b>兩邊越「純」越好</b>（同一類的盡量分到同一邊）。純不純用 <span class="term">吉尼不純度（Gini）</span>或<span class="term">熵／資訊增益</span>衡量——選能讓資料<b>最純</b>的那一刀。一路切到<b>葉節點</b>，就給出預測。
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、動手玩：單樹走一條路 vs 森林投票</h2>
+        <p class="lead">上方切換「單一決策樹 / 隨機森林」。<b>點紫色菱形（未知資料點）</b>：單樹模式看它沿一條路徑走到葉節點；森林模式看三棵樹各自判斷、再匯總投票。</p>
+
+        <div class="demo-card">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"
+      style="background-color: #f9f9f9; font-family: 'Microsoft JhengHei', 'Heiti TC', Arial, sans-serif;">
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#999" />
+        </marker>
+        <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+          <feOffset dx="2" dy="2" result="offsetblur" />
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.2" />
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <style>
+        .node-rect {
+          fill: #fff;
+          stroke: #333;
+          stroke-width: 2px;
+          rx: 5;
+          ry: 5;
+          filter: url(#dropShadow);
+          cursor: default;
+        }
+        .leaf-rect-A { fill: #d4edda; stroke: #28a745; }
+        .leaf-rect-B { fill: #f8d7da; stroke: #dc3545; }
+        .connection { stroke: #999; stroke-width: 2px; marker-end: url(#arrowhead); fill: none; }
+        .label-text { font-size: 14px; text-anchor: middle; pointer-events: none; }
+        .path-label { font-size: 12px; fill: #666; background-color: rgba(255, 255, 255, 0.9); padding: 2px; }
+        .ui-button { fill: #e0e0e0; stroke: #999; stroke-width: 1px; cursor: pointer; transition: fill 0.3s; }
+        .ui-button:hover { fill: #d0d0d0; }
+        .ui-button.active { fill: #16a34a; stroke: #15803d; }
+        .ui-button-text { font-size: 16px; text-anchor: middle; pointer-events: none; fill: #333; }
+        .ui-button.active+.ui-button-text { fill: white; font-weight: bold; }
+        .data-point { fill: #9c27b0; stroke: #fff; stroke-width: 2px; cursor: pointer; filter: url(#dropShadow); transition: transform 0.2s; }
+        .data-point:hover { transform: scale(1.1); }
+        .data-point-clone { fill: #9c27b0; opacity: 0.7; stroke: none; pointer-events: none; }
+        .explainer-box { fill: #fffde7; stroke: #fdd835; stroke-width: 1px; rx: 5; }
+        .explainer-text { font-size: 14px; fill: #555; }
+        .title-text { font-size: 24px; font-weight: bold; fill: #333; text-anchor: middle; }
+      </style>
+
+      <text x="400" y="40" class="title-text">決策樹 vs. 隨機森林 互動圖解</text>
+
+      <g transform="translate(180, 70)">
+        <rect id="btn-tree" class="ui-button active" x="0" y="0" width="210" height="40" rx="5" />
+        <text x="105" y="25" class="ui-button-text">模式一：單一決策樹</text>
+
+        <rect id="btn-forest" class="ui-button" x="230" y="0" width="230" height="40" rx="5" />
+        <text x="345" y="25" class="ui-button-text">模式二：隨機森林 (多樹投票)</text>
+      </g>
+
+      <g id="input-section" transform="translate(400, 160)">
+        <text x="0" y="-25" class="label-text" style="font-weight: bold;">未知數據點 (特徵：紅色, 小型)</text>
+        <polygon id="main-data-point" class="data-point" points="0,-15 15,0 0,15 -15,0">
+          <title>點擊此處開始預測！</title>
+        </polygon>
+        <text x="0" y="30" class="label-text" font-size="12">(點擊紫色菱形開始)</text>
+      </g>
+
+      <g id="view-decision-tree" style="display: block;">
+        <g transform="translate(400, 240)">
+          <rect class="node-rect" x="-70" y="-20" width="140" height="40" />
+          <text class="label-text" y="5">是紅色嗎？</text>
+
+          <path class="connection" d="M0,20 C0,60 -200,40 -200,80" />
+          <rect class="node-rect" x="-270" y="80" width="140" height="40" />
+          <text class="label-text" x="-200" y="105">是大型嗎？</text>
+          <text class="path-label" x="-100" y="50">是</text>
+
+          <path class="connection" d="M0,20 C0,60 200,40 200,80" />
+          <rect class="node-rect leaf-rect-B" x="130" y="80" width="140" height="40" />
+          <text class="label-text" x="200" y="105">結果：類別 B (非紅)</text>
+          <text class="path-label" x="100" y="50">否</text>
+
+          <path class="connection" d="M-200,120 C-200,160 -300,140 -300,180" />
+          <rect class="node-rect leaf-rect-B" x="-380" y="180" width="160" height="40" />
+          <text class="label-text" x="-300" y="205">結果：類別 B (大紅)</text>
+          <text class="path-label" x="-260" y="150">是</text>
+
+          <path class="connection" d="M-200,120 C-200,160 -100,140 -100,180" />
+          <rect class="node-rect leaf-rect-A" x="-180" y="180" width="160" height="40" />
+          <text class="label-text" x="-100" y="205">結果：類別 A (小紅)</text>
+          <text class="path-label" x="-140" y="150">否</text>
+        </g>
+
+        <g transform="translate(100, 500)">
+          <rect class="explainer-box" width="600" height="85" />
+          <text class="explainer-text" x="20" y="30" font-weight="bold">單一決策樹特點：</text>
+          <text class="explainer-text" x="20" y="55">結構簡單直觀，像一系列是非題。</text>
+          <text class="explainer-text" x="20" y="75">但容易「過擬合」（太鑽牛角尖），對特定訓練數據太敏感。</text>
+        </g>
+      </g>
+
+      <g id="view-random-forest" style="display: none;">
+        <g transform="translate(0, 220)">
+          <g transform="translate(200, 0) scale(0.7)">
+            <rect class="node-rect" x="-60" y="-15" width="120" height="30" /><text class="label-text"
+              y="5">特徵隨機子集?</text>
+            <path class="connection" d="M0,15 L-60,60" />
+            <path class="connection" d="M0,15 L60,60" />
+            <rect class="node-rect leaf-rect-A" x="-100" y="60" width="80" height="30" /><text class="label-text"
+              x="-60" y="80">結果 A</text>
+            <rect class="node-rect leaf-rect-B" x="20" y="60" width="80" height="30" /><text class="label-text" x="60"
+              y="80">結果 B</text>
+            <text x="0" y="-30" class="label-text" font-weight="bold">樹 1</text>
+          </g>
+
+          <g transform="translate(400, 0) scale(0.7)">
+            <rect class="node-rect" x="-50" y="-15" width="100" height="30" /><text class="label-text"
+              y="5">不同特徵?</text>
+            <path class="connection" d="M0,15 L-40,60" />
+            <path class="connection" d="M0,15 L80,60" />
+            <rect class="node-rect leaf-rect-B" x="-80" y="60" width="80" height="30" /><text class="label-text" x="-40"
+              y="80">結果 B</text>
+            <rect class="node-rect" x="40" y="60" width="80" height="30" /><text class="label-text" x="80"
+              y="80">再判斷?</text>
+            <path class="connection" d="M80,90 L80,120" />
+            <rect class="node-rect leaf-rect-A" x="40" y="120" width="80" height="30" /><text class="label-text" x="80"
+              y="140">結果 A</text>
+            <text x="0" y="-30" class="label-text" font-weight="bold">樹 2</text>
+          </g>
+
+          <g transform="translate(600, 0) scale(0.7)">
+            <rect class="node-rect" x="-60" y="-15" width="120" height="30" /><text class="label-text"
+              y="5">另一組特徵?</text>
+            <path class="connection" d="M0,15 L-60,60" />
+            <path class="connection" d="M0,15 L60,60" />
+            <rect class="node-rect leaf-rect-A" x="-100" y="60" width="80" height="30" /><text class="label-text"
+              x="-60" y="80">結果 A</text>
+            <rect class="node-rect leaf-rect-B" x="20" y="60" width="80" height="30" /><text class="label-text" x="60"
+              y="80">結果 B</text>
+            <text x="0" y="-30" class="label-text" font-weight="bold">樹 3</text>
+          </g>
+        </g>
+
+        <g transform="translate(400, 420)">
+          <rect class="node-rect" x="-160" y="0" width="320" height="60" style="fill: #e3f2fd; stroke: #1976d2;" />
+          <text class="label-text" y="25" font-weight="bold" font-size="16">匯總投票區 (Majority Voting)</text>
+          <text id="voting-result-text" class="label-text" y="50" fill="#1976d2">等待結果...</text>
+        </g>
+
+        <g transform="translate(100, 500)">
+          <rect class="explainer-box" width="600" height="85" />
+          <text class="explainer-text" x="20" y="30" font-weight="bold">隨機森林特點：</text>
+          <text class="explainer-text" x="20" y="55">「三個臭皮匠，勝過一個諸葛亮」。建立多棵差異化的樹。</text>
+          <text class="explainer-text" x="20" y="75">最終結果由所有樹「投票」決定，更穩定、準確。</text>
+        </g>
+      </g>
+
+      <g id="animation-layer" pointer-events="none"></g>
+
+      <script>
+        //<![CDATA[
+        const btnTree = document.getElementById('btn-tree');
+        const btnForest = document.getElementById('btn-forest');
+        const viewTree = document.getElementById('view-decision-tree');
+        const viewForest = document.getElementById('view-random-forest');
+        const mainDataPoint = document.getElementById('main-data-point');
+        const animationLayer = document.getElementById('animation-layer');
+        const votingResultText = document.getElementById('voting-result-text');
+
+        let currentMode = 'tree';
+        let isAnimating = false;
+
+        function switchMode(mode) {
+          if (isAnimating) return;
+          currentMode = mode;
+          if (mode === 'tree') {
+            btnTree.classList.add('active');
+            btnForest.classList.remove('active');
+            viewTree.style.display = 'block';
+            viewForest.style.display = 'none';
+          } else {
+            btnForest.classList.add('active');
+            btnTree.classList.remove('active');
+            viewForest.style.display = 'block';
+            viewTree.style.display = 'none';
+            votingResultText.textContent = "等待結果...";
+          }
+        }
+
+        btnTree.addEventListener('click', () => switchMode('tree'));
+        btnForest.addEventListener('click', () => switchMode('forest'));
+
+        function createClone(x, y) {
+          const clone = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+          clone.setAttribute("points", "0,-10 10,0 0,10 -10,0");
+          clone.setAttribute("class", "data-point-clone");
+          clone.setAttribute("transform", `translate(${x}, ${y})`);
+          animationLayer.appendChild(clone);
+          return clone;
+        }
+
+        function animateElement(element, startX, startY, endX, endY, duration, delay = 0) {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              element.style.transition = `transform ${duration}ms ease-in-out`;
+              element.setAttribute("transform", `translate(${endX}, ${endY})`);
+              setTimeout(resolve, duration);
+            }, delay);
+          });
+        }
+
+        mainDataPoint.addEventListener('click', async () => {
+          if (isAnimating) return;
+          isAnimating = true;
+          animationLayer.innerHTML = '';
+          votingResultText.textContent = "等待結果...";
+
+          const startX = 400;
+          const startY = 160;
+
+          if (currentMode === 'tree') {
+            const p = createClone(startX, startY);
+            await animateElement(p, startX, startY, 400, 220, 500);
+            await animateElement(p, 400, 220, 200, 320, 500, 200);
+            await animateElement(p, 200, 320, 300, 420, 500, 200);
+
+            setTimeout(() => {
+              alert("預測結果：類別 A (小紅)\n\n路徑：是紅色 -> 不是大型 -> 類別 A");
+              p.remove();
+              isAnimating = false;
+            }, 800);
+
+          } else {
+            const p1 = createClone(startX, startY);
+            const p2 = createClone(startX, startY);
+            const p3 = createClone(startX, startY);
+
+            const move1 = animateElement(p1, startX, startY, 200, 220, 600);
+            const move2 = animateElement(p2, startX, startY, 400, 220, 600);
+            const move3 = animateElement(p3, startX, startY, 600, 220, 600);
+            await Promise.all([move1, move2, move3]);
+
+            const leaf1 = animateElement(p1, 200, 220, 140, 280, 800, 300);
+            const leaf2 = animateElement(p2, 400, 220, 440, 340, 1000, 300);
+            const leaf3 = animateElement(p3, 600, 220, 660, 280, 800, 300);
+            await Promise.all([leaf1, leaf2, leaf3]);
+
+            const vote1 = animateElement(p1, 140, 280, 380, 450, 700, 500);
+            const vote2 = animateElement(p2, 440, 340, 400, 450, 700, 500);
+            const vote3 = animateElement(p3, 660, 280, 420, 450, 700, 500);
+
+            votingResultText.textContent = "投票中：2票 A, 1票 B...";
+            await Promise.all([vote1, vote2, vote3]);
+
+            votingResultText.textContent = "最終結果：類別 A 勝出 (多數決)";
+            votingResultText.style.fontWeight = 'bold';
+
+            setTimeout(() => {
+              p1.remove(); p2.remove(); p3.remove();
+              isAnimating = false;
+            }, 1000);
+          }
+        });
+
+        switchMode('tree');
+        //]]>
+      </script>
+    </svg>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            <b>單樹</b>：資料點沿「是紅色？→ 是大型？」一路走到唯一的葉節點——路徑清楚、可解釋，但整棵樹的判斷押在<b>一條路徑</b>上。<b>森林</b>：三棵樹各用<b>不同的特徵/角度</b>判斷，可能各給不同答案，最後<b>多數決</b>（2 票 A、1 票 B → A 勝）。少數幾棵樹的錯誤會被多數<b>平均掉</b>。
+        </div>
+    </section>
+
+    <!-- ===== 3. 決策樹優缺點 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 三、決策樹的優點與致命傷</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--gr)"><b style="color:var(--gr)">✅ 直觀可解釋</b>一串是非題，能畫出來、能跟老闆解釋為什麼。</div>
+            <div class="keycard" style="border-left-color:var(--gr)"><b style="color:var(--gr)">✅ 不用標準化</b>依門檻切分，對特徵縮放不敏感，省去前處理。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">❌ 容易過擬合</b>不限制就會一直分到<b>連雜訊都背下來</b>，對新資料差。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">❌ 不穩定</b>換一點資料，整棵樹可能長得完全不同（高變異）。</div>
+        </div>
+        <div class="note meta">
+            <h4>怎麼抑制單樹過擬合？</h4>
+            <b>剪枝（pruning）、限制最大深度、設葉節點最小樣本數</b>——別讓它分太細。但更強的做法是……種一片森林。
+        </div>
+    </section>
+
+    <!-- ===== 4. 隨機森林 ===== -->
+    <section class="lesson">
+        <h2>🌳 四、隨機森林：讓「差異化」的樹一起投票</h2>
+        <p class="lead">隨機森林靠<b>兩層隨機</b>製造出一群「彼此不太一樣」的樹，再讓它們投票（分類）或平均（回歸）。</p>
+        <div class="keys">
+            <div class="keycard"><b>① Bagging（自助抽樣）</b>對訓練資料<b>有放回抽樣</b>，每棵樹看到的資料略不同。</div>
+            <div class="keycard"><b>② 隨機特徵子集</b>每次分裂只從<b>隨機一部分特徵</b>裡挑——讓樹彼此<b>去相關</b>，不會都長一樣。</div>
+            <div class="keycard"><b>③ 投票 / 平均</b>多棵樹的結果匯總，把個別樹的錯誤<b>平均掉</b>。</div>
+        </div>
+        <div class="note def">
+            <h4>🧠 為什麼有效？降變異</h4>
+            單棵樹<b>高變異</b>（不穩）；把很多棵<b>去相關</b>的樹平均起來，變異就大幅下降——這正是 <a href="bias_variance.html" style="color:#15803d;font-weight:700">偏差-變異</a> 裡「Bagging 降變異」的道理。代價是：<b>犧牲一點單樹的可解釋性</b>。
+        </div>
+    </section>
+
+    <!-- ===== 5. 單樹 vs 森林 ===== -->
+    <section class="lesson">
+        <h2>📊 五、單樹 vs 森林 對照</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="t">單一決策樹</th><th class="f">隨機森林</th></tr>
+            <tr><td>準確 / 穩定</td><td>較低、不穩</td><td><b>更準、更穩</b></td></tr>
+            <tr><td>過擬合</td><td>容易</td><td>大幅緩解</td></tr>
+            <tr><td>可解釋性</td><td><b>高</b>（畫得出來）</td><td>較低（黑盒一點）</td></tr>
+            <tr><td>速度</td><td>快</td><td>較慢（多棵樹）</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 6. RF vs GBDT ===== -->
+    <section class="lesson">
+        <h2>🆚 六、隨機森林 vs 梯度提升（GBDT）</h2>
+        <div class="note app">
+            <h4>📌 都是「集成很多樹」，但方式相反</h4>
+            <b>隨機森林＝Bagging</b>：很多棵<b>獨立的樹並行</b>訓練、投票，主要<b>降變異</b>、較不易過擬合、好調。<br>
+            <b>GBDT＝Boosting</b>：樹<b>一棵接一棵</b>，每棵專門修正前面的<b>殘差</b>，主要<b>降偏差</b>、通常更準，但較易過擬合、需細調。詳見 <a href="ensemble.html" style="color:#1d4ed8;font-weight:700">集成學習</a> 與 <a href="gbdt.html" style="color:#1d4ed8;font-weight:700">GBDT</a>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 補充 ===== -->
+    <section class="lesson">
+        <h2>🧰 七、兩個實用重點</h2>
+        <div class="keys">
+            <div class="keycard"><b>不用標準化</b>樹靠門檻切分，對特徵單調轉換不敏感——這是相對 <a href="svm.html" style="color:#15803d">SVM</a>／<a href="knn.html" style="color:#15803d">KNN</a> 的一大便利。</div>
+            <div class="keycard"><b>特徵重要性 & OOB</b>森林能算出<b>哪個特徵最有用</b>，並用<b>袋外樣本（OOB）</b>免費估誤差，不必另切驗證集。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 決策樹每個節點怎麼決定怎麼切？</summary>
+                <p>挑特徵+門檻，讓切完後<b>兩邊最純</b>（用<b>吉尼/熵/資訊增益</b>衡量）。</p></details>
+            <details><summary>Q2. 決策樹為什麼容易過擬合？怎麼辦？</summary>
+                <p>不限制會分到連雜訊都背；用<b>剪枝、限深度、葉節點最小樣本數</b>抑制。</p></details>
+            <details><summary>Q3. 隨機森林用哪兩層隨機讓樹差異化？</summary>
+                <p><b>Bagging（有放回抽樣資料）</b>＋<b>每次分裂用隨機特徵子集</b>。</p></details>
+            <details><summary>Q4. 隨機森林主要降偏差還是變異？</summary>
+                <p>主要<b>降變異</b>（多棵去相關的樹平均）。GBDT 才是降偏差。</p></details>
+            <details><summary>Q5. 樹模型需要對特徵標準化嗎？</summary>
+                <p><b>不需要</b>，樹依門檻切分、對縮放不敏感。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>決策樹</b>if-else 是非題，吉尼/熵分最純。</div>
+            <div class="keycard"><b>單樹缺點</b>易過擬合、高變異、不穩。</div>
+            <div class="keycard"><b>隨機森林</b>Bagging + 隨機特徵 + 投票。</div>
+            <div class="keycard"><b>效果</b>降變異、更準更穩，犧牲點解釋性。</div>
+            <div class="keycard"><b>vs GBDT</b>森林並行降變異、GBDT 序列降偏差。</div>
+            <div class="keycard"><b>樹不用標準化</b>＋特徵重要性/OOB。</div>
+        </div>
+    </section>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>決策樹與隨機森林是 iPAS 常考的對比題(中級科目三)。重點:單棵決策樹易解釋但不穩、易過擬合;隨機森林用裝袋(Bagging)加隨機特徵訓練多棵樹再投票,更準更穩。易混點:隨機森林犧牲單樹的可解釋性換取準確與穩定;它降的是變異(與 Boosting 降偏差不同)。情境:判斷該用單樹(求解釋)還是森林(求準確)。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>決策樹怎麼做決策？</summary><p>像一連串 if-else：每個節點挑一個特徵與門檻，把資料分得「最純」(用資訊增益/熵或吉尼不純度衡量)，一路分到葉節點給出預測。</p></details><details><summary>決策樹為什麼容易過擬合？</summary><p>若不限制深度，樹會一直分到完美擬合訓練資料(連雜訊都記住)，對新資料就差；可用剪枝、限制深度或葉節點最小樣本數來抑制。</p></details><details><summary>隨機森林如何改善單棵樹？</summary><p>用 bagging(對資料有放回抽樣訓練多棵樹)，再加「每次分裂只考慮隨機特徵子集」讓樹彼此去相關；最後投票或平均，大幅降低變異、更穩定。</p></details><details><summary>隨機森林和梯度提升(GBDT)差在哪？</summary><p>隨機森林是 bagging(多棵獨立樹並行、主要降變異)；GBDT 是 boosting(樹一棵接一棵修正前面的殘差、主要降偏差)，通常更準但較易過擬合、需細調。</p></details><details><summary>樹模型需要標準化嗎？</summary><p>不需要。樹依門檻分割，對特徵的單調轉換不敏感，所以不必標準化，這是相對 SVM/KNN 的一大便利。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "決策樹怎麼做決策？", "acceptedAnswer": {"@type": "Answer", "text": "像一連串 if-else：每個節點挑一個特徵與門檻，把資料分得「最純」(用資訊增益/熵或吉尼不純度衡量)，一路分到葉節點給出預測。"}}, {"@type": "Question", "name": "決策樹為什麼容易過擬合？", "acceptedAnswer": {"@type": "Answer", "text": "若不限制深度，樹會一直分到完美擬合訓練資料(連雜訊都記住)，對新資料就差；可用剪枝、限制深度或葉節點最小樣本數來抑制。"}}, {"@type": "Question", "name": "隨機森林如何改善單棵樹？", "acceptedAnswer": {"@type": "Answer", "text": "用 bagging(對資料有放回抽樣訓練多棵樹)，再加「每次分裂只考慮隨機特徵子集」讓樹彼此去相關；最後投票或平均，大幅降低變異、更穩定。"}}, {"@type": "Question", "name": "隨機森林和梯度提升(GBDT)差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "隨機森林是 bagging(多棵獨立樹並行、主要降變異)；GBDT 是 boosting(樹一棵接一棵修正前面的殘差、主要降偏差)，通常更準但較易過擬合、需細調。"}}, {"@type": "Question", "name": "樹模型需要標準化嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不需要。樹依門檻分割，對特徵的單調轉換不敏感，所以不必標準化，這是相對 SVM/KNN 的一大便利。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="ensemble.html">集成學習</a><a href="gbdt.html">梯度提升樹 (GBDT)</a><a href="xgboost.html">XGBoost</a><a href="bias_variance.html">偏差-變異權衡</a><a href="overfitting_underfitting.html">過擬合 vs 欠擬合</a><a href="matrix.html">混淆矩陣與指標</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+
+</html>

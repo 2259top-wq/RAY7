@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成式 vs 鑑別式：低資源情境評估</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。 不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/model_comparison.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="生成式 vs 鑑別式：低資源情境評估">
+    <meta property="og:description" content="用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。 不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/model_comparison.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="生成式 vs 鑑別式：低資源情境評估">
+    <meta name="twitter:description" content="用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。 不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "生成式 vs 鑑別式：低資源情境評估",
+  "url": "https://akira.ipas-ai.com/model_comparison.html",
+  "description": "用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。 不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 { text-align: center; color: #1e293b; }
+        
+        .container {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        /* 控制面板 */
+        .controls {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .control-group label {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #334155;
+        }
+        input[type="range"] {
+            width: 80%;
+            max-width: 500px;
+            cursor: pointer;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .percentage-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3b82f6;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+
+        /* 儀表板佈局 */
+        .dashboard {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        /* 圖表區 */
+        .chart-container {
+            flex: 2;
+            min-width: 400px;
+            position: relative;
+        }
+        svg {
+            width: 100%;
+            height: 350px;
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        /* 數據卡片區 */
+        .stats-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 250px;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card.bert { border-color: #3b82f6; }
+        .stat-card.vae { border-color: #8b5cf6; }
+        .stat-card.winner { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        
+        .card-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .bert .card-title { color: #2563eb; }
+        .vae .card-title { color: #7c3aed; }
+        
+        .score {
+            font-size: 40px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .bert .score { color: #3b82f6; }
+        .vae .score { color: #8b5cf6; }
+
+        /* 圖例 */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot.bert { background-color: #3b82f6; }
+        .dot.vae { background-color: #8b5cf6; }
+
+        /* 說明區塊 */
+        .explanation {
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 5px solid #10b981;
+        }
+        .explanation h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .highlight { font-weight: bold; color: #10b981; }
+        
+        /* 視覺化小點點 */
+        .data-viz {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .data-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background-color: #e2e8f0; transition: background-color 0.3s;
+        }
+        .data-dot.labeled { background-color: #10b981; }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <h1>模型驗證：資料利用效率與泛化能力</h1>
+
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label>標註資料比例 (Labeled Data Ratio)</label>
+                <input type="range" id="slider" min="5" max="100" step="1" value="100">
+                <div class="percentage-display"><span id="ratio-display">100</span>%</div>
+                <div style="font-size: 14px; color: #64748b; margin-top: 5px;">總資料量：2,000 筆</div>
+            </div>
+            
+            <div class="data-viz" id="data-viz">
+                </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="chart-container">
+                <svg id="chart" viewBox="0 0 600 350">
+                    <line x1="50" y1="300" x2="550" y2="300" stroke="#94a3b8" stroke-width="2"/>
+                    <line x1="50" y1="50" x2="50" y2="300" stroke="#94a3b8" stroke-width="2"/>
+                    
+                    <text x="300" y="340" text-anchor="middle" fill="#64748b" font-size="14">標註比例 (%)</text>
+                    <text x="20" y="180" text-anchor="middle" fill="#64748b" font-size="14" transform="rotate(-90 20 180)">F1-Score</text>
+                    
+                    <text x="50" y="320" text-anchor="middle" fill="#64748b" font-size="12">0</text>
+                    <text x="550" y="320" text-anchor="middle" fill="#64748b" font-size="12">100</text>
+                    <text x="40" y="300" text-anchor="end" fill="#64748b" font-size="12">0.4</text>
+                    <text x="40" y="50" text-anchor="end" fill="#64748b" font-size="12">1.0</text>
+
+                    <line x1="50" y1="175" x2="550" y2="175" stroke="#cbd5e1" stroke-dasharray="5" stroke-width="1"/>
+
+                    <path id="path-bert" fill="none" stroke="#3b82f6" stroke-width="4"></path>
+                    <path id="path-vae" fill="none" stroke="#8b5cf6" stroke-width="4"></path>
+
+                    <line id="vline" x1="550" y1="50" x2="550" y2="300" stroke="#1e293b" stroke-dasharray="4" stroke-width="2"/>
+                    <circle id="dot-bert" cx="550" cy="50" r="6" fill="#3b82f6"/>
+                    <circle id="dot-vae" cx="550" cy="150" r="6" fill="#8b5cf6"/>
+                </svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="dot bert"></div> 方案 B: BERT (鑑別式)</div>
+                    <div class="legend-item"><div class="dot vae"></div> 方案 A: VAE+分類 (生成式)</div>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card bert" id="card-bert">
+                    <div class="card-title">方案 B：BERT 分類器</div>
+                    <div class="score" id="score-bert">0.950</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 5px;">資料飢渴，高標註時精準</div>
+                </div>
+                <div class="stat-card vae" id="card-vae">
+                    <div class="card-title">方案 A：VAE 潛在語意</div>
+                    <div class="score" id="score-vae">0.870</div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 5px;">泛化力強，低標註時抗跌</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h2>圖解說明：為什麼要減少標註比例來測試？</h2>
+        <p>在資源充足（100% 標註）的情況下，像 BERT 這種強大的鑑別式模型通常會取得最高分，因為它能直接針對任務最佳化。但這<strong>無法測出模型真正的泛化與抗壓能力</strong>。</p>
+        <ul>
+            <li><strong>試著將滑桿拉到 100%：</strong> BERT 的 F1-score 遙遙領先 VAE。如果只看這個結果，團隊肯定秒選 BERT。</li>
+            <li><strong>試著將滑桿拉到 10% (Low-resource)：</strong> 你會發現 BERT 的分數發生<strong>雪崩式下跌</strong>（因為資料不足導致過擬合或抓不到特徵邊界）。相反地，VAE 雖然滿分沒那麼高，但它在 10% 時的分數反而<strong>超越了 BERT</strong>。</li>
+        </ul>
+        <p>💡 <strong>結論：</strong>因為 VAE (方案 A) 先建構了無監督的潛在空間，它利用了文字本身的結構，不完全依賴標籤。透過逐步減少標註比例，我們完美突顯了：<span class="highlight">鑑別式模型追求極致準確，生成式模型追求穩健泛化。</span>這在未來標註成本高昂的實務場景中，是非常重要的決策依據！</p>
+    </div>
+
+    <script>
+        const slider = document.getElementById('slider');
+        const ratioDisplay = document.getElementById('ratio-display');
+        const vline = document.getElementById('vline');
+        const dotBert = document.getElementById('dot-bert');
+        const dotVae = document.getElementById('dot-vae');
+        const scoreBert = document.getElementById('score-bert');
+        const scoreVae = document.getElementById('score-vae');
+        const cardBert = document.getElementById('card-bert');
+        const cardVae = document.getElementById('card-vae');
+        const dataViz = document.getElementById('data-viz');
+
+        // SVG 座標對應設定
+        const svgWidth = 600;
+        const svgHeight = 350;
+        const margin = { left: 50, right: 50, top: 50, bottom: 50 };
+        const innerWidth = svgWidth - margin.left - margin.right;
+        const innerHeight = svgHeight - margin.top - margin.bottom;
+
+        // X軸：比例 0 到 100
+        // Y軸：F1-score 0.4 到 1.0
+        function scaleX(percent) {
+            return margin.left + (percent / 100) * innerWidth;
+        }
+
+        function scaleY(f1) {
+            // Y軸反轉 (上為大)
+            const normalized = (f1 - 0.4) / (1.0 - 0.4);
+            return svgHeight - margin.bottom - normalized * innerHeight;
+        }
+
+        // 模擬學習曲線公式 (數學模型)
+        // BERT: 陡峭的曲線，初期成長慢，後期突破天際
+        function calcBertF1(p) {
+            const ratio = p / 100;
+            return 0.4 + 0.55 * Math.pow(ratio, 0.4);
+        }
+
+        // VAE: 平緩的曲線，初期就具備一定水準，但天花板較低
+        function calcVaeF1(p) {
+            const ratio = p / 100;
+            return 0.65 + 0.22 * Math.pow(ratio, 0.6);
+        }
+
+        // 產生 SVG Path D
+        function generatePath(func) {
+            let d = `M ${scaleX(5)} ${scaleY(func(5))} `;
+            for (let i = 6; i <= 100; i += 2) {
+                d += `L ${scaleX(i)} ${scaleY(func(i))} `;
+            }
+            return d;
+        }
+
+        // 初始化圖表
+        function initChart() {
+            document.getElementById('path-bert').setAttribute('d', generatePath(calcBertF1));
+            document.getElementById('path-vae').setAttribute('d', generatePath(calcVaeF1));
+
+            // 初始化視覺化小點 (100顆)
+            for (let i = 0; i < 100; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'data-dot';
+                dataViz.appendChild(dot);
+            }
+        }
+
+        // 更新 UI 狀態
+        function update() {
+            const val = parseInt(slider.value);
+            ratioDisplay.innerText = val;
+
+            const f1Bert = calcBertF1(val);
+            const f1Vae = calcVaeF1(val);
+
+            // 更新分數
+            scoreBert.innerText = f1Bert.toFixed(3);
+            scoreVae.innerText = f1Vae.toFixed(3);
+
+            // 更新 SVG 元素位置
+            const xPos = scaleX(val);
+            vline.setAttribute('x1', xPos);
+            vline.setAttribute('x2', xPos);
+            
+            dotBert.setAttribute('cx', xPos);
+            dotBert.setAttribute('cy', scaleY(f1Bert));
+            
+            dotVae.setAttribute('cx', xPos);
+            dotVae.setAttribute('cy', scaleY(f1Vae));
+
+            // 更新贏家卡片樣式
+            if (f1Bert > f1Vae) {
+                cardBert.classList.add('winner');
+                cardVae.classList.remove('winner');
+            } else {
+                cardVae.classList.add('winner');
+                cardBert.classList.remove('winner');
+            }
+
+            // 更新資料點點視覺化
+            const dots = dataViz.children;
+            for (let i = 0; i < 100; i++) {
+                if (i < val) {
+                    dots[i].classList.add('labeled');
+                } else {
+                    dots[i].classList.remove('labeled');
+                }
+            }
+        }
+
+        slider.addEventListener('input', update);
+
+        initChart();
+        update();
+    </script>
+
+
+
+
+
+<style>
+.mxwrap{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;max-width:900px;margin:26px auto 0;padding:0 16px;box-sizing:border-box}
+.mxwrap .mxc{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.mxwrap .mxh{font-size:1.05rem;color:#0f766e;margin:0 0 11px;font-weight:800}
+.mxtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mxtbl th,.mxtbl td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top;color:#334155;line-height:1.6}
+.mxtbl thead th{background:#e8f2fe;color:#1565C0;font-weight:700;white-space:nowrap}
+.mxtbl td:first-child{font-weight:700;color:#1a2233;white-space:nowrap}
+.mxtbl tbody tr:nth-child(even){background:#f7f9fc}
+.mxq{border-top:1px solid #f0f2f5;padding:10px 0}
+.mxq:first-of-type{border-top:0}
+.mxq summary{cursor:pointer;font-weight:700;color:#2c3e50}
+.mxq .a{margin-top:7px;color:#475467;font-size:.93rem;line-height:1.7}
+.mxk{list-style:none;counter-reset:k;margin:2px 0 0;padding:0}
+.mxk li{position:relative;padding-left:30px;margin-bottom:8px;color:#334155;font-size:14.5px;line-height:1.6}
+.mxk li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+<div class="mxwrap">
+  <div class="mxc"><div class="mxh">📊 公平比較模型的面向</div><div style="overflow-x:auto"><table class="mxtbl"><thead><tr><th>面向</th><th>看什麼</th></tr></thead><tbody><tr><td>效能</td><td>同資料、同指標、同 CV 切分</td></tr><tr><td>統計顯著</td><td>差異是否超出隨機波動</td></tr><tr><td>成本</td><td>訓練／推論時間、資源</td></tr><tr><td>可解釋／維運</td><td>可否解釋、易不易上線維護</td></tr></tbody></table></div></div>
+  <div class="mxc"><div class="mxh">✅ 自我檢測</div><details class="mxq"><summary>怎麼公平比較不同模型？</summary><div class="a">用「相同的資料切分、相同指標、相同前處理」比;最好用交叉驗證平均並看變異,別各調各的。</div></details><details class="mxq"><summary>兩個模型差一點點算贏嗎？</summary><div class="a">不一定;要看差異是否統計顯著、是否超過 CV 折間的波動,微小差距可能只是隨機。</div></details><details class="mxq"><summary>為什麼有時選較差但簡單的模型？</summary><div class="a">簡單模型更好解釋、更快、更好維運、較不易過擬合;在效能相近時常更值得(奧坎剃刀)。</div></details></div>
+  <div class="mxc"><div class="mxh">🎯 重點整理</div><ol class="mxk"><li>相同資料切分、指標、前處理才公平。</li><li>用 CV 平均並看折間變異。</li><li>微小差距可能不顯著。</li><li>也要比成本、可解釋、維運。</li><li>效能相近時,簡單模型常更好。</li></ol></div>
+</div>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>模型比較是 iPAS 中級的實務考點(科目三)。重點:在相同切分、相同指標、相同前處理下用測試集或交叉驗證公平比較,並兼顧穩定度、推論速度、成本與可解釋性,不只單一分數。易混點:差一點點不一定有意義(需看多折分數分布或統計檢定);常見陷阱是資料洩漏、用測試集調參、只跑一次就下結論。情境:有時選較差但簡單、好維護的模型更值得上線。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>怎麼公平比較不同模型？</summary><p>用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。</p></details><details><summary>該看哪些面向？</summary><p>不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。</p></details><details><summary>兩個模型差一點點算贏嗎？</summary><p>要看差異是否穩定且有統計意義；可用多折交叉驗證看分數分布、或統計檢定，避免被隨機波動誤導。</p></details><details><summary>為什麼有時選較差但簡單的模型？</summary><p>若指標只差一點，簡單模型在速度、成本、可解釋與維護上更佔優，綜合考量常更值得上線。</p></details><details><summary>比較時常見的陷阱？</summary><p>資料洩漏、用測試集調參、指標選錯(不平衡只看準確率)、只跑一次就下結論、忽略部署成本。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "怎麼公平比較不同模型？", "acceptedAnswer": {"@type": "Answer", "text": "用相同的訓練與測試切分、相同評估指標與前處理，並在獨立測試集或交叉驗證下比較，避免條件不一致。"}}, {"@type": "Question", "name": "該看哪些面向？", "acceptedAnswer": {"@type": "Answer", "text": "不只看單一指標；還要看穩定度(多次或多折的變異)、推論速度與成本、可解釋性、維護難度與資料需求。"}}, {"@type": "Question", "name": "兩個模型差一點點算贏嗎？", "acceptedAnswer": {"@type": "Answer", "text": "要看差異是否穩定且有統計意義；可用多折交叉驗證看分數分布、或統計檢定，避免被隨機波動誤導。"}}, {"@type": "Question", "name": "為什麼有時選較差但簡單的模型？", "acceptedAnswer": {"@type": "Answer", "text": "若指標只差一點，簡單模型在速度、成本、可解釋與維護上更佔優，綜合考量常更值得上線。"}}, {"@type": "Question", "name": "比較時常見的陷阱？", "acceptedAnswer": {"@type": "Answer", "text": "資料洩漏、用測試集調參、指標選錯(不平衡只看準確率)、只跑一次就下結論、忽略部署成本。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="grid_search.html">模型訓練與調參</a><a href="model-development.html">模型開發</a><a href="problem-definition.html">問題定義</a><a href="charts.html">資料探索 (EDA)</a><a href="imbalanced_data.html">資料清洗</a><a href="interaction_feature.html">特徵工程</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 漫畫小說學習館</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101112;
+      --ink: #f7f1e7;
+      --muted: #c8bbaa;
+      --line: rgba(247, 241, 231, 0.16);
+      --paper: #1a1b1d;
+      --paper-2: #22201c;
+      --gold: #efc76d;
+      --mint: #79d2c0;
+      --rose: #ff8f70;
+      --blue: #87a8ff;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.38);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        linear-gradient(180deg, #171819 0%, #101112 34%, #12110f 100%);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      min-height: 100svh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px clamp(16px, 4vw, 56px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(16, 17, 18, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(239, 199, 109, 0.56);
+      border-radius: var(--radius);
+      background: #2a2113;
+      color: var(--gold);
+      font-size: 18px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav a {
+      padding: 8px 10px;
+      border-radius: 7px;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      background: rgba(255, 255, 255, 0.08);
+      outline: none;
+    }
+
+    .hero {
+      padding: clamp(28px, 4vw, 54px) clamp(16px, 4vw, 56px) clamp(22px, 3vw, 36px);
+      min-height: auto;
+    }
+
+    .hero-copy {
+      max-width: 860px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--mint);
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0;
+      max-width: 16ch;
+      font-size: clamp(38px, 5.8vw, 70px);
+      line-height: 1.02;
+      font-weight: 950;
+    }
+
+    .hero p {
+      margin: 22px 0 0;
+      max-width: 640px;
+      color: var(--muted);
+      font-size: clamp(17px, 1.6vw, 21px);
+      line-height: 1.85;
+    }
+
+    .topic-tabs {
+      padding: 0 clamp(16px, 4vw, 56px);
+    }
+
+    .topic-tab-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: flex-end;
+      min-height: 70px;
+      padding-top: 18px;
+      border-bottom: 1px solid rgba(247, 241, 231, 0.18);
+    }
+
+    .topic-tab {
+      position: relative;
+      min-height: 46px;
+      padding: 0 22px;
+      border: 1px solid rgba(247, 241, 231, 0.16);
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      background: linear-gradient(180deg, #24211c 0%, #171819 100%);
+      color: var(--muted);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: min-height 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+
+    .topic-tab:hover,
+    .topic-tab:focus-visible {
+      border-color: rgba(239, 199, 109, 0.54);
+      color: var(--ink);
+      outline: none;
+      min-height: 50px;
+    }
+
+    .topic-tab.is-active {
+      min-height: 64px;
+      background: linear-gradient(180deg, #ffe39a 0%, var(--gold) 72%, #d9aa44 100%);
+      border-color: var(--gold);
+      color: #18120a;
+      z-index: 2;
+      box-shadow:
+        0 -8px 26px rgba(239, 199, 109, 0.24),
+        0 12px 26px rgba(0, 0, 0, 0.34),
+        inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    }
+
+    .topic-tab.is-active::after {
+      content: "";
+      position: absolute;
+      left: -1px;
+      right: -1px;
+      bottom: -2px;
+      height: 3px;
+      background: #101112;
+    }
+
+    .topic-tab:active {
+      min-height: 48px;
+    }
+
+    .topic-tab.is-active:active {
+      min-height: 62px;
+    }
+
+    .topic-panel[hidden] {
+      display: none;
+    }
+
+    .topic-panel {
+      border-top: 0;
+    }
+
+    .topic-panel.is-active .section-head,
+    .topic-panel.is-active .book-card {
+      animation: flyInFromRight 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .topic-panel.is-active .book-card:nth-child(1) {
+      animation-delay: 40ms;
+    }
+
+    .topic-panel.is-active .book-card:nth-child(2) {
+      animation-delay: 95ms;
+    }
+
+    .topic-panel.is-active .book-card:nth-child(3) {
+      animation-delay: 150ms;
+    }
+
+    .topic-panel.is-active .book-card:nth-child(4) {
+      animation-delay: 205ms;
+    }
+
+    @keyframes flyInFromRight {
+      from {
+        opacity: 0;
+        transform: translate3d(64px, 0, 0) scale(0.985);
+        filter: blur(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .topic-panel.is-active .section-head,
+      .topic-panel.is-active .book-card {
+        animation: none;
+      }
+    }
+
+    .section {
+      padding: clamp(34px, 5vw, 70px) clamp(16px, 4vw, 56px);
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .section h2 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.08;
+    }
+
+    .section-head p {
+      margin: 12px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    .ai-note {
+      margin: 16px 0 0;
+      max-width: 820px;
+      padding: 12px 14px;
+      border: 1px solid rgba(239, 199, 109, 0.24);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius);
+      background: rgba(239, 199, 109, 0.08);
+      color: #eadcc9;
+      font-size: 15px;
+      line-height: 1.75;
+    }
+
+    .ai-note strong {
+      color: var(--gold);
+    }
+
+    .topic-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid rgba(121, 210, 192, 0.42);
+      border-radius: 999px;
+      color: var(--mint);
+      font-size: 13px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .book-card {
+      display: grid;
+      grid-template-rows: auto auto;
+      min-height: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--paper);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.26);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .book-card:hover,
+    .book-card:focus-visible {
+      transform: translateY(-3px);
+      border-color: rgba(239, 199, 109, 0.54);
+      background: #202124;
+      outline: none;
+    }
+
+    .cover {
+      position: relative;
+      order: 2;
+      aspect-ratio: 4 / 5.2;
+      border-top: 1px solid var(--line);
+      background: #0f1115;
+      overflow: hidden;
+    }
+
+    .cover img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .cover-live {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    .cover-live iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 540px;
+      height: 702px;
+      border: 0;
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .cover-badge {
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      padding: 6px 8px;
+      border-radius: 7px;
+      background: rgba(8, 9, 10, 0.76);
+      color: #fff8ec;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .book-body {
+      order: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .creator {
+      color: var(--gold);
+      font-size: 17px;
+      font-weight: 950;
+      line-height: 1.2;
+    }
+
+    .book-body h3 {
+      margin: 0;
+      color: #fffaf0;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .book-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .meta-row span {
+      padding: 5px 7px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      color: #ddd1c4;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .future {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+
+    .future-item {
+      min-height: 126px;
+      padding: 18px;
+      border: 1px dashed rgba(247, 241, 231, 0.28);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .future-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #fff8ec;
+      font-size: 18px;
+    }
+
+    .future-item span {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .footer {
+      padding: 28px clamp(16px, 4vw, 56px) 42px;
+      color: #9f9488;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .library-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 14px;
+      }
+
+      .nav {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .hero {
+        padding: 26px 14px 20px;
+      }
+
+      .hero h1 {
+        max-width: 10ch;
+        font-size: clamp(38px, 12vw, 56px);
+      }
+
+      .topic-tabs {
+        padding: 0 14px;
+      }
+
+      .topic-tab-list {
+        min-height: 70px;
+        gap: 6px;
+      }
+
+      .topic-tab {
+        flex: 1 1 150px;
+        min-height: 44px;
+        padding: 0 10px;
+        font-size: 14px;
+      }
+
+      .topic-tab.is-active {
+        min-height: 60px;
+      }
+
+      .section {
+        padding: 36px 14px;
+      }
+
+      .section-head {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .library-grid,
+      .future {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="回到首頁">
+        <span class="brand-mark">AI</span>
+        <span>漫畫小說學習館</span>
+      </a>
+      <nav class="nav" aria-label="主選單">
+        <a href="../index.html">回首頁</a>
+        <a href="#linear">線性回歸</a>
+        <a href="#kmeans">K-means</a>
+        <a href="#isolation">Isolation Forest</a>
+        <a href="#xai">XAI</a>
+        <a href="#matrix">混淆矩陣</a>
+        <a href="#nin">忍者大戰</a>
+        <a href="#future">下一批主題</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow">漫畫 x 小說 x AI 學習</div>
+          <h1 id="hero-title">用故事把 AI 學進腦袋</h1>
+          <p>
+            這裡把 AI 概念變成漫畫分鏡與短篇小說。四大 AI 漫畫家各自出招，有的溫柔、有的荒謬、有的像在寫教材，有的像在吐槽額度用完。
+            讀完一篇故事，再回頭看模型、資料、特徵與預測，抽象名詞就會比較像熟人。
+          </p>
+        </div>
+
+      </section>
+
+      <div class="topic-tabs" aria-label="漫畫主題切換">
+        <div class="topic-tab-list" role="tablist" aria-label="主題回合">
+          <button class="topic-tab is-active" type="button" id="tab-linear" role="tab" aria-selected="true" aria-controls="linear" data-topic-tab="linear">第一回：線性回歸</button>
+          <button class="topic-tab" type="button" id="tab-kmeans" role="tab" aria-selected="false" aria-controls="kmeans" data-topic-tab="kmeans">第二回：K-means 分群</button>
+          <button class="topic-tab" type="button" id="tab-isolation" role="tab" aria-selected="false" aria-controls="isolation" data-topic-tab="isolation">第三回：Isolation Forest</button>
+          <button class="topic-tab" type="button" id="tab-xai" role="tab" aria-selected="false" aria-controls="xai" data-topic-tab="xai">第四回：XAI 可解釋 AI</button>
+          <button class="topic-tab" type="button" id="tab-matrix" role="tab" aria-selected="false" aria-controls="matrix" data-topic-tab="matrix">第五回：混淆矩陣狼人殺</button>
+          <button class="topic-tab" type="button" id="tab-nin" role="tab" aria-selected="false" aria-controls="nin" data-topic-tab="nin">第六回：AI忍者大戰</button>
+        </div>
+      </div>
+
+      <section class="section topic-panel is-active" id="linear" data-topic-panel="linear" aria-labelledby="linear-title">
+        <div class="section-head">
+          <div>
+            <h2 id="linear-title">第一回：線性回歸</h2>
+            <p>
+              第一批作品從「一條線」開始。飲料店、珍珠、雨天、促銷和銷售額全都變成資料點，
+              四位 AI 漫畫家用自己的語氣講同一件事：怎麼從混亂生活裡找到能預測未來的規律。
+            </p>
+            <p class="ai-note">
+              <strong>閱讀提醒：</strong>本區漫畫與小說均由 AI 產生，內容、圖像或教學說法可能會有錯誤。
+              這也正好可以拿來比較每個 AI 的性能與風格：誰講得清楚、誰畫面穩、誰最會說故事，讀的時候都能一起觀察。
+            </p>
+          </div>
+          <span class="topic-tag">主題核心：線性回歸</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="liner/ChatGPT/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="liner/ChatGPT/001.jpg" alt="ChatGPT 作品封面">
+              <span class="cover-badge">12 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>半糖月亮的資料救店行動</h3>
+              <p>溫柔、完整、像一杯半糖少冰的線性回歸入門。從蒐集資料到持續評估，故事把模型訓練講得很像日常。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>線性回歸</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="liner/Gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="liner/Gemini/001.jpg" alt="Gemini 作品封面">
+              <span class="cover-badge">16 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>晨曦茶坊的精準備料任務</h3>
+              <p>把自變數、應變數、離群值和 RMSE 放進飲料店危機。讀起來像店長在跟數據簽生死契約。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>評估模型</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="liner/Grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="liner/Grok/01.jpg" alt="Grok 作品封面">
+              <span class="cover-badge">9 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>幸福泡泡的熱血逆轉</h3>
+              <p>節奏更像熱血短劇，公式直接登場，預測表一出手就讓雨天也變成促銷舞台。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>預測銷售</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="liner/Claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="liner/Claude/001.svg" alt="Claude 作品封面">
+              <span class="cover-badge">3 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>幸福泡泡與 Token 結界</h3>
+              <p>前兩頁是 SVG 漫畫，第三頁直接遇到額度用完。模型還沒講完，Token 已經先示範什麼叫限制條件。</p>
+              <div class="meta-row">
+                <span>SVG</span>
+                <span>小說</span>
+                <span>彩蛋頁</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section topic-panel" id="kmeans" data-topic-panel="kmeans" aria-labelledby="kmeans-title" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="kmeans-title">第二回：K-means 分群</h2>
+            <p>
+              這一回把資料點丟進分群遊樂場。K-means 不先問標準答案，而是看誰和誰比較像，
+              反覆移動群中心、重新分配資料點，直到每一群慢慢站穩位置。
+            </p>
+            <p class="ai-note">
+              <strong>比較觀察：</strong>本回同樣由 AI 產生漫畫，可以比較不同 AI 對「距離、中心點、迭代、收斂」的表現。
+              Claude 選手因 token 用完本次不參賽，保留公告圖作為產出狀態紀錄。
+            </p>
+          </div>
+          <span class="topic-tag">主題核心：K-means 分群</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="k-means/chatgpt/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="k-means/chatgpt/001.jpg" alt="ChatGPT K-means 作品封面">
+              <span class="cover-badge">11 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>把需要，送到心裡去</h3>
+              <p>小熊口袋用 K-means 重新理解顧客，把推薦從「大家都買」改成「你真正需要」。漫畫與小說都已補齊。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>分群</span>
+                <span>迭代</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="k-means/gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="k-means/gemini/001.jpg" alt="Gemini K-means 作品封面">
+              <span class="cover-badge">10 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>三個營火的奇蹟</h3>
+              <p>用三個營火解釋 K-means 的中心點、重新分配與收斂，也把會員推薦寫成一封封懂人的信。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>距離</span>
+                <span>中心點</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="k-means/grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="k-means/grok/001.jpg" alt="Grok K-means 作品封面">
+              <span class="cover-badge">15 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>幸福小站</h3>
+              <p>節奏最童話的一篇，把顧客分成忙碌小蜜蜂、甜蜜寶貝家、毛孩守護者與慢活園丁。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>分隊</span>
+                <span>收斂</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="k-means/claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="k-means/claude/001.svg" alt="Claude token 用完公告圖">
+              <span class="cover-badge">1 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>Token 用完，本次不參賽</h3>
+              <p>Claude 選手這回沒有正式漫畫，改由公告圖記錄：token 使用率 100%，Reset 時間還有 3 天。</p>
+              <div class="meta-row">
+                <span>公告圖</span>
+                <span>Token</span>
+                <span>未參賽</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section topic-panel" id="isolation" data-topic-panel="isolation" aria-labelledby="isolation-title" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="isolation-title">第三回：Isolation Forest</h2>
+            <p>
+              這一回把異常偵測變成森林冒險。Isolation Forest 會用一棵棵隨機切割的樹，找出那些很快就被分離出來的特別樣本，讓「異常值」不再只是報表裡刺眼的紅字，而是值得理解的訊號。
+            </p>
+            <p class="ai-note">
+              <strong>閱讀提醒：</strong>漫畫均由 AI 產生，可能會有文字、分鏡或概念上的誤差。這也正好可以比較四位 AI 漫畫家的表現：誰最會講故事、誰最像教材、誰最會畫面化異常偵測。
+            </p>
+          </div>
+          <span class="topic-tag">第三回主題：異常偵測</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="isolation_forest/chatgpt/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="isolation_forest/chatgpt/001.jpg" alt="ChatGPT Isolation Forest 漫畫">
+              <span class="cover-badge">12 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>森林裡的異常訊號</h3>
+              <p>用故事包裝異常偵測，把隨機切割、孤立點與風險提醒變成一場找出特別樣本的森林任務。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>Isolation Forest</span>
+                <span>異常偵測</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="isolation_forest/gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="isolation_forest/gemini/001.jpg" alt="Gemini Isolation Forest 漫畫">
+              <span class="cover-badge">12 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>資料森林的警報</h3>
+              <p>把演算法的「孤立」概念轉成視覺化分鏡，適合邊看漫畫邊抓住異常偵測的核心直覺。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>森林模型</span>
+                <span>異常點</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="isolation_forest/grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="isolation_forest/grok/001.jpg" alt="Grok Isolation Forest 漫畫">
+              <span class="cover-badge">12 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>不合群的那一點</h3>
+              <p>用較直接的漫畫節奏講異常值。本選手中文不大好，容易變亂碼，這回只能以英文參賽。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>英文參賽</span>
+                <span>Grok</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="isolation_forest/claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="isolation_forest/claude/panel_01_opening.svg" alt="Claude Isolation Forest 漫畫">
+              <span class="cover-badge">12 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>12 頁 SVG 漫畫補完</h3>
+              <p>Claude 前面生成 12 頁時一直出錯，曾經額度用完只能先出小說；現在漫畫已補上，以 SVG 分鏡正式參賽。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>SVG</span>
+                <span>Claude</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section topic-panel" id="xai" data-topic-panel="xai" aria-labelledby="xai-title" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="xai-title">第四回：XAI 可解釋 AI</h2>
+            <p>
+              這一回把黑箱模型打開來看。XAI 會把模型為什麼這樣判斷、哪些特徵最有影響、哪些像素或變數在推動答案，變成比較能被人理解的線索。
+              讀漫畫時可以留意 SHAP、LIME、特徵貢獻與模型透明度這些關鍵字。
+            </p>
+            <p class="ai-note">
+              <strong>閱讀提醒：</strong>漫畫均由 AI 產生，可能會有文字、分鏡或概念上的誤差。這一回小說內容之後補上，目前先提供四位 AI 漫畫家的 XAI 分鏡作品，適合比較不同模型如何把「解釋」畫成故事。
+            </p>
+          </div>
+          <span class="topic-tag">第四回主題：模型解釋</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="xai/chatgpt/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="xai/chatgpt/001.jpg" alt="ChatGPT XAI 漫畫">
+              <span class="cover-badge">10 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>黑箱模型的解釋任務</h3>
+              <p>XAI 被拆成可以跟著角色一起理解的分鏡：從模型輸出回頭看理由，讓「為什麼」不再只是一串分數。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>XAI</span>
+                <span>模型解釋</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="xai/gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="xai/gemini/001.jpg" alt="Gemini XAI 漫畫">
+              <span class="cover-badge">10 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>可解釋 AI 的視覺故事</h3>
+              <p>用比較明確的視覺節奏整理 XAI 的用途：把特徵、判斷依據與信任感放到同一條閱讀路線上。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>可解釋性</span>
+                <span>視覺化</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="xai/grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="xai/grok/001.jpg" alt="Grok XAI 漫畫">
+              <span class="cover-badge">10 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>XAI 黑箱拆解挑戰</h3>
+              <p>用較直接的漫畫節奏呈現「黑箱不再黑」的概念，適合快速抓住解釋方法在考題裡常出現的位置。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>黑箱模型</span>
+                <span>Grok</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="xai/claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="xai/claude/shap_manga_page_1.svg" alt="Claude XAI 漫畫">
+              <span class="cover-badge">10 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>SHAP 分鏡實驗</h3>
+              <p>Claude 這回以 SVG 分鏡呈現 SHAP 觀念，從特徵貢獻切入，讓模型判斷背後的推力更容易被看見。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>SVG</span>
+                <span>SHAP</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section topic-panel" id="matrix" data-topic-panel="matrix" aria-labelledby="matrix-title" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="matrix-title">第五回：混淆矩陣狼人殺</h2>
+            <p>
+              這一回把混淆矩陣搬進狼人殺現場。TP、FP、FN、TN 不再只是四格表格，
+              而是每一次指認、誤殺、漏抓與成功辨識背後的推理代價。
+            </p>
+            <p class="ai-note">
+              <strong>閱讀提醒：</strong>漫畫均由 AI 產生，四位 AI 的小說都已加入。先看分鏡可以快速建立 Precision、Recall、F1 與錯誤類型的直覺，
+              再回頭做混淆矩陣題目時，比較不容易被題幹語意繞進去。
+            </p>
+          </div>
+          <span class="topic-tag">第五回主題：模型評估</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="matrix/chatgpt/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="matrix/chatgpt/000.jpg" alt="ChatGPT 混淆矩陣狼人殺漫畫">
+              <span class="cover-badge">11 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>狼人殺裡的四格真相</h3>
+              <p>把 TP、FP、FN、TN 變成月圓村裡的抓狼、冤枉、漏網與清白，小說版也已補上完整指標教學。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>評估指標</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="matrix/gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="matrix/gemini/000.jpg" alt="Gemini 混淆矩陣狼人殺漫畫">
+              <span class="cover-badge">11 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>血月村的評估指標</h3>
+              <p>用比較戲劇化的分鏡處理誤判與漏判，小說版把狼人殺對跳、查殺與金水對應到混淆矩陣四象限。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>Recall</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="matrix/grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="matrix/grok/000.jpg" alt="Grok 混淆矩陣狼人殺漫畫">
+              <span class="cover-badge">11 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>誰被判成狼人？</h3>
+              <p>節奏偏快速的狼人殺推理版，小說把每次投票寫成模型預測，直接追蹤 Precision、Recall 與錯誤代價。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>Grok</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="matrix/claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="matrix/claude/狼人村疑案_漫畫封面.svg" alt="Claude 混淆矩陣狼人殺漫畫">
+              <span class="cover-badge">11 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>狼人村疑案</h3>
+              <p>小說版把三位判官的失敗寫成一場血月下的指標寓言。這是一件真正能讓人理解「指標和權衡」的教學藝術品。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>F1</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section topic-panel" id="nin" data-topic-panel="nin" aria-labelledby="nin-title" hidden>
+        <div class="section-head">
+          <div>
+            <h2 id="nin-title">第六回：AI忍者大戰</h2>
+            <p>
+              這一回把整套機器學習模型搬進忍界。RNN、LSTM、Transformer、CNN、UNet、ViT、
+              無監督分群與生成模型輪番登場，最後在「多模型融合」中決戰，把選模型這件事變成一場熱血對決。
+            </p>
+            <p class="ai-note">
+              <strong>閱讀提醒：</strong>漫畫均由 AI 產生，內容或教學說法可能有誤。本回小說版製作中，稍後補上；
+              先看分鏡能快速建立各家模型的定位與優劣。點閱讀器右上角「圖鑑」可查 25+ 種 AI 忍術。
+            </p>
+          </div>
+          <span class="topic-tag">第六回主題：模型總覽與選型</span>
+        </div>
+
+        <div class="library-grid">
+          <a class="book-card" href="nin/chatgpt/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="nin/chatgpt/00_封面_模型忍界大戰_特徵峽谷篇.jpg" alt="ChatGPT AI忍者大戰漫畫">
+              <span class="cover-badge">13 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:ChatGPT</div>
+              <h3>模型忍界大戰・特徵峽谷篇</h3>
+              <p>從資料忍界崩壞到模型融合終極反擊，把 RNN、LSTM、Transformer、CNN 到生成模型編成一場完整的忍界大戰。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>圖鑑</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="nin/gemini/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="nin/gemini/000.jpg" alt="Gemini AI忍者大戰漫畫">
+              <span class="cover-badge">14 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Gemini</div>
+              <h3>影像與序列的對決</h3>
+              <p>戲劇化分鏡演繹序列、視覺與生成模型的對決，看各路模型如何接管戰場、彼此壓制。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>圖鑑</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="nin/grok/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <img src="nin/grok/000.png" alt="Grok AI忍者大戰漫畫">
+              <span class="cover-badge">13 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Grok</div>
+              <h3>模型亂鬥忍法帖</h3>
+              <p>節奏明快的模型亂鬥，從循環神經網到擴散模型輪番登場，快速建立各家模型的直覺定位。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>圖鑑</span>
+              </div>
+            </div>
+          </a>
+
+          <a class="book-card" href="nin/claude/index.html" target="_blank" rel="noopener">
+            <div class="cover">
+              <div class="cover-live">
+                <iframe data-cover-src="nin/claude/ai_ninja_manga_cover.html" title="Claude AI忍者大戰 封面" scrolling="no" loading="lazy" aria-hidden="true"></iframe>
+              </div>
+              <span class="cover-badge">13 頁</span>
+            </div>
+            <div class="book-body">
+              <div class="creator">創作:Claude</div>
+              <h3>融合的力量</h3>
+              <p>以互動 HTML 分鏡呈現整個模型忍界，附「招式圖鑑」可查 25+ 種 AI 忍術的優勢、弱點與登場章節。</p>
+              <div class="meta-row">
+                <span>漫畫</span>
+                <span>小說</span>
+                <span>圖鑑</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="section" id="future" aria-labelledby="future-title">
+        <div class="section-head">
+          <div>
+            <h2 id="future-title">下一批主題預留區</h2>
+            <p>
+              這個入口頁會一路往下長。之後每個新主題都可以像「線性回歸」和「K-means」一樣，放進一組漫畫家作品，
+              讓同一個 AI 概念有四種畫風、四種敘事節奏、四種理解入口。
+            </p>
+          </div>
+          <span class="topic-tag">持續連載中</span>
+        </div>
+        <div class="future">
+          <div class="future-item">
+            <strong>機器學習冒險篇</strong>
+            <span>分類、迴歸、資料切分和模型評估，都可以變成角色闖關。</span>
+          </div>
+          <div class="future-item">
+            <strong>神經網路劇場篇</strong>
+            <span>權重、激活函數、反向傳播，適合拍成一群節點互相傳紙條。</span>
+          </div>
+          <div class="future-item">
+            <strong>生成式 AI 工房篇</strong>
+            <span>Prompt、Token、上下文、幻覺與工具使用，直接變成創作現場。</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      AI 漫畫小說學習館 · 用漫畫先打開興趣，再用小說把概念留下來。
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const tabs = Array.from(document.querySelectorAll("[data-topic-tab]"));
+      const panels = Array.from(document.querySelectorAll("[data-topic-panel]"));
+      const topicIds = new Set(panels.map((panel) => panel.dataset.topicPanel));
+
+      function activateTopic(topicId, updateHash = true) {
+        if (!topicIds.has(topicId)) return;
+
+        tabs.forEach((tab) => {
+          const active = tab.dataset.topicTab === topicId;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", active ? "true" : "false");
+        });
+
+        panels.forEach((panel) => {
+          const active = panel.dataset.topicPanel === topicId;
+          panel.classList.toggle("is-active", active);
+          panel.hidden = !active;
+        });
+
+        if (updateHash && location.hash !== `#${topicId}`) {
+          history.pushState(null, "", `#${topicId}`);
+        }
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => activateTopic(tab.dataset.topicTab));
+      });
+
+      document.querySelectorAll('a[href="#linear"], a[href="#kmeans"], a[href="#isolation"], a[href="#xai"], a[href="#matrix"], a[href="#nin"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          activateTopic(link.getAttribute("href").slice(1));
+        });
+      });
+
+      window.addEventListener("popstate", () => {
+        const hashTopic = location.hash.slice(1);
+        activateTopic(topicIds.has(hashTopic) ? hashTopic : "linear", false);
+      });
+
+      const initialTopic = location.hash.slice(1);
+      activateTopic(topicIds.has(initialTopic) ? initialTopic : "linear", false);
+    })();
+  </script>
+  <script>
+    (() => {
+      const DESIGN_W = 540;
+      const frames = Array.from(document.querySelectorAll(".cover-live iframe[data-cover-src]"));
+      if (!frames.length) return;
+
+      frames.forEach((frame) => {
+        if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.coverSrc);
+      });
+
+      function scaleFrames() {
+        frames.forEach((frame) => {
+          const wrap = frame.parentElement;
+          const w = wrap.clientWidth;
+          if (!w) return;
+          frame.style.transform = `scale(${w / DESIGN_W})`;
+        });
+      }
+
+      scaleFrames();
+      window.addEventListener("resize", scaleFrames);
+      frames.forEach((f) => f.addEventListener("load", scaleFrames));
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(scaleFrames);
+    })();
+  </script>
+</body>
+</html>

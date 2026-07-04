@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料洩漏 互動動畫</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。 前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/data_leakage.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="資料洩漏 互動動畫">
+    <meta property="og:description" content="訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。 前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/data_leakage.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="資料洩漏 互動動畫">
+    <meta name="twitter:description" content="訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。 前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "資料洩漏 互動動畫",
+  "url": "https://akira.ipas-ai.com/data_leakage.html",
+  "description": "訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。 前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);color:#e0e0e0;min-height:100vh;padding:1.2rem}
+h1{text-align:center;font-size:1.6rem;margin-bottom:.3rem;background:linear-gradient(90deg,#ef4444,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#aaa;font-size:.92rem;margin-bottom:1rem}
+.container{max-width:1000px;margin:0 auto}
+.card{background:rgba(255,255,255,.06);border-radius:16px;padding:1.2rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,.08)}
+.card h2{font-size:1.15rem;margin-bottom:.6rem;color:#f87171}
+.card p,.card li{font-size:.93rem;line-height:1.7;color:#ccc}
+.card ul{padding-left:1.2rem}.card li{margin-bottom:.3rem}
+.highlight{background:rgba(248,113,113,.12);border-left:3px solid #f87171;padding:.6rem .8rem;border-radius:8px;margin:.6rem 0;font-size:.9rem;color:#fca5a5}
+.svg-wrap{background:rgba(0,0,0,.3);border-radius:12px;padding:.5rem;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.scenario-tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+.scenario-tab{padding:.5rem 1rem;border-radius:999px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#bbb;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.scenario-tab:hover{border-color:#f87171}
+.scenario-tab.active{background:#ef4444;color:#fff;border-color:#ef4444}
+.result-box{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:650px){.result-box{grid-template-columns:1fr}}
+.result{background:rgba(0,0,0,.2);border-radius:14px;padding:1rem;border:2px solid}
+.result h3{font-size:1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.result .score{font-size:2rem;font-weight:800;text-align:center;margin:.5rem 0}
+.result .detail{font-size:.85rem;color:#aaa;line-height:1.6}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:.8rem 0}
+.btn{padding:.5rem 1.2rem;border-radius:999px;border:none;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-go{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+.btn-go:hover{transform:scale(1.05)}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+<div class="container">
+<h1>🕵️ 資料洩漏 互動動畫</h1>
+<p class="subtitle">Data Leakage — 為什麼你的模型離線超神、上線超爛？</p>
+
+<div class="card">
+<h2>💡 白話說明</h2>
+<p>資料洩漏就像考試作弊：</p>
+<ul>
+<li><strong>偷看答案</strong>：訓練時不小心讓模型看到了測試資料 → 離線分數超高，上線崩潰</li>
+<li><strong>未來穿越</strong>：用「未來的資料」預測「過去的事」→ 時間序列最常犯</li>
+<li><strong>全局預處理</strong>：先對全部資料做 SMOTE/標準化，再切分 → 測試集已經被「污染」了</li>
+</ul>
+<div class="highlight">📌 考試重點：資料洩漏會讓離線指標「虛高」，上線後表現崩潰。所有預處理（標準化、SMOTE、特徵選擇）都必須在交叉驗證的每個 fold 內重做。</div>
+</div>
+
+<div class="scenario-tabs">
+<div class="scenario-tab active" data-s="test_leak">🔍 測試集混入</div>
+<div class="scenario-tab" data-s="future_leak">⏰ 未來資訊洩漏</div>
+<div class="scenario-tab" data-s="preprocess_leak">⚙️ 預處理洩漏</div>
+<div class="scenario-tab" data-s="target_leak">🎯 目標洩漏</div>
+</div>
+
+<div class="btn-row">
+<button class="btn btn-go" id="showBtn">▶ 展示洩漏過程</button>
+</div>
+
+<div class="svg-wrap">
+<svg id="chart" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="result-box">
+<div class="result" style="border-color:#f8717144">
+<h3 style="color:#f87171">❌ 有洩漏（作弊版）</h3>
+<div class="score" id="leakScore" style="color:#f87171">-</div>
+<div class="detail" id="leakDetail">-</div>
+</div>
+<div class="result" style="border-color:#4ade8044">
+<h3 style="color:#4ade80">✅ 無洩漏（正確版）</h3>
+<div class="score" id="cleanScore" style="color:#4ade80">-</div>
+<div class="detail" id="cleanDetail">-</div>
+</div>
+</div>
+
+<div class="card" style="margin-top:1rem">
+<h2>🛡️ 如何避免資料洩漏？</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem">
+<div style="background:rgba(74,222,128,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#4ade80">✅ 先切分再預處理</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">先把資料切成 train/test，所有預處理只在 train 上做，test 用 train 的參數轉換。</p>
+</div>
+<div style="background:rgba(96,165,250,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#60a5fa">✅ Pipeline 封裝</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">用 sklearn Pipeline 把預處理和模型包在一起，自動在每個 fold 內重做。</p>
+</div>
+<div style="background:rgba(251,191,36,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#fbbf24">✅ 時序用 Walk-Forward</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">時間序列永遠用過去預測未來，不能隨機切分。</p>
+</div>
+<div style="background:rgba(167,139,250,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#a78bfa">✅ 檢查特徵</strong>
+<p style="font-size:.82rem;color:#aaa;margin-top:.3rem">如果某特徵跟目標相關性異常高（>0.95），很可能是洩漏。</p>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const W=800,H=350,svg=document.getElementById('chart');
+let current='test_leak',showingLeak=false;
+
+const scenarios={
+  test_leak:{
+    title:'測試集混入訓練集',
+    leakScore:'98.5%',cleanScore:'82.3%',
+    leakDetail:'測試資料混進訓練集，模型直接「背答案」。離線看起來超神，上線遇到新資料就崩潰。',
+    cleanDetail:'嚴格分離 train/test，模型只能靠真本事。82% 才是真實實力。'
+  },
+  future_leak:{
+    title:'未來資訊洩漏',
+    leakScore:'95.2%',cleanScore:'71.8%',
+    leakDetail:'用「明天的股價」預測「今天該不該買」— 當然準啊，你都穿越了！但上線時沒有明天的資料。',
+    cleanDetail:'嚴格按時間順序，只用過去預測未來。71% 才是真實能力。'
+  },
+  preprocess_leak:{
+    title:'預處理洩漏（全局 SMOTE/標準化）',
+    leakScore:'94.7%',cleanScore:'78.5%',
+    leakDetail:'先對全部資料做 SMOTE 再切分 → 合成的少數類樣本已經「看過」測試集的分布了。標準化也是，用全局均值/標準差等於偷看了測試集。',
+    cleanDetail:'在每個 CV fold 內獨立做 SMOTE 和標準化。78% 才是誠實的分數。'
+  },
+  target_leak:{
+    title:'目標洩漏（特徵包含答案）',
+    leakScore:'99.1%',cleanScore:'76.4%',
+    leakDetail:'特徵裡包含了「只有知道答案才會有的資訊」。例如用「是否已接受治療」預測「是否生病」— 當然生病的人才會接受治療啊！',
+    cleanDetail:'移除洩漏特徵後，模型只能用真正的預測因子。76% 才是真實水準。'
+  }
+};
+
+function draw(){
+  const s=scenarios[current];
+  let html=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  html+=`<text x="${W/2}" y="25" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🕵️ ${s.title}</text>`;
+
+  if(current==='test_leak') html+=drawTestLeak();
+  else if(current==='future_leak') html+=drawFutureLeak();
+  else if(current==='preprocess_leak') html+=drawPreprocessLeak();
+  else html+=drawTargetLeak();
+
+  svg.innerHTML=html;
+
+  document.getElementById('leakScore').textContent=s.leakScore;
+  document.getElementById('cleanScore').textContent=s.cleanScore;
+  document.getElementById('leakDetail').textContent=s.leakDetail;
+  document.getElementById('cleanDetail').textContent=s.cleanDetail;
+}
+
+function drawTestLeak(){
+  let h=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  h+=`<text x="${W/2}" y="25" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🕵️ ${scenarios[current].title}</text>`;
+
+  // Wrong way (show in phase 1+)
+  if(animPhase>=1){
+    h+=`<text x="200" y="60" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700">❌ 錯誤：測試資料混入訓練</text>`;
+    h+=`<rect x="50" y="75" width="300" height="100" rx="10" fill="rgba(248,113,113,0.08)" stroke="#f87171" stroke-width="1.5"/>`;
+    h+=`<text x="200" y="95" text-anchor="middle" fill="#888" font-size="11">訓練集（混入了測試資料！）</text>`;
+    const colors=['#60a5fa','#60a5fa','#60a5fa','#60a5fa','#60a5fa','#60a5fa','#60a5fa','#f87171','#f87171','#f87171'];
+    const labels=['訓','訓','訓','訓','訓','訓','訓','測','測','測'];
+    for(let i=0;i<10;i++){
+      const x=80+i*27;
+      h+=`<circle cx="${x}" cy="135" r="10" fill="${colors[i]}33" stroke="${colors[i]}" stroke-width="1.5"><animate attributeName="r" from="0" to="10" dur="0.3s" begin="${i*0.05}s" fill="freeze"/></circle>`;
+      h+=`<text x="${x}" y="139" text-anchor="middle" fill="${colors[i]}" font-size="9" font-weight="700">${labels[i]}</text>`;
+    }
+    h+=`<text x="200" y="200" text-anchor="middle" fill="#f87171" font-size="12">模型直接背了測試資料的答案 → 98.5% 🤥</text>`;
+  }
+
+  // Right way (show in phase 2+)
+  if(animPhase>=2){
+    h+=`<text x="600" y="60" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">✅ 正確：嚴格分離</text>`;
+    h+=`<rect x="450" y="75" width="180" height="80" rx="10" fill="rgba(96,165,250,0.08)" stroke="#60a5fa" stroke-width="1.5"/>`;
+    h+=`<text x="540" y="95" text-anchor="middle" fill="#60a5fa" font-size="11">訓練集 (70%)</text>`;
+    for(let i=0;i<7;i++){h+=`<circle cx="${470+i*24}" cy="125" r="8" fill="#60a5fa33" stroke="#60a5fa" stroke-width="1.5"/>`;}
+    h+=`<rect x="650" y="75" width="120" height="80" rx="10" fill="rgba(248,113,113,0.08)" stroke="#f87171" stroke-width="1.5"/>`;
+    h+=`<text x="710" y="95" text-anchor="middle" fill="#f87171" font-size="11">測試集 (30%)</text>`;
+    for(let i=0;i<3;i++){h+=`<circle cx="${670+i*24}" cy="125" r="8" fill="#f8717133" stroke="#f87171" stroke-width="1.5"/>`;}
+    h+=`<text x="540" y="180" text-anchor="middle" fill="#888" font-size="11">🔒 訓練時完全看不到測試資料</text>`;
+    h+=`<text x="600" y="200" text-anchor="middle" fill="#4ade80" font-size="12">模型靠真本事 → 82.3% ✅</text>`;
+  }
+
+  // Gap highlight (show in phase 3)
+  if(animPhase>=3){
+    h+=`<rect x="150" y="230" width="500" height="50" rx="10" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="1"/>`;
+    h+=`<text x="400" y="252" text-anchor="middle" fill="#fbbf24" font-size="13" font-weight="700">⚠️ 差距 16.2% — 這就是洩漏造成的「虛高」！</text>`;
+    h+=`<text x="400" y="270" text-anchor="middle" fill="#fde68a" font-size="11">上線後表現會從 98.5% 暴跌到 82% 附近</text>`;
+  }
+  return h;
+}
+
+function drawFutureLeak(){
+  let h=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  h+=`<text x="${W/2}" y="25" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🕵️ ${scenarios[current].title}</text>`;
+
+  // Timeline (always show)
+  h+=`<line x1="50" y1="120" x2="750" y2="120" stroke="#555" stroke-width="2"/>`;
+  for(let i=0;i<8;i++){
+    const x=100+i*85;
+    h+=`<circle cx="${x}" cy="120" r="5" fill="${i<5?'#60a5fa':'#f87171'}"/>`;
+    h+=`<text x="${x}" y="145" text-anchor="middle" fill="#888" font-size="10">Day ${i+1}</text>`;
+  }
+  h+=`<text x="300" y="100" text-anchor="middle" fill="#60a5fa" font-size="11">← 過去（可用）</text>`;
+  h+=`<text x="600" y="100" text-anchor="middle" fill="#f87171" font-size="11">未來（不可用）→</text>`;
+
+  if(animPhase>=1){
+    h+=`<text x="200" y="185" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700">❌ 用 Day 6-8 的資料訓練預測 Day 5</text>`;
+    h+=`<path d="M525,115 C525,80 270,80 270,115" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrR)"/>`;
+    h+=`<text x="400" y="75" text-anchor="middle" fill="#f87171" font-size="10">偷看未來！</text>`;
+    h+=`<defs><marker id="arrR" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#f87171"/></marker></defs>`;
+  }
+
+  if(animPhase>=2){
+    h+=`<text x="600" y="185" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">✅ Walk-Forward：只用過去預測未來</text>`;
+    h+=`<rect x="100" y="200" width="340" height="35" rx="6" fill="rgba(96,165,250,0.1)" stroke="#60a5fa" stroke-width="1"/>`;
+    h+=`<text x="270" y="222" text-anchor="middle" fill="#60a5fa" font-size="11">Train: Day 1-5</text>`;
+    h+=`<rect x="450" y="200" width="85" height="35" rx="6" fill="rgba(74,222,128,0.1)" stroke="#4ade80" stroke-width="1"/>`;
+    h+=`<text x="492" y="222" text-anchor="middle" fill="#4ade80" font-size="11">Test: Day 6</text>`;
+  }
+
+  if(animPhase>=3){
+    h+=`<rect x="150" y="260" width="500" height="45" rx="10" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="1"/>`;
+    h+=`<text x="400" y="280" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">⚠️ 時間序列最常犯的錯：隨機切分 = 未來穿越</text>`;
+    h+=`<text x="400" y="296" text-anchor="middle" fill="#fde68a" font-size="11">必須用 Walk-Forward 或 Time-Series CV</text>`;
+  }
+  return h;
+}
+
+function drawPreprocessLeak(){
+  let h=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  h+=`<text x="${W/2}" y="25" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🕵️ ${scenarios[current].title}</text>`;
+
+  if(animPhase>=1){
+    h+=`<text x="200" y="55" text-anchor="middle" fill="#f87171" font-size="13" font-weight="700">❌ 先 SMOTE 再切分</text>`;
+    h+=`<rect x="50" y="65" width="300" height="40" rx="8" fill="rgba(255,255,255,0.05)" stroke="#888" stroke-width="1"/>`;
+    h+=`<text x="200" y="90" text-anchor="middle" fill="#888" font-size="11">全部資料</text>`;
+    h+=`<text x="200" y="120" text-anchor="middle" fill="#f87171" font-size="11">↓ 對全部做 SMOTE（已污染！）</text>`;
+    h+=`<rect x="50" y="130" width="300" height="40" rx="8" fill="rgba(248,113,113,0.1)" stroke="#f87171" stroke-width="1.5"/>`;
+    h+=`<text x="200" y="155" text-anchor="middle" fill="#f87171" font-size="11">SMOTE 後的資料（測試集資訊已洩漏）</text>`;
+    h+=`<text x="200" y="185" text-anchor="middle" fill="#f87171" font-size="11">↓ 再切分 train/test</text>`;
+    h+=`<text x="200" y="210" text-anchor="middle" fill="#f87171" font-size="12">合成樣本已經「看過」測試集分布 → 94.7% 🤥</text>`;
+  }
+
+  if(animPhase>=2){
+    h+=`<text x="600" y="55" text-anchor="middle" fill="#4ade80" font-size="13" font-weight="700">✅ 先切分再 SMOTE</text>`;
+    h+=`<rect x="450" y="65" width="140" height="40" rx="8" fill="rgba(96,165,250,0.08)" stroke="#60a5fa" stroke-width="1.5"/>`;
+    h+=`<text x="520" y="90" text-anchor="middle" fill="#60a5fa" font-size="11">Train</text>`;
+    h+=`<rect x="610" y="65" width="140" height="40" rx="8" fill="rgba(248,113,113,0.08)" stroke="#f87171" stroke-width="1.5"/>`;
+    h+=`<text x="680" y="90" text-anchor="middle" fill="#f87171" font-size="11">Test 🔒</text>`;
+    h+=`<text x="520" y="120" text-anchor="middle" fill="#4ade80" font-size="11">↓ 只對 Train 做 SMOTE</text>`;
+    h+=`<rect x="450" y="130" width="140" height="40" rx="8" fill="rgba(74,222,128,0.1)" stroke="#4ade80" stroke-width="1.5"/>`;
+    h+=`<text x="520" y="155" text-anchor="middle" fill="#4ade80" font-size="11">SMOTE 後 Train</text>`;
+    h+=`<text x="680" y="155" text-anchor="middle" fill="#888" font-size="11">Test 不動 🔒</text>`;
+    h+=`<text x="600" y="210" text-anchor="middle" fill="#4ade80" font-size="12">測試集完全乾淨 → 78.5% ✅</text>`;
+  }
+
+  if(animPhase>=3){
+    h+=`<rect x="150" y="240" width="500" height="45" rx="10" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" stroke-width="1"/>`;
+    h+=`<text x="400" y="260" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">⚠️ 標準化、PCA、特徵選擇也一樣！都要在 fold 內做</text>`;
+    h+=`<text x="400" y="278" text-anchor="middle" fill="#fde68a" font-size="11">用 sklearn Pipeline 自動處理最安全</text>`;
+  }
+  return h;
+}
+
+function drawTargetLeak(){
+  let h=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  h+=`<text x="${W/2}" y="25" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🕵️ ${scenarios[current].title}</text>`;
+
+  if(animPhase>=1){
+    h+=`<text x="400" y="55" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">🎯 特徵裡藏了答案</text>`;
+    const cols=['年齡','BMI','已接受治療','是否生病（目標）'];
+    const rows=[['45','28','是','是'],['30','22','否','否'],['55','31','是','是'],['25','20','否','否']];
+    const tx=150,ty=80,cw=130,rh=30;
+    cols.forEach((c,i)=>{
+      const isLeak=i===2;
+      h+=`<rect x="${tx+i*cw}" y="${ty}" width="${cw}" height="${rh}" fill="${isLeak?'rgba(248,113,113,0.2)':'rgba(255,255,255,0.05)'}" stroke="rgba(255,255,255,0.1)"/>`;
+      h+=`<text x="${tx+i*cw+cw/2}" y="${ty+20}" text-anchor="middle" fill="${isLeak?'#f87171':'#aaa'}" font-size="11" font-weight="700">${c}</text>`;
+    });
+    rows.forEach((row,ri)=>{
+      row.forEach((cell,ci)=>{
+        const isLeak=ci===2;
+        h+=`<rect x="${tx+ci*cw}" y="${ty+(ri+1)*rh}" width="${cw}" height="${rh}" fill="${isLeak?'rgba(248,113,113,0.1)':'rgba(0,0,0,0.1)'}" stroke="rgba(255,255,255,0.05)"/>`;
+        h+=`<text x="${tx+ci*cw+cw/2}" y="${ty+(ri+1)*rh+20}" text-anchor="middle" fill="${isLeak?'#fca5a5':'#888'}" font-size="11">${cell}</text>`;
+      });
+    });
+    h+=`<text x="${tx+2*cw+cw/2}" y="${ty+5*rh+25}" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">⬆️ 這欄就是答案！</text>`;
+    h+=`<text x="${tx+2*cw+cw/2}" y="${ty+5*rh+45}" text-anchor="middle" fill="#fca5a5" font-size="11">「已接受治療」= 生病才會治療</text>`;
+    h+=`<text x="${tx+2*cw+cw/2}" y="${ty+5*rh+62}" text-anchor="middle" fill="#fca5a5" font-size="11">模型學到「治療=生病」→ 99.1% 但毫無預測價值</text>`;
+  }
+
+  if(animPhase>=3){
+    h+=`<rect x="150" y="290" width="500" height="40" rx="10" fill="rgba(74,222,128,0.1)" stroke="#4ade80" stroke-width="1"/>`;
+    h+=`<text x="400" y="315" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="700">✅ 解法：移除「已接受治療」欄位，只用真正的預測因子</text>`;
+  }
+  return h;
+}
+
+document.querySelectorAll('.scenario-tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.scenario-tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    current=t.dataset.s;
+    animPhase=0;
+    draw();
+  });
+});
+
+let animPhase=0; // 0=initial, 1=wrong way, 2=right way, 3=full comparison
+let animating=false;
+
+function drawInitial(){
+  const s=scenarios[current];
+  let h=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+  h+=`<text x="${W/2}" y="140" text-anchor="middle" fill="#888" font-size="16">🕵️ ${s.title}</text>`;
+  h+=`<text x="${W/2}" y="175" text-anchor="middle" fill="#aaa" font-size="13">點擊「展示洩漏過程」觀看動畫</text>`;
+  h+=`<text x="${W/2}" y="210" text-anchor="middle" fill="#555" font-size="40">🔍</text>`;
+  svg.innerHTML=h;
+  document.getElementById('leakScore').textContent='？？';
+  document.getElementById('cleanScore').textContent='？？';
+  document.getElementById('leakDetail').textContent='點擊按鈕揭曉...';
+  document.getElementById('cleanDetail').textContent='點擊按鈕揭曉...';
+}
+
+async function playAnimation(){
+  if(animating) return;
+  animating=true;
+  const s=scenarios[current];
+  const btn=document.getElementById('showBtn');
+  btn.textContent='⏳ 展示中...';
+
+  // Phase 1: Show wrong way
+  animPhase=1;
+  document.getElementById('leakScore').textContent='⏳';
+  document.getElementById('leakDetail').textContent='正在展示錯誤做法...';
+  draw();
+  await sleep(1500);
+
+  // Phase 1.5: Reveal leak score
+  document.getElementById('leakScore').textContent=s.leakScore;
+  document.getElementById('leakDetail').textContent=s.leakDetail;
+  await sleep(1200);
+
+  // Phase 2: Show right way
+  animPhase=2;
+  document.getElementById('cleanScore').textContent='⏳';
+  document.getElementById('cleanDetail').textContent='正在展示正確做法...';
+  draw();
+  await sleep(1500);
+
+  // Phase 2.5: Reveal clean score
+  document.getElementById('cleanScore').textContent=s.cleanScore;
+  document.getElementById('cleanDetail').textContent=s.cleanDetail;
+  await sleep(800);
+
+  // Phase 3: Full comparison
+  animPhase=3;
+  draw();
+
+  btn.textContent='▶ 重新展示';
+  animating=false;
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function draw(){
+  if(animPhase===0){drawInitial();return;}
+  const s=scenarios[current];
+  let html;
+  switch(current){
+    case 'test_leak':html=drawTestLeak();break;
+    case 'future_leak':html=drawFutureLeak();break;
+    case 'preprocess_leak':html=drawPreprocessLeak();break;
+    default:html=drawTargetLeak();break;
+  }
+  svg.innerHTML=html;
+}
+
+document.getElementById('showBtn').addEventListener('click',()=>{
+  animPhase=0;
+  playAnimation();
+});
+
+// Initial state
+animPhase=0;
+drawInitial();
+</script>
+
+
+
+
+
+<style>
+.mxwrap{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;max-width:900px;margin:26px auto 0;padding:0 16px;box-sizing:border-box}
+.mxwrap .mxc{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.mxwrap .mxh{font-size:1.05rem;color:#0f766e;margin:0 0 11px;font-weight:800}
+.mxtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mxtbl th,.mxtbl td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top;color:#334155;line-height:1.6}
+.mxtbl thead th{background:#e8f2fe;color:#1565C0;font-weight:700;white-space:nowrap}
+.mxtbl td:first-child{font-weight:700;color:#1a2233;white-space:nowrap}
+.mxtbl tbody tr:nth-child(even){background:#f7f9fc}
+.mxq{border-top:1px solid #f0f2f5;padding:10px 0}
+.mxq:first-of-type{border-top:0}
+.mxq summary{cursor:pointer;font-weight:700;color:#2c3e50}
+.mxq .a{margin-top:7px;color:#475467;font-size:.93rem;line-height:1.7}
+.mxk{list-style:none;counter-reset:k;margin:2px 0 0;padding:0}
+.mxk li{position:relative;padding-left:30px;margin-bottom:8px;color:#334155;font-size:14.5px;line-height:1.6}
+.mxk li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+<div class="mxwrap">
+  <div class="mxc"><div class="mxh">📊 資料洩漏常見來源</div><div style="overflow-x:auto"><table class="mxtbl"><thead><tr><th>來源</th><th>例子</th><th>對策</th></tr></thead><tbody><tr><td>前處理洩漏</td><td>用全資料算均值填補／縮放</td><td>只 fit 訓練折、放 pipeline</td></tr><tr><td>目標洩漏</td><td>特徵其實含未來或目標資訊</td><td>檢查特徵是否事後才知</td></tr><tr><td>時間洩漏</td><td>用未來資料預測過去</td><td>依時間切分、時序 CV</td></tr><tr><td>重複／群組</td><td>同人同事件跨訓練測試</td><td>按群組切分</td></tr></tbody></table></div></div>
+  <div class="mxc"><div class="mxh">✅ 自我檢測</div><details class="mxq"><summary>資料洩漏是什麼？</summary><div class="a">訓練時不當用到「預測時拿不到」的資訊(未來或目標),讓分數虛高、上線卻崩。</div></details><details class="mxq"><summary>為什麼分數高反而要警覺？</summary><div class="a">好到不真實常是洩漏徵兆;要回頭檢查特徵與切分,別高興太早。</div></details><details class="mxq"><summary>怎麼預防？</summary><div class="a">先切分再前處理、把前處理放進 pipeline 對每折分別 fit、依時間／群組切分、審視每個特徵的可得時點。</div></details></div>
+  <div class="mxc"><div class="mxh">🎯 重點整理</div><ol class="mxk"><li>洩漏=用到預測時拿不到的資訊。</li><li>常見:前處理、目標、時間、群組洩漏。</li><li>先切分再前處理,放進 pipeline。</li><li>依時間／群組切分避免穿越。</li><li>分數好到不真實要先懷疑洩漏。</li></ol></div>
+</div>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>資料洩漏是 iPAS 最常考的陷阱題(中級科目二與三)。重點:訓練時不當用到測試或未來的資訊,導致評估虛高、上線後大幅落差。易混點:常見來源是切分前就對全資料標準化、特徵選擇或重取樣、用未來資料預測過去、或特徵藏有目標的代理變數;前處理要放進管線、在折內做。情境:辨識某做法為何會洩漏、如何避免。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>資料洩漏(Data Leakage)是什麼？</summary><p>訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。</p></details><details><summary>有哪些常見來源？</summary><p>前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。</p></details><details><summary>怎麼預防？</summary><p>先切分再做前處理、把所有前處理包進 pipeline 並只在訓練折擬合、時間序列用時序切分、檢查可疑地「過好」的特徵與分數。</p></details><details><summary>為什麼分數高反而要警覺？</summary><p>異常高(如接近 100%)常是洩漏的徵兆，真實任務很少完美；應回頭檢查特徵是否含目標資訊、或前處理是否洩漏。</p></details><details><summary>target leakage 的例子？</summary><p>用「是否已付款」預測「是否成交」，但付款本身就是成交結果；或用只有確診後才會有的欄位去預測是否確診，都會造成上線無效。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "資料洩漏(Data Leakage)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "訓練時不慎用到實際上線時拿不到、或屬於驗證/測試的資訊，使評估分數虛高，但上線後表現崩盤，是實務中最常見的隱形陷阱。"}}, {"@type": "Question", "name": "有哪些常見來源？", "acceptedAnswer": {"@type": "Answer", "text": "前處理在切分前對全資料做(標準化、PCA、特徵選擇)、用未來資訊預測過去、放進與目標幾乎等價的特徵(target leakage)、重複樣本跨訓練與測試。"}}, {"@type": "Question", "name": "怎麼預防？", "acceptedAnswer": {"@type": "Answer", "text": "先切分再做前處理、把所有前處理包進 pipeline 並只在訓練折擬合、時間序列用時序切分、檢查可疑地「過好」的特徵與分數。"}}, {"@type": "Question", "name": "為什麼分數高反而要警覺？", "acceptedAnswer": {"@type": "Answer", "text": "異常高(如接近 100%)常是洩漏的徵兆，真實任務很少完美；應回頭檢查特徵是否含目標資訊、或前處理是否洩漏。"}}, {"@type": "Question", "name": "target leakage 的例子？", "acceptedAnswer": {"@type": "Answer", "text": "用「是否已付款」預測「是否成交」，但付款本身就是成交結果；或用只有確診後才會有的欄位去預測是否確診，都會造成上線無效。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="charts.html">資料探索 (EDA)</a><a href="interaction_feature.html">特徵工程</a><a href="model-development.html">模型開發</a><a href="problem-definition.html">問題定義</a><a href="validation.html">資料切分</a><a href="baseline.html">基準模型</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

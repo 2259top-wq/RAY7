@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>時間複雜度三部曲 ｜ Big O Trilogy</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="不背公式，靠遊戲玩出對時間複雜度的直覺。 看情境、讀程式、算極限——三款挑戰，覆蓋 O(1)、O(log n)、O(n)、O(n²) 四大派系。 情境給你，你來判斷它是 O(1)、O(log n)、O(n) 還是 O(n²)。…">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/big_o_trilogy.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="時間複雜度三部曲 ｜ Big O Trilogy">
+    <meta property="og:description" content="不背公式，靠遊戲玩出對時間複雜度的直覺。 看情境、讀程式、算極限——三款挑戰，覆蓋 O(1)、O(log n)、O(n)、O(n²) 四大派系。 情境給你，你來判斷它是 O(1)、O(log n)、O(n) 還是 O(n²)。…">
+    <meta property="og:url" content="https://akira.ipas-ai.com/big_o_trilogy.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="時間複雜度三部曲 ｜ Big O Trilogy">
+    <meta name="twitter:description" content="不背公式，靠遊戲玩出對時間複雜度的直覺。 看情境、讀程式、算極限——三款挑戰，覆蓋 O(1)、O(log n)、O(n)、O(n²) 四大派系。 情境給你，你來判斷它是 O(1)、O(log n)、O(n) 還是 O(n²)。…">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "時間複雜度三部曲 ｜ Big O Trilogy",
+  "url": "https://akira.ipas-ai.com/big_o_trilogy.html",
+  "description": "不背公式，靠遊戲玩出對時間複雜度的直覺。 看情境、讀程式、算極限——三款挑戰，覆蓋 O(1)、O(log n)、O(n)、O(n²) 四大派系。 情境給你，你來判斷它是 O(1)、O(log n)、O(n) 還是 O(n²)。…",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+:root {
+  --bg-0: #0a0e1a;
+  --bg-1: #131829;
+  --bg-2: #1c2238;
+  --bg-3: #252c47;
+  --line: rgba(255,255,255,0.08);
+  --line-2: rgba(255,255,255,0.16);
+  --txt-0: #f1f3f8;
+  --txt-1: #b8bdd0;
+  --txt-2: #767c95;
+  --txt-3: #4d5470;
+
+  --c-1: #97C459;
+  --c-1-d: #639922;
+  --c-1-bg: rgba(151,196,89,0.12);
+  --c-1-br: rgba(151,196,89,0.35);
+
+  --c-log: #5DCAA5;
+  --c-log-d: #1D9E75;
+  --c-log-bg: rgba(93,202,165,0.12);
+  --c-log-br: rgba(93,202,165,0.35);
+
+  --c-n: #F2A623;
+  --c-n-d: #BA7517;
+  --c-n-bg: rgba(242,166,35,0.12);
+  --c-n-br: rgba(242,166,35,0.35);
+
+  --c-n2: #E24B4A;
+  --c-n2-d: #A32D2D;
+  --c-n2-bg: rgba(226,75,74,0.12);
+  --c-n2-br: rgba(226,75,74,0.35);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Monaco, Menlo, Consolas, "Courier New", monospace;
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --radius-xl: 22px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--txt-0);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body {
+  background:
+    radial-gradient(1100px 600px at 20% -10%, rgba(93,202,165,0.07), transparent 60%),
+    radial-gradient(900px 500px at 110% 100%, rgba(226,75,74,0.06), transparent 60%),
+    radial-gradient(700px 400px at -10% 110%, rgba(242,166,35,0.05), transparent 60%),
+    var(--bg-0);
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+/* ==== Header ==== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: baseline; gap: 12px; }
+.brand-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--txt-2);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.menu-back-btn {
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--txt-1);
+  padding: 7px 14px;
+  border-radius: var(--radius-s);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.menu-back-btn:hover { background: var(--bg-2); color: var(--txt-0); }
+
+/* ==== Screens ==== */
+.screen { display: none; animation: fadeUp 0.4s ease; }
+.screen.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop {
+  0% { transform: scale(0.9); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* ==== Menu ==== */
+.hero {
+  text-align: center;
+  padding: 28px 12px 36px;
+}
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.hero-title {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  background: linear-gradient(135deg, #97C459 0%, #5DCAA5 35%, #F2A623 70%, #E24B4A 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 14px;
+}
+.hero-desc {
+  color: var(--txt-1);
+  max-width: 540px;
+  margin: 0 auto;
+  font-size: 15px;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 36px;
+}
+.game-card {
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  padding: 26px 22px 22px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: inherit;
+  color: var(--txt-0);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+}
+.game-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0.7;
+}
+.game-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--line-2);
+  box-shadow: 0 14px 40px -20px var(--accent);
+}
+.game-card[data-game="1"] { --accent: var(--c-log); }
+.game-card[data-game="2"] { --accent: var(--c-n2); }
+.game-card[data-game="3"] { --accent: var(--c-n); }
+.game-card[data-game="study"] { --accent: var(--c-1); }
+
+.gc-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+}
+.gc-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.gc-en {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-top: -4px;
+}
+.gc-desc {
+  font-size: 14px;
+  color: var(--txt-1);
+  line-height: 1.55;
+  flex: 1;
+  margin-top: 6px;
+}
+.gc-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--txt-2);
+  font-family: var(--font-mono);
+  margin-top: 8px;
+}
+.gc-meta span {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+}
+
+/* ==== Game Header (HUD) ==== */
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  flex-wrap: wrap;
+}
+.hud-block { display: flex; align-items: center; gap: 8px; }
+.hud-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+}
+.hud-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--txt-0);
+}
+.hud-progress {
+  flex: 1;
+  min-width: 120px;
+  height: 6px;
+  background: var(--bg-3);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.hud-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-log), var(--c-1));
+  width: 10%;
+  transition: width 0.3s ease;
+}
+.hp-pip {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--c-n2);
+  box-shadow: 0 0 12px rgba(226,75,74,0.4);
+  transition: all 0.2s ease;
+}
+.hp-pip.lost { background: var(--bg-3); box-shadow: none; opacity: 0.5; }
+.combo-flash {
+  color: var(--c-n);
+  text-shadow: 0 0 8px rgba(242,166,35,0.6);
+  animation: pop 0.4s ease;
+}
+
+/* ==== Question card ==== */
+.q-card {
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  padding: 28px 28px 26px;
+  margin-bottom: 18px;
+  animation: fadeUp 0.35s ease;
+}
+.q-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.q-prompt {
+  font-size: 19px;
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.q-sub {
+  color: var(--txt-1);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Code block for game 2 */
+.code-block {
+  background: #07090f;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 18px 20px;
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #c8cee0;
+  white-space: pre;
+  overflow-x: auto;
+  position: relative;
+}
+.code-block::before {
+  content: "JS";
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 10px;
+  color: var(--txt-3);
+  letter-spacing: 0.15em;
+}
+.tk-kw { color: #c792ea; }
+.tk-fn { color: #82aaff; }
+.tk-num { color: #f2a623; }
+.tk-str { color: #c3e88d; }
+.tk-com { color: #5d6478; font-style: italic; }
+.tk-pn { color: #89ddff; }
+
+/* Game 3 spec panel */
+.spec-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.spec-cell {
+  background: var(--bg-3);
+  border-radius: var(--radius-s);
+  padding: 12px 14px;
+}
+.spec-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+}
+.spec-val {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--txt-0);
+}
+
+/* ==== Answer options ==== */
+.options {
+  display: grid;
+  gap: 10px;
+}
+.options.cols-2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 600px) { .options.cols-2 { grid-template-columns: 1fr; } }
+
+.opt-btn {
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-m);
+  padding: 16px 18px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--txt-0);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+.opt-btn:not(:disabled):hover {
+  border-color: var(--txt-1);
+  background: var(--bg-2);
+  transform: translateY(-1px);
+}
+.opt-btn:disabled { cursor: default; }
+.opt-btn .opt-tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--txt-1);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  min-width: 70px;
+  text-align: center;
+}
+.opt-btn[data-c="1"] .opt-tag { background: var(--c-1-bg); color: var(--c-1); border: 1px solid var(--c-1-br); }
+.opt-btn[data-c="log"] .opt-tag { background: var(--c-log-bg); color: var(--c-log); border: 1px solid var(--c-log-br); }
+.opt-btn[data-c="n"] .opt-tag { background: var(--c-n-bg); color: var(--c-n); border: 1px solid var(--c-n-br); }
+.opt-btn[data-c="n2"] .opt-tag { background: var(--c-n2-bg); color: var(--c-n2); border: 1px solid var(--c-n2-br); }
+
+.opt-btn.correct {
+  border-color: var(--c-1);
+  background: var(--c-1-bg);
+  animation: pop 0.4s ease;
+}
+.opt-btn.wrong {
+  border-color: var(--c-n2);
+  background: var(--c-n2-bg);
+  animation: shakeX 0.4s ease;
+}
+.opt-btn.dim { opacity: 0.4; }
+
+.opt-text {
+  flex: 1;
+  line-height: 1.5;
+}
+.opt-num {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ==== Feedback panel ==== */
+.feedback {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border-radius: var(--radius-m);
+  border-left: 3px solid var(--accent);
+  background: var(--bg-2);
+  animation: fadeUp 0.35s ease;
+}
+.feedback.correct { --accent: var(--c-1); }
+.feedback.wrong { --accent: var(--c-n2); }
+.feedback-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.feedback-status {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+.feedback-points {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--txt-2);
+}
+.feedback-text {
+  font-size: 14.5px;
+  color: var(--txt-1);
+  line-height: 1.65;
+}
+.feedback-text strong {
+  color: var(--txt-0);
+  font-weight: 600;
+}
+
+/* ==== Action button ==== */
+.action-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 18px; }
+.btn {
+  background: var(--c-log);
+  color: #0a0e1a;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-m);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.02em;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px var(--c-log); }
+.btn.btn-ghost { background: transparent; color: var(--txt-1); border: 1px solid var(--line-2); }
+.btn.btn-ghost:hover { background: var(--bg-2); color: var(--txt-0); box-shadow: none; }
+
+/* ==== Result screen ==== */
+.result-card {
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 40px 32px;
+  text-align: center;
+}
+.result-rank {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.result-grade {
+  font-size: 80px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #97C459, #F2A623);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.result-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.result-subtitle {
+  color: var(--txt-1);
+  margin-bottom: 30px;
+  font-size: 14.5px;
+}
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.result-stat {
+  background: var(--bg-3);
+  padding: 18px 12px;
+  border-radius: var(--radius-m);
+}
+.result-stat-val {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--txt-0);
+}
+.result-stat-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--txt-2);
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+.result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ==== Study mode ==== */
+.study-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 700px) { .study-grid { grid-template-columns: 1fr; } }
+.study-card {
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-l);
+  padding: 22px 24px;
+}
+.study-card[data-c="1"] { --accent: var(--c-1); }
+.study-card[data-c="log"] { --accent: var(--c-log); }
+.study-card[data-c="n"] { --accent: var(--c-n); }
+.study-card[data-c="n2"] { --accent: var(--c-n2); }
+.study-notation {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.study-name {
+  font-size: 14px;
+  color: var(--txt-1);
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+.study-line {
+  font-size: 14.5px;
+  color: var(--txt-1);
+  line-height: 1.65;
+  margin-bottom: 8px;
+}
+.study-line strong { color: var(--txt-0); }
+.study-egs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--txt-2);
+}
+.study-egs strong { color: var(--accent); display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 600; }
+
+/* ==== Footer ==== */
+.app-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--txt-3);
+  text-align: center;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+
+<body>
+<div id="app">
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-title">時間複雜度三部曲</span>
+    <span class="brand-sub">Big O Trilogy</span>
+  </div>
+  <button id="back-btn" class="menu-back-btn" style="display:none">← 回主選單</button>
+</header>
+
+<!-- ============ MENU ============ -->
+<main id="screen-menu" class="screen active">
+  <section class="hero">
+    <div class="hero-tag">algorithm · complexity · gameplay</div>
+    <h1 class="hero-title">用三場戰役<br>把 Big O 刻進你的本能</h1>
+    <p class="hero-desc">
+      不背公式，靠遊戲玩出對時間複雜度的直覺。
+      看情境、讀程式、算極限——三款挑戰，覆蓋 O(1)、O(log n)、O(n)、O(n²) 四大派系。
+    </p>
+  </section>
+
+  <div class="game-grid">
+    <button class="game-card" data-game="1" type="button">
+      <span class="gc-num">Chapter 01</span>
+      <span class="gc-title">演算法配對戰</span>
+      <span class="gc-en">Scenario · Match · Big O</span>
+      <p class="gc-desc">情境給你，你來判斷它是 O(1)、O(log n)、O(n) 還是 O(n²)。從口袋拿手機到全班互相握手，把抽象變具體。</p>
+      <div class="gc-meta"><span>10 題</span><span>3 條命</span></div>
+    </button>
+
+    <button class="game-card" data-game="2" type="button">
+      <span class="gc-num">Chapter 02</span>
+      <span class="gc-title">複雜度刺客</span>
+      <span class="gc-en">Read · Code · Strike</span>
+      <p class="gc-desc">直接看 JavaScript 程式碼，從迴圈結構嗅出時間複雜度。看到巢狀就要繃緊神經。</p>
+      <div class="gc-meta"><span>10 題</span><span>3 條命</span></div>
+    </button>
+
+    <button class="game-card" data-game="3" type="button">
+      <span class="gc-num">Chapter 03</span>
+      <span class="gc-title">n 越界生存</span>
+      <span class="gc-en">Budget · Limit · Survive</span>
+      <p class="gc-desc">硬體規格 × 時間預算 × 演算法複雜度，求 n 的極限。把 Big O 翻成你能感受的「可以多大、需要多久」。</p>
+      <div class="gc-meta"><span>10 題</span><span>3 條命</span></div>
+    </button>
+
+    <button class="game-card" data-game="study" type="button">
+      <span class="gc-num">Codex</span>
+      <span class="gc-title">複雜度圖鑑</span>
+      <span class="gc-en">Reference · Quick Recap</span>
+      <p class="gc-desc">四大複雜度的速查卡，每張附口語化解釋與生活範例。挑戰前先翻、挑戰後再記。</p>
+      <div class="gc-meta"><span>4 卡</span><span>速查</span></div>
+    </button>
+  </div>
+</main>
+
+<!-- ============ GAME ============ -->
+<main id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-block">
+      <span class="hud-label">HP</span>
+      <div id="hp-row" style="display:flex;gap:6px"></div>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">SCORE</span>
+      <span class="hud-val" id="score-val">0</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-label">COMBO</span>
+      <span class="hud-val" id="combo-val">×1</span>
+    </div>
+    <div class="hud-progress"><div class="hud-progress-fill" id="progress-fill"></div></div>
+    <div class="hud-block">
+      <span class="hud-val" id="progress-text" style="font-size:13px">1 / 10</span>
+    </div>
+  </div>
+
+  <div id="q-host"></div>
+  <div id="feedback-host"></div>
+  <div class="action-row">
+    <button id="next-btn" class="btn" style="display:none">下一題 →</button>
+  </div>
+</main>
+
+<!-- ============ RESULT ============ -->
+<main id="screen-result" class="screen">
+  <div class="result-card">
+    <div class="result-rank">FINAL VERDICT</div>
+    <div class="result-grade" id="result-grade">S</div>
+    <div class="result-title" id="result-title">演算法之眼覺醒</div>
+    <p class="result-subtitle" id="result-subtitle">你看穿了大部分的時間複雜度陷阱</p>
+    <div class="result-stats">
+      <div class="result-stat"><div class="result-stat-val" id="rs-correct">10</div><div class="result-stat-label">Correct</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="rs-score">0</div><div class="result-stat-label">Score</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="rs-best">×0</div><div class="result-stat-label">Max Combo</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="rs-hp">3</div><div class="result-stat-label">HP Left</div></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn btn-ghost" id="result-back">回主選單</button>
+      <button class="btn" id="result-replay">再戰一次</button>
+    </div>
+  </div>
+</main>
+
+<!-- ============ STUDY ============ -->
+<main id="screen-study" class="screen">
+  <div class="study-grid">
+    <div class="study-card" data-c="1">
+      <div class="study-notation">O(1)</div>
+      <div class="study-name">CONSTANT TIME · 常數時間</div>
+      <p class="study-line"><strong>不管 n 多大，操作次數固定</strong>。最理想的複雜度。</p>
+      <p class="study-line">把資料量從 1 變成 100 萬，所需時間幾乎一樣。</p>
+      <div class="study-egs">
+        <strong>Examples</strong>
+        ・陣列用 index 取值 arr[5]<br>
+        ・Hash table 查詢 / 寫入<br>
+        ・Stack 的 push / pop<br>
+        ・口袋拿手機、看時鐘
+      </div>
+    </div>
+    <div class="study-card" data-c="log">
+      <div class="study-notation">O(log n)</div>
+      <div class="study-name">LOGARITHMIC · 對數時間</div>
+      <p class="study-line"><strong>每次把問題切一半</strong>。資料變 1024 倍，操作只多 10 次。</p>
+      <p class="study-line">非常快。能從 O(n) 升級到 O(log n) 通常代表演算法很漂亮。</p>
+      <div class="study-egs">
+        <strong>Examples</strong>
+        ・二分搜尋 (Binary Search)<br>
+        ・平衡 BST 的查找<br>
+        ・每次 n /= 2 的 while 迴圈<br>
+        ・查紙本字典、猜數字遊戲
+      </div>
+    </div>
+    <div class="study-card" data-c="n">
+      <div class="study-notation">O(n)</div>
+      <div class="study-name">LINEAR TIME · 線性時間</div>
+      <p class="study-line"><strong>資料變兩倍，時間就變兩倍</strong>。一個迴圈跑完就是這個。</p>
+      <p class="study-line">日常開發最常見。對大部分情境都還算可以接受。</p>
+      <div class="study-egs">
+        <strong>Examples</strong>
+        ・單層 for 迴圈跑過陣列<br>
+        ・找最大值、計算總和<br>
+        ・Linked List 走訪到第 k 個<br>
+        ・班級點名、把照片每張看一遍
+      </div>
+    </div>
+    <div class="study-card" data-c="n2">
+      <div class="study-notation">O(n²)</div>
+      <div class="study-name">QUADRATIC · 平方時間</div>
+      <p class="study-line"><strong>資料變兩倍，時間變四倍</strong>。資料一大就災難。</p>
+      <p class="study-line">看到巢狀迴圈就要警覺。1 萬筆資料就有 1 億次操作。</p>
+      <div class="study-egs">
+        <strong>Examples</strong>
+        ・Bubble / Selection / Insertion Sort<br>
+        ・雙層巢狀 for 處理所有 (i, j) 配對<br>
+        ・把每張照片跟其他每張比較<br>
+        ・班上同學互相握手
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="app-footer">
+  AKIRA · IPAS-AI · 時間複雜度互動教材
+</footer>
+
+</div>
+
+<script>
+// ============== DATA ==============
+
+// Game 1: 情境 → Big O
+const G1_QUESTIONS = [
+  { q: "從陣列直接拿出 arr[0]", a: "1", e: "用 index 直接定位記憶體位置，不管陣列多大都是一步。這是 O(1) 最經典的例子。" },
+  { q: "從口袋拿手機", a: "1", e: "口袋裡有 1 個還是 100 個東西，拿手機都是一秒。跟 n 無關 = O(1)。" },
+  { q: "把全班 30 個學生的名字唸過一次", a: "n", e: "一個一個唸，30 人就唸 30 次，60 人就唸 60 次。時間隨 n 線性成長 = O(n)。" },
+  { q: "用 hash map 查詢 'apple' 對應的數量", a: "1", e: "Hash 算出 index 直接拿，平均 O(1)。這就是 hash table 的賣點。" },
+  { q: "在排序好的紙本字典找『憂鬱』", a: "log", e: "從中間翻、再從一半的中間翻，每次砍一半搜尋範圍。這就是二分搜尋的本質 = O(log n)。" },
+  { q: "Bubble Sort 把 100 個數字由小排到大", a: "n2", e: "外層跑 n 次、內層跑 n 次的兩兩比較交換。所有 N² 排序法都是這個複雜度。" },
+  { q: "在 LINE 群組裡每個人都單獨私訊其他每個人", a: "n2", e: "n 個人配對，總共 n×(n-1) 次訊息。所有「兩兩配對」的情境都是 O(n²)。" },
+  { q: "用 for 走訪整個陣列計算總和", a: "n", e: "每個元素都要碰一次才能加總，n 個元素 = n 次操作 = O(n)。" },
+  { q: "在平衡的二元搜尋樹找一個節點", a: "log", e: "每往下一層，候選範圍砍一半。樹的高度是 log n，所以查詢 = O(log n)。" },
+  { q: "把一個元素 push 到 stack 頂端", a: "1", e: "只動一個 top 指標，跟 stack 已經有多少元素無關 = O(1)。" },
+  { q: "在沒排序的陣列裡用 for 找特定值", a: "n", e: "最壞情況要看完整個陣列才能確定有沒有，這就是 Linear Search = O(n)。" },
+  { q: "Selection Sort 把 50 個數字排好", a: "n2", e: "每輪掃一遍找最小值，重複 n 輪。雙層迴圈結構 = O(n²)。" },
+  { q: "二分搜尋法在排好的陣列裡找某個數", a: "log", e: "每次比對中間值，搜尋範圍砍一半。1024 個元素最多只要 10 次 = O(log n)。" },
+  { q: "把陣列的所有兩兩組合 (i, j) 印出來", a: "n2", e: "雙層 for 跑完所有 i, j 配對，總共 n² 個。所有「nested loop 跑完整個陣列」都是這個。" },
+  { q: "確認 hashmap 裡有沒有某個 key", a: "1", e: "Hash table 的 lookup 平均常數時間 = O(1)。這也是為什麼 dict / Map 在演算法裡這麼好用。" },
+  { q: "Merge Sort 的 merge 階段合併兩個排好的陣列", a: "n", e: "兩個指標各自前進，總共走 n 次。這個 merge 動作本身是 O(n)（雖然整個 Merge Sort 是 O(n log n)）。" },
+  { q: "從 Linked List 拿第 50 個節點的值", a: "n", e: "Linked List 不能隨機跳，得從 head 一步步走到第 50 個。最壞情況 = O(n)。" },
+  { q: "讀取 arr.length", a: "1", e: "JavaScript 把陣列長度存好了，直接讀 = O(1)。" },
+  { q: "把 1000 張照片每張都跟其他每張比相似度", a: "n2", e: "每張照片要跟其他 n-1 張比較，雙層迴圈 = O(n²)。資料一大就跑不完。" },
+  { q: "在無序陣列找最大值", a: "n", e: "至少要看過每個元素才能確定誰最大，無法偷懶 = O(n)。" },
+  { q: "查詢時鐘現在幾點", a: "1", e: "讀一個值，跟你存了多少資料完全無關 = O(1)。" },
+  { q: "把 10 萬個訂單，每個都跟其他每個比對是否重複", a: "n2", e: "雙層比對是 O(n²)。10 萬筆就要 100 億次比對，鐵定爆炸——這時要改用 hash set 把它降到 O(n)。" }
+];
+
+// Game 2: code → Big O
+const G2_QUESTIONS = [
+  {
+    code: `function getFirst(arr) {
+  return arr[0];
+}`,
+    a: "1",
+    e: "直接 index 存取，不論陣列多長都是一步 = O(1)。"
+  },
+  {
+    code: `function sum(arr) {
+  let total = 0;
+  for (let i = 0; i < arr.length; i++) {
+    total += arr[i];
+  }
+  return total;
+}`,
+    a: "n",
+    e: "單層 for 走過 n 個元素，每個做常數工作 = O(n)。"
+  },
+  {
+    code: `function pairs(arr) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length; j++) {
+      result.push([arr[i], arr[j]]);
+    }
+  }
+  return result;
+}`,
+    a: "n2",
+    e: "雙層 for 各跑 n 次，總共 n × n = n² 次操作。看到巢狀迴圈第一直覺：O(n²)。"
+  },
+  {
+    code: `function shrink(n) {
+  let count = 0;
+  while (n > 1) {
+    n = Math.floor(n / 2);
+    count++;
+  }
+  return count;
+}`,
+    a: "log",
+    e: "n 每次砍半，從 1024 砍到 1 只要 10 次。這就是 O(log n) 的標誌——「每次除以 2」。"
+  },
+  {
+    code: `function bubbleSort(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length - 1; j++) {
+      if (arr[j] > arr[j+1]) {
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+      }
+    }
+  }
+}`,
+    a: "n2",
+    e: "Bubble Sort 的經典外層 n × 內層 n 結構 = O(n²)。所有 N² 排序法的同款骨架。"
+  },
+  {
+    code: `function get(map, key) {
+  return map[key];
+}`,
+    a: "1",
+    e: "物件屬性查詢 / hash 查詢平均 O(1)，跟 map 有多大無關。"
+  },
+  {
+    code: `function process(arr) {
+  for (let x of arr) console.log(x);
+  for (let x of arr) console.log(x * 2);
+}`,
+    a: "n",
+    e: "陷阱題！兩個迴圈是『接連』不是『巢狀』。總共 2n 次 = O(n)，常數倍會被拿掉。"
+  },
+  {
+    code: `function binarySearch(arr, target) {
+  let l = 0, r = arr.length - 1;
+  while (l <= r) {
+    const m = Math.floor((l + r) / 2);
+    if (arr[m] === target) return m;
+    if (arr[m] < target) l = m + 1;
+    else r = m - 1;
+  }
+  return -1;
+}`,
+    a: "log",
+    e: "二分搜尋——每輪砍掉一半搜尋範圍，最多 log₂(n) 輪。經典 O(log n)。"
+  },
+  {
+    code: `function findMax(arr) {
+  let max = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > max) max = arr[i];
+  }
+  return max;
+}`,
+    a: "n",
+    e: "單層 for，每個元素看一次 = O(n)。找最大值就是要看過所有人。"
+  },
+  {
+    code: `function selectionSort(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    let minIdx = i;
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[j] < arr[minIdx]) minIdx = j;
+    }
+    [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+  }
+}`,
+    a: "n2",
+    e: "雙層巢狀，雖然內層平均跑 n/2，但去掉常數後 = O(n²)。"
+  },
+  {
+    code: `function swap(arr, i, j) {
+  const tmp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = tmp;
+}`,
+    a: "1",
+    e: "三行常數操作，跟陣列大小完全無關 = O(1)。"
+  },
+  {
+    code: `function reverse(arr) {
+  let l = 0, r = arr.length - 1;
+  while (l < r) {
+    [arr[l], arr[r]] = [arr[r], arr[l]];
+    l++; r--;
+  }
+}`,
+    a: "n",
+    e: "雖然每次走兩步、總共走 n/2 次，去掉常數還是 O(n)。"
+  },
+  {
+    code: `function countPairs(arr, target) {
+  let count = 0;
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[i] + arr[j] === target) count++;
+    }
+  }
+  return count;
+}`,
+    a: "n2",
+    e: "雙層巢狀總操作數 = n×(n-1)/2，去掉常數還是 O(n²)。這題可以用 hash 降到 O(n)。"
+  },
+  {
+    code: `function powerOf2(n) {
+  let i = 1;
+  while (i < n) {
+    i = i * 2;
+  }
+  return i;
+}`,
+    a: "log",
+    e: "i 每次乘 2，從 1 翻到 n 要 log₂(n) 步。任何「每次 ×2 / ÷2」的迴圈 = O(log n)。"
+  },
+  {
+    code: `const cache = {};
+function getOrInit(key) {
+  if (cache[key] !== undefined) return cache[key];
+  cache[key] = Date.now();
+  return cache[key];
+}`,
+    a: "1",
+    e: "兩個 hash 查詢 + 一個寫入，全部常數時間 = O(1)。Memoization 的核心。"
+  }
+];
+
+// Game 3: budget puzzles
+const G3_QUESTIONS = [
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(n²)", budget: "1 秒" },
+    q: "在這台電腦上，演算法 O(n²) 想在 1 秒內跑完，n 最大可以多大？",
+    options: [
+      { txt: "1,000", a: false, why: "1000² = 100 萬，太保守，硬體還剩很多力。" },
+      { txt: "10,000", a: true, why: "10,000² = 1 億 = 預算用完。剛好卡在邊緣。" },
+      { txt: "100,000", a: false, why: "100,000² = 100 億，超出 100 倍。會跑 100 秒。" },
+      { txt: "1,000,000", a: false, why: "100 萬² = 1 兆，需要約 2.7 小時。爆炸。" }
+    ]
+  },
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(n)", budget: "1 秒" },
+    q: "同樣硬體，演算法 O(n) 想在 1 秒內跑完，n 最大可以多大？",
+    options: [
+      { txt: "10 萬", a: false, why: "硬體 1 秒能做 1 億次，10 萬太少了。" },
+      { txt: "100 萬", a: false, why: "還沒用滿，再多一個零。" },
+      { txt: "1000 萬", a: false, why: "再多一個零才剛好。" },
+      { txt: "1 億", a: true, why: "O(n) 直接等於操作次數，n = 1 億剛好用滿 1 秒預算。" }
+    ]
+  },
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(n²)", budget: "1 秒", n: "n = 1,000,000" },
+    q: "演算法 O(n²)、n = 100 萬、硬體 1 億 ops/秒，會跑多久？",
+    options: [
+      { txt: "0.01 秒", a: false, why: "差太多了。1M² = 1 兆 ÷ 1 億 = 1 萬秒。" },
+      { txt: "100 秒", a: false, why: "再多一個零的數量級。" },
+      { txt: "約 2.8 小時", a: true, why: "1,000,000² = 10¹² 次操作 ÷ 10⁸ ops/秒 = 10⁴ 秒 ≈ 2.78 小時。" },
+      { txt: "約 11 天", a: false, why: "太誇張了，這是 n = 1000 萬的等級。" }
+    ]
+  },
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(log n)", budget: "1 秒" },
+    q: "演算法 O(log n)、硬體 1 億 ops/秒，n 大概可以多大？",
+    options: [
+      { txt: "1 萬", a: false, why: "O(log n) 太強了，根本不會卡在這。" },
+      { txt: "100 萬", a: false, why: "還是太低估了 log 的威力。" },
+      { txt: "1 兆 (10¹²)", a: false, why: "log₂(10¹²) ≈ 40，連零頭都不到。可以更大。" },
+      { txt: "n 多大都行", a: true, why: "log₂(n) 要等於 1 億，n 必須 ≥ 2^(10⁸)，這比宇宙原子數還多。實際應用上 O(log n) 等於免費。" }
+    ]
+  },
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(1)", budget: "1 秒" },
+    q: "演算法 O(1)、硬體 1 億 ops/秒，n 可以多大？",
+    options: [
+      { txt: "1 億", a: false, why: "O(1) 跟 n 完全沒關係。" },
+      { txt: "看資料怎麼存", a: false, why: "O(1) 的定義就是不看 n。" },
+      { txt: "n 多大都行", a: true, why: "O(1) 的時間是常數，跟 n 沒關係。1 萬筆和 100 兆筆都一樣快。" },
+      { txt: "需要更多資訊", a: false, why: "資訊已經足夠：O(1) 永遠是常數。" }
+    ]
+  },
+  {
+    spec: { ops: "10 億 / 秒", cplx: "O(n²)", budget: "0.1 秒" },
+    q: "升級硬體到 10 億 ops/秒，預算只有 0.1 秒。O(n²) 的 n 最大多少？",
+    options: [
+      { txt: "1,000", a: false, why: "保守了。預算 = 10⁹ × 0.1 = 10⁸ 次。" },
+      { txt: "10,000", a: true, why: "預算 10⁸ 次，n² ≤ 10⁸，n ≤ 10,000。" },
+      { txt: "100,000", a: false, why: "100,000² = 10¹⁰，超出 100 倍。" },
+      { txt: "1,000,000", a: false, why: "完全爆炸。" }
+    ]
+  },
+  {
+    spec: { cplx: "O(log n) vs O(n²)", n: "n = 1,000,000" },
+    q: "n = 100 萬時，O(log n) 大約幾次操作？",
+    options: [
+      { txt: "1 次", a: false, why: "那是 O(1)。" },
+      { txt: "20 次", a: true, why: "log₂(10⁶) ≈ 20。一千倍資料只多 10 次操作，這就是對數的恐怖之處。" },
+      { txt: "1 萬次", a: false, why: "高估了，那是 √n 等級。" },
+      { txt: "100 萬次", a: false, why: "那是 O(n)。" }
+    ]
+  },
+  {
+    spec: { cplx: "O(n²)", n: "n = 10,000", ops: "1 億 / 秒" },
+    q: "n = 1 萬、O(n²)、硬體 1 億 ops/秒，會跑多久？",
+    options: [
+      { txt: "0.0001 秒（瞬間）", a: false, why: "差很多。10⁴² = 10⁸。" },
+      { txt: "1 秒", a: true, why: "10,000² = 10⁸ 次操作 ÷ 10⁸ ops/秒 = 1 秒。剛好用完預算。" },
+      { txt: "100 秒", a: false, why: "高估 100 倍。" },
+      { txt: "約 2.8 小時", a: false, why: "那是 n = 100 萬的數量級。" }
+    ]
+  },
+  {
+    spec: { cplx: "O(n) vs O(n²)", n: "n = 100,000" },
+    q: "n = 10 萬時，O(n²) 比 O(n) 慢多少倍？",
+    options: [
+      { txt: "10 倍", a: false, why: "差距遠不只這個。" },
+      { txt: "100 倍", a: false, why: "太低估了。" },
+      { txt: "10,000 倍", a: false, why: "再大一個級數。" },
+      { txt: "100,000 倍", a: true, why: "O(n²)/O(n) = n。n = 10⁵ 時，O(n²) 就比 O(n) 慢 10⁵ 倍。差距會隨資料量無限拉開。" }
+    ]
+  },
+  {
+    spec: { ops: "1 億 / 秒", cplx: "O(n²)", budget: "10 秒" },
+    q: "把預算放寬到 10 秒，O(n²) 演算法的 n 最大多少？",
+    options: [
+      { txt: "10,000", a: false, why: "保守了。預算多了 10 倍。" },
+      { txt: "約 31,000", a: true, why: "預算 = 10⁹ 次操作。n ≤ √10⁹ ≈ 31,623。預算放大 10 倍，n 只大約 √10 ≈ 3.16 倍。" },
+      { txt: "100,000", a: false, why: "100,000² = 10¹⁰，超出 10 倍。" },
+      { txt: "1,000,000", a: false, why: "差太遠了。" }
+    ]
+  },
+  {
+    spec: { cplx: "演算法選擇", n: "n = 1,000,000" },
+    q: "處理 100 萬筆資料、預算 1 秒、硬體 1 億 ops/秒，下列哪個演算法跑得完？",
+    options: [
+      { txt: "只有 O(n²) 跑得完", a: false, why: "完全相反。O(n²) 在這需要 2.8 小時。" },
+      { txt: "除了 O(n²) 都跑得完", a: true, why: "O(1) = 1 次、O(log n) = 20 次、O(n) = 10⁶ 次（0.01 秒）都遠在預算內。只有 O(n²) = 10¹² 次會爆炸。" },
+      { txt: "全部都跑得完", a: false, why: "O(n²) 在這個規模絕對跑不完。" },
+      { txt: "全部都跑不完", a: false, why: "O(n)、O(log n)、O(1) 都綽綽有餘。" }
+    ]
+  }
+];
+
+// ============== STATE ==============
+let state = {
+  game: null,
+  qIdx: 0,
+  questions: [],
+  score: 0,
+  combo: 0,
+  maxCombo: 0,
+  hp: 3,
+  correct: 0,
+  answered: false
+};
+
+// ============== UTIL ==============
+function $(id) { return document.getElementById(id); }
+function shuffle(a) { const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  $('back-btn').style.display = name === 'menu' ? 'none' : 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============== MENU ==============
+document.querySelectorAll('.game-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const g = card.dataset.game;
+    if (g === 'study') showScreen('study');
+    else startGame(g);
+  });
+});
+$('back-btn').addEventListener('click', () => showScreen('menu'));
+$('result-back').addEventListener('click', () => showScreen('menu'));
+$('result-replay').addEventListener('click', () => startGame(state.game));
+
+// ============== GAME ==============
+function startGame(num) {
+  state.game = num;
+  state.qIdx = 0;
+  state.score = 0;
+  state.combo = 0;
+  state.maxCombo = 0;
+  state.hp = 3;
+  state.correct = 0;
+  state.answered = false;
+
+  const banks = { '1': G1_QUESTIONS, '2': G2_QUESTIONS, '3': G3_QUESTIONS };
+  state.questions = shuffle(banks[num]).slice(0, 10);
+
+  showScreen('game');
+  renderHUD();
+  renderQuestion();
+}
+
+function renderHUD() {
+  const hpRow = $('hp-row');
+  hpRow.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'hp-pip' + (i >= state.hp ? ' lost' : '');
+    hpRow.appendChild(pip);
+  }
+  $('score-val').textContent = state.score;
+  const cv = $('combo-val');
+  cv.textContent = '×' + (state.combo + 1);
+  if (state.combo >= 2) cv.classList.add('combo-flash');
+  else cv.classList.remove('combo-flash');
+
+  const total = state.questions.length;
+  const pct = ((state.qIdx) / total) * 100;
+  $('progress-fill').style.width = pct + '%';
+  $('progress-text').textContent = (state.qIdx + 1) + ' / ' + total;
+}
+
+function renderQuestion() {
+  state.answered = false;
+  const q = state.questions[state.qIdx];
+  const host = $('q-host');
+  const fb = $('feedback-host');
+  fb.innerHTML = '';
+  $('next-btn').style.display = 'none';
+
+  if (state.game === '1') host.innerHTML = renderG1(q);
+  else if (state.game === '2') host.innerHTML = renderG2(q);
+  else host.innerHTML = renderG3(q);
+
+  // bind option clicks
+  const isG3 = state.game === '3';
+  document.querySelectorAll('.opt-btn').forEach((btn, idx) => {
+    btn.addEventListener('click', () => handleAnswer(btn, idx, q));
+  });
+}
+
+function renderG1(q) {
+  return `
+    <div class="q-card">
+      <div class="q-tag">情境</div>
+      <div class="q-prompt">${q.q}</div>
+      <p class="q-sub">這個動作的時間複雜度是哪一個？</p>
+    </div>
+    <div class="options cols-2">
+      ${optionBtn('1', 'O(1)', '常數時間')}
+      ${optionBtn('log', 'O(log n)', '對數時間')}
+      ${optionBtn('n', 'O(n)', '線性時間')}
+      ${optionBtn('n2', 'O(n²)', '平方時間')}
+    </div>
+  `;
+}
+
+function renderG2(q) {
+  return `
+    <div class="q-card">
+      <div class="q-tag">CODE · 嗅出複雜度</div>
+      <div class="code-block">${highlightCode(q.code)}</div>
+    </div>
+    <div class="options cols-2">
+      ${optionBtn('1', 'O(1)', '常數時間')}
+      ${optionBtn('log', 'O(log n)', '對數時間')}
+      ${optionBtn('n', 'O(n)', '線性時間')}
+      ${optionBtn('n2', 'O(n²)', '平方時間')}
+    </div>
+  `;
+}
+
+function renderG3(q) {
+  const specCells = [];
+  if (q.spec.ops) specCells.push(`<div class="spec-cell"><div class="spec-label">硬體速度</div><div class="spec-val">${q.spec.ops}</div></div>`);
+  if (q.spec.cplx) specCells.push(`<div class="spec-cell"><div class="spec-label">演算法</div><div class="spec-val">${q.spec.cplx}</div></div>`);
+  if (q.spec.budget) specCells.push(`<div class="spec-cell"><div class="spec-label">時間預算</div><div class="spec-val">${q.spec.budget}</div></div>`);
+  if (q.spec.n) specCells.push(`<div class="spec-cell"><div class="spec-label">資料量</div><div class="spec-val">${q.spec.n}</div></div>`);
+
+  const opts = q.options.map((o, i) => `
+    <button class="opt-btn" data-idx="${i}" type="button">
+      <span class="opt-tag">選項 ${i + 1}</span>
+      <span class="opt-text opt-num">${o.txt}</span>
+    </button>
+  `).join('');
+
+  return `
+    <div class="q-card">
+      <div class="q-tag">硬體規格 · 預算 · 演算法</div>
+      <div class="q-prompt">${q.q}</div>
+      <div class="spec-panel">${specCells.join('')}</div>
+    </div>
+    <div class="options cols-2">${opts}</div>
+  `;
+}
+
+function optionBtn(c, label, sub) {
+  return `
+    <button class="opt-btn" data-c="${c}" type="button">
+      <span class="opt-tag">${label}</span>
+      <span class="opt-text">${sub}</span>
+    </button>
+  `;
+}
+
+function highlightCode(code) {
+  const KW = ['function','let','const','var','return','for','while','if','else','of','in','new','this'];
+  // Process line by line, escaping HTML and applying simple token coloring.
+  return code.split('\n').map(line => {
+    let s = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // line comments
+    s = s.replace(/(\/\/[^\n]*)/g, '<span class="tk-com">$1</span>');
+    // strings
+    s = s.replace(/('[^']*'|"[^"]*"|`[^`]*`)/g, '<span class="tk-str">$1</span>');
+    // numbers
+    s = s.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tk-num">$1</span>');
+    // keywords
+    KW.forEach(k => {
+      s = s.replace(new RegExp('\\b' + k + '\\b', 'g'), `<span class="tk-kw">${k}</span>`);
+    });
+    // function names after `function `
+    s = s.replace(/(<span class="tk-kw">function<\/span>\s+)([a-zA-Z_$][\w$]*)/g, '$1<span class="tk-fn">$2</span>');
+    // method calls / function calls
+    s = s.replace(/\b([a-zA-Z_$][\w$]*)\(/g, (m, name) => {
+      // skip if already wrapped or is keyword
+      return `<span class="tk-fn">${name}</span>(`;
+    });
+    return s;
+  }).join('\n');
+}
+
+function handleAnswer(btn, idx, q) {
+  if (state.answered) return;
+  state.answered = true;
+
+  let isCorrect, correctC, expl;
+
+  if (state.game === '3') {
+    const sel = q.options[idx];
+    isCorrect = sel.a;
+    correctC = q.options.findIndex(o => o.a);
+    expl = sel.why;
+  } else {
+    const c = btn.dataset.c;
+    isCorrect = c === q.a;
+    correctC = q.a;
+    expl = q.e;
+  }
+
+  // Mark all buttons
+  document.querySelectorAll('.opt-btn').forEach((b, i) => {
+    b.disabled = true;
+    if (state.game === '3') {
+      if (i === correctC) b.classList.add('correct');
+      else if (i === idx && !isCorrect) b.classList.add('wrong');
+      else b.classList.add('dim');
+    } else {
+      if (b.dataset.c === correctC) b.classList.add('correct');
+      else if (b === btn) b.classList.add('wrong');
+      else b.classList.add('dim');
+    }
+  });
+
+  // Score
+  let pts = 0;
+  if (isCorrect) {
+    state.correct++;
+    state.combo++;
+    state.maxCombo = Math.max(state.maxCombo, state.combo);
+    pts = 100 + Math.min(state.combo - 1, 4) * 25; // combo bonus, max +100
+    state.score += pts;
+  } else {
+    state.combo = 0;
+    state.hp--;
+  }
+
+  // Show feedback
+  const fb = $('feedback-host');
+  fb.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="feedback-head">
+        <span class="feedback-status">${isCorrect ? '✓ 命中' : '✗ 失手'}</span>
+        ${isCorrect ? `<span class="feedback-points">+${pts} 分${state.combo > 1 ? ' · 連擊 ×' + state.combo : ''}</span>` : `<span class="feedback-points">−1 HP</span>`}
+      </div>
+      <div class="feedback-text">${expl}</div>
+    </div>
+  `;
+
+  renderHUD();
+
+  // Check end
+  if (state.hp <= 0) {
+    setTimeout(() => endGame(false), 1100);
+  } else if (state.qIdx + 1 >= state.questions.length) {
+    $('next-btn').textContent = '看戰績 →';
+    $('next-btn').style.display = 'inline-block';
+    $('next-btn').onclick = () => endGame(true);
+  } else {
+    $('next-btn').textContent = '下一題 →';
+    $('next-btn').style.display = 'inline-block';
+    $('next-btn').onclick = () => {
+      state.qIdx++;
+      renderHUD();
+      renderQuestion();
+    };
+  }
+}
+
+// ============== END / RESULT ==============
+function endGame(finished) {
+  const total = state.questions.length;
+  const pct = state.correct / total;
+  let grade, title, subtitle;
+
+  if (!finished) {
+    grade = 'F';
+    title = '陣亡';
+    subtitle = '這次倒下了。再來一次，這次抓對巢狀迴圈的氣味。';
+  } else if (pct >= 0.9) {
+    grade = 'S';
+    title = '演算法之眼覺醒';
+    subtitle = '你已經能在 0.5 秒內看穿大多數複雜度陷阱。';
+  } else if (pct >= 0.75) {
+    grade = 'A';
+    title = '工程嗅覺敏銳';
+    subtitle = '已經能避開 O(n²) 大部分的陷阱了。';
+  } else if (pct >= 0.6) {
+    grade = 'B';
+    title = '基礎扎實';
+    subtitle = '核心概念抓到了，再多練幾輪就能升 A。';
+  } else if (pct >= 0.4) {
+    grade = 'C';
+    title = '還在熱機';
+    subtitle = '回去翻一下複雜度圖鑑，再戰一次會明顯不同。';
+  } else {
+    grade = 'D';
+    title = '需要重新校準';
+    subtitle = '建議先去看複雜度圖鑑，把四種複雜度的味道記下來。';
+  }
+
+  $('result-grade').textContent = grade;
+  $('result-title').textContent = title;
+  $('result-subtitle').textContent = subtitle;
+  $('rs-correct').textContent = state.correct + ' / ' + total;
+  $('rs-score').textContent = state.score;
+  $('rs-best').textContent = '×' + state.maxCombo;
+  $('rs-hp').textContent = Math.max(state.hp, 0);
+
+  showScreen('result');
+}
+</script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 40px;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both;background:#fff;border-radius:14px}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>時間複雜度(Big O)描述演算法運算量隨資料量 n 的成長趨勢,是 AI 工程與資料結構基礎(iPAS 中級科目一相關)。重點:O(1) 常數、O(log n) 對數(每次砍半)、O(n) 線性、O(n²) 平方(巢狀迴圈、兩兩比對),越上面越快。易混點:兩個「接連」的單層迴圈是 O(n) 不是 O(n²)(常數倍去掉);自注意力是 O(n²) 隨序列長度平方成長,限制上下文長度。情境:選演算法、估算能處理多大資料、理解 Transformer 長序列成本。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Big O 是什麼？</summary><p>描述演算法運算量(或記憶體)隨輸入規模 n 的成長趨勢,忽略常數與低階項,用來比較效率與可擴展性。</p></details><details><summary>O(1)、O(log n)、O(n)、O(n²) 怎麼分？</summary><p>O(1) 不隨 n 變(最快)、O(log n) 每次砍半(超快)、O(n) 線性、O(n²) 平方(巢狀迴圈或兩兩比對,資料一大就爆)。</p></details><details><summary>看到兩個迴圈就是 O(n²) 嗎？</summary><p>不一定。兩層「巢狀」都跑 n 才是 O(n²);兩個「接連」的單層迴圈是 O(n)(2n 去掉常數)。要看是巢狀還是接連。</p></details><details><summary>Big O 和 AI 有什麼關係？</summary><p>自注意力是 O(n²),限制上下文長度與長文成本;選對資料結構(如 hash 查詢 O(1))能把 O(n²) 降到 O(n),影響訓練與推論效率。</p></details><details><summary>怎麼估演算法能處理多大 n？</summary><p>用「硬體每秒運算數 × 時間預算 = 可負擔操作數」,再依複雜度反推 n(如 O(n²)、1 億次預算下 n 約 1 萬)。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Big O 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "描述演算法運算量(或記憶體)隨輸入規模 n 的成長趨勢,忽略常數與低階項,用來比較效率與可擴展性。"}}, {"@type": "Question", "name": "O(1)、O(log n)、O(n)、O(n²) 怎麼分？", "acceptedAnswer": {"@type": "Answer", "text": "O(1) 不隨 n 變(最快)、O(log n) 每次砍半(超快)、O(n) 線性、O(n²) 平方(巢狀迴圈或兩兩比對,資料一大就爆)。"}}, {"@type": "Question", "name": "看到兩個迴圈就是 O(n²) 嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。兩層巢狀都跑 n 才是 O(n²);兩個接連的單層迴圈是 O(n)(2n 去掉常數)。要看是巢狀還是接連。"}}, {"@type": "Question", "name": "Big O 和 AI 有什麼關係？", "acceptedAnswer": {"@type": "Answer", "text": "自注意力是 O(n²),限制上下文長度與長文成本;選對資料結構(如 hash 查詢 O(1))能把 O(n²) 降到 O(n),影響訓練與推論效率。"}}, {"@type": "Question", "name": "怎麼估演算法能處理多大 n？", "acceptedAnswer": {"@type": "Answer", "text": "用硬體每秒運算數乘以時間預算等於可負擔操作數,再依複雜度反推 n(如 O(n²)、1 億次預算下 n 約 1 萬)。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="o-n-squared.html">O(n²) 複雜度</a><a href="attention.html">注意力機制</a><a href="transformer.html">Transformer</a><a href="multi-head-attention.html">多頭注意力</a><a href="rag.html">RAG</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

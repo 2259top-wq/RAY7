@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型開發總覽 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。 訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/model-development.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="模型開發總覽 · 互動教學">
+    <meta property="og:description" content="大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。 訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/model-development.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="模型開發總覽 · 互動教學">
+    <meta name="twitter:description" content="大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。 訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "模型開發總覽 · 互動教學",
+  "url": "https://akira.ipas-ai.com/model-development.html",
+  "description": "大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。 訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Model Development · 全流程地圖</span>
+    <h1><span class="en">模型開發</span></h1>
+    <div class="sub">從問題到上線的完整流水線</div>
+    <p class="lede">做 AI 不是按一下訓練就好。模型開發是一條八階段的迭代流水線——<br>問題定義、EDA、清洗、特徵、切分、基準、訓練調參、評估，缺一不可。</p>
+    <div class="eq-hero">問題 → 資料 → 特徵 → 切分 → 基準 → 訓練 → 評估（會回頭迭代）</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>模型開發不是「訓練模型」那一步而已</h2>
+  <p>很多人以為做 AI 就是「丟資料、按訓練、出模型」。其實<span class="c-en hl">真正寫 model.fit() 的時間不到 10%</span>，前面的問題定義、資料清洗、特徵工程才是決定成敗的關鍵。模型開發是一條<span class="hl">有順序、會回頭</span>的流水線。</p>
+  <div class="trio">
+    <div class="persona hi"><svg viewBox="0 0 100 100"><circle cx="30" cy="50" r="6" fill="var(--l1)"/><circle cx="50" cy="50" r="6" fill="var(--l2)"/><circle cx="70" cy="50" r="6" fill="var(--en)"/><path d="M36 50 H44 M56 50 H64" stroke="#9aa1ac" stroke-width="2"/></svg><div class="nm">有順序</div><div class="tag">一步接一步</div><p>問題沒定義好，後面全白做。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><path d="M25 40 H70 A8 8 0 0 1 70 56 H30" fill="none" stroke="var(--l2)" stroke-width="3"/><path d="M36 48 L28 56 L36 64" fill="none" stroke="var(--l2)" stroke-width="3"/></svg><div class="nm">會回頭</div><div class="tag">迭代</div><p>評估不好，常要回去調特徵或資料。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="22" y="30" width="20" height="40" fill="var(--l1)" opacity=".7"/><rect x="44" y="50" width="20" height="20" fill="var(--l2)" opacity=".7"/></svg><div class="nm">資料為王</div><div class="tag">8 成工夫</div><p>清洗與特徵決定上限，模型只是逼近它。</p></div>
+  </div>
+  <p class="hint">這頁是整條「模型開發」路線的地圖。下面點任一步驟，看它在做什麼、為什麼重要、以及和前後步驟的關係。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>點亮流程，看每一步在做什麼</h2>
+  <p>下面是模型開發的<span class="c-en hl">8 個階段</span>。點任一節點，看它的職責與重點；注意它是一條<span class="hl">主線向右、但隨時可能回頭</span>的迴圈——評估不佳就繞回特徵工程或資料清洗。</p>
+  <div class="card">
+    <div class="svgbox"><svg id="flowSvg" viewBox="0 0 460 260"></svg></div>
+    <div class="card" id="stepInfo" style="margin:14px 0 0;min-height:96px">
+      <h3 id="stepTitle" style="margin-top:0">點上面任一步驟</h3>
+      <p id="stepDesc" style="margin-bottom:6px;color:var(--ink2)">每個階段都有它的任務與常見陷阱，點一下看說明。</p>
+      <div id="stepTip" class="hint" style="margin-top:6px"></div>
+    </div>
+    <p class="hint">紅色虛線箭頭代表「迭代回頭」：模型評估沒過關，最常見的修法不是換模型，而是回去把資料和特徵做得更好。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 全流程心法</div>
+  <h2>模型開發的關鍵原則</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>先定義問題與成功指標，再動手</li><li>資料切分要在特徵工程之前，避免洩漏</li><li>先做基準模型，立一根誠實的及格線</li><li>把它當迭代迴圈，而非一次性直線</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>跳過問題定義，做出沒人要的模型</li><li>資料洩漏：特徵工程偷看了測試資料</li><li>沒有基準，無法判斷模型到底好不好</li><li>只想調模型，卻忽略資料品質才是上限</li></ul></div>
+</div><h3 style='margin-top:26px'>八個階段一覽</h3><div class="usecards"><div class="uc"><div class="ic">🎯</div><div class="t">問題定義</div><div class="d">把業務願望翻成可學習的問題</div></div><div class="uc"><div class="ic">🔍</div><div class="t">資料探索 EDA</div><div class="d">先看懂資料長什麼樣</div></div><div class="uc"><div class="ic">🧹</div><div class="t">資料清洗</div><div class="d">處理遺失、異常、不平衡</div></div><div class="uc"><div class="ic">🛠️</div><div class="t">特徵工程</div><div class="d">把原始資料變成好特徵</div></div><div class="uc"><div class="ic">✂️</div><div class="t">資料切分</div><div class="d">Train/Val/Test、交叉驗證</div></div><div class="uc"><div class="ic">📏</div><div class="t">基準模型</div><div class="d">先立及格線</div></div><div class="uc"><div class="ic">⚙️</div><div class="t">訓練與調參</div><div class="d">訓練、正則化、超參數</div></div><div class="uc"><div class="ic">📊</div><div class="t">模型評估</div><div class="d">測試集最終驗收</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("flowSvg");
+  const titleE=document.getElementById("stepTitle"), descE=document.getElementById("stepDesc"), tipE=document.getElementById("stepTip");
+  const steps=[
+    {id:"pd", n:"問題定義", c:"var(--en)", d:"把模糊的業務需求翻譯成明確的 ML 問題：分類還是回歸？用什麼指標算成功？", tip:"陷阱：目標太模糊、指標與業務脫節。"},
+    {id:"eda",n:"資料探索", c:"var(--l1)", d:"用統計與視覺化先「看懂」資料：分布、缺值、離群、相關性。", tip:"先看資料再建模，別急著訓練。"},
+    {id:"clean",n:"資料清洗", c:"var(--l1)", d:"處理遺失值、異常值與類別不平衡，讓資料乾淨可用。", tip:"髒資料訓出來的模型再強也沒用。"},
+    {id:"feat",n:"特徵工程", c:"var(--l2)", d:"把原始欄位轉成模型好學的特徵：編碼、縮放、交互特徵。", tip:"特徵決定模型上限，務必在切分之後做。"},
+    {id:"split",n:"資料切分", c:"var(--l2)", d:"切成訓練/驗證/測試；資料少用 K-Fold 交叉驗證。", tip:"測試集只開封一次，慎防資料洩漏。"},
+    {id:"base",n:"基準模型", c:"var(--en)", d:"先建一個超簡單的模型當及格線，後續必須贏過它。", tip:"不平衡資料的高準確率常是假象。"},
+    {id:"train",n:"訓練調參", c:"var(--l1)", d:"訓練模型、加正則化防過擬合、調超參數找最佳設定。", tip:"用驗證集調，別碰測試集。"},
+    {id:"eval",n:"模型評估", c:"var(--bad)", d:"在從未看過的測試集上做最終評估，確認能否上線。", tip:"評估不佳？回頭改特徵或資料，而非硬調模型。"},
+  ];
+  // layout: two rows snake
+  const cols=4, bw=98, bh=42, gx=14, gy=40, sx=110, sy=90;
+  const pos=steps.map((s,i)=>{
+    const r=Math.floor(i/cols); let c=i%cols; if(r===1)c=cols-1-c; // snake
+    return {x:gx+c*sx, y:gy+r*sy};
+  });
+  let sel=0;
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    const defs=el("defs",{});
+    [["arr","#9aa1ac"],["arrBack","var(--bad)"]].forEach(([id,col])=>{
+      const m=el("marker",{id,markerWidth:8,markerHeight:8,refX:6,refY:3,orient:"auto"});
+      m.appendChild(el("path",{d:"M0 0 L6 3 L0 6 Z",fill:col}));defs.appendChild(m);});
+    svg.appendChild(defs);
+    // forward arrows
+    for(let i=0;i<steps.length-1;i++){
+      const a=pos[i],b=pos[i+1];
+      const ax=a.x+bw/2, ay=a.y+bh/2, bx=b.x+bw/2, by=b.y+bh/2;
+      if(a.y===b.y){
+        const dir=bx>ax?1:-1;
+        svg.appendChild(el("path",{d:`M${ax+dir*bw/2} ${ay} H${bx-dir*bw/2}`,stroke:"#9aa1ac","stroke-width":2,"marker-end":"url(#arr)"}));
+      }else{
+        svg.appendChild(el("path",{d:`M${ax} ${ay+bh/2} V${by-bh/2}`,stroke:"#9aa1ac","stroke-width":2,"marker-end":"url(#arr)"}));
+      }
+    }
+    // iteration back arrow: eval(8) -> split(5)，直接折回，不繞大圈
+    const e=pos[7], sp=pos[4];
+    const ex=e.x+bw/2, spx=sp.x+bw/2, ylow=e.y+bh+18;
+    svg.appendChild(el("path",{d:`M${ex} ${e.y+bh+2} V${ylow} H${spx} V${sp.y+bh+3}`,
+      fill:"none",stroke:"var(--bad)","stroke-width":1.6,"stroke-dasharray":"5 4","marker-end":"url(#arrBack)",opacity:.85}));
+    svg.appendChild(txt(230,252,"⟲ 評估不佳 → 回頭重新迭代",{fill:"var(--bad)","font-size":11}));
+    // boxes
+    steps.forEach((s,i)=>{
+      const p=pos[i], on=i===sel;
+      const g=el("g",{cursor:"pointer"});
+      g.appendChild(el("rect",{x:p.x,y:p.y,width:bw,height:bh,rx:9,
+        fill:on?s.c:"var(--paper2)",stroke:s.c,"stroke-width":on?2.6:1.6,opacity:on?1:.9}));
+      g.appendChild(txt(p.x+bw/2,p.y+bh/2+1,(i+1)+". "+s.n,{fill:on?"#fff":"var(--ink2)","font-weight":700,"font-size":12.5}));
+      g.addEventListener("click",()=>{sel=i;build();info();});
+      svg.appendChild(g);
+    });
+  }
+  function info(){
+    const s=steps[sel];
+    titleE.textContent=(sel+1)+". "+s.n;
+    descE.textContent=s.d;
+    tipE.textContent=s.tip;
+  }
+  build(); info();
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>機器學習專案的標準流程？</summary><p>大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。</p></details><details><summary>為什麼要切出獨立的測試集？</summary><p>訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。</p></details><details><summary>驗證集和測試集差在哪？</summary><p>驗證集用於調整模型(選超參數、早停)；測試集用於最終評估，過程中不可拿來調整，否則等於間接洩漏、分數失真。</p></details><details><summary>開發時最常見的坑？</summary><p>資料洩漏、用測試集調參、評估指標選錯(不平衡只看 Accuracy)、訓練與上線資料分布不一致、忽略基準線(baseline)比較。</p></details><details><summary>為什麼要先建一個簡單基準(baseline)？</summary><p>先用簡單模型或規則當基準，才能判斷複雜模型是否真的有價值；若複雜模型贏不了基準，可能是資料或設定有問題。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "機器學習專案的標準流程？", "acceptedAnswer": {"@type": "Answer", "text": "大致為問題定義→資料蒐集與清理→特徵工程→選模型與訓練→驗證與調參→部署→監控與維運，是反覆迭代而非一次到位。"}}, {"@type": "Question", "name": "為什麼要切出獨立的測試集？", "acceptedAnswer": {"@type": "Answer", "text": "訓練與驗證集用來訓練與調參，若拿同一批評估會高估表現；獨立測試集只在最後評估一次，才能反映真實泛化能力。"}}, {"@type": "Question", "name": "驗證集和測試集差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "驗證集用於調整模型(選超參數、早停)；測試集用於最終評估，過程中不可拿來調整，否則等於間接洩漏、分數失真。"}}, {"@type": "Question", "name": "開發時最常見的坑？", "acceptedAnswer": {"@type": "Answer", "text": "資料洩漏、用測試集調參、評估指標選錯(不平衡只看 Accuracy)、訓練與上線資料分布不一致、忽略基準線(baseline)比較。"}}, {"@type": "Question", "name": "為什麼要先建一個簡單基準(baseline)？", "acceptedAnswer": {"@type": "Answer", "text": "先用簡單模型或規則當基準，才能判斷複雜模型是否真的有價值；若複雜模型贏不了基準，可能是資料或設定有問題。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="crisp_dm.html">方法論</a><a href="problem-definition.html">問題定義</a><a href="charts.html">資料探索 (EDA)</a><a href="imbalanced_data.html">資料清洗</a><a href="interaction_feature.html">特徵工程</a><a href="validation.html">資料切分</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">模型開發</span> · 互動教學</div></footer>
+</body>
+</html>

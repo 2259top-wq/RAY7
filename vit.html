@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision Transformer ViT｜白話＋互動：把圖切塊丟進 Transformer</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。 CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/vit.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Vision Transformer (ViT) 互動演示">
+    <meta property="og:description" content="Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。 CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/vit.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vision Transformer (ViT) 互動演示">
+    <meta name="twitter:description" content="Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。 CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Vision Transformer (ViT) 互動演示",
+  "url": "https://akira.ipas-ai.com/vit.html",
+  "description": "Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。 CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#f1f1fb; --ink:#1b1a3a; --sub:#5a5885;
+      --brand:#4f46e5; --brand2:#4338ca; --brand-soft:#e0defb;
+      --card:#ffffff; --line:#e3e1f5;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#6366f1,#4f46e5 55%,#4338ca);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#e8e7fd;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(79,70,229,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson h3{font-size:1.06rem;margin:20px 0 8px;color:var(--brand2)}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#c7c3f7 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#eef7f0;border-left:4px solid #16a34a}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#f5f4fd}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f5f4fd;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f5f4fd}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#454372;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .vit-demo） ===== */
+    .vit-demo{--primary-color:#4f46e5;--highlight-color:#f43f5e;--cls-color:#f59e0b;margin:14px 0}
+    .vit-demo .demo-title{font-size:1.12rem;font-weight:800;color:#4338ca;margin:0 0 12px;text-align:center}
+    .vit-demo .viz-wrapper{display:flex;flex-direction:column;align-items:center;gap:16px}
+    .vit-demo .svg-container{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow-x:auto;box-shadow:inset 0 0 20px rgba(0,0,0,.02);width:100%}
+    .vit-demo .svg-container svg{display:block;width:100%;height:auto;max-width:800px;margin:0 auto}
+    .vit-demo .patch-rect{fill:transparent;stroke:#cbd5e1;stroke-width:1;cursor:pointer;transition:all .2s}
+    .vit-demo .patch-rect:hover,.vit-demo .patch-rect.active{stroke:var(--highlight-color);stroke-width:3;fill:rgba(244,63,94,.1)}
+    .vit-demo .vector-rect{fill:#c4b5fd;stroke:#8b5cf6;stroke-width:1;transition:all .2s}
+    .vit-demo .vector-rect.active{fill:var(--highlight-color);stroke:#be123c;transform:scaleY(1.1);transform-origin:bottom}
+    .vit-demo .cls-token{fill:var(--cls-color);stroke:#b45309}
+    .vit-demo .connector-line{stroke:var(--highlight-color);stroke-width:2;stroke-dasharray:5;opacity:0;pointer-events:none;transition:opacity .2s}
+    .vit-demo .connector-line.visible{opacity:.6}
+    .vit-demo .info-panel{min-height:48px;text-align:center;font-weight:bold;color:var(--primary-color);background:#f3f4f6;width:100%;padding:10px;border-radius:6px}
+    .vit-demo .arrow-text{font-size:12px;fill:#64748b;text-anchor:middle}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 電腦視覺</span>
+  <h1>Vision Transformer (ViT)</h1>
+  <p>把圖片切成一塊塊小方格，像一句話的單字一樣排成序列，丟進 Transformer——讓每一塊在第一層就「看見」全圖。</p>
+  <div class="chips">
+    <span>影像切 patch</span><span>Patch Embedding</span><span>[CLS]</span><span>位置編碼</span><span>全域注意力</span><span>vs CNN</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>Vision Transformer（ViT）</b>＝ 把原本用於文字的 <b>Transformer</b> 搬到影像：將圖<span class="term">切成固定大小的小塊（patch）</span>當成一串序列，丟進<span class="hl">自注意力（Self-Attention）</span>，直接學影像的全域關係。
+    </div>
+    <p>在超大資料集上預訓練後，ViT 常能超越最頂尖的 CNN，也成了現代多模態模型的標準影像編碼器。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧩</span>為什麼要切成 patch？</h2>
+    <div class="note meta">
+      Transformer 本來是處理「一串單字」的。影像是 2D 像素矩陣，且像素太多（224×224 就有 5 萬多個），直接餵進去會讓自注意力的 <b>O(N²)</b> 運算爆炸。ViT 的解法：把圖切成小方塊（如 16×16），一張圖就變成 N 個 patch——<b>就像一句話有 N 個單字一樣</b>，數量剛好可以處理。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：patch 怎麼變成向量</h2>
+    <p>把滑鼠移到左側圖片的 3×3 <b>patch</b> 上：對應的<b>嵌入向量</b>會亮起、連一條線過去，並顯示「攤平 → 線性投影 → 加位置編碼」的過程。最前面橘色的是 <b>[CLS]</b> token。</p>
+    <div class="vit-demo">
+      <div class="demo-title">Vision Transformer (ViT) 互動演示</div>
+      <div class="viz-wrapper">
+        <div class="svg-container">
+          <svg id="vit-svg" width="800" height="450" viewBox="0 0 800 450">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+              </marker>
+            </defs>
+
+            <text x="100" y="30" text-anchor="middle" font-weight="bold" fill="#334155">1. 輸入影像 (Image)</text>
+
+            <g id="input-image" transform="translate(20, 50)">
+              <rect x="0" y="0" width="160" height="160" fill="#e2e8f0" />
+              <path d="M20 60 L80 10 L140 60 L140 150 L20 150 Z" fill="#fff" stroke="#475569" stroke-width="2"/>
+              <rect x="60" y="100" width="40" height="50" fill="#cbd5e1" stroke="#475569"/>
+              <circle cx="80" cy="40" r="15" fill="#94a3b8" opacity="0.5"/>
+
+              <g id="grid-overlay"></g>
+            </g>
+
+            <text x="100" y="230" text-anchor="middle" font-size="12" fill="#64748b">3x3 Patches</text>
+
+            <path d="M190 130 L230 130" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+            <text x="210" y="120" class="arrow-text">Flatten &amp; Project</text>
+
+            <text x="400" y="30" text-anchor="middle" font-weight="bold" fill="#334155">2. 嵌入向量 (Patch Embeddings)</text>
+
+            <g id="embedding-seq" transform="translate(250, 100)">
+              <rect x="0" y="0" width="20" height="60" class="cls-token" rx="2" />
+              <text x="10" y="75" text-anchor="middle" font-size="10" font-weight="bold" fill="#d97706">[CLS]</text>
+              <text x="10" y="-10" text-anchor="middle" font-size="10" fill="#d97706">0</text>
+            </g>
+
+            <text x="420" y="230" text-anchor="middle" font-size="12" fill="#64748b">加上位置編碼 (+ Position Embedding)</text>
+
+            <path d="M420 80 L420 60 L560 60 L560 80" fill="none" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <text x="650" y="30" text-anchor="middle" font-weight="bold" fill="#334155">3. Transformer Encoder</text>
+
+            <rect x="580" y="80" width="140" height="150" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2" rx="5" />
+            <text x="650" y="140" text-anchor="middle" fill="#8b5cf6" font-size="14">L x Layers</text>
+            <text x="650" y="160" text-anchor="middle" fill="#6d28d9" font-size="12">(MSA + MLP)</text>
+
+            <path d="M650 230 L650 260" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+            <g transform="translate(580, 270)">
+              <rect x="0" y="0" width="140" height="60" fill="#fef3c7" stroke="#f59e0b" rx="5"/>
+              <text x="70" y="25" text-anchor="middle" font-weight="bold" fill="#b45309">MLP Head</text>
+              <text x="70" y="45" text-anchor="middle" font-size="12" fill="#b45309">Class: House</text>
+            </g>
+
+            <path id="conn-1" class="connector-line" d="M0 0 L0 0" />
+            <path id="conn-2" class="connector-line" d="M0 0 L0 0" />
+          </svg>
+        </div>
+
+        <div class="info-panel" id="info-text">
+          請移動滑鼠到左側圖片上，觀察 Patch 如何轉換為向量。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔩</span>三個關鍵零件</h2>
+    <div class="keys">
+      <div class="keycard"><span>🧱</span><b>Patch Embedding</b><br>把每塊 patch 攤平，做線性投影變成一個向量（就像一個「單字」）。</div>
+      <div class="keycard"><span>🏷️</span><b>[CLS] Token</b><br>一個可學習的向量，跟著所有 patch 一起進網路，最後用它<b>彙整全圖</b>做分類。</div>
+      <div class="keycard"><span>📍</span><b>位置編碼</b><br>Transformer 不知道 patch 在空間上誰跟誰相鄰，要加位置編碼補上這個資訊。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🌐</span>全域注意力 vs 局部卷積</h2>
+    <p>這是 ViT 和 CNN 最核心的差別：</p>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>CNN</th><th>ViT</th></tr></thead>
+      <tbody>
+        <tr><td>看的範圍</td><td>卷積核只看局部，堆多層才看到全圖</td><td>自注意力第一層就<b>看見所有 patch</b></td></tr>
+        <tr><td>歸納偏置</td><td><b>強</b>（局部性、平移不變、權重共享）</td><td><b>弱</b>（幾乎沒有先天假設）</td></tr>
+        <tr><td>資料需求</td><td>較省，小資料也能學</td><td><b>需要大量資料</b>或大型預訓練</td></tr>
+        <tr><td>強項</td><td>局部紋理、資料有限時穩健</td><td>全域關聯、規模化、易與多模態整合</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">🍽️</span>歸納偏置弱 → 資料飢渴</h2>
+    <div class="note warn">
+      CNN 天生就「假設」影像有局部性與平移不變（<b>歸納偏置強</b>），所以小資料也學得動。ViT 幾乎不帶這些假設，什麼都要自己從資料學——<b>歸納偏置弱</b>，因此<b>需要更多資料或預訓練</b>才追得上、甚至超越 CNN。資料有限、想省算力時，CNN 仍是穩健選擇；實務上兩者也常混用。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🚀</span>應用場景</h2>
+    <div class="note app">
+      <b>大規模影像分類</b>（在 ImageNet-21k、JFT-300M 等超大資料集預訓練後常勝過 ResNet）、<b>多模態模型</b>（CLIP、Gemini 等——Transformer 能同時吃圖與文，ViT 成為標準影像編碼器）、<b>偵測與分割</b>（Swin Transformer 等層次化變體，能處理不同尺度）。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. 圖片怎麼變成 Transformer 的輸入？</summary>
+        <div class="ans">切成固定大小的 patch（如 16×16），每塊攤平後做線性投影成向量（patch embedding），加上位置編碼與一個 [CLS] token，再送進 Transformer 編碼器。</div></details>
+      <details><summary>Q2. 為什麼要切 patch，不直接餵像素？</summary>
+        <div class="ans">像素太多，自注意力是 O(N²) 會爆炸。切成 patch 後數量大減，一張圖變成 N 個「單字」，剛好能被 Transformer 處理。</div></details>
+      <details><summary>Q3. ViT 和 CNN 最大的差別？</summary>
+        <div class="ans">CNN 有強歸納偏置（局部性、平移不變、權重共享），卷積只看局部；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。</div></details>
+      <details><summary>Q4. [CLS] token 和位置編碼各是做什麼的？</summary>
+        <div class="ans">[CLS] 是一個可學習向量，用來彙整全圖資訊做最終分類；位置編碼補上「patch 在空間中誰跟誰相鄰」的資訊，因為 Transformer 本身沒有順序概念。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>是什麼：</b>把圖切 patch 當序列，丟進 Transformer 自注意力。</li>
+      <li><b>為何切 patch：</b>像素太多、O(N²) 會爆炸；patch 像單字。</li>
+      <li><b>三零件：</b>Patch Embedding、[CLS] token、位置編碼。</li>
+      <li><b>vs CNN：</b>全域注意力 vs 局部卷積；ViT 歸納偏置弱、需大資料。</li>
+      <li><b>應用：</b>大規模分類、多模態編碼器、Swin 做偵測。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const gridOverlay = document.getElementById('grid-overlay');
+        const embeddingSeq = document.getElementById('embedding-seq');
+        const infoText = document.getElementById('info-text');
+        const conn1 = document.getElementById('conn-1');
+        const conn2 = document.getElementById('conn-2');
+
+        const patchSize = 53.33; // 160 / 3
+        const gridSize = 3;
+
+        // Offset for SVG coordinate mapping
+        const imgOffsetX = 20;
+        const imgOffsetY = 50;
+        const embOffsetX = 250;
+        const embOffsetY = 100;
+
+        window.onload = () => {
+            initViz();
+        };
+
+        function initViz() {
+            // 1. Create 3x3 Grid on Image
+            for(let r=0; r<gridSize; r++) {
+                for(let c=0; c<gridSize; c++) {
+                    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    rect.setAttribute("x", c * patchSize);
+                    rect.setAttribute("y", r * patchSize);
+                    rect.setAttribute("width", patchSize);
+                    rect.setAttribute("height", patchSize);
+                    rect.setAttribute("class", "patch-rect");
+                    rect.setAttribute("id", `patch-${r}-${c}`);
+
+                    // Interaction
+                    rect.onmouseover = () => highlight(r, c);
+
+                    gridOverlay.appendChild(rect);
+                }
+            }
+
+            // 2. Create Embedding Vectors (9 Patches)
+            for(let i=0; i<gridSize*gridSize; i++) {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("transform", `translate(${30 + i * 35}, 0)`);
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("width", 20);
+                rect.setAttribute("height", 60);
+                rect.setAttribute("class", "vector-rect");
+                rect.setAttribute("id", `vec-${i}`);
+                rect.setAttribute("rx", 2);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", 10);
+                text.setAttribute("y", -10);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", "10");
+                text.setAttribute("fill", "#64748b");
+                text.textContent = i + 1; // Position ID
+
+                g.appendChild(rect);
+                g.appendChild(text);
+                embeddingSeq.appendChild(g);
+            }
+
+            // Mouse leave event for container to reset
+            document.getElementById('vit-svg').onmouseleave = resetViz;
+        }
+
+        function highlight(row, col) {
+            resetViz(); // clear previous
+
+            const patchIdx = row * gridSize + col;
+
+            // 1. Highlight Image Patch
+            const patch = document.getElementById(`patch-${row}-${col}`);
+            patch.classList.add('active');
+
+            // 2. Highlight Vector
+            const vec = document.getElementById(`vec-${patchIdx}`);
+            vec.classList.add('active');
+
+            // 3. Draw Connectors
+            const pX = imgOffsetX + (col * patchSize) + patchSize/2;
+            const pY = imgOffsetY + (row * patchSize) + patchSize/2;
+
+            const vX = embOffsetX + 30 + (patchIdx * 35) + 10;
+            const vY = embOffsetY; // Top of vector
+
+            const d = `M ${pX} ${pY} Q ${(pX+vX)/2} ${pY-50} ${vX} ${vY}`;
+
+            conn1.setAttribute("d", d);
+            conn1.classList.add("visible");
+
+            // 4. Update Info Text
+            infoText.innerHTML = `
+                Patch (${row}, ${col})
+                <span style="color:#94a3b8">→ 攤平 (Flatten) →</span>
+                Vector #${patchIdx + 1}
+                <span style="color:#94a3b8">+ Pos Embedding</span>
+            `;
+        }
+
+        function resetViz() {
+            document.querySelectorAll('.patch-rect').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.vector-rect').forEach(el => el.classList.remove('active'));
+            conn1.classList.remove("visible");
+            infoText.innerText = "請移動滑鼠到左側圖片上，觀察 Patch 如何轉換為向量。";
+        }
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>Vision Transformer(ViT)把 Transformer 用到影像,iPAS 中級科目一進階考點。重點:將影像切成小區塊(patch)當作序列、用自注意力建模全局關係,在大資料下可超越 CNN。易混點:ViT 缺 CNN 的歸納偏置(局部性、平移不變),需大量資料或預訓練才好;CNN 抓局部、ViT 看全局,各有所長且常被結合。情境:大規模影像分類與多模態模型骨幹。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>ViT 是什麼？</summary><p>Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。</p></details><details><summary>ViT 和 CNN 最大差別？</summary><p>CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。</p></details><details><summary>圖片怎麼變成 Transformer 的輸入？</summary><p>切成固定大小的 patch(如 16x16)，每塊攤平做線性投影成向量(patch embedding)，加上位置編碼與一個分類 token，再進編碼器。</p></details><details><summary>ViT 的優缺點？</summary><p>優點：能捕捉長距全域關係、規模化效果好、易與多模態整合。缺點：資料需求大、計算量隨 patch 數增加，小資料上不如 CNN。</p></details><details><summary>什麼時候選 ViT 或 CNN？</summary><p>有大量資料或可用大型預訓練模型時 ViT 很強；資料有限、要省算力，CNN 仍是穩健選擇，實務上也常混用。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ViT 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "Vision Transformer，把 Transformer 用到影像：將圖切成小塊(patch)當成序列丟進自注意力，直接學影像的全域關係。"}}, {"@type": "Question", "name": "ViT 和 CNN 最大差別？", "acceptedAnswer": {"@type": "Answer", "text": "CNN 有卷積的局部性與權重共享、歸納偏置強；ViT 靠自注意力建模全域關係、歸納偏置弱，通常需要更多資料或預訓練才贏過 CNN。"}}, {"@type": "Question", "name": "圖片怎麼變成 Transformer 的輸入？", "acceptedAnswer": {"@type": "Answer", "text": "切成固定大小的 patch(如 16x16)，每塊攤平做線性投影成向量(patch embedding)，加上位置編碼與一個分類 token，再進編碼器。"}}, {"@type": "Question", "name": "ViT 的優缺點？", "acceptedAnswer": {"@type": "Answer", "text": "優點：能捕捉長距全域關係、規模化效果好、易與多模態整合。缺點：資料需求大、計算量隨 patch 數增加，小資料上不如 CNN。"}}, {"@type": "Question", "name": "什麼時候選 ViT 或 CNN？", "acceptedAnswer": {"@type": "Answer", "text": "有大量資料或可用大型預訓練模型時 ViT 很強；資料有限、要省算力，CNN 仍是穩健選擇，實務上也常混用。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="transformer.html">Transformer</a><a href="attention.html">自注意力</a><a href="cnn.html">CNN</a><a href="clip_alignment.html">CLIP 多模態</a><a href="yolo.html">YOLO</a><a href="segmentation.html">影像分割</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

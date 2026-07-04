@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>離群值偵測 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。 統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dr-outlier.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="離群值偵測 · 互動教學">
+    <meta property="og:description" content="明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。 統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dr-outlier.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="離群值偵測 · 互動教學">
+    <meta name="twitter:description" content="明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。 統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "離群值偵測 · 互動教學",
+  "url": "https://akira.ipas-ai.com/dr-outlier.html",
+  "description": "明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。 統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Outlier Detection · 異常值</span>
+    <h1><span class="en">離群值偵測</span></h1>
+    <div class="sub">那個極端值，是錯誤還是寶藏？</div>
+    <p class="lede">離群值是遠離群體的極端值。關鍵是判斷它是錯誤（要清掉）還是真實重要（詐騙、故障，正是目標）。<br>用 Z-score、IQR 偵測，門檻拿捏是核心。</p>
+    <div class="eq-hero">IQR 法：超出 Q1−k·IQR 或 Q3+k·IQR（常用 k=1.5）</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>那個超大的數字，是錯誤還是寶藏？</h2>
+  <p>離群值（Outlier）是<span class="c-en hl">遠離其他資料的極端值</span>。關鍵問題：它是<span class="c-bad hl">錯誤</span>（打錯字、感測器壞）還是<span class="c-ok hl">真實又重要</span>（詐騙交易、設備異常）？前者要清掉，後者正是你要找的目標。所以離群值偵測既是清理、也是異常偵測。</p>
+  <div class="trio">
+    <div class="persona hi"><svg viewBox="0 0 100 100"><circle cx="40" cy="55" r="4" fill="var(--l1)"/><circle cx="48" cy="50" r="4" fill="var(--l1)"/><circle cx="52" cy="58" r="4" fill="var(--l1)"/><circle cx="82" cy="22" r="6" fill="var(--bad)"/></svg><div class="nm">離群值</div><div class="tag">極端</div><p>遠離群體的點。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><path d="M20 70 Q50 20 80 70" fill="none" stroke="var(--l2)" stroke-width="3"/><path d="M30 60 H70" stroke="var(--l2)" stroke-width="1.5" stroke-dasharray="3 2"/></svg><div class="nm">Z-score</div><div class="tag">標準差法</div><p>離平均幾個標準差以外。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="34" y="40" width="32" height="24" fill="none" stroke="var(--en)" stroke-width="3"/><path d="M34 52 H22 M66 52 H78" stroke="var(--en)" stroke-width="2.4"/></svg><div class="nm">IQR 法</div><div class="tag">箱型圖</div><p>超出四分位距 1.5 倍。</p></div>
+  </div>
+  <p class="hint">先別急著刪！永遠先問：這個極端值是「錯」還是「真」。詐騙偵測、故障預警，要找的正是離群值。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>拖門檻，看 IQR/Z-score 怎麼抓離群值</h2>
+  <p>下面一排資料點，大部分集中，少數極端。拖動<span class="c-en hl">靈敏度</span>，看離群判定範圍怎麼變——<span class="hl">太鬆</span>抓不到異常，<span class="hl">太嚴</span>把正常值也當異常（誤報）。這個拿捏是偵測的核心。</p>
+  <div class="card">
+    <div class="svgbox"><svg id="oSvg" viewBox="0 0 460 180"></svg></div>
+    <div class="slider-row"><label>靈敏度（嚴←→鬆）</label><input type="range" id="k" min="10" max="35" step="1" value="15"><span class="val" id="kV">1.5</span></div>
+    <div class="readout"><div class="ro"><div class="k">判定為離群</div><div class="v c-bad" id="nOut">—</div></div>
+      <div class="ro"><div class="k">提示</div><div id="oStat" style="margin-top:2px"></div></div></div>
+    <p class="hint">IQR 法常用 1.5 倍當界線（箱型圖鬚線）。調很鬆(3.0)只抓最誇張的；調很嚴(1.0)連邊緣正常值都被標成離群——誤報變多。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 方法與判斷</div>
+  <h2>離群值的處理</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>先判斷：錯誤值 vs 有意義的極端值</li><li>IQR 對偏態資料較穩健</li><li>Isolation Forest 適合高維、自動偵測</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>盲目刪除可能丟掉重要訊號（詐騙！）</li><li>Z-score 假設常態分布，偏態會失準</li><li>門檻太嚴 → 大量誤報</li></ul></div>
+</div><h3 style='margin-top:26px'>偵測方法</h3><div class="usecards"><div class="uc"><div class="ic">📏</div><div class="t">Z-score</div><div class="d">離均值幾個標準差</div></div><div class="uc"><div class="ic">📦</div><div class="t">IQR</div><div class="d">箱型圖四分位距</div></div><div class="uc"><div class="ic">🌲</div><div class="t">Isolation Forest</div><div class="d">高維自動偵測</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("oSvg");
+  const kS=document.getElementById("k"),kV=document.getElementById("kV");
+  const nE=document.getElementById("nOut"),stat=document.getElementById("oStat");
+  const data=[20,22,23,24,24,25,25,26,27,28,29,30,31,33,52,58];
+  let k=1.5;
+  function quartile(arr,q){const s=[...arr].sort((a,b)=>a-b);const pos=(s.length-1)*q;const b=Math.floor(pos);const r=pos-b;return s[b+1]!==undefined?s[b]+r*(s[b+1]-s[b]):s[b];}
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    const q1=quartile(data,.25),q3=quartile(data,.75),iqr=q3-q1;
+    const lo=q1-k*iqr, hi=q3+k*iqr;
+    const x0=30,x1=430,y=90;
+    svg.appendChild(el("line",{x1:x0,y1:y,x2:x1,y2:y,stroke:"#cfc8b8","stroke-width":1.5}));
+    const mn=15,mx=62; const sx=v=>x0+(v-mn)/(mx-mn)*(x1-x0);
+    // acceptable band
+    svg.appendChild(el("rect",{x:sx(Math.max(mn,lo)),y:y-34,width:sx(Math.min(mx,hi))-sx(Math.max(mn,lo)),height:68,fill:"var(--ok)",opacity:.08}));
+    svg.appendChild(el("line",{x1:sx(hi),y1:y-40,x2:sx(hi),y2:y+40,stroke:"var(--bad)","stroke-width":1.6,"stroke-dasharray":"4 3"}));
+    svg.appendChild(txt(sx(hi),y-46,"離群界線",{fill:"var(--bad)","font-size":11,"text-anchor":"middle"}));
+    let n=0;
+    data.forEach(v=>{const out=v<lo||v>hi; if(out)n++;
+      svg.appendChild(el("circle",{cx:sx(v),cy:y+(Math.random()*16-8),r:6,fill:out?"var(--bad)":"var(--l1)",opacity:.85,stroke:"#fff","stroke-width":1}));});
+    nE.textContent=n+" 個";
+    kV.textContent=(k).toFixed(1);
+    stat.innerHTML = k>=2.5?'<span class="badge keep" style="background:#fff7e6;color:#b7791f;border-color:#f3dca0">門檻鬆，只抓最極端</span>':(k<=1.2?'<span class="badge drop">門檻嚴，誤報增加</span>':'<span class="badge keep">✓ 1.5 倍是常用基準</span>');
+  }
+  kS.addEventListener("input",()=>{k=(+kS.value)/10;build();});
+  build();
+})();
+
+</script>
+
+
+
+
+
+<style>
+  .dtbl{width:100%;border-collapse:collapse;font-size:14px}
+  .dtbl th,.dtbl td{border:1px solid var(--rule);padding:9px 11px;text-align:left;vertical-align:top}
+  .dtbl thead th{background:var(--en-soft);color:var(--en);font-weight:700;white-space:nowrap}
+  .dtbl td:first-child{font-weight:700;color:var(--ink);white-space:nowrap}
+  .dtbl tbody tr:nth-child(even){background:var(--paper)}
+  .klist{list-style:none;counter-reset:k;margin:6px 0 0}
+  .klist li{position:relative;padding-left:32px;margin-bottom:9px;color:var(--ink2);font-size:15px}
+  .klist li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:2px;width:21px;height:21px;border-radius:50%;background:var(--en);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .qbox{border:1px solid var(--rule);border-radius:12px;background:var(--paper2);padding:4px 16px;margin:10px 0}
+  .qbox summary{cursor:pointer;font-weight:700;color:var(--ink);padding:12px 0}
+  .qbox[open] summary{color:var(--en)}
+  .qbox .a{color:var(--ink2);font-size:14.5px;padding:0 0 13px}
+</style>
+<section><div class="wrap">
+  <div class="sec-num">04 — 速記與對照</div>
+  <h2>離群值偵測方法</h2>
+  <div class="card" style="overflow-x:auto"><table class="dtbl"><thead><tr><th>方法</th><th>怎麼判</th><th>特點</th></tr></thead><tbody><tr><td>IQR 法</td><td>超過 Q1−1.5·IQR 或 Q3＋1.5·IQR</td><td>不受極端值影響、直觀</td></tr><tr><td>Z-score</td><td>|z|>3(距均值幾個標準差)</td><td>假設近常態</td></tr><tr><td>視覺化</td><td>箱型圖、散佈圖</td><td>快速人眼發現</td></tr><tr><td>模型法</td><td>Isolation Forest、LOF</td><td>高維、非線性有效</td></tr></tbody></table></div>
+  <h3 style="margin-top:28px">自我檢測</h3>
+  <details class="qbox"><summary>怎麼偵測離群值？</summary><div class="a">統計法(IQR、Z-score)、視覺化(箱型圖)、或模型法(Isolation Forest、LOF);高維資料多用模型法。</div></details><details class="qbox"><summary>IQR 法怎麼判定？</summary><div class="a">算四分位距 IQR=Q3−Q1,落在 Q1−1.5·IQR 以下或 Q3＋1.5·IQR 以上視為離群,對極端值穩健。</div></details><details class="qbox"><summary>發現離群值該怎麼處理？</summary><div class="a">先判斷是錯誤還是真實極端:錯誤就修正／刪除;真實則保留、蓋帽(winsorize)或用穩健方法,別一律刪。</div></details>
+  <div class="callout" style="margin-top:26px"><h3>🎯 重點整理</h3><ol class="klist"><li>離群值=明顯偏離多數的觀測值。</li><li>IQR、Z-score、箱型圖、模型法偵測。</li><li>IQR 用 1.5 倍距、對極端值穩健。</li><li>先分辨錯誤 vs 真實極端再處理。</li><li>別盲刪——可能是重要訊號。</li></ol></div>
+</div></section>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>離群值偵測與處理影響模型穩定,iPAS 考點(中級科目二與三)。重點:用箱形圖、Z 分數、IQR 或模型法找極端值,再決定保留、修正或移除。易混點:不可粗暴刪除而破壞整體分布——要先分辨是錯誤資料還是真實的極端案例(如高額理賠);有些模型(樹)對離群較不敏感。情境:在不破壞分布前提下處理離群、判斷某做法是否恰當。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>什麼是離群值(outlier)？</summary><p>明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。</p></details><details><summary>怎麼偵測離群值？</summary><p>統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。</p></details><details><summary>IQR 法怎麼判定？</summary><p>算 Q1、Q3 與四分位距 IQR=Q3−Q1，落在 Q1−1.5×IQR 以下或 Q3+1.5×IQR 以上者視為離群。</p></details><details><summary>發現離群值該怎麼處理？</summary><p>先判斷成因：是錯誤就修正或刪除；是真實極端值可保留、做轉換(如取對數)、或改用對離群值穩健的方法與指標(中位數、MAE)。</p></details><details><summary>離群值對模型的影響？</summary><p>對 SVM、線性迴歸、K-means、MSE 等敏感方法影響大(會被拉偏)；樹模型相對穩健，處理前要想清楚它是否該被忽略。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是離群值(outlier)？", "acceptedAnswer": {"@type": "Answer", "text": "明顯偏離其他資料的值，可能是錯誤(輸入錯)或真實極端事件(如詐欺)；是否處理要看它是雜訊還是有意義的訊號。"}}, {"@type": "Question", "name": "怎麼偵測離群值？", "acceptedAnswer": {"@type": "Answer", "text": "統計法(Z-score、IQR 箱型圖)、距離與密度法(DBSCAN、LOF)、模型法(Isolation Forest)；視覺化(箱型圖、散點圖)也很有用。"}}, {"@type": "Question", "name": "IQR 法怎麼判定？", "acceptedAnswer": {"@type": "Answer", "text": "算 Q1、Q3 與四分位距 IQR=Q3−Q1，落在 Q1−1.5×IQR 以下或 Q3+1.5×IQR 以上者視為離群。"}}, {"@type": "Question", "name": "發現離群值該怎麼處理？", "acceptedAnswer": {"@type": "Answer", "text": "先判斷成因：是錯誤就修正或刪除；是真實極端值可保留、做轉換(如取對數)、或改用對離群值穩健的方法與指標(中位數、MAE)。"}}, {"@type": "Question", "name": "離群值對模型的影響？", "acceptedAnswer": {"@type": "Answer", "text": "對 SVM、線性迴歸、K-means、MSE 等敏感方法影響大(會被拉偏)；樹模型相對穩健，處理前要想清楚它是否該被忽略。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="dr-abtest.html">A/B 測試 · 互動教學</a><a href="dr-acid.html">ACID / Schema · 互動教學</a><a href="dr-causal.html">因果推論 · 互動教學</a><a href="dr-cleaning.html">資料清理 · 互動教學</a><a href="dr-consistency.html">一致性檢查 · 互動教學</a><a href="dr-constraint.html">資料需求與限制 · 互動教學</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">離群值偵測</span> · 互動教學</div></footer>
+</body>
+</html>

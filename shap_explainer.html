@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHAP 特徵貢獻 互動動畫</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。 衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/shap_explainer.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SHAP 特徵貢獻 互動動畫">
+    <meta property="og:description" content="SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。 衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/shap_explainer.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SHAP 特徵貢獻 互動動畫">
+    <meta name="twitter:description" content="SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。 衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "SHAP 特徵貢獻 互動動畫",
+  "url": "https://akira.ipas-ai.com/shap_explainer.html",
+  "description": "SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。 衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC','Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#1a1a3e,#24243e);color:#e0e0e0;min-height:100vh;padding:1.2rem}
+h1{text-align:center;font-size:1.6rem;margin-bottom:.3rem;background:linear-gradient(90deg,#8b5cf6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#aaa;font-size:.92rem;margin-bottom:1rem}
+.container{max-width:1000px;margin:0 auto}
+.card{background:rgba(255,255,255,.06);border-radius:16px;padding:1.2rem;margin-bottom:1rem;border:1px solid rgba(255,255,255,.08)}
+.card h2{font-size:1.15rem;margin-bottom:.6rem;color:#a78bfa}
+.card p,.card li{font-size:.93rem;line-height:1.7;color:#ccc}
+.card ul{padding-left:1.2rem}.card li{margin-bottom:.3rem}
+.highlight{background:rgba(167,139,250,.12);border-left:3px solid #a78bfa;padding:.6rem .8rem;border-radius:8px;margin:.6rem 0;font-size:.9rem;color:#c4b5fd}
+.svg-wrap{background:rgba(0,0,0,.3);border-radius:12px;padding:.5rem;overflow:hidden}
+svg{display:block;width:100%;height:auto}
+.scenario-tabs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+.scenario-tab{padding:.5rem 1rem;border-radius:999px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#bbb;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.scenario-tab:hover{border-color:#a78bfa}
+.scenario-tab.active{background:#a78bfa;color:#1a1a3e;border-color:#a78bfa}
+.prediction-box{text-align:center;margin:.8rem 0;padding:1rem;background:rgba(0,0,0,.2);border-radius:12px}
+.prediction-box .pred-label{font-size:.85rem;color:#888}
+.prediction-box .pred-value{font-size:2rem;font-weight:800}
+.prediction-box .pred-detail{font-size:.82rem;color:#aaa;margin-top:.3rem}
+.feature-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem;margin:1rem 0}
+.fc{background:rgba(0,0,0,.2);padding:.6rem;border-radius:10px}
+.fc label{font-size:.82rem;color:#aaa;display:block;margin-bottom:.3rem}
+.fc input[type=range]{width:100%;accent-color:#a78bfa}
+.fc .fv{font-size:.9rem;font-weight:700;color:#a78bfa;text-align:right}
+</style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+<div class="container">
+<h1>🔍 SHAP 特徵貢獻 互動動畫</h1>
+<p class="subtitle">看每個特徵如何「推高」或「推低」模型預測</p>
+
+<div class="card">
+<h2>💡 白話說明</h2>
+<p>想像你去銀行申請貸款，AI 說「拒絕」。你問「為什麼？」：</p>
+<ul>
+<li><strong>SHAP</strong> 會告訴你：「你的<span style="color:#f87171">年收入太低（-0.3）</span>、<span style="color:#f87171">信用卡遲繳（-0.2）</span>，但<span style="color:#4ade80">工作年資長（+0.15）</span>」</li>
+<li><strong>紅色長條</strong> = 把預測往「拒絕」方向推的特徵</li>
+<li><strong>綠色長條</strong> = 把預測往「通過」方向推的特徵</li>
+<li>所有推力加起來 = 最終預測結果</li>
+</ul>
+<div class="highlight">📌 考試重點：SHAP 基於賽局理論的 Shapley 值，能公平分配每個特徵的貢獻。是目前最主流的 XAI（可解釋 AI）方法。</div>
+</div>
+
+<div class="scenario-tabs">
+<div class="scenario-tab active" data-s="loan">🏦 貸款審核</div>
+<div class="scenario-tab" data-s="health">🏥 疾病風險</div>
+<div class="scenario-tab" data-s="churn">📱 客戶流失</div>
+</div>
+
+<div class="feature-controls" id="featureControls"></div>
+
+<div class="prediction-box">
+<div class="pred-label">模型預測結果</div>
+<div class="pred-value" id="predValue">-</div>
+<div class="pred-detail" id="predDetail">調整上方特徵值觀察 SHAP 變化</div>
+</div>
+
+<div style="text-align:center;font-size:.9rem;color:#aaa;margin:.5rem 0">📊 SHAP 瀑布圖（Waterfall Plot）</div>
+<div class="svg-wrap">
+<svg id="shapChart" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="card" style="margin-top:1rem">
+<h2>🧠 SHAP vs LIME</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+<div style="background:rgba(167,139,250,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#a78bfa">SHAP</strong>
+<ul style="font-size:.82rem;color:#aaa;margin-top:.3rem">
+<li>基於 Shapley 值（賽局理論）</li>
+<li>全局 + 局部解釋都行</li>
+<li>理論保證公平分配</li>
+<li>計算較慢但結果穩定</li>
+</ul>
+</div>
+<div style="background:rgba(244,114,182,.1);padding:.8rem;border-radius:10px">
+<strong style="color:#f472b6">LIME</strong>
+<ul style="font-size:.82rem;color:#aaa;margin-top:.3rem">
+<li>在預測點附近擬合簡單模型</li>
+<li>只做局部解釋</li>
+<li>速度快但結果可能不穩定</li>
+<li>每次跑結果可能略不同</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const scenarios={
+  loan:{
+    title:'貸款審核',
+    baseValue:0.5,
+    features:[
+      {name:'年收入（萬）',min:20,max:200,default:55,weight:0.004,icon:'💰'},
+      {name:'信用分數',min:300,max:850,default:620,weight:0.003,icon:'📊'},
+      {name:'工作年資（年）',min:0,max:30,default:8,weight:0.012,icon:'💼'},
+      {name:'負債比率（%）',min:0,max:80,default:45,weight:-0.006,icon:'💳'},
+      {name:'遲繳次數',min:0,max:10,default:2,weight:-0.08,icon:'⚠️'},
+      {name:'房產（有=1）',min:0,max:1,default:0,weight:0.15,icon:'🏠'}
+    ],
+    posLabel:'✅ 通過',negLabel:'❌ 拒絕',threshold:0.5
+  },
+  health:{
+    title:'疾病風險',
+    baseValue:0.3,
+    features:[
+      {name:'年齡',min:20,max:80,default:55,weight:0.005,icon:'🎂'},
+      {name:'BMI',min:15,max:45,default:28,weight:0.015,icon:'⚖️'},
+      {name:'血壓（收縮壓）',min:90,max:200,default:140,weight:0.004,icon:'❤️'},
+      {name:'每週運動次數',min:0,max:7,default:1,weight:-0.06,icon:'🏃'},
+      {name:'吸菸（有=1）',min:0,max:1,default:1,weight:0.2,icon:'🚬'},
+      {name:'家族病史（有=1）',min:0,max:1,default:0,weight:0.18,icon:'🧬'}
+    ],
+    posLabel:'⚠️ 高風險',negLabel:'✅ 低風險',threshold:0.5
+  },
+  churn:{
+    title:'客戶流失',
+    baseValue:0.35,
+    features:[
+      {name:'使用月數',min:1,max:60,default:6,weight:-0.005,icon:'📅'},
+      {name:'月消費（元）',min:100,max:5000,default:800,weight:-0.0002,icon:'💵'},
+      {name:'客訴次數',min:0,max:10,default:3,weight:0.06,icon:'😤'},
+      {name:'上月使用天數',min:0,max:30,default:10,weight:-0.012,icon:'📱'},
+      {name:'合約到期（月）',min:0,max:24,default:2,weight:-0.03,icon:'📝'},
+      {name:'競品優惠（有=1）',min:0,max:1,default:1,weight:0.2,icon:'🎯'}
+    ],
+    posLabel:'⚠️ 可能流失',negLabel:'✅ 留存',threshold:0.5
+  }
+};
+
+let currentScenario='loan';
+let featureValues={};
+
+function buildControls(){
+  const s=scenarios[currentScenario];
+  const container=document.getElementById('featureControls');
+  container.innerHTML='';
+  featureValues={};
+  s.features.forEach((f,i)=>{
+    featureValues[i]=f.default;
+    const div=document.createElement('div');
+    div.className='fc';
+    div.innerHTML=`<label>${f.icon} ${f.name}</label><input type="range" min="${f.min}" max="${f.max}" value="${f.default}" step="${f.max<=1?1:1}" data-idx="${i}"><div class="fv" id="fv${i}">${f.default}</div>`;
+    container.appendChild(div);
+    div.querySelector('input').addEventListener('input',e=>{
+      featureValues[i]=+e.target.value;
+      document.getElementById('fv'+i).textContent=e.target.value;
+      draw();
+    });
+  });
+}
+
+function computeSHAP(){
+  const s=scenarios[currentScenario];
+  const shapValues=[];
+  s.features.forEach((f,i)=>{
+    const diff=featureValues[i]-((f.min+f.max)/2);
+    const shap=diff*f.weight;
+    shapValues.push({name:f.icon+' '+f.name,value:shap,featureVal:featureValues[i]});
+  });
+  shapValues.sort((a,b)=>Math.abs(b.value)-Math.abs(a.value));
+  const prediction=Math.max(0,Math.min(1,s.baseValue+shapValues.reduce((sum,v)=>sum+v.value,0)));
+  return {shapValues,prediction,baseValue:s.baseValue};
+}
+
+function draw(){
+  const s=scenarios[currentScenario];
+  const {shapValues,prediction,baseValue}=computeSHAP();
+
+  // Update prediction display
+  const predEl=document.getElementById('predValue');
+  const isPositive=prediction>=s.threshold;
+  predEl.textContent=(isPositive?s.posLabel:s.negLabel)+` (${(prediction*100).toFixed(1)}%)`;
+  predEl.style.color=isPositive?(currentScenario==='loan'?'#4ade80':'#f87171'):(currentScenario==='loan'?'#f87171':'#4ade80');
+  document.getElementById('predDetail').textContent=`基準值 ${(baseValue*100).toFixed(1)}% → 最終 ${(prediction*100).toFixed(1)}%（SHAP 推力合計 ${((prediction-baseValue)*100).toFixed(1)}%）`;
+
+  // Draw waterfall chart
+  const svg=document.getElementById('shapChart');
+  const W=800,H=450,PL=180,PR=60,PT=50,PB=40;
+  const chartW=W-PL-PR, chartH=H-PT-PB;
+  const n=shapValues.length;
+  const barH=Math.min(40,chartH/(n+2));
+  const gap=5;
+
+  let html=`<rect width="${W}" height="${H}" fill="rgba(0,0,0,.15)" rx="8"/>`;
+
+  // Find scale
+  let cumMin=baseValue,cumMax=baseValue,cum=baseValue;
+  shapValues.forEach(v=>{cum+=v.value;cumMin=Math.min(cumMin,cum);cumMax=Math.max(cumMax,cum);});
+  const margin=0.1;
+  const xMin=Math.max(0,cumMin-margin);
+  const xMax=Math.min(1,cumMax+margin);
+  function xScale(v){return PL+chartW*((v-xMin)/(xMax-xMin))}
+
+  // Grid
+  for(let i=0;i<=10;i++){
+    const v=xMin+(xMax-xMin)*i/10;
+    const x=xScale(v);
+    html+=`<line x1="${x}" y1="${PT}" x2="${x}" y2="${H-PB}" stroke="rgba(255,255,255,0.05)"/>`;
+    html+=`<text x="${x}" y="${H-PB+15}" text-anchor="middle" fill="#666" font-size="10">${(v*100).toFixed(0)}%</text>`;
+  }
+
+  // Base value line
+  const baseX=xScale(baseValue);
+  html+=`<line x1="${baseX}" y1="${PT-5}" x2="${baseX}" y2="${H-PB}" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  html+=`<text x="${baseX}" y="${PT-10}" text-anchor="middle" fill="#888" font-size="11">基準 ${(baseValue*100).toFixed(0)}%</text>`;
+
+  // Waterfall bars
+  let currentVal=baseValue;
+  shapValues.forEach((v,i)=>{
+    const y=PT+i*(barH+gap);
+    const startX=xScale(currentVal);
+    const endX=xScale(currentVal+v.value);
+    const barLeft=Math.min(startX,endX);
+    const barWidth=Math.abs(endX-startX);
+    const isPos=v.value>=0;
+    const color=isPos?'#4ade80':'#f87171';
+
+    // Connector line from previous
+    if(i>0){
+      html+=`<line x1="${startX}" y1="${y-gap}" x2="${startX}" y2="${y+barH/2}" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="2,2"/>`;
+    }
+
+    // Bar
+    html+=`<rect x="${barLeft}" y="${y}" width="${Math.max(2,barWidth)}" height="${barH}" fill="${color}" opacity="0.75" rx="4">`;
+    html+=`<animate attributeName="width" from="0" to="${Math.max(2,barWidth)}" dur="0.4s" begin="${i*0.05}s" fill="freeze"/>`;
+    html+=`</rect>`;
+
+    // Feature name
+    html+=`<text x="${PL-8}" y="${y+barH/2+4}" text-anchor="end" fill="#ccc" font-size="12">${v.name}</text>`;
+
+    // Value label
+    const sign=v.value>=0?'+':'';
+    html+=`<text x="${endX+(isPos?5:-5)}" y="${y+barH/2+4}" text-anchor="${isPos?'start':'end'}" fill="${color}" font-size="11" font-weight="700">${sign}${(v.value*100).toFixed(1)}%</text>`;
+
+    currentVal+=v.value;
+  });
+
+  // Final prediction line
+  const finalX=xScale(prediction);
+  const finalY=PT+n*(barH+gap);
+  html+=`<line x1="${finalX}" y1="${finalY-gap}" x2="${finalX}" y2="${finalY+barH/2}" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="2,2"/>`;
+  html+=`<rect x="${xScale(Math.min(baseValue,prediction))}" y="${finalY}" width="${Math.abs(xScale(prediction)-xScale(baseValue))}" height="${barH}" fill="#a78bfa" opacity="0.6" rx="4"/>`;
+  html+=`<text x="${PL-8}" y="${finalY+barH/2+4}" text-anchor="end" fill="#a78bfa" font-size="12" font-weight="700">最終預測</text>`;
+  html+=`<text x="${finalX+8}" y="${finalY+barH/2+4}" text-anchor="start" fill="#a78bfa" font-size="13" font-weight="700">${(prediction*100).toFixed(1)}%</text>`;
+
+  svg.innerHTML=html;
+}
+
+document.querySelectorAll('.scenario-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.scenario-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentScenario=tab.dataset.s;
+    buildControls();
+    draw();
+  });
+});
+
+buildControls();
+draw();
+</script>
+
+
+
+
+
+<style>
+.mxwrap{font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;max-width:900px;margin:26px auto 0;padding:0 16px;box-sizing:border-box}
+.mxwrap .mxc{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:18px 20px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:14px}
+.mxwrap .mxh{font-size:1.05rem;color:#0f766e;margin:0 0 11px;font-weight:800}
+.mxtbl{width:100%;border-collapse:collapse;font-size:14px}
+.mxtbl th,.mxtbl td{border:1px solid #e6e9ef;padding:9px 11px;text-align:left;vertical-align:top;color:#334155;line-height:1.6}
+.mxtbl thead th{background:#e8f2fe;color:#1565C0;font-weight:700;white-space:nowrap}
+.mxtbl td:first-child{font-weight:700;color:#1a2233;white-space:nowrap}
+.mxtbl tbody tr:nth-child(even){background:#f7f9fc}
+.mxq{border-top:1px solid #f0f2f5;padding:10px 0}
+.mxq:first-of-type{border-top:0}
+.mxq summary{cursor:pointer;font-weight:700;color:#2c3e50}
+.mxq .a{margin-top:7px;color:#475467;font-size:.93rem;line-height:1.7}
+.mxk{list-style:none;counter-reset:k;margin:2px 0 0;padding:0}
+.mxk li{position:relative;padding-left:30px;margin-bottom:8px;color:#334155;font-size:14.5px;line-height:1.6}
+.mxk li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:1px;width:20px;height:20px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+</style>
+<div class="mxwrap">
+  <div class="mxc"><div class="mxh">📊 SHAP 重點</div><div style="overflow-x:auto"><table class="mxtbl"><thead><tr><th>概念</th><th>說明</th></tr></thead><tbody><tr><td>Shapley 值</td><td>賽局理論:每特徵對預測的公平貢獻</td></tr><tr><td>基準</td><td>從平均預測出發、各特徵推它一把</td></tr><tr><td>加總性</td><td>各特徵貢獻加總=該筆預測−基準</td></tr><tr><td>TreeSHAP</td><td>樹模型的高效精確算法</td></tr></tbody></table></div></div>
+  <div class="mxc"><div class="mxh">✅ 自我檢測</div><details class="mxq"><summary>SHAP 是什麼？</summary><div class="a">基於賽局理論 Shapley 值的模型解釋法:公平分配「每個特徵對某筆預測的貢獻」,可局部與全域解釋。</div></details><details class="mxq"><summary>SHAP 有什麼好性質？</summary><div class="a">加總性(貢獻和=預測−基準)、一致性、局部準確;是理論基礎最扎實的解釋法之一。</div></details><details class="mxq"><summary>TreeSHAP 是什麼？</summary><div class="a">針對樹模型(XGBoost／RF)的高效精確 SHAP 算法,把原本指數級計算降到多項式,實務可用。</div></details></div>
+  <div class="mxc"><div class="mxh">🎯 重點整理</div><ol class="mxk"><li>SHAP=用 Shapley 值分配特徵貢獻。</li><li>各特徵貢獻加總=預測−基準(加總性)。</li><li>可局部(單筆)與全域(整體)解釋。</li><li>TreeSHAP 讓樹模型算得又快又準。</li><li>與 LIME 並列主流 XAI 方法。</li></ol></div>
+</div>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>SHAP 用賽局論的 Shapley 值解釋模型輸出,iPAS 中級科目三考點。重點:把預測公平地分配到每個特徵的貢獻,可看單筆(局部)也可彙總成全局重要性,且滿足一致性與加總性。易混點:特徵重要性不等於因果(只是模型怎麼用該特徵);TreeSHAP 針對樹模型加速、KernelSHAP 較通用但慢。情境:向業務或法遵解釋為何核拒這筆貸款。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>SHAP 是什麼？</summary><p>SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。</p></details><details><summary>Shapley 值的核心概念？</summary><p>衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。</p></details><details><summary>SHAP 有什麼好性質？</summary><p>可加性(各特徵貢獻加基準值等於該預測)、一致性(特徵影響變大其 SHAP 值不會反而變小)，讓解釋更可信、可比較。</p></details><details><summary>TreeSHAP 是什麼？</summary><p>針對樹模型(隨機森林、XGBoost)的高效精確 SHAP 演算法；一般 SHAP 計算昂貴，TreeSHAP 大幅加速、實務常用。</p></details><details><summary>SHAP 能做哪些解釋？</summary><p>單筆(force 或 waterfall 圖看各特徵推力)、全域(特徵重要性排序、beeswarm)、依賴圖(看某特徵與其影響的關係)，局部與全域兼顧。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "SHAP 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "SHapley Additive exPlanations，用合作博弈論的 Shapley 值，把一筆預測公平地拆解成各特徵的貢獻，說明每個特徵把預測往上或往下推多少。"}}, {"@type": "Question", "name": "Shapley 值的核心概念？", "acceptedAnswer": {"@type": "Answer", "text": "衡量某特徵加入各種特徵組合時平均帶來的邊際貢獻；這是博弈論中公平分配合作收益、且唯一滿足數個公理的方法。"}}, {"@type": "Question", "name": "SHAP 有什麼好性質？", "acceptedAnswer": {"@type": "Answer", "text": "可加性(各特徵貢獻加基準值等於該預測)、一致性(特徵影響變大其 SHAP 值不會反而變小)，讓解釋更可信、可比較。"}}, {"@type": "Question", "name": "TreeSHAP 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "針對樹模型(隨機森林、XGBoost)的高效精確 SHAP 演算法；一般 SHAP 計算昂貴，TreeSHAP 大幅加速、實務常用。"}}, {"@type": "Question", "name": "SHAP 能做哪些解釋？", "acceptedAnswer": {"@type": "Answer", "text": "單筆(force 或 waterfall 圖看各特徵推力)、全域(特徵重要性排序、beeswarm)、依賴圖(看某特徵與其影響的關係)，局部與全域兼顧。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="trustworthy-ai.html">可信賴性</a><a href="human.html">治理與倫理</a><a href="fairness.html">公平性與去偏見</a><a href="security.html">安全與防禦</a><a href="adversarial.html">對抗式攻擊防禦</a><a href="robustness.html">強健性</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO 物件偵測｜白話＋互動：一次看完就框出所有物件</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。 分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/yolo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="YOLO 物件偵測互動演示">
+    <meta property="og:description" content="You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。 分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/yolo.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="YOLO 物件偵測互動演示">
+    <meta name="twitter:description" content="You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。 分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "YOLO 物件偵測互動演示",
+  "url": "https://akira.ipas-ai.com/yolo.html",
+  "description": "You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。 分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#fdf6ec; --ink:#3a2708; --sub:#8a6a3d;
+      --brand:#d97706; --brand2:#b45309; --brand-soft:#fce7c6;
+      --card:#ffffff; --line:#f0e2cc;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706 55%,#b45309);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#fff3e0;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(217,119,6,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson h3{font-size:1.06rem;margin:20px 0 8px;color:var(--brand2)}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#fbd89b 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fdf7ec}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .formula{background:#3a2708;color:#fff3e0;border-radius:12px;padding:16px 18px;margin:14px 0;font-family:'Consolas','SFMono-Regular',monospace;font-size:.92rem;line-height:1.9;overflow-x:auto;text-align:center}
+    .formula .c{color:#fcd34d}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#fdf7ec;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fdf7ec}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#6b4e24;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .yolo-demo） ===== */
+    .yolo-demo{--primary-color:#f59e0b;--box-color:#ef4444;margin:14px 0}
+    .yolo-demo .demo-title{font-size:1.12rem;font-weight:800;color:#b45309;margin:0 0 14px;text-align:center}
+    .yolo-demo .viz-wrapper{display:flex;gap:26px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+    .yolo-demo .image-container{position:relative;width:400px;height:400px;max-width:100%;border:2px solid #0f172a;background:#e2e8f0;border-radius:4px;overflow:hidden;cursor:crosshair}
+    .yolo-demo .image-container svg{position:absolute;top:0;left:0;width:100%;height:100%}
+    .yolo-demo .dashboard{flex:1;min-width:280px;background:#f1f5f9;padding:20px;border-radius:8px;border:1px solid #cbd5e1}
+    .yolo-demo .dash-title{font-weight:bold;font-size:1.1rem;margin-bottom:15px;color:#475569;border-bottom:1px solid #cbd5e1;padding-bottom:5px}
+    .yolo-demo .data-row{display:flex;justify-content:space-between;margin-bottom:8px;font-family:monospace;font-size:1.05rem}
+    .yolo-demo .bar-container{margin-bottom:15px}
+    .yolo-demo .bar-label{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:2px}
+    .yolo-demo .bar-bg{background:#cbd5e1;height:10px;border-radius:5px;overflow:hidden}
+    .yolo-demo .bar-fill{height:100%;width:0%;transition:width .2s}
+    .yolo-demo .grid-line{stroke:#94a3b8;stroke-width:1;stroke-dasharray:4;opacity:.5;pointer-events:none}
+    .yolo-demo .active-cell{fill:var(--primary-color);fill-opacity:.3;stroke:var(--primary-color);stroke-width:2}
+    .yolo-demo .bbox{fill:none;stroke:var(--box-color);stroke-width:3;stroke-dasharray:0;transition:all .1s}
+    .yolo-demo .object-art{pointer-events:none}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 物件偵測</span>
+  <h1>YOLO 物件偵測</h1>
+  <p>You Only Look Once——只看一次整張圖，就同時把「有哪些物件、各在哪裡」全部框出來，快到能做即時偵測。</p>
+  <div class="chips">
+    <span>You Only Look Once</span><span>一次前向</span><span>網格系統</span><span>one-stage</span><span>IoU · mAP · NMS</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>YOLO（You Only Look Once）</b>＝ 一種<span class="term">即時物件偵測</span>方法：<span class="hl">一次前向傳播</span>就同時預測影像中所有物件的<span class="term">位置（bounding box）與類別</span>，因此速度很快。
+    </div>
+    <p>它把「物件偵測」當成一個迴歸問題來解——不像 R-CNN 系列要先產生數千個候選區再一一分類，YOLO 看一眼就給答案。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🆚</span>先分清：分類 vs 偵測</h2>
+    <div class="note meta">
+      <b>影像分類</b>只回答「這整張圖是什麼」（一張圖一個標籤）；<b>物件偵測</b>要回答「圖裡有哪些物件、各自在哪裡」——同時做<b>定位（畫框）</b>與<b>分類</b>，輸出多個邊界框與類別。YOLO 解的是後者。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：哪個網格負責偵測？</h2>
+    <p>把滑鼠移到圖片裡物件的<b>中心點</b>：只有「中心落在該格」的網格會輸出高信心度、畫出邊界框、並在右側點亮對應類別。移到背景則只有雜訊。</p>
+    <div class="yolo-demo">
+      <div class="demo-title">YOLO (You Only Look Once) 互動演示</div>
+      <div class="viz-wrapper">
+        <div class="image-container" id="img-container" onmousemove="handleHover(event)" onmouseleave="resetView()">
+          <svg id="world-svg">
+            <rect x="0" y="200" width="400" height="200" fill="#e5e7eb" />
+            <line x1="0" y1="200" x2="400" y2="200" stroke="#94a3b8" stroke-width="2" />
+
+            <g class="object-art" transform="translate(40, 220)">
+              <rect x="0" y="20" width="100" height="40" fill="#3b82f6" rx="5" />
+              <rect x="15" y="0" width="70" height="25" fill="#93c5fd" rx="5" />
+              <circle cx="20" cy="60" r="12" fill="#1e293b" />
+              <circle cx="80" cy="60" r="12" fill="#1e293b" />
+              <text x="50" y="45" text-anchor="middle" fill="white" font-size="12" font-weight="bold">CAR</text>
+            </g>
+
+            <g class="object-art" transform="translate(250, 180)">
+              <circle cx="20" cy="20" r="15" fill="#fca5a5" />
+              <rect x="5" y="40" width="30" height="50" fill="#ef4444" rx="5" />
+              <line x1="10" y1="90" x2="10" y2="120" stroke="#1e293b" stroke-width="6" />
+              <line x1="30" y1="90" x2="30" y2="120" stroke="#1e293b" stroke-width="6" />
+              <text x="20" y="70" text-anchor="middle" fill="white" font-size="10" font-weight="bold">Person</text>
+            </g>
+
+            <g class="object-art" transform="translate(300, 300)">
+              <rect x="10" y="15" width="40" height="20" fill="#84cc16" rx="5" /> <circle cx="10" cy="15" r="12" fill="#84cc16" /> <rect x="10" y="35" width="5" height="15" fill="#3f6212" />
+              <rect x="40" y="35" width="5" height="15" fill="#3f6212" />
+              <rect x="45" y="15" width="10" height="5" fill="#3f6212" /> <text x="30" y="28" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Dog</text>
+            </g>
+          </svg>
+
+          <svg id="grid-svg"></svg>
+
+          <svg id="bbox-svg">
+            <rect id="pred-box" class="bbox" x="0" y="0" width="0" height="0" stroke-opacity="0" />
+            <text id="pred-label" x="0" y="0" fill="white" font-weight="bold" font-size="14" opacity="0" style="background: red;">Label</text>
+          </svg>
+        </div>
+
+        <div class="dashboard">
+          <div class="dash-title">單一網格輸出 (Output Vector $y$)</div>
+
+          <div style="margin-bottom: 20px;">
+            <div class="data-row">
+              <span>Confidence ($p_c$):</span>
+              <span id="val-pc" style="color:var(--box-color); font-weight:bold;">0.00</span>
+            </div>
+            <div class="data-row" style="font-size: 0.9rem; color: #64748b;">
+              <span>Box Center ($b_x, b_y$):</span>
+              <span id="val-xy">-, -</span>
+            </div>
+            <div class="data-row" style="font-size: 0.9rem; color: #64748b;">
+              <span>Box Size ($b_w, b_h$):</span>
+              <span id="val-wh">-, -</span>
+            </div>
+          </div>
+
+          <div class="dash-title" style="font-size: 1rem;">類別機率 (Class Probabilities)</div>
+
+          <div class="bar-container">
+            <div class="bar-label"><span>🚗 Car ($c_1$)</span><span id="prob-car">0%</span></div>
+            <div class="bar-bg"><div id="bar-car" class="bar-fill" style="background: #3b82f6;"></div></div>
+          </div>
+
+          <div class="bar-container">
+            <div class="bar-label"><span>🚶 Person ($c_2$)</span><span id="prob-person">0%</span></div>
+            <div class="bar-bg"><div id="bar-person" class="bar-fill" style="background: #ef4444;"></div></div>
+          </div>
+
+          <div class="bar-container">
+            <div class="bar-label"><span>🐕 Dog ($c_3$)</span><span id="prob-dog">0%</span></div>
+            <div class="bar-bg"><div id="bar-dog" class="bar-fill" style="background: #84cc16;"></div></div>
+          </div>
+
+          <div style="font-size: 0.8rem; color: #64748b; margin-top: 20px;">
+            * 試著將滑鼠移到圖片中的「物件中心點」。只有負責該物件中心的網格 (Grid Cell) 才會輸出高信心度。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔲</span>網格系統與輸出向量</h2>
+    <p>YOLO 把圖切成 <span class="term">S×S 網格</span>（demo 為 5×5）。<b>關鍵規則：</b>物件的「中心點」落在哪個網格，那個網格就負責偵測它。每個網格輸出一個向量：</p>
+    <div class="formula">
+y = [ <span class="c">p_c</span>, b_x, b_y, b_w, b_h, <span class="c">c_1, c_2, c_3</span> ]
+    </div>
+    <p><b>p_c</b>＝這格有物件的信心度；<b>b_x, b_y</b>＝框中心（相對網格的偏移）；<b>b_w, b_h</b>＝框的寬高（相對整張圖）；<b>c₁…c₃</b>＝各類別機率。看一眼整張圖，就把每一格的這個向量全部算出來。</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>one-stage vs two-stage</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>one-stage（YOLO、SSD）</th><th>two-stage（Faster R-CNN 系）</th></tr></thead>
+      <tbody>
+        <tr><td>做法</td><td>一次前向直接回歸框＋類別</td><td>先產生候選區，再分類＋修框</td></tr>
+        <tr><td>速度</td><td><b>快</b>，適合即時</td><td>較慢</td></tr>
+        <tr><td>精度</td><td>好；小物件曾較弱（新版已大幅改善）</td><td>傳統上較準</td></tr>
+        <tr><td>場景</td><td>即時監控、自駕、無人機</td><td>離線、追求精度的任務</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">📏</span>評估與後處理</h2>
+    <div class="keys">
+      <div class="keycard"><span>🔲</span><b>IoU</b><br>預測框與真實框的重疊度，用來判定是否算「命中」。</div>
+      <div class="keycard"><span>📈</span><b>mAP</b><br>各類別 AP 的平均（mean Average Precision），偵測的主要指標。</div>
+      <div class="keycard"><span>🧹</span><b>NMS</b><br>非極大值抑制：同一物件常有多個框，NMS 去掉重複、只留最好的。</div>
+      <div class="keycard"><span>🎚️</span><b>信心閾值</b><br>低於門檻的框直接丟棄，控制精確率與召回率的取捨。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🏭</span>應用場景</h2>
+    <div class="note app">
+      <b>即時監控</b>（車流統計、闖紅燈偵測）、<b>自動駕駛</b>（毫秒級偵測行人與車輛）、<b>無人機／產線瑕疵檢測</b>——凡是需要「快速、即時」框出物件的場合，YOLO 都是首選之一。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. 影像分類和物件偵測差在哪？</summary>
+        <div class="ans">分類只回答「整張圖是什麼」（一個標籤）；偵測要找出「有哪些物件、各在哪裡」，同時做定位（畫框）與分類，輸出多個邊界框與類別。</div></details>
+      <details><summary>Q2. YOLO 為什麼快？</summary>
+        <div class="ans">它把偵測當成單一迴歸問題、一次前向就處理整張圖（one-stage），不像兩階段法要先產生候選區再分類，因此適合即時應用。</div></details>
+      <details><summary>Q3. 「哪個網格負責一個物件」的規則是什麼？</summary>
+        <div class="ans">物件的中心點落在哪個網格，那個網格就負責偵測它，並輸出該物件的信心度、邊界框與類別機率。</div></details>
+      <details><summary>Q4. 偵測結果怎麼評估？NMS 做什麼？</summary>
+        <div class="ans">用 IoU 判定預測框是否命中真實框，再算各類 AP 與整體 mAP。NMS（非極大值抑制）用來去掉同一物件的重複框，只保留信心最高的那個。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>是什麼：</b>一次前向同時預測所有物件的框與類別的即時偵測法。</li>
+      <li><b>分類 vs 偵測：</b>偵測＝定位＋分類，輸出多個框。</li>
+      <li><b>網格：</b>物件中心落在哪格，哪格負責，輸出 [p_c, 框, 類別]。</li>
+      <li><b>取捨：</b>one-stage 快（YOLO）、two-stage 準（Faster R-CNN）。</li>
+      <li><b>評估：</b>IoU、mAP；後處理用 NMS 去重複框。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const gridSize = 5; // 5x5 grid
+        const imgSize = 400;
+        const cellSize = imgSize / gridSize;
+
+        // 定義場景中的物件 (Ground Truth)
+        const objects = [
+            { name: "Car",    classIdx: 0, x: 90,  y: 250, w: 100, h: 70 },
+            { name: "Person", classIdx: 1, x: 270, y: 250, w: 50,  h: 120 },
+            { name: "Dog",    classIdx: 2, x: 330, y: 325, w: 50,  h: 40 }
+        ];
+
+        window.onload = () => {
+            createGrid();
+        };
+
+        function createGrid() {
+            const svg = document.getElementById('grid-svg');
+
+            // 繪製格線
+            for (let i = 1; i < gridSize; i++) {
+                // 垂直線
+                let lineV = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                lineV.setAttribute("x1", i * cellSize); lineV.setAttribute("y1", 0);
+                lineV.setAttribute("x2", i * cellSize); lineV.setAttribute("y2", imgSize);
+                lineV.setAttribute("class", "grid-line");
+                svg.appendChild(lineV);
+
+                // 水平線
+                let lineH = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                lineH.setAttribute("x1", 0);       lineH.setAttribute("y1", i * cellSize);
+                lineH.setAttribute("x2", imgSize); lineH.setAttribute("y2", i * cellSize);
+                lineH.setAttribute("class", "grid-line");
+                svg.appendChild(lineH);
+            }
+
+            // 建立互動格子 (透明 rect)
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                    rect.setAttribute("x", c * cellSize);
+                    rect.setAttribute("y", r * cellSize);
+                    rect.setAttribute("width", cellSize);
+                    rect.setAttribute("height", cellSize);
+                    rect.setAttribute("fill", "transparent");
+                    rect.setAttribute("stroke", "none");
+                    rect.setAttribute("id", `cell-${r}-${c}`);
+                    svg.appendChild(rect);
+                }
+            }
+        }
+
+        function handleHover(e) {
+            const rect = document.getElementById('img-container').getBoundingClientRect();
+            const scaleX = imgSize / rect.width;
+            const scaleY = imgSize / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            // 計算當前在哪個格子
+            const col = Math.floor(mouseX / cellSize);
+            const row = Math.floor(mouseY / cellSize);
+
+            // 清除之前的 active 樣式
+            document.querySelectorAll('rect[id^="cell-"]').forEach(el => el.classList.remove('active-cell'));
+
+            // 設定當前 active 樣式
+            const currentCell = document.getElementById(`cell-${row}-${col}`);
+            if (currentCell) currentCell.classList.add('active-cell');
+
+            // 檢查該格子是否包含任何物件的"中心點"
+            let bestObj = null;
+
+            for (let obj of objects) {
+                const objCol = Math.floor(obj.x / cellSize);
+                const objRow = Math.floor(obj.y / cellSize);
+
+                if (objCol === col && objRow === row) {
+                    bestObj = obj;
+                    break;
+                }
+            }
+
+            updateDashboard(bestObj, row, col);
+        }
+
+        function updateDashboard(obj, row, col) {
+            const predBox = document.getElementById('pred-box');
+            const predLabel = document.getElementById('pred-label');
+
+            if (obj) {
+                // 有物件：顯示 High Confidence
+                document.getElementById('val-pc').innerText = "0.98";
+                document.getElementById('val-xy').innerText = `${obj.x}, ${obj.y}`;
+                document.getElementById('val-wh').innerText = `${obj.w}, ${obj.h}`;
+
+                updateBars(obj.classIdx);
+
+                // 畫出 Bounding Box
+                predBox.setAttribute("x", obj.x - obj.w/2);
+                predBox.setAttribute("y", obj.y - obj.h/2);
+                predBox.setAttribute("width", obj.w);
+                predBox.setAttribute("height", obj.h);
+                predBox.setAttribute("stroke-opacity", 1);
+
+                // 標籤位置
+                predLabel.setAttribute("x", obj.x - obj.w/2);
+                predLabel.setAttribute("y", obj.y - obj.h/2 - 5);
+                predLabel.textContent = `${obj.name} (0.98)`;
+                predLabel.setAttribute("opacity", 1);
+                predLabel.setAttribute("fill", obj.classIdx === 0 ? "#3b82f6" : (obj.classIdx === 1 ? "#ef4444" : "#84cc16"));
+
+            } else {
+                // 背景：顯示 Low Confidence (Noise)
+                const noise = Math.random() * 0.1;
+                document.getElementById('val-pc').innerText = noise.toFixed(2);
+                document.getElementById('val-xy').innerText = "-, -";
+                document.getElementById('val-wh').innerText = "-, -";
+
+                updateBars(-1); // -1 means background
+
+                // 隱藏 Box
+                predBox.setAttribute("stroke-opacity", 0);
+                predLabel.setAttribute("opacity", 0);
+            }
+        }
+
+        function updateBars(targetIdx) {
+            const probs = [0, 0, 0];
+
+            if (targetIdx !== -1) {
+                probs[targetIdx] = 0.95 + Math.random() * 0.04;
+                // 其他給一點點雜訊
+                for(let i=0; i<3; i++) {
+                    if(i !== targetIdx) probs[i] = Math.random() * 0.05;
+                }
+            } else {
+                // 全部都是低機率雜訊
+                for(let i=0; i<3; i++) probs[i] = Math.random() * 0.1;
+            }
+
+            // 更新 UI
+            const names = ['car', 'person', 'dog'];
+            names.forEach((name, idx) => {
+                const pct = (probs[idx] * 100).toFixed(1) + "%";
+                document.getElementById(`prob-${name}`).innerText = pct;
+                document.getElementById(`bar-${name}`).style.width = pct;
+            });
+        }
+
+        function resetView() {
+            document.querySelectorAll('rect[id^="cell-"]').forEach(el => el.classList.remove('active-cell'));
+            updateDashboard(null, 0, 0);
+        }
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>YOLO(You Only Look Once)是一階段即時物件偵測的代表,iPAS 中級科目一案例常見。重點:一次前向就同時預測所有物件的框與類別,速度快、適合即時應用。易混點:一階段(YOLO)重速度、兩階段(Faster R-CNN)重精度;YOLO 輸出仍需 NMS 去重複框,並用 IoU、mAP 評估。情境:即時監控、自駕、無人機、產線檢測等講求速度的場景。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>YOLO 是什麼？</summary><p>You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。</p></details><details><summary>物件偵測和影像分類差在哪？</summary><p>分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。</p></details><details><summary>YOLO 為什麼快？</summary><p>把偵測當成單一迴歸問題、一次處理整張圖(one-stage)，不像兩階段法(如 Faster R-CNN)先找候選區再分類，適合即時應用。</p></details><details><summary>怎麼評估物件偵測？</summary><p>用 IoU(預測框與真實框的重疊度)判定是否命中，再算各類別的 AP 與整體 mAP(mean Average Precision)。</p></details><details><summary>one-stage 和 two-stage 偵測差在哪？</summary><p>one-stage(YOLO、SSD)快、適合即時但小物件略弱；two-stage(R-CNN 系)較準但慢，依速度與精度需求選擇。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "YOLO 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "You Only Look Once，一種即時物件偵測法：一次前向就同時預測影像中物件的位置(bounding box)與類別，速度很快。"}}, {"@type": "Question", "name": "物件偵測和影像分類差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "分類只回答整張圖是什麼；偵測要找出有哪些物件、各在哪裡(定位加分類)，輸出多個邊界框與類別。"}}, {"@type": "Question", "name": "YOLO 為什麼快？", "acceptedAnswer": {"@type": "Answer", "text": "把偵測當成單一迴歸問題、一次處理整張圖(one-stage)，不像兩階段法(如 Faster R-CNN)先找候選區再分類，適合即時應用。"}}, {"@type": "Question", "name": "怎麼評估物件偵測？", "acceptedAnswer": {"@type": "Answer", "text": "用 IoU(預測框與真實框的重疊度)判定是否命中，再算各類別的 AP 與整體 mAP(mean Average Precision)。"}}, {"@type": "Question", "name": "one-stage 和 two-stage 偵測差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "one-stage(YOLO、SSD)快、適合即時但小物件略弱；two-stage(R-CNN 系)較準但慢，依速度與精度需求選擇。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="iou_demo.html">IoU / mAP</a><a href="cnn.html">CNN</a><a href="segmentation.html">影像分割</a><a href="ocr.html">OCR</a><a href="vit.html">ViT</a><a href="deep-learning.html">深度學習總覽</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

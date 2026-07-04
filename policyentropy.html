@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>強化學習：策略熵 (Policy Entropy)</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="策略熵衡量策略的隨機或不確定程度；熵高代表動作較分散(多探索)、熵低代表很確定(多利用)。在目標中加熵獎勵(熵正則化)能鼓勵探索、避免策略太早過度確定而卡在次優。SAC、A2C、PPO 都會用到。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/policyentropy.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="強化學習：策略熵 (Policy Entropy)">
+    <meta property="og:description" content="策略熵衡量策略的隨機/不確定程度；熵高多探索、熵低多利用。熵正則化鼓勵探索、避免太早卡在次優。SAC、A2C、PPO 都會用到。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/policyentropy.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="強化學習：策略熵 (Policy Entropy)">
+    <meta name="twitter:description" content="策略熵衡量策略的隨機/不確定程度；熵高多探索、熵低多利用。熵正則化鼓勵探索、避免太早卡在次優。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "強化學習：策略熵 (Policy Entropy)",
+  "url": "https://akira.ipas-ai.com/policyentropy.html",
+  "description": "策略熵衡量策略的隨機或不確定程度；熵高代表動作較分散(多探索)、熵低代表很確定(多利用)。在目標中加熵獎勵(熵正則化)能鼓勵探索、避免策略太早過度確定而卡在次優。SAC、A2C、PPO 都會用到。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --fu:#c026d3; --fu-d:#a21caf; --fu-dd:#701a75;
+            --cyan:#0891b2; --green:#16a34a; --amber:#f59e0b; --red:#ef4444; --blue:#2563eb; --violet:#7c3aed;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f7ecf8;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#701a75 0%,#c026d3 55%,#e879f9 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(192,38,211,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.8rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#f5d0fe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--fu-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#fdf4ff; border-left:5px solid var(--fu)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#eff6ff; border-left:5px solid var(--blue)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f8eefa; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .hi{color:var(--fu-d); font-weight:700} .cmp .lo{color:var(--green); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--fu);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--fu-d)}
+
+        .formula{background:#fdf4ff; border:1px solid #f5d0fe; border-radius:10px; padding:16px;
+            font-family:"Cambria Math",Georgia,serif; overflow-x:auto; text-align:center; font-size:1.08rem; color:var(--fu-dd); margin:14px 0}
+        .formula small{display:block; margin-top:8px; font-family:"Microsoft JhengHei",sans-serif; color:var(--muted); font-size:.8rem}
+
+        .qa{background:#fdf4ff; border:1px solid #f5d0fe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #f2ddf9; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--fu-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved · dark neon) ===== */
+        .demo-dark{background:#1e1e2f; border:1px solid #3a3a50; border-radius:16px; padding:22px; margin:14px 0}
+        .dashboard{display:flex; gap:18px; flex-wrap:wrap}
+        .panel{flex:1; min-width:260px; background:#232336; padding:18px; border-radius:10px; color:#e0e0e0}
+        .panel label{color:#cbd5e1; font-weight:bold; font-size:.92rem}
+        .demo-dark input[type=range]{width:100%; cursor:pointer; accent-color:#22d3ee; margin-top:8px}
+        .entropy-caption{color:#cbd5e1; font-size:.9rem; margin-top:6px}
+        .entropy-display{font-size:22px; font-weight:bold; color:#ff4fa3; text-align:center; margin:12px 0; text-shadow:0 0 10px rgba(255,79,163,.5)}
+        .bar-group{margin-bottom:10px}
+        .bar-label{display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; color:#cbd5e1}
+        .bar-bg{width:100%; background:#3a3a50; height:12px; border-radius:6px; overflow:hidden}
+        .bar-fill{height:100%; background:#22d3ee; width:25%; transition:width .3s ease, background .3s ease}
+        #bar-C .bar-fill{background:#00ff88}
+        .svg-container{flex:1; min-width:260px; background:#1a1a24; border-radius:10px; position:relative;
+            display:flex; justify-content:center; align-items:center; overflow:hidden; border:1px solid #3a3a50}
+        #world{width:100%; height:350px}
+        .node{fill:#3a3a50; stroke:#b0b0c0; stroke-width:2}
+        .node-best{fill:#00ff88; stroke:#00cc6a}
+        .path-line{stroke:#3a3a50; stroke-width:4; stroke-linecap:round}
+        .agent-dot{fill:#22d3ee; opacity:.8}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🎲 策略熵 Policy Entropy · iPAS RL</span>
+        <h1>策略熵：衡量 AI「有多猶豫」，並用它逼機器人多探索</h1>
+        <p>策略熵幫你量化一件事：AI 現在的策略是<b>什麼都想試（很隨機）</b>，還是<b>只認定一個動作（很確定）</b>。在訓練目標裡加一點熵，能<b>逼它保持探索</b>、別太早鎖死在「看起來最好」的選項上。</p>
+        <div class="chips"><span>熵＝不確定性</span><span>探索 vs 利用</span><span>Softmax 溫度</span><span>熵正則化</span><span>SAC · PPO · A2C</span></div>
+    </header>
+
+    <!-- ===== 1. 白話定義 ===== -->
+    <section class="lesson">
+        <h2>🧠 一、先用白話講：策略熵是什麼？</h2>
+        <p class="lead"><span class="term">策略熵（Policy Entropy）</span>衡量「策略有多隨機、多不確定」。</p>
+        <div class="keys">
+            <div class="keycard"><b>熵高 → 多探索</b>動作機率很<b>分散</b>（各動作都有機會被選），代表 AI 還在「什麼都想試」。</div>
+            <div class="keycard"><b>熵低 → 多利用</b>機率幾乎<b>集中在一個動作</b>，代表 AI 很確定、只想做它認為最好的那個。</div>
+        </div>
+        <div class="note def">
+            <h4>🍽️ 生活比喻：點餐</h4>
+            <b>熵高的人</b>＝菜單每樣都可能點、愛嘗鮮、拿不定主意；<b>熵低的人</b>＝每次都點同一道、超級確定。剛到一家新餐廳該多試（高熵探索），吃熟了再固定愛店（低熵利用）。RL 訓練也是這節奏。
+        </div>
+    </section>
+
+    <!-- ===== 2. 熵公式 ===== -->
+    <section class="lesson">
+        <h2>🔢 二、熵怎麼算？（Shannon 熵）</h2>
+        <div class="formula">
+            H ＝ − Σ p · log₂(p)
+            <small>p 是每個動作的機率；把所有動作加總</small>
+        </div>
+        <div class="note def">
+            <h4>兩個極端</h4>
+            <b>最亂（熵最大）：</b>4 個動作各 25% 的均勻分布 → H ＝ log₂4 ＝ <b>2 bit</b>。<br>
+            <b>最確定（熵最小）：</b>某動作 100%、其餘 0% → H ＝ <b>0</b>。<br>
+            所以熵值就是一把「<span class="hl">猶豫程度的尺</span>」——越大越猶豫、越小越果斷。
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：決策溫度實驗室</h2>
+        <div class="note def" style="text-align:left">
+            <h4>📜 情境</h4>
+            機器人面對 4 條路 A/B/C/D，系統內部的隱藏評分是 A、B、D＝10 分，<b style="color:#16a34a">C＝13 分（最佳）</b>。拖動<b>「決策溫度」</b>，看它怎麼改變<b>機率分布</b>與<b>策略熵</b>，下方光點會依機率四散或集中衝向 C。
+        </div>
+
+        <div class="demo-dark">
+            <div class="dashboard">
+                <div class="panel">
+                    <div class="slider-container">
+                        <label for="temp-slider">決策溫度 (Temperature): <span id="temp-val">高 (探索期)</span></label>
+                        <input type="range" id="temp-slider" min="0.5" max="10" step="0.1" value="8">
+                        <p class="entropy-caption" style="font-size:12px; color:#8b8ba7; margin-top:6px;">
+                            *溫度高：無視分數差異，隨機亂走。<br>
+                            *溫度低：極度固執，只選分數最高的那條路。
+                        </p>
+                    </div>
+
+                    <div class="entropy-caption">目前策略熵 (不確定性):</div>
+                    <div class="entropy-display" id="entropy-val">2.00 bit (極度混亂)</div>
+
+                    <div class="bars">
+                        <div class="bar-group" id="bar-A">
+                            <div class="bar-label"><span>路線 A (普通)</span><span class="pct">25%</span></div>
+                            <div class="bar-bg"><div class="bar-fill"></div></div>
+                        </div>
+                        <div class="bar-group" id="bar-B">
+                            <div class="bar-label"><span>路線 B (普通)</span><span class="pct">25%</span></div>
+                            <div class="bar-bg"><div class="bar-fill"></div></div>
+                        </div>
+                        <div class="bar-group" id="bar-C">
+                            <div class="bar-label"><span style="color:#00ff88; font-weight:bold;">路線 C (最佳解)</span><span class="pct" style="color:#00ff88;">25%</span></div>
+                            <div class="bar-bg"><div class="bar-fill"></div></div>
+                        </div>
+                        <div class="bar-group" id="bar-D">
+                            <div class="bar-label"><span>路線 D (普通)</span><span class="pct">25%</span></div>
+                            <div class="bar-bg"><div class="bar-fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="svg-container">
+                    <svg id="world">
+                        <line x1="175" y1="300" x2="50" y2="80" class="path-line" />
+                        <line x1="175" y1="300" x2="133" y2="80" class="path-line" />
+                        <line x1="175" y1="300" x2="216" y2="80" class="path-line" stroke="#005533" /> <line x1="175" y1="300" x2="300" y2="80" class="path-line" />
+
+                        <circle cx="50" cy="80" r="20" class="node" />
+                        <text x="50" y="85" text-anchor="middle" fill="white" font-size="14">A</text>
+
+                        <circle cx="133" cy="80" r="20" class="node" />
+                        <text x="133" y="85" text-anchor="middle" fill="white" font-size="14">B</text>
+
+                        <circle cx="216" cy="80" r="25" class="node node-best" />
+                        <text x="216" y="85" text-anchor="middle" fill="#1a1a24" font-weight="bold" font-size="16">C</text>
+
+                        <circle cx="300" cy="80" r="20" class="node" />
+                        <text x="300" y="85" text-anchor="middle" fill="white" font-size="14">D</text>
+
+                        <circle cx="175" cy="300" r="25" fill="#3a3a50" stroke="#22d3ee" stroke-width="2" />
+                        <text x="175" y="305" text-anchor="middle" fill="#22d3ee" font-weight="bold">AI</text>
+
+                        <g id="agents-group"></g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            <b>溫度調高</b>：機率條變得<b>四條差不多長</b>、熵值衝到 2.0（粉紅=極亂），光點<b>四面八方亂射</b>（探索）。<b>溫度調低</b>：機率<b>幾乎全集中到綠色 C</b>、熵值掉到接近 0（變綠=果斷），光點<b>全衝向 C</b>（利用）。這就是「溫度」在控制探索/利用。
+        </div>
+    </section>
+
+    <!-- ===== 4. 溫度 ===== -->
+    <section class="lesson">
+        <h2>🌡️ 四、溫度 T 與 Softmax</h2>
+        <p class="lead">demo 背後是加了「溫度」的 Softmax：</p>
+        <div class="formula">
+            P(a) ＝ exp( Q(a) / T ) ⁄ Σ exp( Q / T )
+            <small>T＝溫度</small>
+        </div>
+        <div class="keys">
+            <div class="keycard"><b>T 大（高溫）</b>分數差被<b>壓平</b> → 機率接近均勻 → <b>熵高、多探索</b>。</div>
+            <div class="keycard"><b>T 小（低溫）</b>分數差被<b>放大</b> → 幾乎只選最高分 → <b>熵低、多利用</b>（趨近貪心）。</div>
+        </div>
+    </section>
+
+    <!-- ===== 5. 熵正則化 ===== -->
+    <section class="lesson">
+        <h2>🎯 五、為什麼要「熵正則化」？</h2>
+        <div class="note meta">
+            <h4>避免策略太早變得過度確定</h4>
+            如果策略<b>太快</b>把機率全押在「目前看起來最好」的動作上（熵驟降），它就<b>不再嘗試別的</b>——萬一還有更好的動作沒被發現，就<b>永遠鎖死在次優（局部最優）</b>。<br>
+            解法：在目標函數裡<b>加一個「熵獎勵」</b>（熵正則化），鼓勵 agent <b>保持一點隨機、繼續探索</b>，別太早收斂。
+        </div>
+    </section>
+
+    <!-- ===== 6. 探索 vs 利用 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 六、熵 ＝ 探索 vs 利用的旋鈕</h2>
+        <table class="cmp">
+            <tr><th></th><th class="hi">高熵</th><th class="lo">低熵</th></tr>
+            <tr><td>行為</td><td>多<b>探索</b>、什麼都試</td><td>多<b>利用</b>、只做最好的</td></tr>
+            <tr><td>好處</td><td>不易錯過更好的動作</td><td>穩定、果斷</td></tr>
+            <tr><td>風險</td><td>不穩、可能不收斂</td><td>易卡<b>次優</b>（局部最優）</td></tr>
+        </table>
+        <div class="note def">
+            <h4>常見做法：先高後低</h4>
+            訓練<b>初期維持較高熵</b>（大膽探索），<b>後期逐步降低</b>（收斂到穩定策略）——就像 demo 的溫度從高慢慢調低。
+        </div>
+    </section>
+
+    <!-- ===== 7. 哪些演算法 ===== -->
+    <section class="lesson">
+        <h2>🧩 七、哪些演算法用到熵？</h2>
+        <div class="note app">
+            <h4>📌 熵正則化的常客</h4>
+            <b>A2C／A3C：</b>在損失函數裡加一個<b>熵項</b>，鼓勵探索。<br>
+            <b>PPO：</b>也常加熵獎勵當輔助。<br>
+            <b>SAC（Soft Actor-Critic）：</b>更徹底——把「<b>最大化回報 ＋ 最大化熵</b>」當作<b>核心目標</b>（最大熵 RL），要求策略「盡量隨機、但要有效」，在連續控制上很強。相關：<a href="policygradient.html" style="color:#a21caf;font-weight:700">Policy Gradient</a>、<a href="actor-critic.html" style="color:#a21caf;font-weight:700">Actor-Critic</a>。
+        </div>
+    </section>
+
+    <!-- ===== 8. 太高太低 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 八、熵太高、太低都不行</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">太高</b>一直亂試、學不穩、<b>不收斂</b>，浪費樣本。</div>
+            <div class="keycard" style="border-left-color:var(--amber)"><b style="color:#b45309">太低</b>過早收斂到<b>次優</b>、缺乏探索，可能永遠找不到更好解。</div>
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">剛剛好</b>初期高、後期降，動態平衡探索與利用。</div>
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 策略熵高、低各代表什麼？</summary>
+                <p><b>高</b>＝動作機率分散、<b>多探索</b>；<b>低</b>＝集中在一個動作、<b>多利用</b>。</p></details>
+            <details><summary>Q2. 熵怎麼算？兩個極端值？</summary>
+                <p>H ＝ −Σ p·log₂ p。均勻（4 選項各 25%）＝ <b>2 bit 最大</b>；集中一個 ＝ <b>0</b>。</p></details>
+            <details><summary>Q3. Softmax 溫度 T 大、小的效果？</summary>
+                <p><b>T 大</b>：機率均勻、熵高、探索；<b>T 小</b>：趨近貪心、熵低、利用。</p></details>
+            <details><summary>Q4. 為什麼要加熵正則化？</summary>
+                <p>鼓勵<b>探索</b>、避免策略太早過度確定而<b>卡在次優</b>。</p></details>
+            <details><summary>Q5. 哪些演算法用到熵？</summary>
+                <p>A2C／A3C、PPO 加<b>熵項</b>；<b>SAC</b> 以「回報＋熵」為核心（最大熵 RL）。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>策略熵＝猶豫程度</b>高=隨機探索、低=確定利用。</div>
+            <div class="keycard"><b>H＝−Σp log p</b>均勻最大、集中為 0。</div>
+            <div class="keycard"><b>溫度 T</b>大→均勻(探索)、小→貪心(利用)。</div>
+            <div class="keycard"><b>熵正則化</b>加熵獎勵鼓勵探索、避免卡次優。</div>
+            <div class="keycard"><b>先高後低</b>初期多探索、後期收斂。</div>
+            <div class="keycard"><b>用它的演算法</b>A2C/A3C、PPO、SAC。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        // 隱藏的真實 Q 值 (C 是最好的)
+        const qValues = [10, 10, 13, 10];
+        const endpoints = [
+            {x: 50, y: 80},   // A
+            {x: 133, y: 80},  // B
+            {x: 216, y: 80},  // C
+            {x: 300, y: 80}   // D
+        ];
+        const startX = 175;
+        const startY = 300;
+
+        let probabilities = [0.25, 0.25, 0.25, 0.25];
+
+        const slider = document.getElementById('temp-slider');
+        const tempLabel = document.getElementById('temp-val');
+        const entropyLabel = document.getElementById('entropy-val');
+        const agentsGroup = document.getElementById('agents-group');
+
+        // 計算 Softmax 機率分佈與策略熵
+        function updateMath() {
+            let temp = parseFloat(slider.value);
+
+            // 更新文字描述
+            if (temp > 6) tempLabel.innerText = "高 (隨機探索)";
+            else if (temp > 2) tempLabel.innerText = "中 (開始收斂)";
+            else tempLabel.innerText = "低 (極度確定)";
+
+            // 1. 計算 Softmax
+            // P(a) = exp(Q(a)/T) / sum(exp(Q(a)/T))
+            let exps = qValues.map(q => Math.exp(q / temp));
+            let sumExps = exps.reduce((a, b) => a + b, 0);
+            probabilities = exps.map(e => e / sumExps);
+
+            // 2. 計算策略熵 (Shannon Entropy)
+            // H = - sum( p * log2(p) )
+            let entropy = 0;
+            probabilities.forEach(p => {
+                if (p > 0) entropy -= p * Math.log2(p);
+            });
+
+            // 最大熵值 (4個選項) = log2(4) = 2.0
+            let entropyPct = (entropy / 2.0) * 100;
+
+            // 更新 UI
+            entropyLabel.innerText = `${entropy.toFixed(2)} bit`;
+            // 根據熵值改變顏色 (高熵紅色，低熵綠色)
+            if (entropy > 1.5) entropyLabel.style.color = "#ff4fa3"; // 紅
+            else if (entropy > 0.5) entropyLabel.style.color = "#f1c40f"; // 黃
+            else entropyLabel.style.color = "#00ff88"; // 綠
+
+            // 更新長條圖
+            const bars = ['A', 'B', 'C', 'D'];
+            for (let i = 0; i < 4; i++) {
+                let pct = (probabilities[i] * 100).toFixed(1) + '%';
+                let barEl = document.getElementById('bar-' + bars[i]);
+                barEl.querySelector('.pct').innerText = pct;
+                barEl.querySelector('.bar-fill').style.width = pct;
+            }
+        }
+
+        // 根據目前的機率分佈，隨機選擇一條路線 (輪盤法 Roulette Wheel Selection)
+        function chooseAction() {
+            let rand = Math.random();
+            let cumulative = 0;
+            for (let i = 0; i < 4; i++) {
+                cumulative += probabilities[i];
+                if (rand <= cumulative) return i;
+            }
+            return 3; // 預防浮點數誤差
+        }
+
+        // 生成並動畫化一個光點代表一次決策嘗試
+        function spawnAgent() {
+            let actionIdx = chooseAction();
+            let target = endpoints[actionIdx];
+
+            // 建立 SVG 圓形
+            let dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('cx', startX);
+            dot.setAttribute('cy', startY);
+            dot.setAttribute('r', 6);
+            dot.setAttribute('class', 'agent-dot');
+            // 如果選到 C，光點稍微變綠一點
+            if(actionIdx === 2) dot.style.fill = "#00ff88";
+
+            agentsGroup.appendChild(dot);
+
+            // 使用 Web Animations API 進行移動與淡出
+            let animation = dot.animate([
+                { transform: `translate(0px, 0px)`, opacity: 0.8 },
+                { transform: `translate(${target.x - startX}px, ${target.y - startY}px)`, opacity: 0 }
+            ], {
+                duration: 800 + Math.random() * 400, // 隨機速度 0.8s ~ 1.2s
+                easing: 'ease-out'
+            });
+
+            animation.onfinish = () => {
+                dot.remove(); // 動畫結束後移除 DOM
+            };
+        }
+
+        // 監聽滑桿變化
+        slider.addEventListener('input', updateMath);
+
+        // 初始化
+        updateMath();
+
+        // 持續不斷地發射光點 (每秒約 5 個)
+        setInterval(spawnAgent, 200);
+
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>策略熵是強化學習鼓勵探索的關鍵機制。重點:熵衡量策略的隨機與不確定程度,在目標中加入熵獎勵(如 SAC、PPO)能讓代理人保持嘗試多種行動、避免太早收斂到次佳策略。易混點:高熵代表多探索但較不穩、低熵代表多利用但易卡局部最優,需權衡探索與利用的取捨。情境:訓練初期常維持較高熵、後期逐步降低。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>策略熵(policy entropy)是什麼？</summary><p>衡量策略的隨機或不確定程度；熵高代表動作較分散(多探索)、熵低代表很確定(多利用)。</p></details><details><summary>為什麼要在目標裡加熵？</summary><p>鼓勵探索、避免策略太早變得過度確定而卡在次優；熵正則化讓代理人保持嘗試新動作的傾向。</p></details><details><summary>這和探索與利用的取捨有關嗎？</summary><p>有。熵正則化是控制探索的一種方式——加大熵權重就更多探索、減小就更多利用，需隨訓練調整。</p></details><details><summary>哪些演算法用到熵正則化？</summary><p>A3C 與 A2C 常在損失加熵項；SAC(Soft Actor-Critic)更把最大化回報加熵當核心目標，鼓勵盡量隨機但有效。</p></details><details><summary>熵太高或太低會怎樣？</summary><p>太高會一直亂試、學不穩、不收斂；太低會過早收斂到次優、缺乏探索；需適當平衡(常初期高、後期降)。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "策略熵(policy entropy)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "衡量策略的隨機或不確定程度；熵高代表動作較分散(多探索)、熵低代表很確定(多利用)。"}}, {"@type": "Question", "name": "為什麼要在目標裡加熵？", "acceptedAnswer": {"@type": "Answer", "text": "鼓勵探索、避免策略太早變得過度確定而卡在次優；熵正則化讓代理人保持嘗試新動作的傾向。"}}, {"@type": "Question", "name": "這和探索與利用的取捨有關嗎？", "acceptedAnswer": {"@type": "Answer", "text": "有。熵正則化是控制探索的一種方式——加大熵權重就更多探索、減小就更多利用，需隨訓練調整。"}}, {"@type": "Question", "name": "哪些演算法用到熵正則化？", "acceptedAnswer": {"@type": "Answer", "text": "A3C 與 A2C 常在損失加熵項；SAC(Soft Actor-Critic)更把最大化回報加熵當核心目標，鼓勵盡量隨機但有效。"}}, {"@type": "Question", "name": "熵太高或太低會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "太高會一直亂試、學不穩、不收斂；太低會過早收斂到次優、缺乏探索；需適當平衡(常初期高、後期降)。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="policygradient.html">Policy Gradient</a><a href="actor-critic.html">Actor-Critic (A2C/A3C)</a><a href="q-learning.html">Q-Learning</a><a href="cumulativereward.html">累積獎勵、回報</a><a href="monte_carlo.html">強化學習</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

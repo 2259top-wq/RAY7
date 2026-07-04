@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCA 主成分分析：特徵值與變異量解釋</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="PCA 找出資料變異最大的方向當主成分；每個主成分的特徵值代表它解釋的變異量。把特徵值換成解釋變異比例、再累積，達門檻(如 90~95%)即可決定保留幾個主成分。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/pca_variance.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="PCA 主成分分析：特徵值與變異量解釋">
+    <meta property="og:description" content="每個主成分的特徵值代表它解釋的變異量；換成解釋變異比例、再累積，達門檻(如 90~95%)即可決定保留幾個主成分。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/pca_variance.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PCA 主成分分析：特徵值與變異量解釋">
+    <meta name="twitter:description" content="每個主成分的特徵值代表它解釋的變異量；換成解釋變異比例、再累積，達門檻(如 90~95%)即可決定保留幾個主成分。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "PCA 主成分分析：特徵值與變異量解釋",
+  "url": "https://akira.ipas-ai.com/pca_variance.html",
+  "description": "PCA 找出資料變異最大的方向當主成分；每個主成分的特徵值代表它解釋的變異量。把特徵值換成解釋變異比例、再累積，達門檻(如 90~95%)即可決定保留幾個主成分。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --ind:#4338ca; --ind-d:#3730a3; --ind-dd:#312e81;
+            --blue:#2563eb; --green:#16a34a; --amber:#f59e0b; --red:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef0f8;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#312e81 0%,#4338ca 55%,#6366f1 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(67,56,202,.30); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.9rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#c7d2fe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--ind-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#eef2ff; border-left:5px solid var(--ind)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f1fa; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--ind);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--ind-d)}
+
+        .qa{background:#eef2ff; border:1px solid #c7d2fe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #dbe1fe; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--ind-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#eef2ff; border:1px solid #c7d2fe; border-radius:14px; padding:18px; margin:14px 0}
+        .svg-container{width:100%; height:380px; background:#fff; border:2px solid #e5e7f5; border-radius:10px; margin-bottom:16px; position:relative}
+        .svg-container svg{width:100%; height:100%}
+        .bar{transition:all .8s cubic-bezier(0.4,0,0.2,1)}
+        .label{transition:all .8s ease; font-weight:bold}
+        .axis{transition:opacity .5s ease; stroke:#bdc3c7; stroke-width:2}
+        .axis-text{fill:#7f8c8d; font-size:14px; font-weight:bold}
+        .fade{opacity:0; pointer-events:none; transition:opacity .5s ease}
+        .visible{opacity:1; pointer-events:auto}
+        .demo-card .controls{display:flex; justify-content:center; gap:10px; margin:0 0 16px; flex-wrap:wrap}
+        .demo-card .controls button{padding:9px 15px; font-size:.92rem; font-weight:800; color:#fff; background:#94a3b8;
+            border:none; border-radius:8px; cursor:pointer; transition:all .3s}
+        .demo-card .controls button:hover{background:#64748b}
+        .demo-card .controls button.active{background:var(--ind); box-shadow:0 4px 10px rgba(67,56,202,.4)}
+        .text-panel{background:#fff; padding:18px 20px; border-left:5px solid var(--ind); border-radius:0 8px 8px 0; min-height:120px}
+        .text-panel h3{margin-top:0; color:var(--ind-d); font-size:1.05rem}
+        .text-panel p{margin:10px 0 0; line-height:1.7; font-size:.97rem}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .svg-container{height:300px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">📊 PCA 解釋變異 · iPAS 降維考點</span>
+        <h1>PCA 該保留幾個主成分？用「解釋變異」來決定</h1>
+        <p>PCA 找出主成分後，每個主成分扛走多少資訊，是用<b>特徵值 λ</b> 衡量的。把 λ 換成<b>解釋變異比例</b>、再<b>累積</b>，達到門檻就知道該留幾維。還沒看 PCA 怎麼找方向？先看 <a href="pca.html" style="color:#fff;text-decoration:underline;font-weight:700">PCA 概念頁</a>。</p>
+        <div class="chips"><span>特徵值 λ</span><span>解釋變異比例</span><span>累積變異</span><span>Scree Plot</span><span>90~95% 門檻</span></div>
+    </header>
+
+    <!-- ===== 1. 特徵值 ===== -->
+    <section class="lesson">
+        <h2>🔑 一、特徵值 λ ＝ 那個方向的「資訊量」</h2>
+        <p class="lead">PCA 算出每個主成分時，會附帶一個<b>特徵值（eigenvalue, λ）</b>。</p>
+        <div class="note def">
+            <h4>λ 越大 → 該主成分保留越多變異（資訊）</h4>
+            主成分會<b>依特徵值由大到小排序</b>：λ 最大的是 PC1（資訊最多），其次 PC2、PC3……越後面的主成分，扛的資訊越少。所以「該留幾個」＝「<b>前幾個就夠裝下大部分資訊？</b>」
+        </div>
+    </section>
+
+    <!-- ===== 2. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 二、四步看懂「保留幾維」的決策</h2>
+        <p class="lead">用一個例子：三個主成分，特徵值 λ＝6、3、1。依序點 ①→②→③→④，看它怎麼一步步算出「留 2 維就夠」。</p>
+
+        <div class="demo-card">
+            <div class="svg-container">
+                <svg viewBox="0 0 800 400">
+                    <line x1="80" y1="350" x2="720" y2="350" class="axis" />
+
+                    <g id="axis-raw" class="visible">
+                        <line x1="80" y1="50" x2="80" y2="350" class="axis" />
+                        <text x="70" y="355" text-anchor="end" class="axis-text">0</text>
+                        <text x="70" y="205" text-anchor="end" class="axis-text">5.0</text>
+                        <text x="70" y="55" text-anchor="end" class="axis-text">10.0</text>
+                        <text x="35" y="200" text-anchor="middle" class="axis-text" transform="rotate(-90 35 200)">資訊量 (特徵值 λ)</text>
+                    </g>
+
+                    <g id="axis-pct" class="fade">
+                        <line x1="80" y1="50" x2="80" y2="350" class="axis" />
+                        <text x="70" y="355" text-anchor="end" class="axis-text">0%</text>
+                        <text x="70" y="205" text-anchor="end" class="axis-text">50%</text>
+                        <text x="70" y="55" text-anchor="end" class="axis-text">100%</text>
+                        <text x="35" y="200" text-anchor="middle" class="axis-text" transform="rotate(-90 35 200)">解釋總變異量 (%)</text>
+                    </g>
+
+                    <g id="threshold-line" class="fade">
+                        <line x1="80" y1="110" x2="720" y2="110" stroke="#e74c3c" stroke-width="3" stroke-dasharray="8,4" />
+                        <rect x="610" y="85" width="100" height="25" fill="#e74c3c" rx="4"/>
+                        <text x="660" y="103" text-anchor="middle" fill="white" font-weight="bold" font-size="14">80% 門檻要求</text>
+                    </g>
+
+                    <rect id="bar-pc1" class="bar" x="150" y="170" width="100" height="180" fill="#3498db" rx="4"/>
+                    <text id="lbl-pc1-name" class="label" x="200" y="375" text-anchor="middle" fill="#2c3e50">主成分 1 (PC1)</text>
+                    <text id="lbl-pc1-val" class="label" x="200" y="160" text-anchor="middle" fill="#2980b9" font-size="18">λ₁ = 6.0</text>
+
+                    <rect id="bar-pc2" class="bar" x="350" y="260" width="100" height="90" fill="#2ecc71" rx="4"/>
+                    <text id="lbl-pc2-name" class="label" x="400" y="375" text-anchor="middle" fill="#2c3e50">主成分 2 (PC2)</text>
+                    <text id="lbl-pc2-val" class="label" x="400" y="250" text-anchor="middle" fill="#27ae60" font-size="18">λ₂ = 3.0</text>
+
+                    <rect id="bar-pc3" class="bar" x="550" y="320" width="100" height="30" fill="#f39c12" rx="4"/>
+                    <text id="lbl-pc3-name" class="label" x="600" y="375" text-anchor="middle" fill="#2c3e50">主成分 3 (PC3)</text>
+                    <text id="lbl-pc3-val" class="label" x="600" y="310" text-anchor="middle" fill="#d35400" font-size="18">λ₃ = 1.0</text>
+
+                    <rect id="cumu-bg" class="fade bar" x="420" y="150" width="140" height="30" fill="#8e44ad" rx="15"/>
+                    <text id="cumu-text" class="fade label" x="490" y="170" text-anchor="middle" fill="white" font-size="14">合計：90%</text>
+
+                    <text id="discard-icon" class="fade label" x="350" y="70" text-anchor="middle" fill="#e74c3c" font-size="24">❌ 捨棄降維</text>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <button id="btn-1" class="active" onclick="setStep(1)">1. 原始特徵值 (λ)</button>
+                <button id="btn-2" onclick="setStep(2)">2. 計算總資訊量</button>
+                <button id="btn-3" onclick="setStep(3)">3. 換算百分比 (%)</button>
+                <button id="btn-4" onclick="setStep(4)">4. 決策：達到 80% 標準</button>
+            </div>
+
+            <div class="text-panel" id="desc-panel">
+                <h3 id="desc-title">1. 取得主成分與特徵值 (Eigenvalues)</h3>
+                <p id="desc-text">經過演算法計算後，我們得到三個主成分。它們身上的「特徵值 (λ)」代表了這個維度抓取到的資訊量大小。PC1 抓到了 6.0、PC2 抓到 3.0、PC3 抓到 1.0。</p>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            ① 三根長條＝三個 λ；② 疊起來＝總變異（6+3+1＝10）；③ 各自除以 10 換成百分比（60%／30%／10%）；④ 從大到小<b>累加</b>，PC1+PC2＝90% 已過 80% 門檻 → <b>丟掉 PC3</b>，三維降成二維還留住 90% 資訊。
+        </div>
+    </section>
+
+    <!-- ===== 3. 三關鍵詞 ===== -->
+    <section class="lesson">
+        <h2>📖 三、三個一定要會的關鍵詞</h2>
+        <div class="keys">
+            <div class="keycard"><b>特徵值 λ</b>單一主成分扛的變異量（絕對值）。</div>
+            <div class="keycard"><b>解釋變異比例</b>該主成分佔總變異的百分比＝<b>λᵢ ÷ Σλ</b>。例：6÷10＝60%。</div>
+            <div class="keycard"><b>累積解釋變異</b>前 k 個比例加總，代表「留 k 維共保住多少資訊」。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. 選 k ===== -->
+    <section class="lesson">
+        <h2>📐 四、實務上怎麼選「幾維」？兩個方法</h2>
+        <table class="cmp">
+            <tr><th>方法</th><th>怎麼做</th><th>判準</th></tr>
+            <tr><td>累積變異門檻</td><td>把解釋變異比例由大到小累加</td><td>累積達 <b>90% 或 95%</b> 所需的維度數</td></tr>
+            <tr><td>Scree Plot 陡坡圖</td><td>把各主成分變異畫成遞減折線</td><td>找<b>「手肘」轉折</b>，轉折後的成分捨棄</td></tr>
+        </table>
+        <div class="note meta">
+            <h4>🧠 一句話</h4>
+            兩種方法常一起看：先用 scree plot 找手肘的大概位置，再用累積變異確認有沒有達到你要的門檻（如 95%）。詳細指標見 <a href="pca-metrics.html" style="color:#3730a3;font-weight:700">解釋變異比例與重建誤差</a>。
+        </div>
+    </section>
+
+    <!-- ===== 5. 太多太少 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 五、留太多 vs 留太少</h2>
+        <div class="keys">
+            <div class="keycard"><b>留太少 ❌</b>丟掉重要資訊，下游模型表現變差、重建誤差大。</div>
+            <div class="keycard"><b>留太多 ❌</b>幾乎沒降維，失去「壓縮、去雜訊、加速」的意義。</div>
+            <div class="keycard"><b>剛剛好 ✅</b>用門檻（90~95%）或手肘，在<b>資訊保留</b>與<b>維度精簡</b>間取得平衡。</div>
+        </div>
+    </section>
+
+    <!-- ===== 6. 易混 ===== -->
+    <section class="lesson">
+        <h2>⚠️ 六、一個常被考的陷阱</h2>
+        <div class="note warn">
+            <h4>變異大 ≠ 對你的任務最有用</h4>
+            PCA 是<b>非監督</b>的——它只看「資料整體哪個方向最分散」，<u>不看標籤</u>。所以變異最大的主成分，<b>未必</b>是對你的預測目標最有鑑別力的方向。有時某個變異不大的方向，反而才是關鍵。要為「分類」降維時，可考慮監督式的 <a href="lda.html" style="color:#b45309;font-weight:700">LDA</a>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 特徵值 λ 代表什麼？</summary>
+                <p>該主成分保留的<b>變異量（資訊量）</b>；λ 越大、保留越多。主成分依 λ 由大到小排。</p></details>
+            <details><summary>Q2. 解釋變異比例怎麼算？</summary>
+                <p><b>λᵢ ÷ 所有 λ 的總和</b>。例：λ＝6,3,1 → PC1＝6/10＝60%。</p></details>
+            <details><summary>Q3. λ＝6、3、1，要保留到 90%，需要幾維？</summary>
+                <p><b>2 維</b>：PC1(60%)+PC2(30%)＝90%，第三個可捨棄。</p></details>
+            <details><summary>Q4. 實務怎麼選成分數 k？</summary>
+                <p><b>累積解釋變異達門檻</b>（90~95%）或 <b>scree plot 找手肘</b>。</p></details>
+            <details><summary>Q5. 變異最大的主成分一定對任務最重要嗎？</summary>
+                <p><b>不一定。</b>PCA 不看標籤，變異大不等於對預測目標最有用。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>特徵值 λ＝資訊量</b>主成分依 λ 由大到小排。</div>
+            <div class="keycard"><b>解釋變異比例</b>λᵢ ÷ Σλ。</div>
+            <div class="keycard"><b>累積變異</b>前 k 個加總＝留 k 維的資訊保留率。</div>
+            <div class="keycard"><b>選 k</b>累積達 90~95% 或 scree plot 手肘。</div>
+            <div class="keycard"><b>權衡</b>太少丟資訊、太多沒降維。</div>
+            <div class="keycard"><b>陷阱</b>變異大 ≠ 對任務最有用。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        // DOM Elements
+        const bar1 = document.getElementById('bar-pc1');
+        const bar2 = document.getElementById('bar-pc2');
+        const bar3 = document.getElementById('bar-pc3');
+
+        const lbl1Name = document.getElementById('lbl-pc1-name');
+        const lbl2Name = document.getElementById('lbl-pc2-name');
+        const lbl3Name = document.getElementById('lbl-pc3-name');
+
+        const lbl1Val = document.getElementById('lbl-pc1-val');
+        const lbl2Val = document.getElementById('lbl-pc2-val');
+        const lbl3Val = document.getElementById('lbl-pc3-val');
+
+        const axisRaw = document.getElementById('axis-raw');
+        const axisPct = document.getElementById('axis-pct');
+        const thresholdLine = document.getElementById('threshold-line');
+        const cumuBg = document.getElementById('cumu-bg');
+        const cumuText = document.getElementById('cumu-text');
+        const discardIcon = document.getElementById('discard-icon');
+
+        const descTitle = document.getElementById('desc-title');
+        const descText = document.getElementById('desc-text');
+        const descPanel = document.getElementById('desc-panel');
+
+        function setStep(step) {
+            // Update button styles
+            for(let i=1; i<=4; i++) {
+                document.getElementById('btn-'+i).classList.remove('active');
+            }
+            document.getElementById('btn-'+step).classList.add('active');
+
+            if (step === 1) {
+                // State 1: Individual bars
+                axisRaw.classList.replace('fade', 'visible');
+                axisPct.classList.replace('visible', 'fade');
+                thresholdLine.classList.replace('visible', 'fade');
+                cumuBg.classList.replace('visible', 'fade');
+                cumuText.classList.replace('visible', 'fade');
+                discardIcon.classList.replace('visible', 'fade');
+
+                bar1.setAttribute('x', '150'); bar1.setAttribute('y', '170'); bar1.setAttribute('opacity', '1');
+                bar2.setAttribute('x', '350'); bar2.setAttribute('y', '260'); bar2.setAttribute('opacity', '1');
+                bar3.setAttribute('x', '550'); bar3.setAttribute('y', '320'); bar3.setAttribute('opacity', '1');
+
+                lbl1Name.setAttribute('x', '200'); lbl1Name.setAttribute('opacity', '1');
+                lbl2Name.setAttribute('x', '400'); lbl2Name.setAttribute('opacity', '1');
+                lbl3Name.setAttribute('x', '600'); lbl3Name.setAttribute('opacity', '1');
+
+                lbl1Val.setAttribute('x', '200'); lbl1Val.setAttribute('y', '160'); lbl1Val.textContent = 'λ₁ = 6.0';
+                lbl2Val.setAttribute('x', '400'); lbl2Val.setAttribute('y', '250'); lbl2Val.textContent = 'λ₂ = 3.0';
+                lbl3Val.setAttribute('x', '600'); lbl3Val.setAttribute('y', '310'); lbl3Val.textContent = 'λ₃ = 1.0';
+
+                descTitle.innerText = "1. 取得主成分與特徵值 (Eigenvalues)";
+                descText.innerHTML = "經過演算法計算後，我們得到三個主成分。它們身上的<strong>特徵值 (λ)</strong>代表了該維度抓取到的資訊量大小。<br>PC1 抓到了 6.0、PC2 抓到 3.0、PC3 抓到 1.0。";
+                descPanel.style.borderLeftColor = "#3498db";
+
+            } else if (step === 2) {
+                // State 2: Stacked bars to show total sum
+                axisRaw.classList.replace('fade', 'visible');
+                axisPct.classList.replace('visible', 'fade');
+                thresholdLine.classList.replace('visible', 'fade');
+                cumuBg.classList.replace('visible', 'fade');
+                cumuText.classList.replace('visible', 'fade');
+                discardIcon.classList.replace('visible', 'fade');
+
+                // Stack at x=350. Total height = 300 (y goes from 350 to 50)
+                // Bar 1 (Height 180): y from 350-180 = 170
+                bar1.setAttribute('x', '350'); bar1.setAttribute('y', '170'); bar1.setAttribute('opacity', '1');
+                // Bar 2 (Height 90): y from 170-90 = 80
+                bar2.setAttribute('x', '350'); bar2.setAttribute('y', '80'); bar2.setAttribute('opacity', '1');
+                // Bar 3 (Height 30): y from 80-30 = 50
+                bar3.setAttribute('x', '350'); bar3.setAttribute('y', '50'); bar3.setAttribute('opacity', '1');
+
+                lbl1Name.setAttribute('opacity', '0');
+                lbl2Name.setAttribute('x', '400'); lbl2Name.setAttribute('opacity', '1'); lbl2Name.textContent = '全部資訊疊加';
+                lbl3Name.setAttribute('opacity', '0');
+
+                lbl1Val.setAttribute('x', '300'); lbl1Val.setAttribute('y', '260'); lbl1Val.textContent = '6.0';
+                lbl2Val.setAttribute('x', '300'); lbl2Val.setAttribute('y', '130'); lbl2Val.textContent = '3.0';
+                lbl3Val.setAttribute('x', '300'); lbl3Val.setAttribute('y', '70'); lbl3Val.textContent = '1.0';
+
+                descTitle.innerText = "2. 計算總資訊量 (Total Variance)";
+                descText.innerHTML = "要計算比例，我們得先知道「總共有多少資訊」。<br>把三個特徵值加起來：<strong>6.0 + 3.0 + 1.0 = 10.0</strong>。<br>這 10.0 就是這個資料集的總變異量 (Total Variance)。";
+                descPanel.style.borderLeftColor = "#2ecc71";
+
+            } else if (step === 3) {
+                // State 3: Convert to Percentages (Keep stacked, change axis)
+                axisRaw.classList.replace('visible', 'fade');
+                axisPct.classList.replace('fade', 'visible');
+                thresholdLine.classList.replace('visible', 'fade');
+                cumuBg.classList.replace('visible', 'fade');
+                cumuText.classList.replace('visible', 'fade');
+                discardIcon.classList.replace('visible', 'fade');
+
+                // Positions remain stacked at x=350
+                bar1.setAttribute('x', '350'); bar1.setAttribute('y', '170'); bar1.setAttribute('opacity', '1');
+                bar2.setAttribute('x', '350'); bar2.setAttribute('y', '80'); bar2.setAttribute('opacity', '1');
+                bar3.setAttribute('x', '350'); bar3.setAttribute('y', '50'); bar3.setAttribute('opacity', '1');
+
+                lbl2Name.textContent = '變異量佔比';
+
+                // Change labels to percentages
+                lbl1Val.setAttribute('x', '300'); lbl1Val.setAttribute('y', '260'); lbl1Val.textContent = '60%';
+                lbl2Val.setAttribute('x', '300'); lbl2Val.setAttribute('y', '130'); lbl2Val.textContent = '30%';
+                lbl3Val.setAttribute('x', '300'); lbl3Val.setAttribute('y', '70'); lbl3Val.textContent = '10%';
+
+                descTitle.innerText = "3. 換算解釋變異量百分比 (%)";
+                descText.innerHTML = "將各自的特徵值除以總和 (10.0)，得到百分比：<br>PC1 = 6.0 / 10.0 = <strong>60%</strong><br>PC2 = 3.0 / 10.0 = <strong>30%</strong><br>PC3 = 1.0 / 10.0 = <strong>10%</strong>";
+                descPanel.style.borderLeftColor = "#f39c12";
+
+            } else if (step === 4) {
+                // State 4: Dimensionality Reduction Decision
+                axisRaw.classList.replace('visible', 'fade');
+                axisPct.classList.replace('fade', 'visible');
+                thresholdLine.classList.replace('fade', 'visible');
+
+                // Keep PC1 and PC2 stacked, move PC3 away and fade it
+                bar1.setAttribute('x', '350'); bar1.setAttribute('y', '170'); bar1.setAttribute('opacity', '1');
+                bar2.setAttribute('x', '350'); bar2.setAttribute('y', '80'); bar2.setAttribute('opacity', '1');
+
+                // Separate and fade PC3
+                bar3.setAttribute('x', '550'); bar3.setAttribute('y', '320'); bar3.setAttribute('opacity', '0.3');
+                lbl3Val.setAttribute('x', '600'); lbl3Val.setAttribute('y', '310'); lbl3Val.textContent = '捨棄 (10%)';
+
+                lbl1Val.setAttribute('x', '300'); lbl1Val.setAttribute('y', '260'); lbl1Val.textContent = '60%';
+                lbl2Val.setAttribute('x', '300'); lbl2Val.setAttribute('y', '130'); lbl2Val.textContent = '30%';
+                lbl2Name.textContent = '保留 PC1 + PC2';
+
+                // Show cumulative label
+                cumuBg.classList.replace('fade', 'visible');
+                cumuText.classList.replace('fade', 'visible');
+                cumuBg.setAttribute('x', '470'); cumuBg.setAttribute('y', '110');
+                cumuText.setAttribute('x', '540'); cumuText.setAttribute('y', '130');
+
+                // Show discard icon
+                discardIcon.classList.replace('fade', 'visible');
+                discardIcon.setAttribute('x', '600'); discardIcon.setAttribute('y', '290');
+
+                descTitle.innerText = "4. 降維決策：達到 80% 標準";
+                descText.innerHTML = "團隊的目標是「保留至少 80% 的變異量」。<br>我們把前兩個主成分加起來：<strong>PC1 (60%) + PC2 (30%) = 90%</strong>。<br>因為 90% > 80%，所以我們大可直接<strong>丟掉 PC3</strong>，將資料降至二維，同時還能完美保留絕大部分的原始資訊！";
+                descPanel.style.borderLeftColor = "#e74c3c";
+            }
+        }
+
+        // Initialize at step 1
+        setStep(1);
+
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>PCA 的特徵值與解釋變異量是 iPAS 降維考點(中級科目三)。重點:每個主成分的特徵值代表它解釋的變異量,主成分依特徵值大小排序;累積解釋變異比例決定保留幾維。易混點:保留太少維會丟資訊、太多失去降維意義;主成分是原特徵的線性組合、不易直接解讀。情境:用陡坡圖或累積變異(如 95%)選主成分數。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>PCA 的「變異」指什麼？</summary><p>PCA 找出資料變異(分散程度)最大的方向當主成分；每個主成分解釋一部分總變異，前幾個通常涵蓋大部分資訊。</p></details><details><summary>解釋變異比例是什麼？</summary><p>每個主成分解釋的變異佔總變異的比例；累積起來可知保留 k 個成分留住了多少資訊。</p></details><details><summary>為什麼第一主成分最重要？</summary><p>它是資料變異最大的方向、保留最多資訊；後續主成分變異依序遞減，且彼此正交(互不相關、無冗餘)。</p></details><details><summary>怎麼決定保留幾個成分？</summary><p>看累積解釋變異達門檻(如 90 到 95%)或陡坡圖手肘，在資訊保留與維度精簡間取捨。</p></details><details><summary>變異大就一定重要嗎？</summary><p>對 PCA 是；但變異大不等於對預測目標最有用——PCA 不看標籤，有時對任務重要的方向變異不大，需注意。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "PCA 的「變異」指什麼？", "acceptedAnswer": {"@type": "Answer", "text": "PCA 找出資料變異(分散程度)最大的方向當主成分；每個主成分解釋一部分總變異，前幾個通常涵蓋大部分資訊。"}}, {"@type": "Question", "name": "解釋變異比例是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "每個主成分解釋的變異佔總變異的比例；累積起來可知保留 k 個成分留住了多少資訊。"}}, {"@type": "Question", "name": "為什麼第一主成分最重要？", "acceptedAnswer": {"@type": "Answer", "text": "它是資料變異最大的方向、保留最多資訊；後續主成分變異依序遞減，且彼此正交(互不相關、無冗餘)。"}}, {"@type": "Question", "name": "怎麼決定保留幾個成分？", "acceptedAnswer": {"@type": "Answer", "text": "看累積解釋變異達門檻(如 90 到 95%)或陡坡圖手肘，在資訊保留與維度精簡間取捨。"}}, {"@type": "Question", "name": "變異大就一定重要嗎？", "acceptedAnswer": {"@type": "Answer", "text": "對 PCA 是；但變異大不等於對預測目標最有用——PCA 不看標籤，有時對任務重要的方向變異不大，需注意。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="pca.html">PCA 概念</a><a href="dim-reduction.html">降維</a><a href="pca-metrics.html">解釋變異比例、重建誤差</a><a href="unsupervised_overview.html">非監督式學習</a><a href="lda.html">LDA 線性判別</a><a href="k-means.html">K-Means</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

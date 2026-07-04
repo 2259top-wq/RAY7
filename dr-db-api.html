@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB / API · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。 用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/dr-db-api.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="DB / API · 互動教學">
+    <meta property="og:description" content="直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。 用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/dr-db-api.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DB / API · 互動教學">
+    <meta name="twitter:description" content="直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。 用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "DB / API · 互動教學",
+  "url": "https://akira.ipas-ai.com/dr-db-api.html",
+  "description": "直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。 用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Database & API · 取得資料</span>
+    <h1><span class="en">DB / API</span></h1>
+    <div class="sub">從資料庫查，或跟 API 要</div>
+    <p class="lede">拿資料八成走兩條路：資料庫用 SQL 查（自家倉庫），API 跟別人系統要（別人櫃台）。<br>下面親手玩一次 SQL，看條件怎麼篩出資料。</p>
+    <div class="eq-hero">資料在我家 → SQL；資料在別人家 → API</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>兩種最常見的資料取得方式</h2>
+  <p>實務上拿資料，八成走這兩條路：從<span class="c-l1 hl">資料庫(DB)</span>用 SQL 查，或從<span class="c-l2 hl">API</span>跟別人的系統要。前者是「自己倉庫翻貨」，後者是「跟別人櫃台拿貨」。</p>
+  <div class="grid2">
+    <div class="prosbox" style="border-left:4px solid var(--l1)"><h3 class="c-l1">資料庫 DB</h3><p style="margin:0;font-size:15px">資料存在你能直接連的資料庫裡。用 <b>SQL</b> 查詢，速度快、可做複雜篩選與彙總。分關聯式（MySQL/PostgreSQL）與 NoSQL（MongoDB）。</p></div>
+    <div class="prosbox" style="border-left:4px solid var(--l2)"><h3 class="c-l2">API</h3><p style="margin:0;font-size:15px">跟外部服務要資料（如天氣、金流、社群）。透過 <b>REST/GraphQL</b> 發請求、拿 JSON 回來。有速率限制、要處理認證與分頁。</p></div>
+  </div>
+  <p class="hint">簡單分辨：資料在「我家」→ 用 DB/SQL；資料在「別人家」→ 用 API。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>看一句 SQL 怎麼篩出你要的資料</h2>
+  <p>SQL 是查資料庫的通用語言。下面有一張訂單表，勾選<span class="c-en hl">查詢條件</span>，看 SQL 怎麼變、會撈出哪些列。這是資料工作最基本、最常用的技能。</p>
+  <div class="card">
+    <div class="chips" style="margin-bottom:6px">
+      <label style="font-size:13px"><input type="checkbox" id="cw" checked> WHERE 金額>500</label>
+      <label style="font-size:13px;margin-left:10px"><input type="checkbox" id="co"> ORDER BY 金額 DESC</label>
+      <label style="font-size:13px;margin-left:10px"><input type="checkbox" id="cl"> LIMIT 3</label>
+    </div>
+    <div class="formula" id="sqlText" style="text-align:left;white-space:normal">—</div>
+    <div class="svgbox"><svg id="dbSvg" viewBox="0 0 460 230"></svg></div>
+    <p class="hint">SELECT 選欄位、FROM 選表、WHERE 篩條件、ORDER BY 排序、LIMIT 取前幾筆——這五個關鍵字就能應付八成的日常查詢。</p>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 選擇與注意</div>
+  <h2>DB vs API 的取捨</h2>
+  <div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>DB：查詢快、可複雜彙總、資料新鮮</li><li>API：拿得到外部資料、即時、標準化</li><li>兩者都應做錯誤處理與重試</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>DB：要有存取權限與連線安全</li><li>API：有速率限制、可能要付費</li><li>API 改版會讓你的程式壞掉</li></ul></div>
+</div><h3 style='margin-top:26px'>常見工具</h3><div class="usecards"><div class="uc"><div class="ic">🗄️</div><div class="t">關聯式 DB</div><div class="d">MySQL、PostgreSQL（SQL）</div></div><div class="uc"><div class="ic">📦</div><div class="t">NoSQL</div><div class="d">MongoDB、Redis</div></div><div class="uc"><div class="ic">🔌</div><div class="t">API</div><div class="d">REST、GraphQL、SDK</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const cw=document.getElementById("cw"),co=document.getElementById("co"),cl=document.getElementById("cl");
+  const sqlT=document.getElementById("sqlText"),svg=document.getElementById("dbSvg");
+  const rows=[{id:1,c:"咖啡",a:120},{id:2,c:"筆電",a:32000},{id:3,c:"滑鼠",a:650},{id:4,c:"鍵盤",a:1500},{id:5,c:"便當",a:90},{id:6,c:"螢幕",a:5400}];
+  function build(){
+    let r=rows.slice();
+    let sql='SELECT * FROM 訂單';
+    if(cw.checked){r=r.filter(x=>x.a>500); sql+=' WHERE 金額>500';}
+    if(co.checked){r=r.sort((a,b)=>b.a-a.a); sql+=' ORDER BY 金額 DESC';}
+    if(cl.checked){r=r.slice(0,3); sql+=' LIMIT 3';}
+    sqlT.innerHTML='<span style="color:var(--l1)">SELECT</span> * <span style="color:var(--l1)">FROM</span> 訂單'+
+      (cw.checked?' <span style="color:var(--l2)">WHERE</span> 金額&gt;500':'')+
+      (co.checked?' <span style="color:var(--en)">ORDER BY</span> 金額 DESC':'')+
+      (cl.checked?' <span style="color:var(--bad)">LIMIT</span> 3':'')+';';
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    // header
+    const cols=["id","商品","金額"],cx=[60,200,360];
+    svg.appendChild(el("rect",{x:20,y:14,width:420,height:30,rx:6,fill:"var(--en)",opacity:.85}));
+    cols.forEach((c,i)=>svg.appendChild(txt(cx[i],34,c,{fill:"#fff","font-weight":700,"font-size":13})));
+    r.slice(0,6).forEach((row,i)=>{
+      const y=50+i*30;
+      svg.appendChild(el("rect",{x:20,y,width:420,height:28,rx:5,fill:i%2?"var(--paper)":"var(--paper2)",stroke:"#e6dfd0"}));
+      svg.appendChild(txt(cx[0],y+19,row.id,{fill:"var(--ink2)","font-size":13}));
+      svg.appendChild(txt(cx[1],y+19,row.c,{fill:"var(--ink2)","font-size":13}));
+      svg.appendChild(txt(cx[2],y+19,"$"+row.a.toLocaleString(),{fill:"var(--ink)","font-size":13,"font-weight":700}));
+    });
+    svg.appendChild(txt(230,50+Math.min(6,r.length)*30+18,"撈出 "+r.length+" 筆",{fill:"var(--muted)","font-size":12}));
+  }
+  [cw,co,cl].forEach(c=>c.addEventListener("change",build));
+  build();
+})();
+
+</script>
+
+
+
+
+
+<style>
+  .dtbl{width:100%;border-collapse:collapse;font-size:14px}
+  .dtbl th,.dtbl td{border:1px solid var(--rule);padding:9px 11px;text-align:left;vertical-align:top}
+  .dtbl thead th{background:var(--en-soft);color:var(--en);font-weight:700;white-space:nowrap}
+  .dtbl td:first-child{font-weight:700;color:var(--ink);white-space:nowrap}
+  .dtbl tbody tr:nth-child(even){background:var(--paper)}
+  .klist{list-style:none;counter-reset:k;margin:6px 0 0}
+  .klist li{position:relative;padding-left:32px;margin-bottom:9px;color:var(--ink2);font-size:15px}
+  .klist li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:2px;width:21px;height:21px;border-radius:50%;background:var(--en);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+  .qbox{border:1px solid var(--rule);border-radius:12px;background:var(--paper2);padding:4px 16px;margin:10px 0}
+  .qbox summary{cursor:pointer;font-weight:700;color:var(--ink);padding:12px 0}
+  .qbox[open] summary{color:var(--en)}
+  .qbox .a{color:var(--ink2);font-size:14.5px;padding:0 0 13px}
+</style>
+<section><div class="wrap">
+  <div class="sec-num">04 — 速記與對照</div>
+  <h2>直連 DB vs 透過 API</h2>
+  <div class="card" style="overflow-x:auto"><table class="dtbl"><thead><tr><th>面向</th><th>直連資料庫</th><th>透過 API</th></tr></thead><tbody><tr><td>存取</td><td>直接下 SQL 查表</td><td>呼叫端點(REST)取結果</td></tr><tr><td>控制</td><td>需帳號權限</td><td>由服務端限定範圍</td></tr><tr><td>耦合</td><td>與資料庫結構綁死</td><td>介面穩定、解耦</td></tr><tr><td>大量資料</td><td>一次抓快</td><td>需分頁、限流</td></tr></tbody></table></div>
+  <h3 style="margin-top:28px">自我檢測</h3>
+  <details class="qbox"><summary>用 API 取資料和直連資料庫差在哪？</summary><div class="a">直連 DB 直接下 SQL、彈性大但與結構耦合;API 由服務端封裝、穩定解耦、含權限與限流,較安全。</div></details><details class="qbox"><summary>取大量資料要注意什麼？</summary><div class="a">分頁(pagination)、限流(rate limit)、逾時重試、增量抓取(只取新資料),避免一次拉爆。</div></details><details class="qbox"><summary>取 API 資料常見的坑？</summary><div class="a">忽略分頁只拿到第一頁、超過速率被封、沒處理錯誤碼、時區與編碼不一致。</div></details>
+  <div class="callout" style="margin-top:26px"><h3>🎯 重點整理</h3><ol class="klist"><li>直連 DB 彈性大但耦合;API 穩定解耦較安全。</li><li>REST 用端點＋方法取資源、回 JSON。</li><li>大量資料要分頁、限流、增量抓。</li><li>處理逾時、重試與錯誤碼。</li><li>注意時區、編碼與資料一致性。</li></ol></div>
+</div></section>
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>資料庫與 API 是資料取得與服務化的管道,iPAS 中級科目一與二考點。重點:用 SQL 從資料庫查資料、用 API 串接外部資料源或把模型包成服務供呼叫。易混點:關聯式資料庫(SQL,結構化、強一致)與 NoSQL(彈性、可擴展)用途不同;API 串接要顧驗證、速率限制與錯誤處理。情境:資料管線的擷取端、模型部署的服務化。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>用 API 取資料和直連資料庫差在哪？</summary><p>直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。</p></details><details><summary>REST API 取資料的基本概念？</summary><p>用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。</p></details><details><summary>取大量資料要注意什麼？</summary><p>分頁(pagination)、速率限制與重試、增量擷取(只取新資料)、逾時處理，避免一次抓爆或被擋。</p></details><details><summary>為什麼分析常透過 API 而非直連 DB？</summary><p>安全與治理(不暴露 DB)、解耦、可控存取與稽核；但即時大量分析仍可能直連倉儲或用資料管線。</p></details><details><summary>取 API 資料的常見坑？</summary><p>沒處理分頁漏資料、忽略速率限制被封、認證金鑰外洩、資料格式變動沒防護、未做錯誤重試。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "用 API 取資料和直連資料庫差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "直連 DB 快又彈性(可任意查詢)但需權限且耦合；API 經封裝、較安全可控、跨系統標準化，但受限於端點與速率。"}}, {"@type": "Question", "name": "REST API 取資料的基本概念？", "acceptedAnswer": {"@type": "Answer", "text": "用 HTTP 方法(GET 讀取)對資源端點請求、常回 JSON；需處理認證(API key 或 OAuth)、參數、狀態碼與錯誤。"}}, {"@type": "Question", "name": "取大量資料要注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "分頁(pagination)、速率限制與重試、增量擷取(只取新資料)、逾時處理，避免一次抓爆或被擋。"}}, {"@type": "Question", "name": "為什麼分析常透過 API 而非直連 DB？", "acceptedAnswer": {"@type": "Answer", "text": "安全與治理(不暴露 DB)、解耦、可控存取與稽核；但即時大量分析仍可能直連倉儲或用資料管線。"}}, {"@type": "Question", "name": "取 API 資料的常見坑？", "acceptedAnswer": {"@type": "Answer", "text": "沒處理分頁漏資料、忽略速率限制被封、認證金鑰外洩、資料格式變動沒防護、未做錯誤重試。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="dr-abtest.html">A/B 測試 · 互動教學</a><a href="dr-acid.html">ACID / Schema · 互動教學</a><a href="dr-causal.html">因果推論 · 互動教學</a><a href="dr-cleaning.html">資料清理 · 互動教學</a><a href="dr-consistency.html">一致性檢查 · 互動教學</a><a href="dr-constraint.html">資料需求與限制 · 互動教學</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">DB / API</span> · 互動教學</div></footer>
+</body>
+</html>

@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TreeSHAP 加速原理 — 從 2ⁿ 到多項式時間</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。 樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/treeshap_acceleration.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="TreeSHAP 加速原理 — 從 2ⁿ 到多項式時間">
+    <meta property="og:description" content="一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。 樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/treeshap_acceleration.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TreeSHAP 加速原理 — 從 2ⁿ 到多項式時間">
+    <meta name="twitter:description" content="一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。 樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "TreeSHAP 加速原理 — 從 2ⁿ 到多項式時間",
+  "url": "https://akira.ipas-ai.com/treeshap_acceleration.html",
+  "description": "一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。 樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Noto+Serif+TC:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F1E8;
+    --bg-card:#FFFDF7;
+    --ink:#1A1815;
+    --ink-soft:#4A4640;
+    --ink-light:#7C786F;
+    --rule:#D9D0BC;
+    --rule-soft:#EBE3D0;
+    --shap:#4A2FD9;
+    --shap-deep:#2A1A8A;
+    --shap-soft:#E3DCFB;
+    --shap-pale:#F0EBFC;
+    --lime:#7BB800;
+    --lime-deep:#4C7A00;
+    --lime-soft:#E8F3C7;
+    --pos:#2E8B57;
+    --neg:#C4452E;
+    --gold:#C19A4B;
+    --gold-soft:#FEF6E8;
+    --shadow: 0 1px 0 rgba(26,24,21,.05), 0 8px 24px -8px rgba(26,24,21,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC',system-ui,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+  body{
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(74,47,217,.07) 0%, transparent 50%),
+      radial-gradient(circle at 88% 92%, rgba(193,154,75,.06) 0%, transparent 50%);
+    background-attachment:fixed;
+  }
+  .container{max-width:1180px;margin:0 auto;padding:0 32px}
+
+  /* HEADER */
+  header.hero{padding:80px 0 64px;border-bottom:1px solid var(--rule);position:relative;overflow:hidden}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-light);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:32px;height:1px;background:var(--gold)}
+  h1.title{
+    font-family:'Fraunces','Noto Serif TC',serif;
+    font-weight:800;
+    font-size:clamp(46px,7vw,92px);
+    line-height:.96;
+    letter-spacing:-.03em;
+    margin-bottom:24px;
+  }
+  h1.title .ce{color:var(--shap);font-style:italic;font-weight:400}
+  h1.title .acc{color:var(--gold)}
+  h1.title .big{display:inline-block;transform:translateY(.05em)}
+  .subtitle{font-family:'Noto Serif TC',serif;font-size:20px;color:var(--ink-soft);max-width:720px;margin-bottom:40px;line-height:1.55}
+  .meta-row{display:flex;gap:32px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-light);letter-spacing:.05em}
+  .meta-row span strong{color:var(--ink);font-weight:600}
+
+  /* OPENER — speed comparison */
+  .speedup-row{
+    display:grid;grid-template-columns:1fr auto 1fr;gap:32px;align-items:center;
+    margin-top:48px;padding:36px 40px;background:var(--bg-card);border:1px solid var(--rule);border-radius:2px;
+  }
+  .speedup-side{text-align:center}
+  .speedup-side .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px}
+  .speedup-side .big-n{font-family:'Fraunces',serif;font-weight:700;font-size:48px;line-height:1;letter-spacing:-.03em;margin-bottom:4px}
+  .speedup-side.slow .big-n{color:var(--neg)}
+  .speedup-side.fast .big-n{color:var(--shap)}
+  .speedup-side .unit{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-soft)}
+  .speedup-side .complexity{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-light);margin-top:8px}
+  .speedup-mid{
+    width:80px;height:80px;border-radius:50%;background:var(--gold);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-style:italic;font-weight:700;font-size:22px;
+    box-shadow:0 4px 24px rgba(193,154,75,.4);
+  }
+
+  /* SECTION */
+  section{padding:80px 0;border-bottom:1px solid var(--rule)}
+  .sec-num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--gold);margin-bottom:16px}
+  h2{font-family:'Fraunces','Noto Serif TC',serif;font-weight:600;font-size:clamp(32px,4vw,48px);line-height:1.1;letter-spacing:-.02em;margin-bottom:24px}
+  h2 em{font-style:italic;color:var(--ink-soft)}
+  h3{font-family:'Fraunces','Noto Serif TC',serif;font-weight:600;font-size:22px;letter-spacing:-.01em;margin-bottom:12px}
+  p.lead{font-family:'Noto Serif TC',serif;font-size:19px;line-height:1.65;color:var(--ink-soft);max-width:720px;margin-bottom:32px}
+  p{margin-bottom:16px;color:var(--ink-soft)}
+  p strong{color:var(--ink);font-weight:600}
+
+  /* §01 — KernelSHAP explosion */
+  .explosion-stage{
+    margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);
+    padding:32px;border-radius:2px;
+    display:grid;grid-template-columns:1fr 1fr;gap:32px;
+  }
+  .stage-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--ink-light);text-transform:uppercase;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .feature-slider{display:flex;align-items:center;gap:16px;margin:24px 0;padding:20px;background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px}
+  .feature-slider .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);min-width:80px}
+  .feature-slider input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--rule-soft);border-radius:2px;outline:none}
+  .feature-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--shap);border-radius:50%;cursor:pointer;border:3px solid var(--bg-card);box-shadow:0 0 0 1px var(--shap)}
+  .feature-slider input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--shap);border-radius:50%;cursor:pointer;border:3px solid var(--bg-card);box-shadow:0 0 0 1px var(--shap)}
+  .feature-slider .val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--shap);min-width:36px;text-align:right}
+
+  .subset-counter{background:#FCFAF3;border:1px solid var(--rule-soft);padding:24px;border-radius:2px;text-align:center}
+  .subset-counter .big{font-family:'Fraunces',serif;font-weight:700;font-size:60px;line-height:1;letter-spacing:-.03em;color:var(--neg);transition:color .3s ease}
+  .subset-counter .big.ok{color:var(--shap)}
+  .subset-counter .formula{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-light);margin-top:8px}
+  .subset-counter .verdict{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:600;margin-top:16px;padding:8px 12px;border-radius:2px;display:inline-block}
+  .subset-counter .verdict.ok{background:var(--shap-soft);color:var(--shap-deep)}
+  .subset-counter .verdict.slow{background:#F4DAD3;color:var(--neg)}
+  .subset-counter .verdict.kill{background:var(--ink);color:var(--bg-card)}
+
+  .subset-viz{margin-top:12px}
+  .subset-grid{display:grid;grid-template-columns:repeat(auto-fill,16px);gap:3px;justify-content:center;padding:12px;background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px;max-height:200px;overflow:hidden;position:relative}
+  .subset-grid::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent, #FCFAF3);pointer-events:none}
+  .subset-dot{width:16px;height:16px;background:var(--shap);border-radius:2px;opacity:.8}
+
+  /* §02 — Decision Tree */
+  .tree-stage{
+    margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);
+    padding:32px;border-radius:2px;
+    display:grid;grid-template-columns:1.4fr 1fr;gap:32px;
+  }
+  .tree-canvas{background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px;padding:16px}
+  svg.tree{width:100%;height:auto;display:block}
+
+  /* tree node styles */
+  .tn-node rect{transition:all .3s ease}
+  .tn-node text{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--ink);font-weight:600;dominant-baseline:central;text-anchor:middle}
+  .tn-leaf circle{transition:all .3s ease}
+  .tn-leaf text{font-family:'JetBrains Mono',monospace;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+  .tn-edge{stroke:var(--rule);stroke-width:1.5;fill:none;transition:all .3s ease}
+  .tn-edge-label{font-family:'JetBrains Mono',monospace;font-size:9px;fill:var(--ink-light);text-anchor:middle}
+  .tn-cover{font-family:'JetBrains Mono',monospace;font-size:9px;fill:var(--ink-light);text-anchor:middle;font-style:italic}
+
+  /* highlighted path */
+  .tn-edge.path{stroke:var(--lime-deep);stroke-width:3.5;filter:drop-shadow(0 0 8px rgba(123,184,0,.4))}
+  .tn-node.visited rect{fill:var(--lime-soft);stroke:var(--lime-deep);stroke-width:2}
+  .tn-leaf.target circle{fill:var(--lime-deep);stroke:var(--lime-deep);stroke-width:3;filter:drop-shadow(0 0 12px rgba(76,122,0,.5))}
+  .tn-leaf.target text{fill:#fff}
+
+  /* highlighted via algorithm step */
+  .tn-node.algo rect{fill:var(--shap-pale);stroke:var(--shap);stroke-width:2.5}
+  .tn-node.algo-active rect{fill:var(--shap);stroke:var(--shap-deep);stroke-width:3;filter:drop-shadow(0 0 12px rgba(74,47,217,.5))}
+  .tn-node.algo-active text{fill:#fff}
+  .tn-edge.algo-both{stroke:var(--gold);stroke-width:3;stroke-dasharray:6,3;animation:dash 1s linear infinite}
+  @keyframes dash{to{stroke-dashoffset:-18}}
+
+  /* Tree side controls */
+  .tree-side h4{font-family:'Fraunces',serif;font-size:20px;margin-bottom:6px}
+  .tree-side .sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);margin-bottom:20px}
+  .input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .input-grid .ig-cell{padding:12px 14px;background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px}
+  .input-grid .ig-cell.used{border-color:var(--lime-deep);background:var(--lime-soft)}
+  .input-grid .ig-cell.unused{border-style:dashed;opacity:.55}
+  .input-grid .ig-cell .ig-name{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-light);margin-bottom:4px;text-transform:uppercase}
+  .input-grid .ig-cell.used .ig-name{color:var(--lime-deep)}
+  .input-grid .ig-cell .ig-val{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--ink)}
+  .input-grid .ig-cell .ig-meta{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-light);margin-top:2px;letter-spacing:.05em}
+
+  .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  button.btn{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.05em;
+    padding:10px 16px;background:var(--ink);color:var(--bg-card);border:1px solid var(--ink);
+    border-radius:2px;cursor:pointer;transition:all .2s ease;text-transform:uppercase;
+  }
+  button.btn:hover{background:transparent;color:var(--ink)}
+  button.btn.secondary{background:transparent;color:var(--ink)}
+  button.btn.secondary:hover{background:var(--ink);color:var(--bg-card)}
+  button.btn.shap{background:var(--shap);border-color:var(--shap);color:#fff}
+  button.btn.shap:hover{background:transparent;color:var(--shap)}
+  button.btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+  button.btn.gold:hover{background:transparent;color:var(--gold)}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .prediction-result{
+    margin-top:20px;padding:18px;background:var(--lime-soft);border:1px solid var(--lime-deep);
+    border-radius:2px;text-align:center;
+    transform:translateY(8px);opacity:0;transition:all .4s ease;
+  }
+  .prediction-result.show{transform:translateY(0);opacity:1}
+  .prediction-result .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--lime-deep);margin-bottom:8px;font-weight:600}
+  .prediction-result .val{font-family:'Fraunces',serif;font-size:36px;font-weight:700;color:var(--lime-deep);line-height:1}
+  .prediction-result .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:6px}
+
+  /* §03 Cover idea — two-tree comparison */
+  .cover-stage{
+    margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);
+    padding:32px;border-radius:2px;
+  }
+  .cover-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:16px}
+  .cover-side{background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px;padding:20px}
+  .cover-side.real{border-top:3px solid var(--lime-deep)}
+  .cover-side.hidden{border-top:3px solid var(--gold)}
+  .cover-side h4{font-family:'Fraunces',serif;font-size:18px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .cover-side .sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);margin-bottom:16px}
+  .cover-side svg{width:100%;height:auto}
+  .cover-side .result-box{margin-top:16px;padding:14px;background:#fff;border:1px solid var(--rule-soft);border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7}
+  .cover-side .result-box .key{color:var(--ink-light)}
+  .cover-side .result-box .val{color:var(--ink);font-weight:600}
+  .cover-side.real .result-box{border-left:3px solid var(--lime-deep)}
+  .cover-side.hidden .result-box{border-left:3px solid var(--gold)}
+  .delta-box{
+    margin-top:24px;padding:24px;background:var(--shap-soft);border-radius:2px;
+    text-align:center;
+  }
+  .delta-box .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--shap-deep);margin-bottom:8px;font-weight:600}
+  .delta-box .val{font-family:'Fraunces',serif;font-size:44px;font-weight:700;color:var(--shap-deep);letter-spacing:-.02em}
+  .delta-box .meta{font-size:13px;color:var(--ink-soft);margin-top:6px;font-family:'Noto Serif TC',serif;font-style:italic}
+
+  /* §04 Algorithm walking — step by step */
+  .algo-stage{
+    margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);
+    padding:32px;border-radius:2px;
+    display:grid;grid-template-columns:1.3fr 1fr;gap:32px;
+  }
+  .algo-controls{display:flex;align-items:center;gap:8px;margin-top:16px;padding:14px 16px;background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px}
+  .algo-controls .step-info{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light);flex:1}
+  .algo-controls .step-info strong{color:var(--shap);font-weight:700}
+
+  .shap-bars{margin-top:8px}
+  .shap-bar{margin-bottom:14px;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .shap-bar .row{display:flex;justify-content:space-between;margin-bottom:6px}
+  .shap-bar .row .name{color:var(--ink);font-weight:600}
+  .shap-bar .row .val{color:var(--shap);font-weight:700}
+  .shap-bar.zero .row .val{color:var(--ink-light);font-weight:400}
+  .shap-bar .track{height:14px;background:var(--rule-soft);border-radius:2px;position:relative;overflow:hidden}
+  .shap-bar .track .pos-side,.shap-bar .track .neg-side{position:absolute;top:0;height:100%;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .shap-bar .track .pos-side{left:50%;background:linear-gradient(90deg,var(--shap),var(--shap-deep))}
+  .shap-bar .track .neg-side{right:50%;background:linear-gradient(270deg,#E89580,var(--neg))}
+  .shap-bar .track::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--ink-light);z-index:2}
+  .algo-narration{
+    margin-top:20px;padding:18px;background:var(--gold-soft);border-left:3px solid var(--gold);border-radius:0 2px 2px 0;
+    font-size:13px;line-height:1.65;color:var(--ink);min-height:120px;
+  }
+  .algo-narration .step-num{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;display:block;margin-bottom:6px}
+
+  /* §05 Complexity comparison chart */
+  .complexity-stage{
+    margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);
+    padding:32px;border-radius:2px;
+  }
+  .complex-chart{background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px;padding:16px;margin-top:20px}
+  .complex-chart svg{width:100%;height:auto}
+  .complex-numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+  .complex-numbers .cn-card{padding:20px;background:#FCFAF3;border:1px solid var(--rule-soft);border-radius:2px}
+  .complex-numbers .cn-card .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px}
+  .complex-numbers .cn-card .scenario{font-family:'Fraunces',serif;font-size:14px;color:var(--ink-soft);font-style:italic;margin-bottom:12px}
+  .complex-numbers .cn-card .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--rule-soft);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .complex-numbers .cn-card .row:last-child{border-bottom:none}
+  .complex-numbers .cn-card .row .lhs{color:var(--ink-light)}
+  .complex-numbers .cn-card .row .rhs{font-weight:700}
+  .complex-numbers .cn-card .row .rhs.slow{color:var(--neg)}
+  .complex-numbers .cn-card .row .rhs.fast{color:var(--shap)}
+  .complex-numbers .cn-card .ratio{margin-top:14px;padding:10px;background:var(--gold-soft);text-align:center;font-family:'Fraunces',serif;font-weight:700;color:var(--gold);font-size:18px;letter-spacing:-.01em;border-radius:2px}
+
+  /* CODE BLOCK */
+  .code-block{
+    background:#1A1815;color:#F5F1E8;
+    padding:24px 28px;border-radius:2px;margin-top:24px;
+    font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;
+    overflow-x:auto;
+    white-space:pre;
+    tab-size:2;
+  }
+  .code-block .com{color:#7C786F;font-style:italic}
+  .code-block .kw{color:#C19A4B;font-weight:600}
+  .code-block .str{color:#A8E0FF}
+  .code-block .fn{color:#C5AFFC}
+  .code-block .num{color:#E89580}
+
+  .tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+  .tip-card{background:var(--bg-card);border:1px solid var(--rule);padding:28px;border-radius:2px}
+  .tip-card h3{display:flex;align-items:center;gap:10px;font-size:20px;margin-bottom:8px}
+  .tip-card .icon{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:32px;height:32px;background:var(--shap-soft);color:var(--shap-deep);
+    font-family:'Fraunces',serif;font-style:italic;font-weight:700;border-radius:2px;font-size:18px;
+  }
+  .tip-card.alt .icon{background:var(--gold-soft);color:var(--gold)}
+  .tip-card ul{list-style:none;padding:0;margin-top:14px}
+  .tip-card li{padding:8px 0;border-bottom:1px dashed var(--rule-soft);display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--ink-soft)}
+  .tip-card li::before{content:"→";color:var(--gold);font-weight:700;margin-top:2px;flex-shrink:0}
+  .tip-card li:last-child{border-bottom:none}
+
+  /* Compare KernelSHAP / TreeSHAP variant table */
+  .variant-table{margin-top:24px;background:var(--bg-card);border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+  .variant-table table{width:100%;border-collapse:collapse}
+  .variant-table th,.variant-table td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+  .variant-table th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-light);font-weight:600;background:var(--rule-soft)}
+  .variant-table td:first-child{font-family:'Fraunces',serif;font-size:15px;font-weight:600;width:22%;color:var(--shap-deep)}
+  .variant-table td{font-size:13px;line-height:1.55;color:var(--ink-soft)}
+  .variant-table tr:last-child td{border-bottom:none}
+
+  /* TAG */
+  .tag-inline{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--rule-soft);color:var(--ink-soft);padding:2px 6px;border-radius:2px;font-weight:600}
+  .tag-inline.shap{background:var(--shap-soft);color:var(--shap-deep)}
+  .tag-inline.gold{background:var(--gold-soft);color:var(--gold)}
+
+  /* FOOTER */
+  footer{padding:64px 0 80px;text-align:center}
+  footer .mark{font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:var(--ink-soft);margin-bottom:8px}
+  footer .credit{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--ink-light);text-transform:uppercase}
+
+  /* RESPONSIVE */
+  @media (max-width:900px){
+    .container{padding:0 20px}
+    .speedup-row{grid-template-columns:1fr;gap:24px;padding:28px}
+    .speedup-mid{margin:0 auto}
+    .explosion-stage,.tree-stage,.algo-stage{grid-template-columns:1fr;padding:20px;gap:24px}
+    .cover-grid{grid-template-columns:1fr}
+    .complex-numbers{grid-template-columns:1fr}
+    .tip-grid{grid-template-columns:1fr}
+    .input-grid{grid-template-columns:1fr 1fr}
+    section{padding:56px 0}
+    header.hero{padding:48px 0 40px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">XAI 系列 03 · TreeSHAP Acceleration</div>
+    <h1 class="title">
+      從 <span class="big" style="color:var(--neg)">2ⁿ</span> <span class="ce">到</span> <span class="acc">O(TLD²)</span>。<br>
+      <span class="ce">TreeSHAP 的</span>魔法。
+    </h1>
+    <p class="subtitle">KernelSHAP 計算 Shapley value 需要枚舉 2ⁿ 個特徵子集 — 30 個特徵就有 10 億種組合。TreeSHAP 利用樹結構，把這個指數級的計算壓縮成<strong>多項式時間</strong>，且結果完全精確。這頁帶你看懂這個 10⁶ 倍速差的祕密。</p>
+    <div class="meta-row">
+      <span><strong>論文 ·</strong> Lundberg et al. 2018</span>
+      <span><strong>適用 ·</strong> XGBoost / LightGBM / RandomForest</span>
+      <span><strong>本質 ·</strong> Path-dependent Recursion</span>
+      <span><strong>輸出 ·</strong> Exact Shapley Values</span>
+    </div>
+
+    <div class="speedup-row">
+      <div class="speedup-side slow">
+        <div class="lbl">KernelSHAP</div>
+        <div class="big-n">2ⁿ</div>
+        <div class="unit">特徵子集</div>
+        <div class="complexity">O(2ⁿ · M)</div>
+      </div>
+      <div class="speedup-mid">10⁶×</div>
+      <div class="speedup-side fast">
+        <div class="lbl">TreeSHAP</div>
+        <div class="big-n">TLD²</div>
+        <div class="unit">樹遍歷</div>
+        <div class="complexity">O(T · L · D²)</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- §01 KernelSHAP explosion -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 01 · 為什麼需要加速</div>
+    <h2>KernelSHAP 的<em>指數級詛咒</em></h2>
+    <p class="lead">前面那篇 LIME vs SHAP 提到，SHAP 要算每個特徵的「平均邊際貢獻」 — 必須對<strong>所有可能的特徵子集</strong>都跑一次模型。問題是：<strong>n 個特徵會有 2ⁿ 個子集</strong>。</p>
+
+    <div class="explosion-stage">
+      <div>
+        <div class="stage-label">
+          <span>互動：拖動特徵數量觀察組合爆炸</span>
+        </div>
+        <p style="font-size:14px;line-height:1.6;margin-bottom:8px">把每個特徵想成「在 / 不在」聯盟兩種狀態，n 個特徵就有 2ⁿ 種可能聯盟。對每個聯盟都要跑模型 → 計算量隨 n 指數成長。</p>
+
+        <div class="feature-slider">
+          <span class="lbl">n 特徵數</span>
+          <input type="range" id="featCount" min="2" max="30" value="10" step="1">
+          <span class="val" id="featVal">10</span>
+        </div>
+
+        <div class="subset-viz">
+          <div class="stage-label" style="margin-bottom:8px"><span>視覺化前 64 個子集（每格代表一個聯盟）</span></div>
+          <div class="subset-grid" id="subsetGrid"></div>
+        </div>
+      </div>
+      <div>
+        <div class="subset-counter">
+          <div class="lbl" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-light);margin-bottom:8px">總子集數量</div>
+          <div class="big" id="subsetCount">1,024</div>
+          <div class="formula">2<sup id="subsetN">10</sup> = subsets</div>
+
+          <div style="margin:24px 0;padding:16px;background:var(--bg);border-radius:2px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8">
+            <div style="color:var(--ink-light);margin-bottom:4px">假設每次模型推論 = 1ms</div>
+            <div>單筆樣本耗時：<strong style="color:var(--ink)" id="timePerSample">1.0 秒</strong></div>
+            <div>10,000 筆資料：<strong style="color:var(--ink)" id="timeTotal">2.8 小時</strong></div>
+          </div>
+
+          <div class="verdict ok" id="verdict">尚可接受</div>
+        </div>
+
+        <p style="font-size:13px;color:var(--ink-light);margin-top:20px;line-height:1.55">
+          現實的金融或醫療模型動輒 50~200 個特徵。KernelSHAP 即使用採樣近似，也無法兼顧速度與精確度。<strong style="color:var(--shap)">這就是 TreeSHAP 出現的契機。</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §02 Tree structure insight -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 02 · 關鍵觀察</div>
+    <h2>樹的預測，<em>只走一條路</em></h2>
+    <p class="lead">決策樹的預測是「分段常數」 — 從根節點走到葉節點的<strong>那條路徑</strong>，決定了預測值。路徑上用了哪些特徵？沒用到的特徵根本不會影響這次預測。這是 TreeSHAP 的第一塊基石。</p>
+
+    <div class="tree-stage">
+      <div>
+        <div class="stage-label">
+          <span>互動：點任意輸入組合觀察預測路徑</span>
+        </div>
+        <div class="tree-canvas">
+          <svg class="tree" id="treeSvg" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+      <div class="tree-side">
+        <h4>申請人特徵</h4>
+        <div class="sub">這棵小樹只用 3 個特徵 — 第 4 個怎麼變都不影響</div>
+        <div class="input-grid" id="inputGrid"></div>
+
+        <div class="btn-row">
+          <button class="btn shap" id="btnPredict">預測 & 顯示路徑</button>
+          <button class="btn secondary" id="btnReset2">重設</button>
+        </div>
+
+        <div class="prediction-result" id="predResult">
+          <div class="lbl">預測機率</div>
+          <div class="val" id="predVal">0.92</div>
+          <div class="meta" id="predMeta">→ 葉節點 L4</div>
+        </div>
+
+        <p style="font-size:12px;color:var(--ink-light);margin-top:24px;line-height:1.55">
+          <strong style="color:var(--ink)">關鍵體會：</strong>負債比這個特徵從來沒被這棵樹的任何節點使用。對單棵樹而言，它的 SHAP 值就是 <span class="tag-inline">0</span>。模型的「特徵重要性」其實寫在樹的結構裡。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §03 The Cover trick -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 03 · 核心技巧</div>
+    <h2>不枚舉子集，<br><em>用 Cover 直接求邊際</em></h2>
+    <p class="lead">Shapley value 要算「<strong>有這個特徵</strong> vs <strong>沒有這個特徵</strong>」的預測差。KernelSHAP 真的去跑所有子集；TreeSHAP 換一招 — 用<strong>訓練資料在每個節點的流量分佈（cover）</strong>來近似「特徵不存在」時的預測。</p>
+
+    <div class="cover-stage">
+      <h3 style="text-align:center;margin-bottom:8px">假設要算「信用分數」對這次預測的影響</h3>
+      <p style="text-align:center;font-size:14px;color:var(--ink-light);font-family:'JetBrains Mono',monospace">比較兩種情境下，根節點的預期輸出</p>
+
+      <div class="cover-grid">
+        <div class="cover-side real">
+          <h4>① 信用分數「揭露」</h4>
+          <div class="sub">遵循樣本的真實值 → 走實線路徑</div>
+          <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" id="coverSvgReal"></svg>
+          <div class="result-box">
+            <div><span class="key">x[信用] = 750</span></div>
+            <div><span class="key">路徑 →</span> 走右子樹</div>
+            <div><span class="key">右子樹 E[f] =</span> <span class="val">0.84</span></div>
+          </div>
+        </div>
+        <div class="cover-side hidden">
+          <h4>② 信用分數「隱藏」</h4>
+          <div class="sub">看訓練資料怎麼流 → 兩條都走，加權</div>
+          <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" id="coverSvgHidden"></svg>
+          <div class="result-box">
+            <div><span class="key">P(走左) = 300/1000 = 0.30</span></div>
+            <div><span class="key">P(走右) = 700/1000 = 0.70</span></div>
+            <div><span class="key">E[f] = 0.30·0.32 + 0.70·0.84 =</span> <span class="val">0.68</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="delta-box">
+        <div class="lbl">信用分數對預測的邊際貢獻 ≈</div>
+        <div class="val">+0.16</div>
+        <div class="meta">= 0.84 (揭露) − 0.68 (隱藏)</div>
+      </div>
+
+      <p style="margin-top:32px;max-width:760px;margin-left:auto;margin-right:auto;text-align:center;font-size:14px;color:var(--ink-light)">
+        這個「揭露 − 隱藏」差值就是<strong style="color:var(--shap)">該特徵在這個節點上對預測的邊際影響</strong>。TreeSHAP 把這個比較<strong>沿著樹遞迴展開</strong>，並用 Shapley 組合權重精確加總 — 完全不需要枚舉 2ⁿ 個子集。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §04 Algorithm walking -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 04 · 演算法逐步</div>
+    <h2>TreeSHAP <em>怎麼走完整棵樹</em></h2>
+    <p class="lead">下面把上面的概念變成具體的演算法步驟。同一棵樹，同一個樣本，按下「下一步」一步步看 TreeSHAP 怎麼累積每個特徵的 SHAP 值：</p>
+
+    <div class="algo-stage">
+      <div>
+        <div class="stage-label">
+          <span>TreeSHAP 遞迴 — 訪問順序</span>
+          <span id="algoStepLbl" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--shap-deep);font-weight:700">準備開始</span>
+        </div>
+        <div class="tree-canvas">
+          <svg class="tree" id="algoTreeSvg" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="algo-controls">
+          <div class="step-info">步驟 <strong id="stepNum">0</strong> / 6</div>
+          <button class="btn secondary" id="btnAlgoPrev">← 上一步</button>
+          <button class="btn shap" id="btnAlgoNext">下一步 →</button>
+          <button class="btn secondary" id="btnAlgoReset">重設</button>
+        </div>
+        <div class="algo-narration" id="algoNarration">
+          <span class="step-num">Step 0 · 初始化</span>
+          樣本 x = (信用 750, 收入 80K, 年齡 35, 負債比 30%)。準備從根節點開始遞迴 — 所有特徵的 φ 累加器初始為 0。按「下一步」開始走樹。
+        </div>
+      </div>
+      <div>
+        <div class="stage-label">
+          <span>四個特徵的 SHAP 累加器</span>
+        </div>
+        <div class="shap-bars" id="shapBars"></div>
+
+        <div style="margin-top:24px;padding:18px;background:var(--shap-soft);border-radius:2px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--shap-deep);margin-bottom:8px;font-weight:600">驗證：Σ φᵢ + base ≈ f(x)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7" id="checkBox">
+            <div>base value:&nbsp;&nbsp;0.686</div>
+            <div>Σ SHAP:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000</div>
+            <div>預測 f(x):&nbsp;&nbsp;0.686</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §05 Complexity comparison -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 05 · 複雜度</div>
+    <h2>實際差多少？<em>用數字說話</em></h2>
+    <p class="lead">把 KernelSHAP 與 TreeSHAP 套到三個常見規模的模型上，看實際 operation 數差距：</p>
+
+    <div class="complex-numbers">
+      <div class="cn-card">
+        <div class="lbl">小型模型</div>
+        <div class="scenario">10 特徵 · 50 樹 · 深度 4</div>
+        <div class="row">
+          <span class="lhs">KernelSHAP (2ⁿ·M)</span>
+          <span class="rhs slow">~ 5.1×10⁵</span>
+        </div>
+        <div class="row">
+          <span class="lhs">TreeSHAP (TLD²)</span>
+          <span class="rhs fast">~ 1.3×10⁴</span>
+        </div>
+        <div class="ratio">≈ 39× 加速</div>
+      </div>
+      <div class="cn-card">
+        <div class="lbl">中型模型</div>
+        <div class="scenario">20 特徵 · 100 樹 · 深度 6</div>
+        <div class="row">
+          <span class="lhs">KernelSHAP (2ⁿ·M)</span>
+          <span class="rhs slow">~ 1.1×10⁹</span>
+        </div>
+        <div class="row">
+          <span class="lhs">TreeSHAP (TLD²)</span>
+          <span class="rhs fast">~ 2.3×10⁵</span>
+        </div>
+        <div class="ratio">≈ 4,700× 加速</div>
+      </div>
+      <div class="cn-card">
+        <div class="lbl">大型模型</div>
+        <div class="scenario">50 特徵 · 500 樹 · 深度 8</div>
+        <div class="row">
+          <span class="lhs">KernelSHAP (2ⁿ·M)</span>
+          <span class="rhs slow">~ 5.6×10¹⁷</span>
+        </div>
+        <div class="row">
+          <span class="lhs">TreeSHAP (TLD²)</span>
+          <span class="rhs fast">~ 8.2×10⁶</span>
+        </div>
+        <div class="ratio">≈ 6.8×10¹⁰ 加速</div>
+      </div>
+    </div>
+
+    <div class="complex-stage" style="margin-top:32px;background:var(--bg-card);border:1px solid var(--rule);padding:32px;border-radius:2px">
+      <div class="stage-label"><span>視覺化：特徵數 n 增加時，兩種方法的 operation 數（log 軸）</span></div>
+      <div class="complex-chart">
+        <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" id="complexChart"></svg>
+      </div>
+      <p style="font-size:13px;color:var(--ink-light);margin-top:20px;text-align:center;line-height:1.55">
+        KernelSHAP 的曲線在 n=20 之後就「飛出畫面」 — 對特徵維度有指數敏感性。<br>TreeSHAP 對 n 幾乎無感，只在意樹的數量與深度。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- §06 Variants + Code + Tips -->
+<section>
+  <div class="container">
+    <div class="sec-num">§ 06 · 實務</div>
+    <h2><em>怎麼用</em>、<em>什麼時候用</em></h2>
+
+    <h3 style="margin-top:32px">TreeSHAP 的兩個變體</h3>
+    <p>TreeSHAP 實際上有兩種估計「特徵不存在」的方式，差別在於用哪種分佈來邊際化：</p>
+
+    <div class="variant-table">
+      <table>
+        <thead>
+          <tr>
+            <th>變體</th>
+            <th>邊際化方式</th>
+            <th>適合場景</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Path-dependent</td>
+            <td>用<strong>訓練資料</strong>在每個節點的 cover 來估計流量</td>
+            <td>速度優先、特徵之間有相關性</td>
+            <td>shap 套件預設、不需要背景資料集</td>
+          </tr>
+          <tr>
+            <td>Interventional</td>
+            <td>用<strong>外部 background 資料</strong>真的去算 E[f | x_S]</td>
+            <td>需要嚴格因果語義、特徵獨立性假設成立時</td>
+            <td>需提供 background dataset、稍慢但更符合 SHAP 原始定義</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top:48px">最小程式碼骨架</h3>
+    <div class="code-block">
+<span class="com"># Python · shap 套件 · TreeSHAP 最常見用法</span>
+<span class="kw">import</span> shap
+<span class="kw">import</span> xgboost <span class="kw">as</span> xgb
+
+<span class="com"># 1. 訓練樹模型（XGBoost / LightGBM / sklearn 都行）</span>
+model = xgb.<span class="fn">XGBClassifier</span>(n_estimators=<span class="num">100</span>, max_depth=<span class="num">6</span>).<span class="fn">fit</span>(X_train, y_train)
+
+<span class="com"># 2. 建立 TreeExplainer — 自動選用 TreeSHAP 演算法</span>
+explainer = shap.<span class="fn">TreeExplainer</span>(
+    model,
+    feature_perturbation=<span class="str">"tree_path_dependent"</span>,  <span class="com"># 預設模式</span>
+    <span class="com"># 或者 feature_perturbation="interventional", data=X_background</span>
+)
+
+<span class="com"># 3. 計算 SHAP values（單筆或整批 — 同樣是 O(TLD²) 每筆）</span>
+shap_values = explainer.<span class="fn">shap_values</span>(X_test)
+
+<span class="com"># 4. 視覺化</span>
+shap.<span class="fn">summary_plot</span>(shap_values, X_test)              <span class="com"># 全局重要性</span>
+shap.<span class="fn">force_plot</span>(explainer.expected_value,
+                explainer.shap_values(X_test[<span class="num">0</span>]), X_test[<span class="num">0</span>])  <span class="com"># 單筆解釋</span>
+shap.<span class="fn">dependence_plot</span>(<span class="str">"income"</span>, shap_values, X_test)   <span class="com"># 特徵依賴圖</span>
+</div>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <h3><span class="icon">✓</span> 選擇 TreeSHAP 的時機</h3>
+        <ul>
+          <li>模型是 <strong>XGBoost、LightGBM、CatBoost、sklearn 的樹型模型</strong> — 直接套用、無需設定</li>
+          <li>需要對<strong>整個資料集</strong>計算 SHAP（百萬筆等級），KernelSHAP 完全不可行</li>
+          <li>要做 <strong>SHAP dependence plot</strong> 或 <strong>interaction values</strong> — 都倚賴 exact SHAP</li>
+          <li>需要在<strong>生產環境</strong>即時計算解釋 — TreeSHAP 通常 &lt; 1ms 每筆</li>
+        </ul>
+      </div>
+
+      <div class="tip-card alt">
+        <h3><span class="icon">!</span> 注意事項與替代</h3>
+        <ul>
+          <li>模型是<strong>神經網路</strong> → 用 <strong>DeepSHAP</strong>（同樣是 SHAP 的快速變體）</li>
+          <li>模型是 <strong>SVM、KNN 或自定義 wrapper</strong> → 沒得選，退回 KernelSHAP + 採樣</li>
+          <li><strong>特徵之間高度相關</strong>時，path-dependent 會把貢獻算給「上游」特徵；要嚴謹歸因請用 interventional</li>
+          <li>TreeSHAP 算的是<strong>機率/log-odds 空間</strong>的貢獻 — 解讀分類模型結果時要注意尺度</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+/* ============================================================
+   §01 — KernelSHAP subset explosion
+   ============================================================ */
+(function(){
+  const slider = document.getElementById('featCount');
+  const valEl = document.getElementById('featVal');
+  const cntEl = document.getElementById('subsetCount');
+  const nEl = document.getElementById('subsetN');
+  const grid = document.getElementById('subsetGrid');
+  const tps = document.getElementById('timePerSample');
+  const ttot = document.getElementById('timeTotal');
+  const verdict = document.getElementById('verdict');
+
+  function format(n){
+    if(n < 1e4) return n.toLocaleString('en-US');
+    if(n < 1e6) return (n/1e3).toFixed(1) + ' 千';
+    if(n < 1e9) return (n/1e6).toFixed(2) + ' 百萬';
+    if(n < 1e12) return (n/1e9).toFixed(2) + ' 十億';
+    return n.toExponential(2);
+  }
+  function formatTime(ms){
+    if(ms < 1000) return ms.toFixed(0) + ' 毫秒';
+    if(ms < 60000) return (ms/1000).toFixed(1) + ' 秒';
+    if(ms < 3.6e6) return (ms/60000).toFixed(1) + ' 分鐘';
+    if(ms < 8.64e7) return (ms/3.6e6).toFixed(1) + ' 小時';
+    if(ms < 3.15e10) return (ms/8.64e7).toFixed(1) + ' 天';
+    return (ms/3.15e10).toFixed(2) + ' 年';
+  }
+
+  // build 64-cell grid (only first 64 shown)
+  let cells = '';
+  for(let i=0;i<64;i++){
+    cells += '<div class="subset-dot" data-i="'+i+'"></div>';
+  }
+  grid.innerHTML = cells;
+
+  function update(){
+    const n = +slider.value;
+    valEl.textContent = n;
+    nEl.textContent = n;
+    const subsets = Math.pow(2, n);
+    cntEl.textContent = format(subsets);
+    // time: assume 1ms per evaluation, ~ subsets evaluations per sample
+    const msPerSample = subsets;
+    tps.textContent = formatTime(msPerSample);
+    ttot.textContent = formatTime(msPerSample * 10000);
+
+    // verdict & color
+    let v='', cls='';
+    if(subsets < 4096){ v='尚可接受'; cls='ok'; cntEl.classList.add('ok'); }
+    else if(subsets < 1e6){ v='開始慢'; cls='slow'; cntEl.classList.remove('ok'); }
+    else if(subsets < 1e9){ v='實務不可行'; cls='slow'; cntEl.classList.remove('ok'); }
+    else { v='完全爆炸'; cls='kill'; cntEl.classList.remove('ok'); }
+    verdict.textContent = v;
+    verdict.className = 'verdict ' + cls;
+
+    // grid opacity (saturation as n grows)
+    const visibleCount = Math.min(64, subsets);
+    document.querySelectorAll('.subset-dot').forEach((d,i)=>{
+      if(i < visibleCount){
+        const opacity = 0.5 + (i/64)*0.5;
+        const color = subsets > 1e6 ? 'var(--neg)' : subsets > 4096 ? '#A89C8C' : 'var(--shap)';
+        d.style.background = color;
+        d.style.opacity = opacity;
+      } else {
+        d.style.background = 'var(--rule-soft)';
+        d.style.opacity = 0.3;
+      }
+    });
+  }
+  slider.addEventListener('input', update);
+  update();
+})();
+
+/* ============================================================
+   DECISION TREE — shared definition
+   ============================================================ */
+const TREE = {
+  // node structure: root and leaves
+  // root: 信用 ≥ 700
+  //   left (No): 收入 ≥ 50K
+  //     left: leaf 0.12  (cover 180)
+  //     right: leaf 0.48 (cover 120)
+  //   right (Yes): 年齡 ≥ 30
+  //     left: leaf 0.65  (cover 200)
+  //     right: leaf 0.92 (cover 500)
+  // cover root = 1000
+  root: {
+    id:'N1', feature:'credit', threshold:700, condition:'信用 ≥ 700', cover:1000,
+    x:300, y:50,
+    left: {
+      id:'N2', feature:'income', threshold:50, condition:'收入 ≥ 50K', cover:300,
+      x:140, y:160,
+      left:  { id:'L1', leaf:true, value:0.20, cover:180, x:60,  y:280 },
+      right: { id:'L2', leaf:true, value:0.50, cover:120, x:220, y:280 }
+    },
+    right: {
+      id:'N3', feature:'age', threshold:30, condition:'年齡 ≥ 30', cover:700,
+      x:460, y:160,
+      left:  { id:'L3', leaf:true, value:0.65, cover:200, x:380, y:280 },
+      right: { id:'L4', leaf:true, value:0.92, cover:500, x:540, y:280 }
+    }
+  }
+};
+const FEATURES = [
+  { id:'credit', label:'信用分數', unit:'', default:750, threshold:700 },
+  { id:'income', label:'月收入',   unit:'K', default:80,  threshold:50 },
+  { id:'age',    label:'年齡',     unit:'歲', default:35, threshold:30 },
+  { id:'debt',   label:'負債比',   unit:'%', default:30,  threshold:null }
+];
+
+// expected value (baseline) = leaf-cover-weighted average
+// = (0.20×180 + 0.50×120 + 0.65×200 + 0.92×500) / 1000 = 0.686
+const TREE_BASE = (0.20*180 + 0.50*120 + 0.65*200 + 0.92*500) / 1000;
+
+function getAllNodes(n){
+  if(!n) return [];
+  if(n.leaf) return [n];
+  return [n, ...getAllNodes(n.left), ...getAllNodes(n.right)];
+}
+function getAllEdges(n){
+  if(!n || n.leaf) return [];
+  return [
+    { from:n, to:n.left, label:'No' },
+    { from:n, to:n.right, label:'Yes' },
+    ...getAllEdges(n.left), ...getAllEdges(n.right)
+  ];
+}
+
+function predictTree(x, node){
+  if(node.leaf) return { value: node.value, path: [node] };
+  const goRight = x[node.feature] >= node.threshold;
+  const child = goRight ? node.right : node.left;
+  const sub = predictTree(x, child);
+  return { value: sub.value, path: [node, ...sub.path] };
+}
+
+/* ============================================================
+   Generic tree renderer
+   ============================================================ */
+function renderTree(svgId, opts={}){
+  const o = Object.assign({
+    pathIds: [],     // nodes/leaves on the highlighted prediction path
+    edgePath: [],    // edge keys "from->to" on the path
+    activeNode: null, // current algorithm node
+    visitedIds: [],   // nodes already visited by algorithm
+    bothChildren: null, // node-id whose both children are being explored
+    showCovers: true,
+  }, opts);
+  const svg = document.getElementById(svgId);
+  if(!svg) return;
+
+  const nodes = getAllNodes(TREE.root);
+  const edges = getAllEdges(TREE.root);
+
+  let str = '';
+
+  // edges first
+  edges.forEach(e=>{
+    const fx = e.from.x, fy = e.from.y + 18;
+    const tx = e.to.x,   ty = e.to.y - (e.to.leaf ? 18 : 18);
+    const edgeKey = e.from.id + '->' + e.to.id;
+    const isPath = o.edgePath.includes(edgeKey);
+    const isBoth = o.bothChildren === e.from.id;
+    let cls = 'tn-edge';
+    if(isPath) cls += ' path';
+    if(isBoth) cls += ' algo-both';
+    // curved line: cubic bezier
+    const midY = (fy + ty)/2;
+    str += `<path class="${cls}" d="M${fx},${fy} C${fx},${midY} ${tx},${midY} ${tx},${ty}"/>`;
+    // label
+    const lx = (fx + tx)/2 + (tx > fx ? 10 : -10);
+    const ly = midY;
+    str += `<text class="tn-edge-label" x="${lx}" y="${ly}">${e.label}</text>`;
+    // cover
+    if(o.showCovers){
+      const cx = (fx + tx)/2 + (tx > fx ? 10 : -10);
+      const cy = midY + 12;
+      str += `<text class="tn-cover" x="${cx}" y="${cy}">n=${e.to.cover}</text>`;
+    }
+  });
+
+  // nodes
+  nodes.forEach(n=>{
+    if(n.leaf){
+      let cls = 'tn-leaf';
+      if(o.pathIds.includes(n.id)) cls += ' target';
+      if(o.visitedIds.includes(n.id)) cls += ' visited';
+      if(o.activeNode === n.id) cls += ' algo-active';
+      str += `<g class="${cls}" data-id="${n.id}">
+        <circle cx="${n.x}" cy="${n.y}" r="22" fill="#FFFDF7" stroke="#1A1815" stroke-width="1.5"/>
+        <text x="${n.x}" y="${n.y - 4}" font-size="9" fill="#7C786F">${n.id}</text>
+        <text x="${n.x}" y="${n.y + 7}" font-size="11" font-weight="700">${n.value}</text>
+      </g>`;
+    } else {
+      let cls = 'tn-node';
+      if(o.pathIds.includes(n.id)) cls += ' visited';
+      if(o.visitedIds.includes(n.id)) cls += ' algo';
+      if(o.activeNode === n.id) cls += ' algo-active';
+      const w = 130, h = 36;
+      str += `<g class="${cls}" data-id="${n.id}">
+        <rect x="${n.x - w/2}" y="${n.y - h/2}" width="${w}" height="${h}" rx="4" fill="#FFFDF7" stroke="#1A1815" stroke-width="1.5"/>
+        <text x="${n.x}" y="${n.y - 6}" font-size="9" fill="#7C786F" font-weight="400">${n.id}</text>
+        <text x="${n.x}" y="${n.y + 7}">${n.condition}?</text>
+      </g>`;
+    }
+  });
+
+  svg.innerHTML = str;
+}
+
+/* ============================================================
+   §02 — Tree predict interactive
+   ============================================================ */
+(function(){
+  const igEl = document.getElementById('inputGrid');
+  const btnPredict = document.getElementById('btnPredict');
+  const btnReset = document.getElementById('btnReset2');
+  const predResult = document.getElementById('predResult');
+  const predVal = document.getElementById('predVal');
+  const predMeta = document.getElementById('predMeta');
+
+  let userX = {};
+  FEATURES.forEach(f => userX[f.id] = f.default);
+
+  // possible input options for each feature (to make interactive)
+  const OPTIONS = {
+    credit: [600, 680, 750, 820],
+    income: [30, 45, 60, 80, 120],
+    age:    [22, 28, 35, 50],
+    debt:   [10, 30, 50, 70]
+  };
+  let optIdx = { credit:2, income:3, age:2, debt:1 };
+
+  function renderInputs(){
+    let html = '';
+    FEATURES.forEach(f=>{
+      const v = OPTIONS[f.id][optIdx[f.id]];
+      userX[f.id] = v;
+      const used = f.id !== 'debt';
+      let cls = 'ig-cell ' + (used ? 'used' : 'unused');
+      const meta = used ? `閾值 ${f.threshold}${f.unit} · 點擊切換` : '此樹未使用 · 點擊切換';
+      html += `<div class="${cls}" data-id="${f.id}">
+        <div class="ig-name">${f.label}</div>
+        <div class="ig-val">${v}${f.unit}</div>
+        <div class="ig-meta">${meta}</div>
+      </div>`;
+    });
+    igEl.innerHTML = html;
+    igEl.querySelectorAll('.ig-cell').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const id = el.dataset.id;
+        optIdx[id] = (optIdx[id] + 1) % OPTIONS[id].length;
+        renderInputs();
+        predResult.classList.remove('show');
+        renderTree('treeSvg');  // reset highlight
+      });
+    });
+  }
+  renderInputs();
+  renderTree('treeSvg');
+
+  btnPredict.addEventListener('click',()=>{
+    const result = predictTree(userX, TREE.root);
+    const pathIds = result.path.map(p => p.id);
+    const edgePath = [];
+    for(let i=0;i<result.path.length-1;i++){
+      edgePath.push(result.path[i].id + '->' + result.path[i+1].id);
+    }
+    renderTree('treeSvg', { pathIds, edgePath });
+    predVal.textContent = result.value.toFixed(2);
+    predMeta.textContent = '→ ' + result.path[result.path.length-1].id;
+    predResult.classList.add('show');
+  });
+
+  btnReset.addEventListener('click',()=>{
+    renderTree('treeSvg');
+    predResult.classList.remove('show');
+  });
+})();
+
+/* ============================================================
+   §03 — Cover SVG: two side-by-side mini trees
+   ============================================================ */
+(function(){
+  // small mini-tree, viewBox 400 x 220
+  // We'll draw nodes manually since this is a small illustrative version
+  function paint(svgId, mode){
+    // mode: 'real' or 'hidden'
+    const svg = document.getElementById(svgId);
+    if(!svg) return;
+    // positions for 3-node mini tree (root + two children)
+    const nodes = [
+      { x:200, y:40, label:'信用 ≥ 700?', type:'split' },
+      { x:90,  y:140, label:'E=0.32', type:'leaf', sub:'左子樹平均' },
+      { x:310, y:140, label:'E=0.84', type:'leaf', sub:'右子樹平均' }
+    ];
+    let str = '';
+    // edges
+    if(mode === 'real'){
+      // only right edge bold (going right because credit=750)
+      str += `<path d="M200,58 C200,90 90,100 90,122" stroke="#D9D0BC" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity=".5"/>`;
+      str += `<path d="M200,58 C200,90 310,100 310,122" stroke="#4C7A00" stroke-width="3.5" fill="none"/>`;
+      str += `<text x="135" y="100" font-family="JetBrains Mono" font-size="10" fill="#7C786F" opacity=".5">No · ignored</text>`;
+      str += `<text x="245" y="100" font-family="JetBrains Mono" font-size="10" fill="#4C7A00" font-weight="700">x=750 → Yes</text>`;
+    } else {
+      // both edges shown with weights
+      str += `<path d="M200,58 C200,90 90,100 90,122" stroke="#C19A4B" stroke-width="3" fill="none" stroke-dasharray="6,3"/>`;
+      str += `<path d="M200,58 C200,90 310,100 310,122" stroke="#C19A4B" stroke-width="3" fill="none" stroke-dasharray="6,3"/>`;
+      str += `<text x="135" y="95" font-family="JetBrains Mono" font-size="10" fill="#C19A4B" font-weight="700">w = 0.30</text>`;
+      str += `<text x="244" y="95" font-family="JetBrains Mono" font-size="10" fill="#C19A4B" font-weight="700">w = 0.70</text>`;
+      str += `<text x="135" y="108" font-family="JetBrains Mono" font-size="9" fill="#7C786F">300/1000</text>`;
+      str += `<text x="244" y="108" font-family="JetBrains Mono" font-size="9" fill="#7C786F">700/1000</text>`;
+    }
+    // nodes
+    nodes.forEach((n,i)=>{
+      if(n.type === 'split'){
+        str += `<rect x="${n.x-65}" y="${n.y-16}" width="130" height="32" rx="4" fill="#FFFDF7" stroke="#1A1815" stroke-width="1.5"/>`;
+        str += `<text x="${n.x}" y="${n.y+4}" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#1A1815" font-weight="700">${n.label}</text>`;
+      } else {
+        const fill = mode === 'real' && i === 2 ? '#E8F3C7' : '#FFFDF7';
+        const stroke = mode === 'real' && i === 2 ? '#4C7A00' : '#1A1815';
+        str += `<rect x="${n.x-50}" y="${n.y-18}" width="100" height="42" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+        str += `<text x="${n.x}" y="${n.y-3}" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="700" fill="#1A1815">${n.label}</text>`;
+        str += `<text x="${n.x}" y="${n.y+15}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7C786F">${n.sub}</text>`;
+      }
+    });
+    svg.innerHTML = str;
+  }
+  paint('coverSvgReal', 'real');
+  paint('coverSvgHidden', 'hidden');
+})();
+
+/* ============================================================
+   §04 — Algorithm step-by-step walker
+   ============================================================ */
+(function(){
+  const stepLbl = document.getElementById('algoStepLbl');
+  const stepNumEl = document.getElementById('stepNum');
+  const narration = document.getElementById('algoNarration');
+  const shapBarsEl = document.getElementById('shapBars');
+  const checkBox = document.getElementById('checkBox');
+  const btnNext = document.getElementById('btnAlgoNext');
+  const btnPrev = document.getElementById('btnAlgoPrev');
+  const btnReset = document.getElementById('btnAlgoReset');
+
+  // Sample x = (credit 750, income 80, age 35, debt 30)
+  // Pre-computed teaching-friendly TreeSHAP values for this example.
+  //   Base value = 0.686 (cover-weighted leaf average)
+  //   At N1 (credit): E[right subtree] - E[hidden] = 0.843 - 0.686 = 0.157 → φ_credit
+  //   At N3 (age):    f(L4) - E[right subtree]   = 0.92  - 0.843 = 0.077 → φ_age
+  //   Income not on path; SHAP from this single tree = 0
+  //   Debt never used in tree; SHAP = 0
+  //   Verification: 0.686 + 0.157 + 0.077 + 0 + 0 = 0.920 ≈ f(x) ✓
+
+  // 7 steps (index 0..6)
+  const STEPS = [
+    {
+      num:0, lbl:'準備開始',
+      narrTitle:'Step 0 · 初始化',
+      narr:'樣本 x = (信用 750, 收入 80K, 年齡 35, 負債比 30%)。所有特徵的 φ 累加器初始為 0。base value = E[f] = 0.686（葉值按 cover 加權平均：0.20·0.18 + 0.50·0.12 + 0.65·0.20 + 0.92·0.50）。準備從根節點開始遞迴。',
+      activeNode:null, visited:[], shap:{credit:0, income:0, age:0, debt:0}, baseDisplayed:0.686, predDisplayed:0.686,
+    },
+    {
+      num:1, lbl:'抵達根節點 N1',
+      narrTitle:'Step 1 · 訪問 N1（信用 ≥ 700?）',
+      narr:'從根節點開始。N1 是「信用」的分裂點。樣本 x[信用]=750 ≥ 700 → 走右子樹。此時演算法準備計算「信用揭露 vs 隱藏」的貢獻：揭露 → 走右子樹 (E=0.843)；隱藏 → 加權平均兩邊 (0.30×0.32 + 0.70×0.84 = 0.686)。差額會記入 φ[信用]。',
+      activeNode:'N1', visited:['N1'], shap:{credit:0, income:0, age:0, debt:0}, baseDisplayed:0.686, predDisplayed:0.686,
+    },
+    {
+      num:2, lbl:'累積 φ[信用]',
+      narrTitle:'Step 2 · 更新 φ[信用]',
+      narr:'這個節點對 信用 的邊際貢獻為 +0.157 = 0.843 − 0.686。把它加到 φ[信用] 累加器，並把目前「已知預測」推進到 0.843（已知 x 在右子樹的期望值）。繼續沿著樣本指引的方向走 → 進入 N3。',
+      activeNode:'N1', visited:['N1'], shap:{credit:0.157, income:0, age:0, debt:0}, baseDisplayed:0.686, predDisplayed:0.843,
+    },
+    {
+      num:3, lbl:'抵達 N3',
+      narrTitle:'Step 3 · 訪問 N3（年齡 ≥ 30?）',
+      narr:'N3 是「年齡」的分裂點。樣本 x[年齡]=35 ≥ 30 → 走右葉 L4。同樣計算「年齡揭露 vs 隱藏」的差：揭露 → L4 = 0.92；隱藏 → 加權平均 (200/700)×0.65 + (500/700)×0.92 = 0.843。差額記入 φ[年齡]。',
+      activeNode:'N3', visited:['N1','N3'], shap:{credit:0.157, income:0, age:0, debt:0}, baseDisplayed:0.686, predDisplayed:0.843,
+    },
+    {
+      num:4, lbl:'累積 φ[年齡]',
+      narrTitle:'Step 4 · 更新 φ[年齡]',
+      narr:'年齡 的邊際貢獻為 +0.077 = 0.920 − 0.843。把它加到 φ[年齡]。注意「收入」和「負債比」這時都沒被任何路徑上的節點觸碰過 — 它們的 φ 還是 0。對單棵樹而言，這就是它們的 SHAP 值。',
+      activeNode:'N3', visited:['N1','N3'], shap:{credit:0.157, income:0, age:0.077, debt:0}, baseDisplayed:0.686, predDisplayed:0.920,
+    },
+    {
+      num:5, lbl:'抵達葉節點 L4',
+      narrTitle:'Step 5 · 抵達葉節點 L4 = 0.92',
+      narr:'路徑結束於 L4，預測值 0.92。對這條路徑而言，演算法完成 — TreeSHAP 還會掃描整棵樹處理「不在路徑上、但在樹其他地方使用」的特徵（這棵小樹剛好沒有這種情況，所以實際工作量非常小）。',
+      activeNode:'L4', visited:['N1','N3','L4'], shap:{credit:0.157, income:0, age:0.077, debt:0}, baseDisplayed:0.686, predDisplayed:0.920,
+    },
+    {
+      num:6, lbl:'驗證 local accuracy',
+      narrTitle:'Step 6 · 完成 · 驗證可加性',
+      narr:'最終 φ：信用=+0.157、年齡=+0.077、收入=0、負債比=0。加總 + base = 0.157 + 0.077 + 0 + 0 + 0.686 = 0.920 = f(x)。Local accuracy 自動成立 — 這是 SHAP 的核心數學保證。整棵樹只走了一次，O(LD²) 完成。',
+      activeNode:null, visited:['N1','N3','L4'], shap:{credit:0.157, income:0, age:0.077, debt:0}, baseDisplayed:0.686, predDisplayed:0.920,
+      done:true
+    }
+  ];
+
+  let currentStep = 0;
+
+  function renderShapBars(shap){
+    const featOrder = ['credit','income','age','debt'];
+    const labels = { credit:'信用分數', income:'收入', age:'年齡', debt:'負債比' };
+    const maxAbs = 0.20; // fixed scale for stability
+    let html = '';
+    featOrder.forEach(f=>{
+      const v = shap[f];
+      const pct = Math.min(Math.abs(v)/maxAbs * 48, 48);
+      const isZero = Math.abs(v) < 0.001;
+      html += `<div class="shap-bar ${isZero?'zero':''}">
+        <div class="row"><span class="name">${labels[f]}</span>
+        <span class="val">${v >= 0 ? '+' : ''}${v.toFixed(3)}</span></div>
+        <div class="track">
+          <div class="pos-side" style="width:${v>0?pct:0}%"></div>
+          <div class="neg-side" style="width:${v<0?pct:0}%"></div>
+        </div>
+      </div>`;
+    });
+    shapBarsEl.innerHTML = html;
+  }
+
+  function updateCheckBox(s){
+    const sumShap = s.shap.credit + s.shap.income + s.shap.age + s.shap.debt;
+    const finalSum = s.baseDisplayed + sumShap;
+    const matches = s.done ? '<span style="color:var(--pos);font-weight:700">  ✓ 一致</span>' : '';
+    checkBox.innerHTML = `
+      <div>base value:&nbsp;&nbsp;${s.baseDisplayed.toFixed(3)}</div>
+      <div>Σ SHAP:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${sumShap >= 0 ? '+' : ''}${sumShap.toFixed(3)}</div>
+      <div>總和:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${finalSum.toFixed(3)}</div>
+      <div>預測 f(x):&nbsp;&nbsp;${s.predDisplayed.toFixed(2)}${matches}</div>
+    `;
+  }
+
+  function renderStep(){
+    const s = STEPS[currentStep];
+    stepNumEl.textContent = s.num;
+    stepLbl.textContent = s.lbl;
+    narration.innerHTML = `<span class="step-num">${s.narrTitle}</span>${s.narr}`;
+
+    // tree with active node
+    const visitedNodes = s.visited.filter(v => !v.startsWith('L'));
+    const pathLeaves = s.visited.filter(v => v.startsWith('L'));
+    const edgePath = [];
+    if(s.visited.includes('N1') && s.visited.length > 1) edgePath.push('N1->N3');
+    if(s.visited.includes('L4')) edgePath.push('N3->L4');
+
+    renderTree('algoTreeSvg', {
+      pathIds: pathLeaves,
+      edgePath,
+      activeNode: s.activeNode,
+      visitedIds: s.visited
+    });
+
+    renderShapBars(s.shap);
+    updateCheckBox(s);
+
+    btnPrev.disabled = currentStep === 0;
+    btnNext.disabled = currentStep === STEPS.length - 1;
+  }
+
+  btnNext.addEventListener('click', ()=>{
+    if(currentStep < STEPS.length - 1){
+      currentStep++;
+      renderStep();
+    }
+  });
+  btnPrev.addEventListener('click', ()=>{
+    if(currentStep > 0){
+      currentStep--;
+      renderStep();
+    }
+  });
+  btnReset.addEventListener('click', ()=>{
+    currentStep = 0;
+    renderStep();
+  });
+
+  renderStep();
+})();
+
+/* ============================================================
+   §05 — Complexity chart
+   ============================================================ */
+(function(){
+  const svg = document.getElementById('complexChart');
+  if(!svg) return;
+
+  const W = 800, H = 320;
+  const padL = 60, padR = 30, padT = 30, padB = 50;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  // x: n from 2 to 30
+  // y: log10 of operation count
+  // KernelSHAP: ~2^n * M (assume M=700 ops per model eval ~ const)
+  // TreeSHAP: ~T*L*D^2 ~ const at ~50000
+  const nMin = 2, nMax = 30;
+  const yMin = 0, yMax = 12; // log10 scale (10^0 to 10^12)
+
+  function xFor(n){ return padL + ((n - nMin)/(nMax - nMin)) * plotW; }
+  function yFor(logV){ return padT + plotH - (logV/yMax) * plotH; }
+
+  let str = '';
+
+  // grid lines & y labels
+  for(let i=0;i<=12;i+=2){
+    const y = yFor(i);
+    str += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#EBE3D0" stroke-width="1"/>`;
+    str += `<text x="${padL-8}" y="${y+3}" font-family="JetBrains Mono" font-size="10" fill="#7C786F" text-anchor="end">10^${i}</text>`;
+  }
+  // x grid & labels
+  for(let n=5;n<=30;n+=5){
+    const x = xFor(n);
+    str += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H-padB}" stroke="#EBE3D0" stroke-width="1"/>`;
+    str += `<text x="${x}" y="${H-padB+18}" font-family="JetBrains Mono" font-size="10" fill="#7C786F" text-anchor="middle">n=${n}</text>`;
+  }
+  // axis lines
+  str += `<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#7C786F" stroke-width="1.5"/>`;
+  str += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#7C786F" stroke-width="1.5"/>`;
+  // axis labels
+  str += `<text x="${W-padR}" y="${H-padB+34}" font-family="JetBrains Mono" font-size="10" fill="#7C786F" text-anchor="end">特徵數 n →</text>`;
+  str += `<text x="${padL+4}" y="${padT-8}" font-family="JetBrains Mono" font-size="10" fill="#7C786F">↑ Operations (log scale)</text>`;
+
+  // KernelSHAP curve: 2^n * 1000 (1000 = approx tree-ensemble eval cost, matches §05 card)
+  let kernelPath = '';
+  for(let n=nMin;n<=nMax;n+=0.5){
+    const ops = Math.pow(2, n) * 1000;
+    const logV = Math.log10(ops);
+    if(logV > yMax + 0.5) continue;
+    const x = xFor(n);
+    const y = yFor(Math.min(logV, yMax));
+    kernelPath += (kernelPath ? ' L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
+  }
+  str += `<path d="${kernelPath}" fill="none" stroke="#C4452E" stroke-width="3"/>`;
+  // dashed continuation beyond chart
+  str += `<text x="${xFor(28)}" y="${yFor(11)}" font-family="JetBrains Mono" font-size="11" fill="#C4452E" font-weight="700">KernelSHAP O(2ⁿ)</text>`;
+  str += `<text x="${xFor(28)}" y="${yFor(11)+14}" font-family="JetBrains Mono" font-size="9" fill="#C4452E">→ 飛出圖外</text>`;
+
+  // TreeSHAP curve: 100 trees, depth grows then caps at 6 (matches §05 card at n=20)
+  let treePath = '';
+  for(let n=nMin;n<=nMax;n+=1){
+    const D = Math.min(6, 3 + n*0.15);
+    const L = Math.pow(2, D);
+    const ops = 100 * L * D*D;
+    const logV = Math.log10(ops);
+    const x = xFor(n);
+    const y = yFor(logV);
+    treePath += (treePath ? ' L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1);
+  }
+  str += `<path d="${treePath}" fill="none" stroke="#4A2FD9" stroke-width="3"/>`;
+  str += `<text x="${xFor(8)}" y="${yFor(6.2)}" font-family="JetBrains Mono" font-size="11" fill="#4A2FD9" font-weight="700">TreeSHAP O(TLD²)</text>`;
+  str += `<text x="${xFor(8)}" y="${yFor(6.2)+14}" font-family="JetBrains Mono" font-size="9" fill="#4A2FD9">→ 多項式平緩</text>`;
+
+  // highlight gap at n=20
+  const gapX = xFor(20);
+  const kernelY = yFor(Math.log10(Math.pow(2,20) * 1000));
+  const treeY   = yFor(Math.log10(100 * 64 * 36));  // D=6 capped, L=64
+  str += `<line x1="${gapX}" y1="${kernelY}" x2="${gapX}" y2="${treeY}" stroke="#C19A4B" stroke-width="2" stroke-dasharray="4,3"/>`;
+  str += `<circle cx="${gapX}" cy="${kernelY}" r="5" fill="#C4452E"/>`;
+  str += `<circle cx="${gapX}" cy="${treeY}" r="5" fill="#4A2FD9"/>`;
+  // gap label
+  const midY = (kernelY + treeY)/2;
+  str += `<rect x="${gapX+8}" y="${midY-14}" width="92" height="28" fill="#FEF6E8" stroke="#C19A4B" stroke-width="1" rx="2"/>`;
+  str += `<text x="${gapX+54}" y="${midY-2}" font-family="JetBrains Mono" font-size="10" fill="#C19A4B" text-anchor="middle" font-weight="700">@ n=20</text>`;
+  str += `<text x="${gapX+54}" y="${midY+10}" font-family="JetBrains Mono" font-size="9" fill="#C19A4B" text-anchor="middle">差距 ≈ 4,700×</text>`;
+
+  svg.innerHTML = str;
+})();
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>TreeSHAP 是針對樹模型的高效 SHAP 演算法,iPAS 可解釋 AI 進階考點(中級科目三)。重點:一般 SHAP 計算量隨特徵數指數成長,TreeSHAP 利用樹結構把複雜度降到多項式時間,讓隨機森林、XGBoost 也能快速算出特徵貢獻。易混點:它是加速的精確解、非近似;適用對象是樹模型,神經網路要用其他方法。情境:大型樹模型的快速可解釋分析。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>TreeSHAP 解決什麼問題？</summary><p>一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。</p></details><details><summary>為什麼能加速？</summary><p>樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。</p></details><details><summary>適用哪些模型？</summary><p>樹系模型：決策樹、隨機森林、GBDT、XGBoost、LightGBM 等；深度網路則用其他近似(如 DeepSHAP、KernelSHAP)。</p></details><details><summary>精確和近似 SHAP 差在哪？</summary><p>TreeSHAP 給精確 Shapley 值；KernelSHAP 等對任意模型用取樣近似(較慢、有誤差)。能用 TreeSHAP 就用，又快又準。</p></details><details><summary>實務上用 SHAP 注意什麼？</summary><p>高相關特徵的歸因要小心解讀；大資料時仍可能慢、可抽樣；解釋是相關非因果，需結合領域知識。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "TreeSHAP 解決什麼問題？", "acceptedAnswer": {"@type": "Answer", "text": "一般 SHAP 要對特徵子集做大量組合運算、成本指數級；TreeSHAP 利用樹結構把樹模型的精確 Shapley 值計算降到多項式時間，實用得多。"}}, {"@type": "Question", "name": "為什麼能加速？", "acceptedAnswer": {"@type": "Answer", "text": "樹的路徑與分裂結構讓貢獻可沿樹有效率地累加，不必窮舉所有特徵組合，就能直接算出精確值。"}}, {"@type": "Question", "name": "適用哪些模型？", "acceptedAnswer": {"@type": "Answer", "text": "樹系模型：決策樹、隨機森林、GBDT、XGBoost、LightGBM 等；深度網路則用其他近似(如 DeepSHAP、KernelSHAP)。"}}, {"@type": "Question", "name": "精確和近似 SHAP 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "TreeSHAP 給精確 Shapley 值；KernelSHAP 等對任意模型用取樣近似(較慢、有誤差)。能用 TreeSHAP 就用，又快又準。"}}, {"@type": "Question", "name": "實務上用 SHAP 注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "高相關特徵的歸因要小心解讀；大資料時仍可能慢、可抽樣；解釋是相關非因果，需結合領域知識。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">分類問題</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer>
+  <div class="container">
+    <div class="mark">— 一個演算法的價值，往往不在它能做什麼，而在它能<strong>多快</strong>做完。 —</div>
+    <div class="credit">akira.ipas-ai.com · XAI 系列 03 · TreeSHAP × Polynomial-time Shapley</div>
+  </div>
+</footer>
+</body>
+</html>

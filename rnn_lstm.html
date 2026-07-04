@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNN / LSTM 序列模型｜白話＋互動：記憶、梯度消失與閘門</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。 反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/rnn_lstm.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="RNN / LSTM 序列模型互動演示">
+    <meta property="og:description" content="它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。 反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/rnn_lstm.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="RNN / LSTM 序列模型互動演示">
+    <meta name="twitter:description" content="它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。 反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "RNN / LSTM 序列模型互動演示",
+  "url": "https://akira.ipas-ai.com/rnn_lstm.html",
+  "description": "它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。 反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#eef6fb; --ink:#0a2a3a; --sub:#476b7e;
+      --brand:#0284c7; --brand2:#0369a1; --brand-soft:#cde9f7;
+      --card:#ffffff; --line:#d6e8f2;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#0ea5e9,#0284c7 55%,#0369a1);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#e2f4fd;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(2,132,199,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#a6dcf3 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#f2f9fd}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .lesson .formula{background:#0a2a3a;color:#e2f4fd;border-radius:12px;padding:16px 18px;margin:14px 0;font-family:'Consolas','SFMono-Regular',monospace;font-size:.98rem;line-height:1.9;overflow-x:auto;text-align:center}
+    .lesson .formula .c{color:#7dd3fc}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f2f9fd;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f2f9fd}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#385b6b;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .rl-demo） ===== */
+    .rl-demo{margin:14px 0}
+    .rl-demo .demo-title{font-size:1.12rem;font-weight:800;color:#0369a1;margin:0 0 14px;text-align:center}
+    .rl-demo .viz-wrapper{display:flex;flex-direction:column;align-items:center;gap:18px}
+    .rl-demo .controls{display:flex;gap:15px;background:#f1f5f9;padding:15px;border-radius:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+    .rl-demo button{padding:10px 18px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.95rem;transition:all .2s;background:#e2e8f0;color:#64748b}
+    .rl-demo button.active-rnn{background:#f59e0b;color:#fff}
+    .rl-demo button.active-lstm{background:#10b981;color:#fff}
+    .rl-demo input[type=range]{width:180px;cursor:pointer;accent-color:#0284c7}
+    .rl-demo .svg-container{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow-x:auto;box-shadow:inset 0 0 20px rgba(0,0,0,.02);width:100%;display:flex;justify-content:center}
+    .rl-demo .svg-container svg{max-width:800px;width:100%;height:auto}
+    .rl-demo .data-flow{stroke-dasharray:10;animation:rlFlow 1s linear infinite}
+    @keyframes rlFlow{to{stroke-dashoffset:-20}}
+    .rl-demo .memory-bar{transition:width .3s, fill .3s}
+    .rl-demo .node-rect{transition:fill .3s, stroke .3s}
+    .rl-demo .input-text{font-weight:bold;font-family:monospace;text-anchor:middle}
+    .rl-demo #info-panel{background:#f1f5f9;padding:15px;border-radius:8px;width:100%;text-align:center;font-size:.95rem}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 自然語言處理</span>
+  <h1>RNN / LSTM 序列模型</h1>
+  <p>第一批「有記憶」的網路：一個字接一個字讀、把前面的資訊往後傳。RNN 會健忘，LSTM 用閘門與一條記憶高速公路把長期記憶救回來。</p>
+  <div class="chips">
+    <span>記憶／隱藏狀態</span><span>梯度消失</span><span>三個閘門</span><span>細胞狀態</span><span>vs Transformer</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>RNN（循環神經網路）</b>＝ 有「記憶」的網路：每一步都把<span class="term">前面步驟的隱藏狀態</span>帶到下一步，適合處理有順序、時間相依的資料（文字、語音、時間序列）。<b>LSTM</b> 則用<span class="hl">閘門與細胞狀態</span>解決 RNN「健忘」的問題。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：RNN 健忘 vs LSTM 記得住</h2>
+    <p>句子是「I grew up in France …」。切換 RNN / LSTM，拉動時間步：看上方「來自開頭 I 的記憶保留強度」——RNN 快速衰退（橘），LSTM 靠藍色的細胞狀態高速公路維持高檔。</p>
+    <div class="rl-demo">
+      <div class="demo-title">RNN / LSTM 序列模型互動演示</div>
+      <div class="viz-wrapper">
+        <div class="controls">
+          <div style="display:flex; gap:10px;">
+            <button class="active-rnn" onclick="setMode('rnn')" id="btn-rnn">RNN (簡單循環)</button>
+            <button onclick="setMode('lstm')" id="btn-lstm">LSTM (長短期記憶)</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; border-left: 2px solid #cbd5e1; padding-left: 15px;">
+            <label style="font-weight:bold; color:#475569;">時間步 (Time Step): <span id="step-val">1</span></label>
+            <input type="range" min="1" max="6" value="1" id="time-slider" oninput="updateStep(this.value)">
+          </div>
+        </div>
+
+        <div class="svg-container">
+          <svg id="main-svg" width="800" height="400" viewBox="0 0 800 400">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+              </marker>
+            </defs>
+
+            <g transform="translate(50, 30)">
+              <text x="0" y="0" font-size="12" font-weight="bold" fill="#475569">來自開頭 ("I") 的記憶保留強度:</text>
+              <rect x="0" y="10" width="200" height="10" fill="#e2e8f0" rx="5" />
+              <rect id="mem-strength-bar" x="0" y="10" width="200" height="10" fill="#f59e0b" rx="5" class="memory-bar" />
+              <text id="mem-strength-text" x="210" y="20" font-size="12" fill="#475569">100%</text>
+            </g>
+
+            <g id="network-layer" transform="translate(50, 100)"></g>
+
+            <g id="cell-diagram" transform="translate(200, 250)"></g>
+          </svg>
+        </div>
+
+        <div id="info-panel"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📞</span>RNN 的致命傷：傳話遊戲</h2>
+    <div class="note meta">
+      RNN 靠隱藏狀態一步步往後傳，就像<b>傳話遊戲</b>：話傳到第 10 個人時，第 1 個人的訊息通常已經變質或消失。這使 RNN 很難學會<b>長距離依賴</b>（主詞在句首、動詞在句尾）。原因是反向傳播沿時間<b>連乘多步梯度</b>：連乘因子小於 1 會指數縮小（<b>梯度消失</b>）、大於 1 會指數放大（<b>梯度爆炸</b>）。
+    </div>
+    <div class="formula">
+h<sub>t</sub> = tanh( W·x<sub>t</sub> + U·h<sub>t−1</sub> + b )　<span class="c">← RNN 的一步</span>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🚗</span>LSTM 的解法：閘門 + 細胞狀態</h2>
+    <p>LSTM 加了一條「記憶高速公路」和三道閘門，資訊可以幾乎無阻礙地長距傳遞：</p>
+    <div class="keys">
+      <div class="keycard"><span>🛣️</span><b>細胞狀態 C_t</b><br>一條資訊高速公路，用加法式更新、梯度不易消失。</div>
+      <div class="keycard"><span>🗑️</span><b>遺忘閘</b><br>決定丟掉多少舊記憶。</div>
+      <div class="keycard"><span>✍️</span><b>輸入閘</b><br>決定寫入多少新資訊。</div>
+      <div class="keycard"><span>📤</span><b>輸出閘</b><br>決定當下要輸出什麼。</div>
+    </div>
+    <div class="formula">
+C<sub>t</sub> = <span class="c">f<sub>t</sub></span>·C<sub>t−1</sub> + <span class="c">i<sub>t</sub></span>·C̃<sub>t</sub>　<span class="c">← 舊記憶×遺忘 + 新資訊×輸入</span>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔀</span>RNN vs LSTM vs GRU</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>RNN</th><th>LSTM</th><th>GRU</th></tr></thead>
+      <tbody>
+        <tr><td>記憶</td><td>只有隱藏狀態</td><td>細胞狀態＋隱藏狀態</td><td>只有隱藏狀態</td></tr>
+        <tr><td>閘門</td><td>無</td><td>遺忘／輸入／輸出（3）</td><td>更新／重置（2）</td></tr>
+        <tr><td>長期依賴</td><td>差（梯度消失）</td><td>好</td><td>好</td></tr>
+        <tr><td>參數／速度</td><td>最少</td><td>多、較慢</td><td>較少、較快</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚠️</span>既然有 LSTM，為何還要 Transformer？</h2>
+    <div class="note warn">
+      RNN／LSTM 必須<b>按順序逐步計算</b>、無法平行化，長序列訓練仍吃力，超長依賴也有極限。<b>Transformer</b> 用注意力可<b>平行處理</b>整個序列、並<b>直接連結遠距位置</b>，因此在 NLP 大幅取代了 RNN／LSTM。不過 RNN／LSTM 仍是理解序列建模與時間序列任務的重要基礎。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. RNN 為什麼適合序列資料？</summary>
+        <div class="ans">它有「記憶」——每一步都帶著前面步驟的隱藏狀態，能處理有順序、時間相依的資料，如文字、語音、時間序列。</div></details>
+      <details><summary>Q2. 梯度消失／爆炸是怎麼發生的？</summary>
+        <div class="ans">反向傳播沿時間連乘多步梯度：連乘因子小於 1 會指數縮小（消失、學不到長期依賴）、大於 1 會指數放大（爆炸），使樸素 RNN 難學長序列。</div></details>
+      <details><summary>Q3. LSTM 如何解決長期記憶問題？</summary>
+        <div class="ans">引入細胞狀態與遺忘／輸入／輸出三個閘門，用加法式更新讓資訊長距傳遞、選擇性記住或遺忘，大幅緩解梯度消失。</div></details>
+      <details><summary>Q4. GRU 和 LSTM 差在哪？為何後來用 Transformer？</summary>
+        <div class="ans">GRU 是簡化版（更新／重置兩閘、無獨立 cell state，較快）。RNN/LSTM 都得循序計算、無法平行、長序列吃力；Transformer 可平行且直連遠距，成為 NLP 主流。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>RNN：</b>有記憶、循序傳隱藏狀態，適合序列。</li>
+      <li><b>問題：</b>傳話遊戲式健忘 → 梯度消失／爆炸。</li>
+      <li><b>LSTM：</b>細胞狀態＋三閘門，記得住長期。</li>
+      <li><b>GRU：</b>簡化版，兩閘、較快，效果相近。</li>
+      <li><b>之後：</b>Transformer 可平行、直連遠距，取代之。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const networkLayer = document.getElementById('network-layer');
+        const cellDiagram = document.getElementById('cell-diagram');
+        const infoPanel = document.getElementById('info-panel');
+        const memBar = document.getElementById('mem-strength-bar');
+        const memText = document.getElementById('mem-strength-text');
+
+        let mode = 'rnn';
+        let step = 1;
+        const sentence = ["I", "grew", "up", "in", "France", "..."];
+
+        window.onload = () => {
+            render();
+        };
+
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btn-rnn').className = mode === 'rnn' ? 'active-rnn' : '';
+            document.getElementById('btn-lstm').className = mode === 'lstm' ? 'active-lstm' : '';
+            render();
+        }
+
+        function updateStep(val) {
+            step = parseInt(val);
+            document.getElementById('step-val').innerText = step;
+            render();
+        }
+
+        function render() {
+            renderUnrolledView();
+            renderCellInternal();
+            updateMemoryStats();
+            updateInfo();
+        }
+
+        function updateMemoryStats() {
+            let retention = 1.0;
+            if (mode === 'rnn') {
+                retention = Math.pow(0.5, step - 1);
+                memBar.setAttribute("fill", "#f59e0b");
+            } else {
+                retention = Math.pow(0.98, step - 1); // LSTM holds well
+                memBar.setAttribute("fill", "#3b82f6");
+            }
+
+            const pct = Math.round(retention * 100);
+            memBar.setAttribute("width", retention * 200);
+            memText.textContent = pct + "%";
+        }
+
+        function renderUnrolledView() {
+            networkLayer.innerHTML = '';
+
+            const startX = 0;
+            const gap = 110;
+            const nodeW = 60;
+            const nodeH = 40;
+
+            for(let i=0; i<6; i++) {
+                const x = startX + i * gap;
+                const isActive = (i + 1) === step;
+                const isPast = (i + 1) < step;
+
+                const opacity = (i + 1) > step ? 0.3 : 1;
+                const color = mode === 'rnn' ? '#f59e0b' : '#10b981';
+                const strokeColor = isActive ? '#000' : (mode === 'rnn' ? '#b45309' : '#047857');
+                const strokeWidth = isActive ? 3 : 2;
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("opacity", opacity);
+                g.setAttribute("id", `node-${i}`);
+
+                const inputText = sentence[i] || "?";
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x + nodeW/2);
+                text.setAttribute("y", 100);
+                text.setAttribute("class", "input-text");
+                text.setAttribute("fill", "#475569");
+                text.textContent = `"${inputText}"`;
+                g.appendChild(text);
+
+                const arrowIn = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                arrowIn.setAttribute("x1", x + nodeW/2); arrowIn.setAttribute("y1", 90);
+                arrowIn.setAttribute("x2", x + nodeW/2); arrowIn.setAttribute("y2", 40);
+                arrowIn.setAttribute("stroke", "#cbd5e1");
+                arrowIn.setAttribute("stroke-width", 2);
+                arrowIn.setAttribute("marker-end", "url(#arrow)");
+                g.appendChild(arrowIn);
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", 0);
+                rect.setAttribute("width", nodeW);
+                rect.setAttribute("height", nodeH);
+                rect.setAttribute("rx", 6);
+                rect.setAttribute("fill", isActive ? color : "#fff");
+                rect.setAttribute("stroke", strokeColor);
+                rect.setAttribute("stroke-width", strokeWidth);
+                rect.setAttribute("class", "node-rect");
+                g.appendChild(rect);
+
+                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", x + nodeW/2);
+                label.setAttribute("y", 25);
+                label.setAttribute("text-anchor", "middle");
+                label.setAttribute("fill", isActive ? "#fff" : color);
+                label.setAttribute("font-weight", "bold");
+                label.textContent = mode === 'rnn' ? 'h' : 'LSTM';
+                g.appendChild(label);
+
+                if (i < 5) {
+                    const hLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    hLine.setAttribute("x1", x + nodeW); hLine.setAttribute("y1", 20);
+                    hLine.setAttribute("x2", x + gap); hLine.setAttribute("y2", 20);
+
+                    if (isPast) {
+                        hLine.setAttribute("stroke", color);
+                        hLine.setAttribute("stroke-width", 3);
+                        if (i + 1 === step - 1) hLine.classList.add('data-flow');
+                    } else {
+                        hLine.setAttribute("stroke", "#e2e8f0");
+                        hLine.setAttribute("stroke-width", 2);
+                    }
+                    hLine.setAttribute("marker-end", "url(#arrow)");
+                    g.appendChild(hLine);
+
+                    if (mode === 'lstm') {
+                        const cLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        const d = `M ${x+nodeW} 5 C ${x+nodeW+20} 5, ${x+gap-20} 5, ${x+gap} 5`;
+                        cLine.setAttribute("d", d);
+                        cLine.setAttribute("fill", "none");
+
+                        if (isPast) {
+                            cLine.setAttribute("stroke", "#3b82f6");
+                            cLine.setAttribute("stroke-width", 4);
+                        } else {
+                            cLine.setAttribute("stroke", "#e2e8f0");
+                            cLine.setAttribute("stroke-width", 2);
+                        }
+                        g.appendChild(cLine);
+                    }
+                }
+
+                const arrowOut = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                arrowOut.setAttribute("x1", x + nodeW/2); arrowOut.setAttribute("y1", 0);
+                arrowOut.setAttribute("x2", x + nodeW/2); arrowOut.setAttribute("y2", -30);
+                arrowOut.setAttribute("stroke", "#cbd5e1");
+                arrowOut.setAttribute("stroke-width", 2);
+                g.appendChild(arrowOut);
+
+                networkLayer.appendChild(g);
+            }
+        }
+
+        function renderCellInternal() {
+            cellDiagram.innerHTML = '';
+
+            const boxW = 400;
+            const boxH = 120;
+            const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bg.setAttribute("width", boxW);
+            bg.setAttribute("height", boxH);
+            bg.setAttribute("rx", 10);
+            bg.setAttribute("fill", "#fff");
+            bg.setAttribute("stroke", "#cbd5e1");
+            bg.setAttribute("stroke-width", 2);
+            cellDiagram.appendChild(bg);
+
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            title.setAttribute("x", 10); title.setAttribute("y", 20);
+            title.setAttribute("font-size", "12");
+            title.setAttribute("fill", "#94a3b8");
+            title.textContent = mode === 'rnn' ? "RNN Cell 內部結構" : "LSTM Cell 內部結構";
+            cellDiagram.appendChild(title);
+
+            if (mode === 'rnn') {
+                drawGate(150, 60, "tanh", "#f59e0b");
+                drawPath(`M 20 80 L 150 80`, "#94a3b8");
+                drawPath(`M 150 110 L 150 90`, "#94a3b8");
+                drawPath(`M 190 80 L 380 80`, "#f59e0b", 3);
+                drawPath(`M 250 80 L 250 20`, "#f59e0b", 3);
+            } else {
+                drawPath(`M 20 40 L 380 40`, "#3b82f6", 4);
+                drawGate(80, 80, "Forget", "#ef4444");
+                drawGate(160, 80, "Input", "#10b981");
+                drawGate(240, 80, "Cell", "#f59e0b");
+                drawGate(320, 80, "Output", "#8b5cf6");
+                drawPath(`M 40 100 L 360 100`, "#94a3b8", 1, "5,5");
+                drawLine(80, 100, 80, 95);
+                drawLine(160, 100, 160, 95);
+                drawLine(240, 100, 240, 95);
+                drawLine(320, 100, 320, 95);
+                drawCircle(80, 40, "X", "#ef4444");
+                drawCircle(200, 40, "+", "#10b981");
+                drawCircle(320, 60, "tanh", "#8b5cf6");
+            }
+        }
+
+        function drawGate(x, y, label, color) {
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", x); rect.setAttribute("y", y);
+            rect.setAttribute("width", 40); rect.setAttribute("height", 25);
+            rect.setAttribute("rx", 4);
+            rect.setAttribute("fill", color);
+            cellDiagram.appendChild(rect);
+
+            const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            t.setAttribute("x", x + 20); t.setAttribute("y", y + 17);
+            t.setAttribute("text-anchor", "middle");
+            t.setAttribute("fill", "white");
+            t.setAttribute("font-size", "10");
+            t.textContent = label;
+            cellDiagram.appendChild(t);
+        }
+
+        function drawPath(d, color, width=2, dash="") {
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("d", d);
+            p.setAttribute("stroke", color);
+            p.setAttribute("stroke-width", width);
+            p.setAttribute("fill", "none");
+            if(dash) p.setAttribute("stroke-dasharray", dash);
+            cellDiagram.appendChild(p);
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+             const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+             l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+             l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+             l.setAttribute("stroke", "#94a3b8");
+             l.setAttribute("stroke-width", 2);
+             cellDiagram.appendChild(l);
+        }
+
+        function drawCircle(cx, cy, label, color) {
+            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            c.setAttribute("cx", cx); c.setAttribute("cy", cy);
+            c.setAttribute("r", 8);
+            c.setAttribute("fill", "#fff");
+            c.setAttribute("stroke", color);
+            c.setAttribute("stroke-width", 2);
+            cellDiagram.appendChild(c);
+
+            if (label.length <= 1) {
+                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                t.setAttribute("x", cx); t.setAttribute("y", cy + 4);
+                t.setAttribute("text-anchor", "middle");
+                t.setAttribute("fill", color);
+                t.setAttribute("font-size", "12");
+                t.setAttribute("font-weight", "bold");
+                t.textContent = label;
+                cellDiagram.appendChild(t);
+            }
+        }
+
+        function updateInfo() {
+            let html = "";
+            if (mode === 'rnn') {
+                html = `<strong>RNN 模式：</strong><br>時間步 ${step}。請注意上方記憶條，隨著句子變長，最初的資訊 ("I") 正在快速流失。這就是為什麼 RNN 很難連接長距離的上下文。`;
+            } else {
+                html = `<strong>LSTM 模式：</strong><br>時間步 ${step}。藍色的「細胞狀態 (Highway)」保護了資訊。即使到了句尾，LSTM 依然記得句首是 "I" (我)，這對後續預測非常重要。`;
+            }
+            infoPanel.innerHTML = html;
+        }
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>RNN 與 LSTM 是處理序列的經典網路,iPAS 中級科目一考點。重點:RNN 有記憶把前一步狀態傳到下一步,適合文字、語音、時間序列;LSTM 用閘門記住長期資訊。易混點:RNN 有長期依賴與梯度消失問題,LSTM 與 GRU 改善之;但循序處理難平行,長序列現多被 Transformer 取代。情境:時間序列預測、序列建模的演進脈絡。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>RNN 為什麼適合序列資料？</summary><p>它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。</p></details><details><summary>什麼是梯度消失與爆炸？</summary><p>反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。</p></details><details><summary>LSTM 如何解決長期記憶問題？</summary><p>引入細胞狀態(cell state)與遺忘、輸入、輸出三個閘門，用加法式更新讓資訊長距傳遞、選擇性記住或遺忘，大幅緩解梯度消失。</p></details><details><summary>GRU 和 LSTM 差在哪？</summary><p>GRU 是簡化版，只有更新與重置兩個閘門、沒有獨立 cell state，參數較少、訓練較快，效果常與 LSTM 相近。</p></details><details><summary>既然有 LSTM，為何還要 Transformer？</summary><p>RNN/LSTM 必須按順序逐步計算、無法平行化、長序列仍吃力；Transformer 用注意力可平行處理並直接連結遠距位置，已成 NLP 主流。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "RNN 為什麼適合序列資料？", "acceptedAnswer": {"@type": "Answer", "text": "它具「記憶」：每一步輸出會帶著前面步驟的隱藏狀態，能處理順序與時間相依的資料，如文字、語音、時間序列。"}}, {"@type": "Question", "name": "什麼是梯度消失與爆炸？", "acceptedAnswer": {"@type": "Answer", "text": "反向傳播沿時間連乘多步梯度；連乘因子小於 1 會指數縮小(消失，學不到長期相依)、大於 1 會指數放大(爆炸)，使樸素 RNN 難學長序列。"}}, {"@type": "Question", "name": "LSTM 如何解決長期記憶問題？", "acceptedAnswer": {"@type": "Answer", "text": "引入細胞狀態(cell state)與遺忘、輸入、輸出三個閘門，用加法式更新讓資訊長距傳遞、選擇性記住或遺忘，大幅緩解梯度消失。"}}, {"@type": "Question", "name": "GRU 和 LSTM 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "GRU 是簡化版，只有更新與重置兩個閘門、沒有獨立 cell state，參數較少、訓練較快，效果常與 LSTM 相近。"}}, {"@type": "Question", "name": "既然有 LSTM，為何還要 Transformer？", "acceptedAnswer": {"@type": "Answer", "text": "RNN/LSTM 必須按順序逐步計算、無法平行化、長序列仍吃力；Transformer 用注意力可平行處理並直接連結遠距位置，已成 NLP 主流。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="attention.html">注意力機制</a><a href="transformer.html">Transformer</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="embedding.html">詞嵌入</a><a href="o-n-squared.html">O(n²) 複雜度</a><a href="gptbert.html">BERT vs GPT</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

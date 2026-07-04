@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDA 資料視覺化圖表解析｜可互動版</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。 比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/charts.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="EDA 資料視覺化圖表解析｜可互動版">
+    <meta property="og:description" content="圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。 比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/charts.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="EDA 資料視覺化圖表解析｜可互動版">
+    <meta name="twitter:description" content="圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。 比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "EDA 資料視覺化圖表解析｜可互動版",
+  "url": "https://akira.ipas-ai.com/charts.html",
+  "description": "圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。 比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111a2e;
+      --card: #17233a;
+      --card-2: #132038;
+      --border: #2b3b57;
+      --text: #eef4ff;
+      --muted: #9db0cf;
+      --blue: #60a5fa;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --purple: #a78bfa;
+      --cyan: #22d3ee;
+      --pink: #fb7185;
+      --shadow: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(96,165,250,0.12), transparent 32%),
+        linear-gradient(180deg, #08101d 0%, #0b1220 100%);
+      color: var(--text);
+      padding: 28px 20px 56px;
+    }
+
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08));
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 28px 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.9rem, 3vw, 2.9rem);
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 980px;
+    }
+
+    
+
+    .action-btn, .mini-btn {
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border-radius: 999px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: .2s ease;
+      font: inherit;
+    }
+
+    .action-btn:hover, .mini-btn:hover,
+    .action-btn:focus-visible, .mini-btn:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+    }
+
+    
+
+    .layout {
+      display: block;
+    }
+
+    .inspector {
+      display: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(23,35,58,0.96), rgba(16,25,43,0.98));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+      position: relative;
+    }
+
+    .card:hover, .card.active {
+      transform: translateY(-5px);
+      border-color: #5c7fae;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.42);
+    }
+
+    .card.hidden { display: none; }
+
+    .card-head {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 18px 18px 12px;
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 20px;
+      flex: 0 0 42px;
+    }
+
+    .title-block { min-width: 0; }
+
+    .title {
+      font-size: 1.18rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .badge {
+      margin-left: auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+    }
+
+    .core { color: #7cc4ff; background: rgba(59,130,246,.14); }
+    .ext { color: #5ee7b4; background: rgba(16,185,129,.14); }
+    .warn { color: #fdbb74; background: rgba(251,191,36,.14); }
+
+    .viz-wrap {
+      position: relative;
+      margin: 0 18px 14px;
+    }
+
+    .viz {
+      height: 210px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(7,12,24,0.96), rgba(11,17,32,0.98)),
+        repeating-linear-gradient(to right, transparent 0, transparent 49px, rgba(255,255,255,0.025) 50px);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .viz::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, transparent calc(100% - 1px), rgba(255,255,255,0.03) 100%),
+        linear-gradient(to bottom, transparent calc(100% - 1px), rgba(255,255,255,0.03) 100%);
+      background-size: 64px 100%, 100% 52px;
+      pointer-events: none;
+    }
+
+    .overlay-tip {
+      position: static;
+      margin-top: 10px;
+      background: rgba(7,12,24,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: #dce9ff;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      transition: .2s ease;
+    }
+
+    .card:hover .overlay-tip,
+    .card:focus-within .overlay-tip,
+    .card.active .overlay-tip {
+      opacity: 1;
+      transform: none;
+    }
+
+    svg { width: 100%; height: 100%; display: block; }
+
+    .hint {
+      margin: 0 18px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      color: #d6e3ff;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .analysis {
+      margin: 0 18px 12px;
+      padding: 14px 14px 14px 16px;
+      background: rgba(8, 14, 28, 0.72);
+      border-left: 4px solid var(--yellow);
+      border-radius: 12px;
+      color: #dbe7fb;
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    .analysis strong { color: #fff; }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      padding: 0 18px 18px;
+      flex-wrap: wrap;
+    }
+
+    .details {
+      margin: 0 18px 18px;
+      display: none;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .details.open { display: block; }
+
+    .details b {
+      display: block;
+      margin: 0 0 8px;
+      color: #fff;
+    }
+
+    .details p, .details li {
+      color: #dce6fa;
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+
+    .details ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    .learn-panel {
+      margin: 0 18px 14px;
+      padding: 14px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+    }
+
+    .learn-panel.collapsed {
+      display: none;
+    }
+
+    .learn-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .learn-item {
+      background: rgba(7,12,24,0.58);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .learn-item b {
+      display: block;
+      color: #fff;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .learn-item p {
+      margin: 0;
+      color: #dbe7fb;
+      line-height: 1.7;
+      font-size: 0.9rem;
+    }
+
+    .axis { stroke: #7183a8; stroke-width: 2; }
+    .label { fill: #b8c8e6; font-size: 11px; }
+    .small { fill: #93a7ca; font-size: 10px; }
+    .anno { fill: #ffffff; font-size: 11px; font-weight: 700; }
+    .dashed { stroke-dasharray: 5 5; }
+
+    @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes drawLine { to { stroke-dashoffset: 0; } }
+    @keyframes pulseFill { 0%,100% { opacity: .75; } 50% { opacity: 1; } }
+    @keyframes radarGlow { 0%,100% { opacity: .6; } 50% { opacity: .95; } }
+
+    .bar-grow { transform-box: fill-box; transform-origin: bottom; animation: growUp 1s ease-out forwards; }
+    .line-draw { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.8s ease-out forwards; }
+    .heat { animation: pulseFill 2.6s ease-in-out infinite; }
+    .radar { animation: radarGlow 3s ease-in-out infinite; }
+
+    .footer-note {
+      margin-top: 20px;
+      background: rgba(17,26,46,0.8);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px 18px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+      .inspector { position: static; }
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 18px 12px 40px; }
+      .hero { padding: 22px 18px; }
+      .grid { grid-template-columns: 1fr; }
+      .viz { height: 198px; }
+      .toolbar { gap: 8px; }
+      .filter-btn, .action-btn, .mini-btn { padding: 9px 12px; }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>EDA 資料視覺化圖表解析｜可互動版</h1>
+      <p>
+        這版可以直接互動：<strong>點圖卡</strong>可切換右側解說面板、<strong>按分類</strong>可篩選核心或延伸圖表、
+        <strong>展開實戰例子</strong>可看更貼近資料分析情境的說明。
+      </p>
+    </section>
+
+    
+
+    <section class="layout">
+      <aside class="inspector" aria-live="polite">
+        <div class="inspector-head">
+          <div class="inspector-kicker">Chart Inspector</div>
+          <h2 class="inspector-title" id="panelTitle">請點一張圖卡</h2>
+          <p class="inspector-sub" id="panelSubtitle">這裡會顯示「這張圖在看什麼、適合何時用、常見陷阱、對模型有什麼幫助」。</p>
+        </div>
+        <div class="inspector-body">
+          <div class="info-box">
+            <b>這張圖主要在看什麼？</b>
+            <p id="panelLook">先選一張圖卡。</p>
+          </div>
+          <div class="info-box">
+            <b>最常用在什麼情境？</b>
+            <p id="panelUse">先選一張圖卡。</p>
+          </div>
+          <div class="info-box">
+            <b>常見誤解 / 陷阱</b>
+            <p id="panelTrap">先選一張圖卡。</p>
+          </div>
+          <div class="info-box">
+            <b>對建模有什麼幫助？</b>
+            <p id="panelModel">先選一張圖卡。</p>
+          </div>
+          <div class="inspector-tip" id="panelTip">
+            小提示：滑鼠移到圖卡上會顯示快速提示，點「展開例子」可看更完整的實戰情境。
+          </div>
+        </div>
+      </aside>
+
+      <div>
+        <section class="grid" id="cardGrid">
+          <article class="card" tabindex="0" data-group="core" data-title="直方圖 Histogram" data-subtitle="看單一數值特徵的分佈形狀：常態、偏態、長尾、多峰。" data-look="看資料分佈長什麼樣：是不是偏左偏右、是不是有長尾、是不是出現兩個山峰。" data-use="收入、消費額、停留時間、年齡、成交金額等數值欄位的初步探索。" data-trap="不要把直方圖和長條圖混為一談。直方圖看的是連續數值區間，不是類別。" data-model="幫你決定是否要做 Log 轉換、標準化、Robust Scaling，或懷疑資料是否不是單一族群。">
+            <div class="card-head">
+              <div class="icon">📊</div>
+              <div class="title-block">
+                <div class="title">直方圖 Histogram</div>
+                <div class="desc">看單一數值特徵的分佈形狀：常態、偏態、長尾、多峰。</div>
+              </div>
+              <div class="badge core">核心探勘</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <text x="24" y="32" class="small">頻數</text>
+                  <text x="300" y="193" class="small">數值大小 →</text>
+                  <rect x="56" y="132" width="26" height="40" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.05s"/>
+                  <rect x="86" y="95" width="26" height="77" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.12s"/>
+                  <rect x="116" y="58" width="26" height="114" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.2s"/>
+                  <rect x="146" y="34" width="26" height="138" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.28s"/>
+                  <rect x="176" y="51" width="26" height="121" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.36s"/>
+                  <rect x="206" y="88" width="26" height="84" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.44s"/>
+                  <rect x="236" y="120" width="26" height="52" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.52s"/>
+                  <rect x="266" y="145" width="26" height="27" rx="3" fill="var(--blue)" class="bar-grow" style="animation-delay:.60s"/>
+                  <path d="M 44 171 C 94 161, 130 57, 166 35 C 205 11, 245 104, 330 160" fill="none" stroke="var(--yellow)" stroke-width="3" class="line-draw"/>
+                  <line x1="262" y1="84" x2="290" y2="52" stroke="var(--red)" class="dashed" />
+                  <text x="292" y="48" class="anno">右偏長尾</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：先看資料是不是歪的。右偏很嚴重時，常要做 Log 轉換。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">看偏態</span>
+              <span class="chip">看長尾</span>
+              <span class="chip">決定是否 Log 轉換</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 如果資料嚴重右偏，像收入、消費額、停留時間，直接餵模型很容易讓少數超大值主導結果。這時常做 <strong>Log 轉換</strong> 或 Robust Scaling，讓分佈更穩。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>假設你在做電商會員分群，看到「消費金額」直方圖右邊拖很長，代表少數大戶把數值拉很高。這時直接做 KMeans 或線性模型，常會被大戶支配。</p>
+              <ul>
+                <li>先畫直方圖看偏態。</li>
+                <li>若極度右偏，可試 Log1p。</li>
+                <li>轉換前後都再畫一次，確認是否更平衡。</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="core" data-title="散佈圖 Scatter Plot" data-subtitle="看兩個變數之間的關係、群聚、離群點與非線性型態。" data-look="看 X 與 Y 有沒有關係，是直線、彎曲、分群，還是出現明顯離群點。" data-use="房價 vs 坪數、廣告費 vs 訂單量、學習時數 vs 成績、年齡 vs 消費額。" data-trap="不要只看線性斜率。很多資料是 U 型或彎曲型，線性回歸會看不出來。" data-model="可以幫你決定要不要做多項式特徵、分群、移除異常點，或直接換樹模型。">
+            <div class="card-head">
+              <div class="icon">🫧</div>
+              <div class="title-block">
+                <div class="title">散佈圖 Scatter Plot</div>
+                <div class="desc">看兩個變數之間的關係、群聚、離群點與非線性型態。</div>
+              </div>
+              <div class="badge core">核心探勘</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <line x1="36" y1="26" x2="36" y2="172" class="axis"/>
+                  <text x="12" y="28" class="small">Y</text>
+                  <text x="324" y="194" class="small">X</text>
+                  <path d="M 52 150 Q 100 90 152 118 Q 210 154 300 40" fill="none" stroke="var(--yellow)" stroke-width="2.5" class="line-draw"/>
+                  <text x="222" y="150" class="anno">非線性</text>
+                  <circle cx="60" cy="146" r="5" fill="var(--blue)"/>
+                  <circle cx="86" cy="128" r="5" fill="var(--blue)"/>
+                  <circle cx="110" cy="108" r="5" fill="var(--blue)"/>
+                  <circle cx="136" cy="112" r="5" fill="var(--blue)"/>
+                  <circle cx="160" cy="127" r="5" fill="var(--blue)"/>
+                  <circle cx="188" cy="143" r="5" fill="var(--blue)"/>
+                  <circle cx="215" cy="134" r="5" fill="var(--blue)"/>
+                  <circle cx="242" cy="96" r="5" fill="var(--blue)"/>
+                  <circle cx="270" cy="74" r="5" fill="var(--blue)"/>
+                  <circle cx="296" cy="45" r="5" fill="var(--blue)"/>
+                  <circle cx="300" cy="160" r="6.5" fill="var(--red)"/>
+                  <line x1="288" y1="156" x2="250" y2="166" stroke="var(--red)" class="dashed"/>
+                  <text x="186" y="171" class="anno">離群點</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：除了正相關、負相關，更要找非線性和離群點。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">看相關性</span>
+              <span class="chip">找離群點</span>
+              <span class="chip">注意 U 型/曲線關係</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 很多人只看正相關或負相關，但真正容易害模型失準的是 <strong>非線性關係</strong>。若資料呈 U 型、拋物線型，線性模型會失真，常要加入 <strong>多項式特徵</strong> 或直接改用樹模型。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>如果你在分析「折扣幅度 vs 毛利率」，可能不是折扣越多毛利越低這麼簡單，而是某一段最有效，過頭反而更差。</p>
+              <ul>
+                <li>先畫散佈圖，確認關係是否像曲線。</li>
+                <li>若非線性明顯，可考慮 polynomial features。</li>
+                <li>若看到幾個超怪點，也要懷疑資料品質或特殊事件。</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="core" data-title="箱型圖 Box Plot" data-subtitle="看中位數、四分位距、鬚鬚範圍與離群值。" data-look="看資料核心區集中在哪裡，中位數在哪，有沒有飛出去的異常點。" data-use="比較不同群組的數值分佈，例如不同門市、不同班級、不同客群。" data-trap="離群值不一定是錯誤資料，有時是很重要的異常事件。不要一看到就刪。" data-model="幫你決定是否截斷極端值、做 robust preprocessing，或針對異常值建立額外特徵。">
+            <div class="card-head">
+              <div class="icon">📦</div>
+              <div class="title-block">
+                <div class="title">箱型圖 Box Plot</div>
+                <div class="desc">看中位數、四分位距、鬚鬚範圍與離群值。</div>
+              </div>
+              <div class="badge core">核心探勘</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <line x1="180" y1="44" x2="180" y2="136" stroke="#b6c5e0" stroke-width="2"/>
+                  <line x1="155" y1="44" x2="205" y2="44" stroke="#eef4ff" stroke-width="2"/>
+                  <line x1="155" y1="136" x2="205" y2="136" stroke="#eef4ff" stroke-width="2"/>
+                  <rect x="135" y="74" width="90" height="46" rx="8" fill="rgba(96,165,250,0.7)" stroke="#eef4ff" stroke-width="2">
+                    <animate attributeName="height" values="0;46" dur="1s" fill="freeze" />
+                    <animate attributeName="y" values="120;74" dur="1s" fill="freeze" />
+                  </rect>
+                  <line x1="135" y1="98" x2="225" y2="98" stroke="#ffffff" stroke-width="4"/>
+                  <text x="233" y="102" class="anno">中位數</text>
+                  <circle cx="180" cy="26" r="6" fill="var(--red)"/>
+                  <line x1="188" y1="32" x2="225" y2="52" stroke="var(--red)" class="dashed"/>
+                  <text x="228" y="56" class="anno">離群值</text>
+                  <text x="60" y="66" class="label">上鬚</text>
+                  <text x="62" y="116" class="label">IQR 核心區</text>
+                  <text x="66" y="146" class="label">下鬚</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：快速看中位數、核心 50% 區間，以及離群值。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">看中位數</span>
+              <span class="chip">看 IQR</span>
+              <span class="chip">抓 Outlier</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 箱型圖很適合資料清整。極端離群值可能來自輸入錯誤，也可能是真實但稀有事件。不要一律刪掉，先判斷業務意義，再決定要 <strong>剔除、截斷、保留</strong> 或改用 robust 方法。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>你在比較不同門市的客單價時，平均數可能被少數超大單扭曲，但箱型圖可以直接看到每家店的中位數與離群值數量。</p>
+              <ul>
+                <li>門市 A 中位數高，代表平常表現就穩定。</li>
+                <li>門市 B 離群值多，可能常出現大單或資料異常。</li>
+                <li>比起只看平均數，箱型圖更能看出結構。</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="core" data-title="熱力圖 Heatmap" data-subtitle="最常用來看相關係數矩陣，也能看缺失值分佈。" data-look="看欄位和欄位之間的相似度或相關程度，橫軸縱軸通常都是同一組特徵名稱。" data-use="挑特徵、檢查共線性、看缺失值模式、快速總覽欄位之間關係。" data-trap="對角線一定最深，因為那是自己和自己比。真正要看的是不同特徵之間是否也很深。" data-model="幫你避免共線性、減少重複資訊，讓特徵挑選更穩定。">
+            <div class="card-head">
+              <div class="icon">🔥</div>
+              <div class="title-block">
+                <div class="title">熱力圖 Heatmap</div>
+                <div class="desc">最常用來看相關係數矩陣，也能看缺失值分佈。</div>
+              </div>
+              <div class="badge core">核心探勘</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <g transform="translate(86 25)">
+                    <rect x="0" y="0" width="58" height="46" rx="6" fill="#183b8b" class="heat"/>
+                    <rect x="63" y="0" width="58" height="46" rx="6" fill="#3b82f6" class="heat" style="animation-delay:.2s"/>
+                    <rect x="126" y="0" width="58" height="46" rx="6" fill="#b7d6ff" class="heat" style="animation-delay:.4s"/>
+                    <rect x="0" y="51" width="58" height="46" rx="6" fill="#3b82f6" class="heat" style="animation-delay:.12s"/>
+                    <rect x="63" y="51" width="58" height="46" rx="6" fill="#183b8b" class="heat" style="animation-delay:.32s"/>
+                    <rect x="126" y="51" width="58" height="46" rx="6" fill="#d7e7ff" class="heat" style="animation-delay:.52s"/>
+                    <rect x="0" y="102" width="58" height="46" rx="6" fill="#b7d6ff" class="heat" style="animation-delay:.22s"/>
+                    <rect x="63" y="102" width="58" height="46" rx="6" fill="#d7e7ff" class="heat" style="animation-delay:.42s"/>
+                    <rect x="126" y="102" width="58" height="46" rx="6" fill="#183b8b" class="heat" style="animation-delay:.62s"/>
+                    <rect x="0" y="0" width="184" height="148" fill="none" stroke="rgba(255,255,255,0.16)" rx="8"/>
+                    <rect x="63" y="0" width="58" height="97" fill="none" stroke="var(--red)" stroke-width="2.5" rx="6"/>
+                  </g>
+                  <text x="20" y="18" class="small">縱軸：特徵名稱</text>
+                  <text x="228" y="196" class="small">橫軸：特徵名稱</text>
+                  <text x="32" y="57" class="label">年齡</text>
+                  <text x="32" y="106" class="label">收入</text>
+                  <text x="20" y="157" class="label">消費額</text>
+                  <text x="100" y="190" class="small">年齡</text>
+                  <text x="162" y="190" class="small">收入</text>
+                  <text x="214" y="190" class="small">消費額</text>
+                  <text x="254" y="57" class="anno">高度相關</text>
+                  <text x="252" y="76" class="anno">→ 共線性風險</text>
+                  <text x="222" y="130" class="label">對角線 = 自己和自己比</text>
+                  <text x="222" y="148" class="label">所以通常最深</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：橫軸縱軸都是欄位名稱，不是在畫地圖座標。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">看相關係數</span>
+              <span class="chip">找共線性</span>
+              <span class="chip">橫軸縱軸都是特徵</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 熱力圖的橫軸和縱軸通常都放<strong>同一組特徵名稱</strong>，每一格代表「某特徵和另一特徵的相關程度」。所以像「年齡 vs 年齡」這種對角線位置，一定是自己和自己比，相關性最高，顏色通常最深。真正要注意的是<strong>不同特徵之間</strong>如果也很深，代表可能有 <strong>共線性</strong> 問題。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>你做房價模型時，若「室內坪數」和「房間數」高度相關，兩者一起放進線性模型，係數可能會亂跳。</p>
+              <ul>
+                <li>先用熱力圖找出高度相關欄位。</li>
+                <li>若兩欄位資訊太重複，可考慮保留其中一個。</li>
+                <li>也可搭配 VIF 或特徵重要度再判斷。</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="ext" data-title="長條圖 Bar Chart" data-subtitle="專門比較類別資料的高低差異，簡單但實用。" data-look="看不同類別誰高誰低，差多少。" data-use="比較產品類型、客群類別、地區、月份分類後的表現。" data-trap="長條圖適合類別，不適合連續數值分箱之後又忘記那其實在看分佈。" data-model="幫助你理解類別型特徵是否需要編碼、合併稀有類別、或觀察哪類別和目標值有關。">
+            <div class="card-head">
+              <div class="icon">📚</div>
+              <div class="title-block">
+                <div class="title">長條圖 Bar Chart</div>
+                <div class="desc">專門比較類別資料的高低差異，簡單但實用。</div>
+              </div>
+              <div class="badge ext">延伸圖表</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <rect x="72" y="95" width="40" height="77" rx="6" fill="var(--blue)" class="bar-grow"/>
+                  <rect x="158" y="42" width="40" height="130" rx="6" fill="var(--green)" class="bar-grow" style="animation-delay:.18s"/>
+                  <rect x="244" y="118" width="40" height="54" rx="6" fill="var(--purple)" class="bar-grow" style="animation-delay:.34s"/>
+                  <text x="92" y="192" class="label" text-anchor="middle">A 類</text>
+                  <text x="178" y="192" class="label" text-anchor="middle">B 類</text>
+                  <text x="264" y="192" class="label" text-anchor="middle">C 類</text>
+                  <line x1="198" y1="42" x2="238" y2="26" stroke="var(--yellow)" class="dashed"/>
+                  <text x="242" y="27" class="anno">最高類別</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：類別比較幾乎都該先畫長條圖。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">比較類別高低</span>
+              <span class="chip">適合看轉換率</span>
+              <span class="chip">比圓餅圖更好比較</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 類別資料幾乎都該先畫長條圖。它比圓餅圖更容易比較細小差異。若想看每類別對目標值的影響，可以進一步畫 <strong>grouped bar</strong> 或 <strong>stacked bar</strong>。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>你在比較不同廣告渠道的轉單數時，長條圖會比圓餅圖更快看出誰最高、誰第二、差距多少。</p>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="ext" data-title="折線圖 Line Chart" data-subtitle="時間序列分析基本功：看趨勢、波動、季節性。" data-look="看數值隨時間怎麼變，是持續上升、周期震盪，還是突然爆衝。" data-use="營收、流量、設備溫度、缺陷率、股價、每日訂單數。" data-trap="時間資料不能亂切訓練集和測試集，否則會看到未來。" data-model="幫你辨識 trend、seasonality、異常波峰，決定時間特徵工程與切分方式。">
+            <div class="card-head">
+              <div class="icon">📈</div>
+              <div class="title-block">
+                <div class="title">折線圖 Line Chart</div>
+                <div class="desc">時間序列分析基本功：看趨勢、波動、季節性。</div>
+              </div>
+              <div class="badge ext">延伸圖表</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <line x1="36" y1="26" x2="36" y2="172" class="axis"/>
+                  <path d="M 42 148 L 84 126 L 126 136 L 168 78 L 210 90 L 252 58 L 294 74 L 324 36" fill="none" stroke="var(--red)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="line-draw"/>
+                  <circle cx="84" cy="126" r="5" fill="var(--red)"/>
+                  <circle cx="168" cy="78" r="5" fill="var(--red)"/>
+                  <circle cx="252" cy="58" r="5" fill="var(--red)"/>
+                  <rect x="148" y="42" width="118" height="62" fill="rgba(34,211,238,0.10)" stroke="rgba(34,211,238,0.5)" stroke-dasharray="5 5" rx="10"/>
+                  <text x="160" y="61" class="anno">上升趨勢</text>
+                  <text x="160" y="81" class="anno">+ 明顯波動</text>
+                  <text x="44" y="195" class="small">過去</text>
+                  <text x="300" y="195" class="small">現在</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：時間順序不能亂，否則會資料洩漏。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">時間順序很重要</span>
+              <span class="chip">找季節性</span>
+              <span class="chip">避免資料洩漏</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 時間序列資料不能亂切 train/test。必須依照時間先後切分，否則會看到未來資料，造成 <strong>data leakage</strong>。另外也要注意滾動平均、趨勢線與異常波峰。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>你在預測每日訂單量時，如果隨機切 train/test，模型可能偷看到未來的節慶波峰，測試分數會虛高。</p>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="warn" data-title="圓餅圖 Pie Chart" data-subtitle="適合展示少量類別的結構佔比，但不利精準比較。" data-look="看整體結構比例，誰大誰小。" data-use="類別很少、只是做簡單佔比展示時。" data-trap="人眼不擅長比較扇形角度。類別一多，就會很難讀。" data-model="對真正建模幫助有限，通常只是報表視覺化。分析時常可換成長條圖。">
+            <div class="card-head">
+              <div class="icon">🥧</div>
+              <div class="title-block">
+                <div class="title">圓餅圖 Pie Chart</div>
+                <div class="desc">適合展示少量類別的結構佔比，但不利精準比較。</div>
+              </div>
+              <div class="badge warn">少用</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <g transform="translate(160 105)">
+                    <circle r="58" fill="none" stroke="#334155" stroke-width="46"/>
+                    <circle r="58" fill="none" stroke="var(--blue)" stroke-width="46" stroke-dasharray="365" stroke-dashoffset="0" transform="rotate(-90)"/>
+                    <circle r="58" fill="none" stroke="var(--green)" stroke-width="46" stroke-dasharray="365" stroke-dashoffset="198" transform="rotate(-90)"/>
+                    <circle r="58" fill="none" stroke="var(--yellow)" stroke-width="46" stroke-dasharray="365" stroke-dashoffset="288" transform="rotate(-90)"/>
+                  </g>
+                  <text x="257" y="70" class="anno">A 55%</text>
+                  <text x="256" y="102" class="anno">B 25%</text>
+                  <text x="256" y="134" class="anno">C 20%</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：能看比例，但不擅長比較細微差距。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">只適合少量類別</span>
+              <span class="chip">不易比較細差</span>
+              <span class="chip">通常可改長條圖</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 圓餅圖不是不能用，但當類別超過 3 個、差異又不大時，人眼很難比較角度大小。若目的是分析而不是簡報裝飾，通常 <strong>長條圖更好</strong>。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>如果只想表達「A 類佔一半以上」，圓餅圖還可以；但若要比較 18%、21%、24% 這種細差，直接改長條圖比較快。</p>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="ext" data-title="雷達圖 Radar Chart" data-subtitle="適合看多維指標輪廓，例如產品、模型、學生能力面向。" data-look="看一個對象在多個面向上的形狀輪廓，哪裡突出、哪裡凹下去。" data-use="比較模型能力、產品規格、學生能力、團隊技能輪廓。" data-trap="不適合很多對象一起疊，否則會變成蜘蛛網打架。" data-model="適合做整體輪廓比較，但不適合做精準數值判讀。比較像策略視覺化而非嚴格統計圖。">
+            <div class="card-head">
+              <div class="icon">🕸️</div>
+              <div class="title-block">
+                <div class="title">雷達圖 Radar Chart</div>
+                <div class="desc">適合看多維指標輪廓，例如產品、模型、學生能力面向。</div>
+              </div>
+              <div class="badge ext">延伸圖表</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <g transform="translate(180 106)">
+                    <polygon points="0,-70 60,-35 60,35 0,70 -60,35 -60,-35" fill="none" stroke="rgba(255,255,255,0.10)"/>
+                    <polygon points="0,-50 44,-25 44,25 0,50 -44,25 -44,-25" fill="none" stroke="rgba(255,255,255,0.10)"/>
+                    <polygon points="0,-30 26,-15 26,15 0,30 -26,15 -26,-15" fill="none" stroke="rgba(255,255,255,0.10)"/>
+                    <line x1="0" y1="0" x2="0" y2="-74" stroke="rgba(255,255,255,0.15)"/>
+                    <line x1="0" y1="0" x2="64" y2="-37" stroke="rgba(255,255,255,0.15)"/>
+                    <line x1="0" y1="0" x2="64" y2="37" stroke="rgba(255,255,255,0.15)"/>
+                    <line x1="0" y1="0" x2="0" y2="74" stroke="rgba(255,255,255,0.15)"/>
+                    <line x1="0" y1="0" x2="-64" y2="37" stroke="rgba(255,255,255,0.15)"/>
+                    <line x1="0" y1="0" x2="-64" y2="-37" stroke="rgba(255,255,255,0.15)"/>
+                    <polygon points="0,-62 42,-24 31,19 0,56 -48,28 -31,-18" fill="rgba(96,165,250,0.35)" stroke="var(--blue)" stroke-width="3" class="radar"/>
+                    <circle cx="0" cy="-62" r="4" fill="var(--blue)"/>
+                    <circle cx="42" cy="-24" r="4" fill="var(--blue)"/>
+                    <circle cx="31" cy="19" r="4" fill="var(--blue)"/>
+                    <circle cx="0" cy="56" r="4" fill="var(--blue)"/>
+                    <circle cx="-48" cy="28" r="4" fill="var(--blue)"/>
+                    <circle cx="-31" cy="-18" r="4" fill="var(--blue)"/>
+                  </g>
+                  <text x="174" y="18" class="label">速度</text>
+                  <text x="262" y="62" class="label">成本</text>
+                  <text x="267" y="154" class="label">精度</text>
+                  <text x="170" y="196" class="label">穩定性</text>
+                  <text x="56" y="154" class="label">可維護</text>
+                  <text x="56" y="62" class="label">彈性</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：適合看輪廓，不適合一次比很多組。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">多維輪廓比較</span>
+              <span class="chip">適合少量對象</span>
+              <span class="chip">不適合很多系列同時畫</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 雷達圖很適合做「輪廓感」比較，例如比較兩台設備、兩種模型、兩位學生在不同能力向度的強弱。但它不適合太多系列一起疊，否則會變成蜘蛛網打架。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>如果你在比較兩個 AI 模型：速度、成本、精度、穩定性、維護性，雷達圖很適合快速看出「誰偏哪一型」。</p>
+            </div>
+          </article>
+
+          <article class="card" tabindex="0" data-group="ext" data-title="小提琴圖 Violin Plot" data-subtitle="箱型圖進階版，同時看中位數與分佈密度。" data-look="看資料在哪些區段最密集，還有沒有雙峰或多峰。" data-use="比較不同群組的完整分佈，例如不同班級成績、不同客群消費額。" data-trap="若樣本太少，小提琴圖的密度形狀可能會誤導。" data-model="能幫你發現箱型圖看不出的雙峰現象，懷疑資料內部其實混了不同子族群。">
+            <div class="card-head">
+              <div class="icon">🎻</div>
+              <div class="title-block">
+                <div class="title">小提琴圖 Violin Plot</div>
+                <div class="desc">箱型圖進階版，同時看中位數與分佈密度。</div>
+              </div>
+              <div class="badge ext">延伸圖表</div>
+            </div>
+            <div class="viz-wrap">
+              <div class="viz">
+                <svg viewBox="0 0 360 210">
+                  <line x1="36" y1="172" x2="330" y2="172" class="axis"/>
+                  <path d="M 140 35 C 100 52, 96 86, 118 105 C 92 126, 104 160, 140 172 L 180 172 C 216 160, 228 126, 202 105 C 224 86, 220 52, 180 35 Z" fill="rgba(167,139,250,0.36)" stroke="var(--purple)" stroke-width="3" class="radar"/>
+                  <line x1="160" y1="42" x2="160" y2="165" stroke="#ffffff" stroke-width="2" opacity="0.8"/>
+                  <line x1="136" y1="104" x2="184" y2="104" stroke="#ffffff" stroke-width="4"/>
+                  <text x="195" y="108" class="anno">中位數</text>
+                  <text x="100" y="56" class="label">密度較低</text>
+                  <text x="208" y="143" class="label">密度較高</text>
+                </svg>
+              </div>
+              <div class="overlay-tip">重點：比箱型圖多了密度資訊，能看出哪段資料最多。</div>
+            </div>
+            <div class="hint">
+              <span class="chip">分佈密度</span>
+              <span class="chip">看多峰現象</span>
+              <span class="chip">比箱型圖更完整</span>
+            </div>
+            <div class="analysis"><strong>實務重點：</strong> 箱型圖只能告訴你範圍與中位數，但小提琴圖還能看出哪一段資料最密集、甚至是否有 <strong>雙峰分佈</strong>。在比較不同群組分佈時非常有用。</div>
+            <div class="card-actions">
+              <button class="action-btn inspect-btn">更新解說面板</button>
+              <button class="mini-btn toggle-detail">展開例子</button>
+            </div>
+            <div class="details">
+              <b>實戰例子</b>
+              <p>如果兩個客群的平均消費差不多，但其中一群其實有兩種人：超低消費與超高消費，小提琴圖比箱型圖更容易看出這種雙峰。</p>
+            </div>
+          </article>
+        </section>
+
+        <div class="footer-note">
+          <b style="color:#fff;">互動功能說明</b><br />
+          1. 每張卡片內都直接放入「白話解釋、適用情境、常見陷阱、建模幫助」。<br />
+          2. 點「收合重點」可只看圖與摘要，點「展開例子」可看完整情境。<br />
+          3. 上方仍可篩選：全部 / 核心探勘 / 延伸圖表 / 少用避坑。<br />
+          4. 卡片支援鍵盤焦點，可用 Tab 移動並按 Enter / Space 聚焦。
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const cards = [...document.querySelectorAll('.card')];
+    
+    const titleEl = document.getElementById('panelTitle');
+    const subtitleEl = document.getElementById('panelSubtitle');
+    const lookEl = document.getElementById('panelLook');
+    const useEl = document.getElementById('panelUse');
+    const trapEl = document.getElementById('panelTrap');
+    const modelEl = document.getElementById('panelModel');
+    const tipEl = document.getElementById('panelTip');
+
+    cards.forEach(card => {
+      const learnPanel = document.createElement('div');
+      learnPanel.className = 'learn-panel';
+      learnPanel.innerHTML = `
+        <div class="learn-grid">
+          <div class="learn-item">
+            <b>這張圖主要在看什麼？</b>
+            <p>${card.dataset.look}</p>
+          </div>
+          <div class="learn-item">
+            <b>最常用在什麼情境？</b>
+            <p>${card.dataset.use}</p>
+          </div>
+          <div class="learn-item">
+            <b>常見誤解 / 陷阱</b>
+            <p>${card.dataset.trap}</p>
+          </div>
+          <div class="learn-item">
+            <b>對建模有什麼幫助？</b>
+            <p>${card.dataset.model}</p>
+          </div>
+        </div>
+      `;
+      const actions = card.querySelector('.card-actions');
+      actions.insertAdjacentElement('afterend', learnPanel);
+
+      const inspectBtn = card.querySelector('.inspect-btn');
+      inspectBtn.textContent = '收合重點';
+      inspectBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        learnPanel.classList.toggle('collapsed');
+        inspectBtn.textContent = learnPanel.classList.contains('collapsed') ? '展開重點' : '收合重點';
+        updatePanel(card);
+      });
+    });
+
+    function updatePanel(card) {
+      cards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      if (titleEl) titleEl.textContent = card.dataset.title;
+      if (subtitleEl) subtitleEl.textContent = card.dataset.subtitle;
+      if (lookEl) lookEl.textContent = card.dataset.look;
+      if (useEl) useEl.textContent = card.dataset.use;
+      if (trapEl) trapEl.textContent = card.dataset.trap;
+      if (modelEl) modelEl.textContent = card.dataset.model;
+      if (tipEl) tipEl.textContent = '你現在看的這張圖：' + card.dataset.title + '。';
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => updatePanel(card));
+      card.addEventListener('focus', () => updatePanel(card));
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.toggle-detail')) return;
+        updatePanel(card);
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          updatePanel(card);
+        }
+      });
+
+      
+
+      const detailBtn = card.querySelector('.toggle-detail');
+      const details = card.querySelector('.details');
+      detailBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = details.classList.toggle('open');
+        detailBtn.textContent = isOpen ? '收起例子' : '展開例子';
+        if (isOpen) updatePanel(card);
+      });
+    });
+
+    
+
+    if (cards.length) updatePanel(cards[0]);
+  </script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>資料視覺化是 EDA 與溝通的關鍵,iPAS 考點(初級科目一、中級科目二)。重點:依資料型態選圖——分布用直方圖或箱形圖、關係用散布圖、比較用長條圖、趨勢用折線圖。易混點:Anscombe 四重奏提醒——統計量相同的資料畫出來可能天差地遠,只看摘要數字不夠;Y 軸不從 0 會誤導。情境:建模前先用圖看懂資料、誠實呈現結果。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>為什麼資料視覺化重要？</summary><p>圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。</p></details><details><summary>常見圖表怎麼選？</summary><p>比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。</p></details><details><summary>Anscombe 四重奏的啟示？</summary><p>四組統計量幾乎相同的資料，畫出來卻完全不同；提醒只看摘要數字不夠，一定要視覺化看資料長相。</p></details><details><summary>視覺化常見的誤導？</summary><p>Y 軸不從 0 開始誇大差異、3D 與花俏效果失真、用圓餅比太多類別、色彩無障礙不佳；應力求誠實清楚。</p></details><details><summary>好圖表的原則？</summary><p>一圖一重點、標題與軸標清楚、去除多餘裝飾(高資料墨水比)、顏色有意義且色盲友善、適當標註關鍵數值。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "為什麼資料視覺化重要？", "acceptedAnswer": {"@type": "Answer", "text": "圖表能快速揭露趨勢、分布、離群與關係，比看數字表格更直覺；是探索分析(EDA)與溝通結果的關鍵。"}}, {"@type": "Question", "name": "常見圖表怎麼選？", "acceptedAnswer": {"@type": "Answer", "text": "比較類別用長條圖、看趨勢用折線圖、看分布用直方圖或箱形圖、看關係用散布圖、看占比用圓餅(類別少時)。"}}, {"@type": "Question", "name": "Anscombe 四重奏的啟示？", "acceptedAnswer": {"@type": "Answer", "text": "四組統計量幾乎相同的資料，畫出來卻完全不同；提醒只看摘要數字不夠，一定要視覺化看資料長相。"}}, {"@type": "Question", "name": "視覺化常見的誤導？", "acceptedAnswer": {"@type": "Answer", "text": "Y 軸不從 0 開始誇大差異、3D 與花俏效果失真、用圓餅比太多類別、色彩無障礙不佳；應力求誠實清楚。"}}, {"@type": "Question", "name": "好圖表的原則？", "acceptedAnswer": {"@type": "Answer", "text": "一圖一重點、標題與軸標清楚、去除多餘裝飾(高資料墨水比)、顏色有意義且色盲友善、適當標註關鍵數值。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="problem-definition.html">問題定義</a><a href="imbalanced_data.html">資料清洗</a><a href="model-development.html">模型開發</a><a href="interaction_feature.html">特徵工程</a><a href="validation.html">資料切分</a><a href="baseline.html">基準模型</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

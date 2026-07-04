@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word2Vec vs GloVe｜白話＋互動：預測型 vs 統計型詞向量</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。 機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/embedding_demo.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Word2Vec vs GloVe 視覺化比較">
+    <meta property="og:description" content="把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。 機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/embedding_demo.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Word2Vec vs GloVe 視覺化比較">
+    <meta name="twitter:description" content="把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。 機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Word2Vec vs GloVe 視覺化比較",
+  "url": "https://akira.ipas-ai.com/embedding_demo.html",
+  "description": "把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。 機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+    <style>
+    :root{
+      --bg:#fdf6ec; --ink:#3a2708; --sub:#8a6a3d;
+      --brand:#d97706; --brand2:#b45309; --brand-soft:#fce7c6;
+      --card:#ffffff; --line:#f0e2cc;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#f59e0b,#d97706 55%,#b45309);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#fff3e0;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(217,119,6,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#fbd89b 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#fdf7ec}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#fdf7ec}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#6b4e24;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .ed-demo） ===== */
+    .ed-demo{margin:14px 0}
+    .ed-demo .demo-title{font-size:1.12rem;font-weight:800;color:#b45309;margin:0 0 14px;text-align:center}
+    .ed-demo .tabs{display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+    .ed-demo .tab-btn{padding:10px 18px;font-size:15px;cursor:pointer;border:2px solid #d97706;background:#fff;color:#b45309;border-radius:5px;transition:.3s}
+    .ed-demo .tab-btn.active{background:#d97706;color:#fff}
+    .ed-demo .controls{text-align:center;margin-bottom:22px}
+    .ed-demo .controls button{padding:8px 16px;font-size:14px;margin:0 5px;cursor:pointer;background:#16a34a;color:#fff;border:none;border-radius:4px}
+    .ed-demo .controls button:disabled{background:#bdc3c7;cursor:not-allowed}
+    .ed-demo .view-container{background:#fbfaf6;padding:24px;border-radius:8px;border:1px solid #f0e2cc;min-height:320px}
+    .ed-demo .sentence{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-bottom:36px;font-size:19px}
+    .ed-demo .word{padding:9px 13px;border:2px solid #e0e0e0;border-radius:6px;background:#fff;transition:.3s}
+    .ed-demo .w2v-target{border-color:#e74c3c;background:#fadbd8;font-weight:bold}
+    .ed-demo .w2v-context{border-color:#f39c12;background:#fdebd0}
+    .ed-demo .glove-active{border-color:#9b59b6;background:#ebdef0;font-weight:bold}
+    .ed-demo table{width:100%;border-collapse:collapse;text-align:center;margin-top:18px}
+    .ed-demo th,.ed-demo td{border:1px solid #ddd;padding:10px;width:14%}
+    .ed-demo th{background:#f2f2f2;font-weight:bold}
+    .ed-demo td.highlight-cell{background:#ebdef0;color:#8e44ad;font-weight:bold;transform:scale(1.1);transition:.2s}
+    .ed-demo .description{text-align:center;font-style:italic;color:#7f8c8d;margin-top:18px}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 自然語言處理</span>
+  <h1>Word2Vec vs GloVe</h1>
+  <p>兩種學「詞向量」的經典方法：一個邊看書邊猜下一個詞（預測型），一個先翻完全書再統計（統計型）。</p>
+  <div class="chips">
+    <span>預測型</span><span>統計型</span><span>滑動視窗</span><span>共現矩陣</span><span>詞向量</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>Word2Vec</b> 與 <b>GloVe</b> 是兩種學習<span class="term">靜態詞向量</span>的經典方法。<b>Word2Vec（預測型）</b>用神經網路在滑動視窗裡<span class="hl">預測相鄰詞</span>；<b>GloVe（統計型）</b>先掃全語料建<span class="hl">共現矩陣</span>再降維。兩者都讓語意相近的詞，向量也相近。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：兩種學法逐步看</h2>
+    <p>切換分頁，按「下一步」：<b>Word2Vec</b> 用中心詞（紅）去預測周圍上下文（橘）；<b>GloVe</b> 逐步統計相鄰詞的共同出現次數，把「共現矩陣」填起來。</p>
+    <div class="ed-demo">
+      <div class="demo-title">詞嵌入模型視覺化</div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-w2v" onclick="switchMode('w2v')">Word2Vec (局部預測)</button>
+        <button class="tab-btn" id="tab-glove" onclick="switchMode('glove')">GloVe (全局共現)</button>
+      </div>
+
+      <div class="controls">
+        <button id="btn-prev" onclick="prevStep()">上一步</button>
+        <button id="btn-next" onclick="nextStep()">下一步</button>
+        <button id="btn-reset" onclick="reset()">重置</button>
+      </div>
+
+      <div class="view-container">
+        <div class="sentence" id="sentence-container"></div>
+        <div id="graphic-container"></div>
+        <div class="description" id="step-description">請點擊「下一步」開始觀察</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>預測型 vs 統計型對照</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>Word2Vec（預測型）</th><th>GloVe（統計型）</th></tr></thead>
+      <tbody>
+        <tr><td>核心哲學</td><td>見微知著：局部滑動視窗預測相鄰詞</td><td>統攬全局：先建共現矩陣再降維</td></tr>
+        <tr><td>怎麼學</td><td>神經網路（Skip-gram／CBOW）</td><td>對全局共現矩陣做矩陣分解</td></tr>
+        <tr><td>優點</td><td>訓練快、擅長類比（國王−男+女≈女王）</td><td>結合局部與全局統計，整體關係更穩</td></tr>
+        <tr><td>缺點</td><td>只看局部、沒用到全局統計</td><td>詞彙量大時共現矩陣吃記憶體</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">📚</span>用「讀書法」來想</h2>
+    <div class="note meta">
+      <b>Word2Vec</b> 像是<b>邊看書邊猜下一個詞</b>來學習——一路滑過句子，用中心詞猜周圍的字。<b>GloVe</b> 則是<b>先把整本書翻完</b>，統計好每個詞跟哪些詞一起出現幾次，再根據這張大表分析出詞向量。一個重「即時預測」，一個重「全局統計」。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔗</span>共通點與現代做法</h2>
+    <div class="note app">
+      兩者都產生<b>靜態詞向量</b>（一詞一向量）、都靠<b>上下文</b>學語意、相似度都常用<b>餘弦</b>。但它們無法區分多義詞（「蘋果」水果 vs 公司同一個向量）。現代 LLM 改用<b>情境式嵌入</b>（BERT、GPT）——同一個詞在不同句子有不同向量，已大幅取代靜態詞向量在下游任務的角色。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. Word2Vec 和 GloVe 最根本的差別？</summary>
+        <div class="ans">Word2Vec 是「預測型」——用神經網路在局部滑動視窗預測相鄰詞；GloVe 是「統計型」——先建全局共現矩陣再降維。前者重局部即時預測，後者重全局統計。</div></details>
+      <details><summary>Q2. 各自的優缺點？</summary>
+        <div class="ans">Word2Vec 訓練快、擅長類比，但沒用到全局統計；GloVe 結合局部與全局、整體關係更穩，但詞彙量大時共現矩陣吃記憶體。</div></details>
+      <details><summary>Q3. 它們和現代 LLM 的嵌入差在哪？</summary>
+        <div class="ans">Word2Vec／GloVe 是靜態詞向量（一詞一向量），無法區分多義；現代 LLM 用情境式嵌入，同一詞在不同句子有不同向量，能依上下文表達不同意思。</div></details>
+      <details><summary>Q4. 比較兩個詞向量像不像，用什麼？</summary>
+        <div class="ans">最常用餘弦相似度（看方向夾角、不受向量長度影響），也可用內積或歐氏距離。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>Word2Vec：</b>預測型，滑動視窗預測相鄰詞，快、擅類比。</li>
+      <li><b>GloVe：</b>統計型，共現矩陣＋降維，全局關係穩。</li>
+      <li><b>比喻：</b>邊看邊猜 vs 翻完全書再統計。</li>
+      <li><b>共通：</b>靜態詞向量、靠上下文、相似度用餘弦。</li>
+      <li><b>現代：</b>情境式嵌入（BERT/GPT）已大幅取代靜態詞向量。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        // 語料資料
+        const words = ["我", "喜歡", "機器", "學習", "且", "我", "喜歡", "深度", "學習"];
+        const vocab = [...new Set(words)];
+
+        // 狀態管理
+        let currentMode = 'w2v';
+        let currentStep = -1;
+        const maxW2vSteps = words.length - 1;
+        const maxGloveSteps = words.length - 2;
+
+        // 初始化
+        function init() {
+            renderSentence();
+            updateUI();
+        }
+
+        // 切換模式
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('tab-w2v').classList.toggle('active', mode === 'w2v');
+            document.getElementById('tab-glove').classList.toggle('active', mode === 'glove');
+            reset();
+        }
+
+        // 步驟控制
+        function nextStep() {
+            let maxSteps = currentMode === 'w2v' ? maxW2vSteps : maxGloveSteps;
+            if (currentStep < maxSteps) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > -1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function reset() {
+            currentStep = -1;
+            updateUI();
+        }
+
+        // 渲染基礎句子
+        function renderSentence() {
+            const container = document.getElementById('sentence-container');
+            container.innerHTML = '';
+            words.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.className = 'word';
+                span.id = `word-${index}`;
+                span.innerText = word;
+                container.appendChild(span);
+            });
+        }
+
+        // 更新畫面
+        function updateUI() {
+            document.querySelectorAll('.word').forEach(el => el.className = 'word');
+
+            const graphicContainer = document.getElementById('graphic-container');
+            const desc = document.getElementById('step-description');
+            graphicContainer.innerHTML = '';
+
+            let maxSteps = currentMode === 'w2v' ? maxW2vSteps : maxGloveSteps;
+            document.getElementById('btn-prev').disabled = currentStep === -1;
+            document.getElementById('btn-next').disabled = currentStep === maxSteps;
+
+            if (currentStep === -1) {
+                desc.innerText = "請點擊「下一步」開始觀察";
+                return;
+            }
+
+            if (currentMode === 'w2v') {
+                renderW2V(graphicContainer, desc);
+            } else {
+                renderGloVe(graphicContainer, desc);
+            }
+        }
+
+        // Word2Vec 渲染邏輯
+        function renderW2V(container, desc) {
+            const targetIdx = currentStep;
+
+            document.getElementById(`word-${targetIdx}`).classList.add('w2v-target');
+
+            const contextWords = [];
+            if (targetIdx > 0) {
+                document.getElementById(`word-${targetIdx - 1}`).classList.add('w2v-context');
+                contextWords.push(words[targetIdx - 1]);
+            }
+            if (targetIdx < words.length - 1) {
+                document.getElementById(`word-${targetIdx + 1}`).classList.add('w2v-context');
+                contextWords.push(words[targetIdx + 1]);
+            }
+
+            container.innerHTML = `
+                <div style="text-align:center; padding: 20px;">
+                    <strong style="color:#e74c3c; font-size:24px;">${words[targetIdx]}</strong>
+                    <div style="font-size:24px; margin: 10px 0;">↓ 預測 ↓</div>
+                    <strong style="color:#f39c12; font-size:20px;">[ ${contextWords.join(' , ')} ]</strong>
+                </div>
+            `;
+            desc.innerText = `視窗滑動中：使用中心詞「${words[targetIdx]}」去預測周圍的上下文詞`;
+        }
+
+        // GloVe 渲染邏輯
+        function renderGloVe(container, desc) {
+            const wordA_idx = currentStep;
+            const wordB_idx = currentStep + 1;
+            const wordA = words[wordA_idx];
+            const wordB = words[wordB_idx];
+
+            document.getElementById(`word-${wordA_idx}`).classList.add('glove-active');
+            document.getElementById(`word-${wordB_idx}`).classList.add('glove-active');
+
+            let matrix = Array(vocab.length).fill(0).map(() => Array(vocab.length).fill(0));
+
+            for (let i = 0; i <= currentStep; i++) {
+                let w1 = vocab.indexOf(words[i]);
+                let w2 = vocab.indexOf(words[i+1]);
+                matrix[w1][w2] += 1;
+                matrix[w2][w1] += 1;
+            }
+
+            let tableHTML = '<table><tr><th></th>';
+            vocab.forEach(v => tableHTML += `<th>${v}</th>`);
+            tableHTML += '</tr>';
+
+            vocab.forEach((v1, i) => {
+                tableHTML += `<tr><th>${v1}</th>`;
+                vocab.forEach((v2, j) => {
+                    let isCurrentUpdate = (v1 === wordA && v2 === wordB) || (v1 === wordB && v2 === wordA);
+                    let cellClass = isCurrentUpdate ? 'class="highlight-cell"' : '';
+                    tableHTML += `<td ${cellClass}>${matrix[i][j]}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</table>';
+
+            container.innerHTML = tableHTML;
+            desc.innerText = `統計全局資料：發現「${wordA}」與「${wordB}」共同出現，更新矩陣計數。`;
+        }
+
+        init();
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>詞嵌入(Embedding)把文字或資料映射成稠密向量,讓語意相近者在向量空間也相近,iPAS 生成式 AI 與檢索考點(初級科目二、中級科目一)。重點:比 one-hot 省維度又能表達語意關係(國王減男人加女人約等於女王),是語意搜尋與 RAG 的基礎。易混點:嵌入是表示法、不是模型本身;相似度多用餘弦(看方向、不受長度影響)。情境:語意搜尋、推薦、分群、RAG 檢索。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>嵌入(Embedding)是什麼？</summary><p>把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。</p></details><details><summary>為什麼需要嵌入？</summary><p>機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。</p></details><details><summary>嵌入怎麼學出來？</summary><p>透過任務訓練得到，如 Word2Vec、GloVe 學詞向量，或用神經網路(含 Transformer)從上下文學；相似上下文產生相似向量。</p></details><details><summary>怎麼衡量兩個向量相似？</summary><p>最常用餘弦相似度(看方向夾角)，也用內積或歐氏距離；餘弦對長度不敏感、適合語意比較。</p></details><details><summary>嵌入有哪些應用？</summary><p>語意搜尋、推薦、分群、相似度比對，以及 RAG 檢索；向量資料庫就是用來高效查詢嵌入的最近鄰。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "嵌入(Embedding)是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "把文字、影像等離散或高維資料映射成稠密的低維向量，讓語意相近的東西在向量空間中也相近。"}}, {"@type": "Question", "name": "為什麼需要嵌入？", "acceptedAnswer": {"@type": "Answer", "text": "機器學習要數值輸入；嵌入比 one-hot 更省維度、能表達語意關係(如國王減男人加女人約等於女王)，利於下游任務。"}}, {"@type": "Question", "name": "嵌入怎麼學出來？", "acceptedAnswer": {"@type": "Answer", "text": "透過任務訓練得到，如 Word2Vec、GloVe 學詞向量，或用神經網路(含 Transformer)從上下文學；相似上下文產生相似向量。"}}, {"@type": "Question", "name": "怎麼衡量兩個向量相似？", "acceptedAnswer": {"@type": "Answer", "text": "最常用餘弦相似度(看方向夾角)，也用內積或歐氏距離；餘弦對長度不敏感、適合語意比較。"}}, {"@type": "Question", "name": "嵌入有哪些應用？", "acceptedAnswer": {"@type": "Answer", "text": "語意搜尋、推薦、分群、相似度比對，以及 RAG 檢索；向量資料庫就是用來高效查詢嵌入的最近鄰。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="embedding.html">詞嵌入概念</a><a href="cosine_similarity.html">餘弦相似度</a><a href="word2vec_rare_word.html">Word2Vec 罕見詞</a><a href="vector_db.html">向量資料庫</a><a href="rag.html">RAG</a><a href="nlp_llm.html">NLP 與 LLM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

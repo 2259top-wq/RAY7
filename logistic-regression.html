@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羅吉斯回歸 (Logistic Regression) 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。 線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/logistic-regression.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="羅吉斯回歸 (Logistic Regression) 互動教學">
+    <meta property="og:description" content="是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。 線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/logistic-regression.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="羅吉斯回歸 (Logistic Regression) 互動教學">
+    <meta name="twitter:description" content="是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。 線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "羅吉斯回歸 (Logistic Regression) 互動教學",
+  "url": "https://akira.ipas-ai.com/logistic-regression.html",
+  "description": "是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。 線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --green:#059669; --green-d:#047857; --blue:#2563eb; --blue-d:#1d4ed8;
+            --redc:#FF4444; --bluec:#2196F3; --amber:#f59e0b; --rose:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eef1f6;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#047857 0%,#059669 50%,#10b981 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(5,150,105,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.18); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.95rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.96}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#a7f3d0 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--green-d); font-weight:700}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#ecfdf5; border-left:5px solid var(--green)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--rose)}
+        .note.read{background:#eff6ff; border-left:5px solid var(--blue)}
+        .note.app{background:#f5f3ff; border-left:5px solid #8b5cf6}
+
+        .steps{display:grid; gap:12px; margin:14px 0}
+        .step{display:flex; gap:14px; align-items:flex-start; background:#fbfcfe; border:1px solid var(--line);
+            border-radius:13px; padding:14px 16px}
+        .step .num{flex:0 0 36px; width:36px; height:36px; border-radius:50%; background:var(--green); color:#fff;
+            font-weight:800; display:flex; align-items:center; justify-content:center; font-size:1.05rem}
+        .step .st-body{flex:1}
+
+        .formula{font-family:'Courier New',monospace; background:#0f172a; color:#e2e8f0; border-radius:10px;
+            padding:12px 16px; margin:10px 0; font-size:1.02rem; overflow-x:auto; letter-spacing:.3px; text-align:center}
+        .formula .p{color:#6ee7b7} .formula .o{color:#fca5a5}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.95rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#f1f5f9; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .lin{color:var(--blue-d); font-weight:800}
+        .cmp .log{color:var(--green-d); font-weight:800}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--green);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--green-d)}
+
+        .legend{display:grid; gap:9px; margin:8px 0 2px}
+        .legend div{display:flex; align-items:flex-start; gap:10px}
+        .legend .mk{flex:0 0 auto; margin-top:4px; width:16px; height:16px; border-radius:50%}
+        .mk.red{background:var(--redc)} .mk.blue{background:var(--bluec)}
+        .mk.line{width:20px; height:0; border-top:3px dashed #333; margin-top:11px; border-radius:0}
+        .mk.grad{background:linear-gradient(90deg,#2196F3,#fff,#FF4444); border:1px solid #ddd}
+
+        /* self-check */
+        .qa{background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #c7f0dd; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--green-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved) ===== */
+        .demo-wrap{background:#f0fdf4; border:1px solid #cde6d8; border-radius:14px; padding:18px; margin:14px 0}
+        .main-layout{display:flex; flex-wrap:wrap; justify-content:center; gap:16px}
+        .canvas-container{background:#fff; padding:14px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.07);
+            text-align:center; flex:1; min-width:300px; border:1px solid var(--line)}
+        .canvas-container h3{margin:0 0 8px; font-size:1rem; color:var(--ink)}
+        .canvas-container p{font-size:.84rem; color:#888; margin:8px 0 0}
+        #scatterCanvas,#sigmoidCanvas{border:1px solid #e3ece7; background:#fff; cursor:crosshair; border-radius:6px; max-width:100%; height:auto}
+        .controls{background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.07);
+            width:100%; margin-top:14px; border:1px solid var(--line)}
+        .slider-group{margin:13px 0; display:flex; align-items:center; gap:14px}
+        .slider-group label{min-width:118px; font-weight:bold}
+        input[type=range]{flex-grow:1; accent-color:var(--green)}
+        .controls button{background:var(--green); color:#fff; border:none; padding:11px 22px; border-radius:8px;
+            font-weight:800; cursor:pointer; transition:.2s; font-size:.95rem}
+        .controls button:hover{background:var(--green-d); transform:translateY(-1px)}
+        .metrics{display:flex; justify-content:space-around; margin-top:16px; padding-top:14px; border-top:1px solid #eef1f6}
+        .metric-box{text-align:center}
+        .metric-value{font-size:1.8em; font-weight:bold; color:var(--bluec)}
+        .metric-label{font-size:.9em; color:#666}
+        .class-0{fill:#2196F3; stroke:white; stroke-width:0.05}
+        .class-1{fill:#FF4444; stroke:white; stroke-width:0.05}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.5rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .slider-group label{min-width:90px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🎯 分類模型 · iPAS 高頻考點</span>
+        <h1>羅吉斯回歸：把「分數」變成「機率」來分類</h1>
+        <p>名字裡有「回歸」，但它其實是<b>分類</b>模型——回答「是/不是」「會/不會」。它先像線性回歸算一個分數，再用 Sigmoid 把分數壓成 0～1 的機率。這頁帶你看懂這條龍脈，並玩玩看模型怎麼自己找出最佳分界線。</p>
+        <div class="chips"><span>分類 vs 迴歸</span><span>線性分數 z</span><span>Sigmoid</span><span>門檻 0.5</span><span>Log Loss</span><span>係數/勝算比</span></div>
+    </header>
+
+    <!-- ===== 1. 分類 vs 迴歸 ===== -->
+    <section class="lesson">
+        <h2>🤔 一、機器怎麼回答「是/不是」？</h2>
+        <p class="lead">線性回歸預測「數字」（房價、溫度）。但很多問題的答案是<b>是非題</b>：這封信是不是垃圾郵件？這位客戶會不會流失？這就是<span class="term">分類</span>。</p>
+
+        <div class="note warn">
+            <h4>❓ 那…直接用線性回歸不行嗎？</h4>
+            不行。線性回歸的輸出可以是<b>任何數字</b>——可能算出 -3、也可能 1.8。但「是垃圾郵件的機率」只能介於 <b>0 到 1</b> 之間，負數和超過 1 都沒意義。所以我們需要一個方法，把線性回歸的「分數」<span class="hl">轉成合理的機率</span>——這就是 Sigmoid 登場的地方。
+        </div>
+
+        <table class="cmp">
+            <tr><th>比較</th><th><span class="lin">線性回歸</span></th><th><span class="log">羅吉斯回歸</span></th></tr>
+            <tr><td>預測什麼</td><td>連續數值（房價）</td><td>類別機率（是/不是）</td></tr>
+            <tr><td>輸出範圍</td><td>−∞ ～ +∞</td><td>0 ～ 1（機率）</td></tr>
+            <tr><td>關鍵轉換</td><td>無，直接輸出</td><td>過一層 <b>Sigmoid</b></td></tr>
+            <tr><td>損失函數</td><td>MSE（最小平方）</td><td><b>Log Loss</b>（交叉熵）</td></tr>
+            <tr><td>用途</td><td>迴歸問題</td><td>分類問題</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 2. 三步驟 ===== -->
+    <section class="lesson">
+        <h2>⚙️ 二、三步驟看懂它怎麼運作</h2>
+        <p class="lead">整條流程就是：<b>算分數 → 變機率 → 定類別</b>。</p>
+        <div class="steps">
+            <div class="step"><div class="num">1</div><div class="st-body">
+                <b>算一個線性分數 z</b><br>
+                跟線性回歸一模一樣，把特徵加權相加：
+                <span class="formula">z = w₁x₁ + w₂x₂ + b</span>
+                z 可以是任何數。z 越大、越偏向「正類（紅）」；越小、越偏向「負類（藍）」。z＝0 就是<b>決策邊界</b>（剛好分不出來）。
+            </div></div>
+            <div class="step"><div class="num">2</div><div class="st-body">
+                <b>用 Sigmoid 把 z 壓成機率</b><br>
+                <span class="formula">P = 1 / (1 + e<span class="o">⁻ᶻ</span>)</span>
+                這條 S 形曲線會把 (−∞, +∞) 的 z <span class="hl">壓進 (0, 1)</span>：z 很大 → P 趨近 1，z 很小 → P 趨近 0，z＝0 → P＝0.5。
+            </div></div>
+            <div class="step"><div class="num">3</div><div class="st-body">
+                <b>用門檻決定類別</b><br>
+                有了機率就好辦：<b>P ≥ 0.5 判為紅(1)、P &lt; 0.5 判為藍(0)</b>。0.5 是預設門檻，之後可以依需求調整（見下方進階）。
+            </div></div>
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：兩張連動的圖</h2>
+        <p class="lead">左圖是「資料與分界線」，右圖是「Sigmoid 機率」，兩張圖<b>連動</b>。先看懂圖例，再拉滑桿、或按下「自動尋找最佳邊界」。</p>
+
+        <div class="note read">
+            <h4>🗺️ 怎麼看這兩張圖</h4>
+            <p style="margin:4px 0 6px"><b>左圖｜決策邊界（資料的世界）</b></p>
+            <div class="legend">
+                <div><span class="mk red"></span><span class="mk blue" style="margin-left:-4px"></span><b>紅點/藍點 = 兩個類別</b>的資料（例如「會流失/不會流失」）。</div>
+                <div><span class="mk line"></span><b>黑虛線 = 決策邊界</b>：模型用它把平面切兩半，一邊判紅、一邊判藍。線上＝機率 0.5。</div>
+                <div><span class="mk grad"></span><b>漸層背景 = 機率傾向</b>：越紅的區域越會判紅、越藍越會判藍。</div>
+            </div>
+            <p style="margin:12px 0 6px"><b>右圖｜Sigmoid（機率的世界）</b></p>
+            <div class="legend">
+                <div><span class="mk" style="background:#666"></span><b>橫軸 = 分數 z</b>（點離邊界多遠、在哪一邊）；<b>縱軸 = 機率</b>。每個點滑到 S 曲線上。</div>
+                <div><span class="mk" style="background:#111"></span><b>離邊界越遠 → 機率越靠 0 或 1</b>（模型越有信心）；靠近邊界 → 機率接近 0.5。<b>被分錯的點會加黑框</b>。</div>
+            </div>
+        </div>
+
+        <div class="demo-wrap">
+            <div class="main-layout">
+                <div class="canvas-container">
+                    <h3>1. 決策邊界（線性特徵空間）</h3>
+                    <svg id="scatterCanvas" width="400" height="400" viewBox="-5 -5 10 10">
+                        <defs>
+                            <linearGradient id="probGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#2196F3" stop-opacity="0.2"/>
+                                <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1"/>
+                                <stop offset="100%" stop-color="#FF4444" stop-opacity="0.2"/>
+                            </linearGradient>
+                        </defs>
+                        <rect id="bgRect" x="-5" y="-5" width="10" height="10" fill="url(#probGradient)" />
+                        <line x1="-5" y1="0" x2="5" y2="0" stroke="#eee" stroke-width="0.05"/>
+                        <line x1="0" y1="-5" x2="0" y2="5" stroke="#eee" stroke-width="0.05"/>
+                        <line id="decisionLine" x1="-5" y1="0" x2="5" y2="0" stroke="#333" stroke-width="0.08" stroke-dasharray="0.2, 0.2"/>
+                        <g id="scatterPoints"></g>
+                    </svg>
+                    <p>這是一條方程式：z = w₁x + w₂y + b</p>
+                </div>
+
+                <div class="canvas-container">
+                    <h3>2. Sigmoid 轉換（機率輸出）</h3>
+                    <svg id="sigmoidCanvas" width="400" height="400" viewBox="-6 -0.2 12 1.4">
+                        <line x1="-6" y1="0" x2="6" y2="0" stroke="#aaa" stroke-width="0.02"/>
+                        <line x1="-6" y1="1" x2="6" y2="1" stroke="#aaa" stroke-width="0.02" stroke-dasharray="0.1"/>
+                        <line x1="0" y1="-0.2" x2="0" y2="1.2" stroke="#aaa" stroke-width="0.02"/>
+                        <path id="sigmoidCurve" fill="none" stroke="#666" stroke-width="0.04" opacity="0.5" />
+                        <g id="sigmoidPoints"></g>
+                        <text x="0.2" y="1.08" font-size="0.4" fill="#FF4444" font-weight="bold">1</text>
+                        <text x="0.2" y="0.08" font-size="0.4" fill="#2196F3" font-weight="bold">0</text>
+                        <text x="4" y="-0.05" font-size="0.3" fill="#999">距離 Z</text>
+                    </svg>
+                    <p>機率 P = 1 / (1 + e⁻ᶻ)</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="slider-group">
+                    <label>旋轉線條 (W)：</label>
+                    <input type="range" id="angleSlider" min="0" max="360" value="90" step="1">
+                    <span id="angleVal">90°</span>
+                </div>
+                <div class="slider-group">
+                    <label>平移位置 (b)：</label>
+                    <input type="range" id="biasSlider" min="-5" max="5" value="0" step="0.1">
+                    <span id="biasVal">0.0</span>
+                </div>
+                <div style="text-align:center; margin:10px 0;">
+                    <button onclick="optimize()">✨ 機器學習：自動尋找最佳邊界</button>
+                </div>
+                <div class="metrics">
+                    <div class="metric-box">
+                        <div class="metric-label">分類準確率</div>
+                        <div class="metric-value" id="accDisplay">0%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Log Loss（預測誤差）</div>
+                        <div class="metric-value" id="lossDisplay" style="color:#FF5722;">0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>👀 一定要按：「自動尋找最佳邊界」</h4>
+            手動拉 W、b 很難喬到最好。按下按鈕，模型會用<b>梯度下降</b>一步步自己調整——你會看到<b>分界線慢慢轉到對的角度，準確率衝高、Log Loss 一路下降</b>。這就是「訓練模型」的真面目。
+        </div>
+    </section>
+
+    <!-- ===== 4. Sigmoid 深入 ===== -->
+    <section class="lesson">
+        <h2>🧠 四、Sigmoid 在做什麼？</h2>
+        <div class="note def">
+            <h4>🌐 它是一個「翻譯官」</h4>
+            分類不能直接用「距離（z）」當答案，因為距離可以無限大。Sigmoid 就是翻譯官，把<b>任何數字壓到 0～1</b>，讓我們能把它讀成機率：<br>
+            • 靠近 <b>1</b> → 模型很有信心是「紅點」<br>
+            • 靠近 <b>0</b> → 模型很有信心是「藍點」<br>
+            • 剛好 <b>0.5</b> → 點就在邊界上，模型完全分不出來
+        </div>
+        <div class="note meta">
+            <h4>🎯 訓練目標</h4>
+            所謂「訓練」就是調整 <b>W（方向）</b>和 <b>b（位置）</b>，讓<b>紅點都被推到 S 曲線頂端（機率→1）、藍點都到底端（機率→0）</b>。當點都歸位，Log Loss 就降到最低——這正是上面那顆按鈕在做的事。
+        </div>
+    </section>
+
+    <!-- ===== 5. Log Loss ===== -->
+    <section class="lesson">
+        <h2>📉 五、為什麼損失用「Log Loss」而不是準確率？</h2>
+        <p class="lead">準確率是給「人」看的成績，Log Loss 才是給「模型訓練」用的損失。</p>
+        <div class="note warn">
+            <h4>🚫 準確率不能拿來訓練</h4>
+            準確率是<b>階梯狀</b>的（猜對就 +1、猜錯就 0），它對「差一點點」毫無感覺、而且<b>不可微分</b>，梯度下降根本沒辦法用它來調整方向。
+        </div>
+        <div class="note def">
+            <h4>✅ Log Loss（交叉熵）量的是「機率準不準」</h4>
+            它看的是你給的<b>機率</b>離真相多遠：<br>
+            • 你說 90% 是紅、答案真的是紅 → 罰很小 😀<br>
+            • 你只說 55% 是紅、答案是紅 → 罰中等（不夠有信心）<br>
+            • 你<b>超有信心</b>說 99% 是紅、結果是藍 → <span class="hl">罰超重</span>（−log(0.01) 很大）😱<br>
+            所以 Log Loss 鼓勵模型「對的時候有把握、但別亂自信」。<b>訓練 = 讓平均 Log Loss 最小。</b>
+        </div>
+    </section>
+
+    <!-- ===== 6. 進階 ===== -->
+    <section class="lesson">
+        <h2>🔧 六、進階：讀模型 & 調整</h2>
+        <div class="note app">
+            <h4>📊 係數怎麼讀？（勝算比 odds ratio）</h4>
+            羅吉斯回歸的係數<b>可以解釋</b>，這是它很受歡迎的原因。係數 w 代表「特徵每增加 1 單位，對<b>對數勝算 log-odds</b> 的影響」。取 <b>e^w</b> 就是<b>勝算比</b>：例如 e^w ≈ 2，表示該特徵每多 1，事件發生的<b>勝算（odds）變 2 倍</b>。w&gt;0 提高正類機率、w&lt;0 降低。
+        </div>
+        <div class="note def">
+            <h4>🎚️ 門檻不一定是 0.5</h4>
+            預設用 0.5 分類，但可以調。<b>怕漏掉正類</b>（如怕漏診）→ <b>調低</b>門檻，寧可多抓一些（高召回）；<b>要很有把握才判正類</b>（如怕誤判詐騙凍結帳戶）→ <b>調高</b>門檻（高精確）。這就是 <a href="rocauc.html" style="color:#047857;font-weight:700">精確率/召回率與 ROC-AUC</a> 的權衡。
+        </div>
+        <div class="note meta">
+            <h4>🌈 多分類怎麼辦？</h4>
+            羅吉斯回歸本是<b>二元</b>分類。要分多類時：用 <b>Softmax</b>（多項式羅吉斯回歸，把多個分數轉成總和為 1 的機率），或用 <b>One-vs-Rest</b>（拆成「是不是 A」「是不是 B」…多個二元分類）。
+        </div>
+    </section>
+
+    <!-- ===== 7. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 七、觀念自我檢測</h2>
+        <p class="lead">先想再點開，檢查自己是不是真的懂了。</p>
+        <div class="qa">
+            <details><summary>Q1. 羅吉斯回歸是「迴歸」還是「分類」？</summary>
+                <p>分類。名字有「回歸」是歷史包袱——它其實輸出的是<b>類別機率</b>，再用門檻轉成類別，解的是分類問題。</p></details>
+            <details><summary>Q2. 為什麼訓練不用「準確率」當損失，要用 Log Loss？</summary>
+                <p>準確率是階梯狀、不可微，梯度下降沒辦法用；Log Loss 平滑可微，還能<b>懲罰「很有信心卻猜錯」</b>，更適合拿來最佳化。</p></details>
+            <details><summary>Q3. 模型算出某點的 z＝0，代表什麼？</summary>
+                <p>z＝0 → Sigmoid 給出 P＝0.5 → 這個點剛好在<b>決策邊界</b>上，模型對它「兩邊都不確定」。</p></details>
+            <details><summary>Q4. 係數 w₁ ＝ 0.7（取 e^0.7 ≈ 2）代表什麼？</summary>
+                <p>特徵 x₁ 每增加 1，事件的<b>勝算（odds）約變成 2 倍</b>，也就是更可能屬於正類。係數正負代表方向、大小代表影響力。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 8. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 八、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>名迴歸、實分類</b>輸出機率再轉類別，解是非題。</div>
+            <div class="keycard"><b>流程：z → Sigmoid → 門檻</b>線性分數壓成 0~1 機率，再以 0.5 分類。</div>
+            <div class="keycard"><b>Sigmoid 把 z 壓進 (0,1)</b>z=0 → P=0.5（決策邊界）。</div>
+            <div class="keycard"><b>損失用 Log Loss（交叉熵）</b>可微、且重罰「自信卻錯」；不用準確率。</div>
+            <div class="keycard"><b>係數可解釋</b>e^係數 = 勝算比 odds ratio。</div>
+            <div class="keycard"><b>門檻可調、可多分類</b>調門檻換精確/召回；Softmax 做多類。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const dataPoints = [];
+        const numPointsPerClass = 20;
+
+        function generateData() {
+            for(let i=0; i<numPointsPerClass; i++) {
+                dataPoints.push({
+                    x: -2 + (Math.random()-0.5)*3.5,
+                    y: -1 + (Math.random()-0.5)*3.5,
+                    label: 0
+                });
+                dataPoints.push({
+                    x: 2 + (Math.random()-0.5)*3.5,
+                    y: 1 + (Math.random()-0.5)*3.5,
+                    label: 1
+                });
+            }
+        }
+
+        const scatterGroup = document.getElementById('scatterPoints');
+        const sigmoidGroup = document.getElementById('sigmoidPoints');
+        const decisionLine = document.getElementById('decisionLine');
+        const probGradient = document.getElementById('probGradient');
+        const angleSlider = document.getElementById('angleSlider');
+        const biasSlider = document.getElementById('biasSlider');
+        const accDisplay = document.getElementById('accDisplay');
+        const lossDisplay = document.getElementById('lossDisplay');
+        const sigmoidPath = document.getElementById('sigmoidCurve');
+
+        function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+
+        function init() {
+            generateData();
+            dataPoints.forEach(p => {
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", p.x);
+                circle.setAttribute("cy", -p.y);
+                circle.setAttribute("r", 0.18);
+                circle.setAttribute("class", p.label === 0 ? "class-0" : "class-1");
+                scatterGroup.appendChild(circle);
+            });
+
+            let pathD = "M -6 " + (1 - sigmoid(-6));
+            for(let x = -6; x <= 6; x += 0.1) {
+                pathD += ` L ${x} ${1 - sigmoid(x)}`;
+            }
+            sigmoidPath.setAttribute("d", pathD);
+            update();
+        }
+
+        function update() {
+            const thetaDeg = parseFloat(angleSlider.value);
+            const thetaRad = thetaDeg * Math.PI / 180;
+            const b = parseFloat(biasSlider.value);
+
+            document.getElementById('angleVal').textContent = thetaDeg + "°";
+            document.getElementById('biasVal').textContent = b.toFixed(1);
+
+            const w1 = Math.cos(thetaRad);
+            const w2 = Math.sin(thetaRad);
+
+            // 更新左圖的決策線
+            let x1, y1, x2, y2;
+            if (Math.abs(w2) > 0.01) {
+                x1 = -5; y1 = (-x1*w1 - b)/w2;
+                x2 = 5;  y2 = (-x2*w1 - b)/w2;
+            } else {
+                x1 = -b/w1; y1 = -5;
+                x2 = x1; y2 = 5;
+            }
+            decisionLine.setAttribute("x1", x1);
+            decisionLine.setAttribute("y1", -y1);
+            decisionLine.setAttribute("x2", x2);
+            decisionLine.setAttribute("y2", -y2);
+
+            // 更新漸層背景方位
+            probGradient.setAttribute("x1", (50 - 50*w1) + "%");
+            probGradient.setAttribute("y1", (50 + 50*w2) + "%");
+            probGradient.setAttribute("x2", (50 + 50*w1) + "%");
+            probGradient.setAttribute("y2", (50 - 50*w2) + "%");
+
+            // 計算與繪製右圖點
+            sigmoidGroup.innerHTML = '';
+            let totalLoss = 0;
+            let correctCount = 0;
+
+            dataPoints.forEach(p => {
+                const z = p.x * w1 + p.y * w2 + b;
+                const prob = sigmoid(z);
+
+                const eps = 1e-15;
+                const pSafe = Math.max(eps, Math.min(1 - eps, prob));
+                const loss = -(p.label * Math.log(pSafe) + (1 - p.label) * Math.log(1 - pSafe));
+                totalLoss += loss;
+
+                if ((prob >= 0.5 ? 1 : 0) === p.label) correctCount++;
+
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", z);
+                dot.setAttribute("cy", 1 - prob);
+                dot.setAttribute("r", 0.15);
+                dot.setAttribute("class", p.label === 0 ? "class-0" : "class-1");
+
+                // 錯誤的點加一個外框提示
+                if ((prob >= 0.5 ? 1 : 0) !== p.label) {
+                    dot.setAttribute("stroke", "#000");
+                    dot.setAttribute("stroke-width", "0.08");
+                }
+
+                sigmoidGroup.appendChild(dot);
+            });
+
+            const accuracy = Math.round((correctCount / dataPoints.length) * 100);
+            accDisplay.textContent = accuracy + "%";
+            lossDisplay.textContent = (totalLoss / dataPoints.length).toFixed(3);
+            accDisplay.style.color = accuracy > 90 ? "#4CAF50" : "#2196F3";
+        }
+
+        function optimize() {
+            let iter = 0;
+            const lr = 0.15;
+            const interval = setInterval(() => {
+                let thetaDeg = parseFloat(angleSlider.value);
+                let thetaRad = thetaDeg * Math.PI / 180;
+                let b = parseFloat(biasSlider.value);
+                let d_theta = 0, d_b = 0;
+
+                dataPoints.forEach(p => {
+                    const w1 = Math.cos(thetaRad), w2 = Math.sin(thetaRad);
+                    const z = p.x * w1 + p.y * w2 + b;
+                    const error = sigmoid(z) - p.label;
+                    d_b += error;
+                    d_theta += error * (p.x * (-Math.sin(thetaRad)) + p.y * Math.cos(thetaRad));
+                });
+
+                b -= lr * (d_b / dataPoints.length) * 4;
+                thetaRad -= lr * (d_theta / dataPoints.length) * 4;
+                thetaDeg = (thetaRad * 180 / Math.PI) % 360;
+                if(thetaDeg < 0) thetaDeg += 360;
+
+                angleSlider.value = thetaDeg;
+                biasSlider.value = b;
+                update();
+
+                if(++iter > 80) clearInterval(interval);
+            }, 30);
+        }
+
+        angleSlider.addEventListener('input', update);
+        biasSlider.addEventListener('input', update);
+        init();
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>邏輯迴歸是基礎且常用的二元分類模型,iPAS 高頻考點(初級科目一、中級科目三)。重點:用 Sigmoid 把線性輸出壓成 0 到 1 的機率,再以門檻轉類別,損失用交叉熵。易混點:名稱有迴歸但其實是分類;係數對應勝算比(odds ratio)、可解釋;線性可分或近線性時表現好。情境:流失預測、信用評分等需要機率與可解釋的場景。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>邏輯斯回歸是回歸還是分類？</summary><p>是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。</p></details><details><summary>為什麼用 sigmoid？</summary><p>線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。</p></details><details><summary>它和線性回歸最大差別？</summary><p>線性回歸預測連續數值、用最小平方；邏輯斯回歸預測類別機率、用交叉熵(log loss)為損失，輸出再經 sigmoid 非線性轉換。</p></details><details><summary>係數怎麼解讀？</summary><p>係數代表該特徵每增一單位對「對數勝算」的影響；取指數 e 的係數次方即勝算比(odds ratio)，大於 1 提高該類機率、小於 1 降低。</p></details><details><summary>多分類怎麼辦？</summary><p>用 Softmax(多項式邏輯斯回歸)，或用 One-vs-Rest 拆成多個二元分類。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "邏輯斯回歸是回歸還是分類？", "acceptedAnswer": {"@type": "Answer", "text": "是分類(雖名為回歸)。它把線性組合通過 sigmoid 壓到 0 到 1 當作機率，再以閾值(常 0.5)決定類別。"}}, {"@type": "Question", "name": "為什麼用 sigmoid？", "acceptedAnswer": {"@type": "Answer", "text": "線性輸出範圍是負無限到正無限，sigmoid 將其映到 0 與 1 之間可解讀為機率，且其對數勝算(log-odds)恰為線性，便於用最大概似估計參數。"}}, {"@type": "Question", "name": "它和線性回歸最大差別？", "acceptedAnswer": {"@type": "Answer", "text": "線性回歸預測連續數值、用最小平方；邏輯斯回歸預測類別機率、用交叉熵(log loss)為損失，輸出再經 sigmoid 非線性轉換。"}}, {"@type": "Question", "name": "係數怎麼解讀？", "acceptedAnswer": {"@type": "Answer", "text": "係數代表該特徵每增一單位對「對數勝算」的影響；取指數 e 的係數次方即勝算比(odds ratio)，大於 1 提高該類機率、小於 1 降低。"}}, {"@type": "Question", "name": "多分類怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "用 Softmax(多項式邏輯斯回歸)，或用 One-vs-Rest 拆成多個二元分類。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="matrix.html">分類問題</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="overfitting_underfitting.html">監督式學習</a><a href="regression.html">回歸問題</a><a href="liner.html">線性回歸</a><a href="l2.html">Ridge (L2)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

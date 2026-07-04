@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 美術設計師路線 · 學習路線</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。 多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/roadmap-designer.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="AI 美術設計師路線 · 學習路線">
+    <meta property="og:description" content="如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。 多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/roadmap-designer.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI 美術設計師路線 · 學習路線">
+    <meta name="twitter:description" content="如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。 多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "AI 美術設計師路線 · 學習路線",
+  "url": "https://akira.ipas-ai.com/roadmap-designer.html",
+  "description": "如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。 多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"✓";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">AI Designer · 學習路線</span>
+    <h1><span class="en">AI 美術設計師路線</span></h1>
+    <div class="sub">用 AI 工具強化設計工作流</div>
+    <p class="lede">給設計師的 AI 路線：設計基礎、AI 工具、進階應用、整合到工作流程。</p>
+    <div class="eq-hero">7 個階段，循序漸進，逐一達成里程碑</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 這條路線是什麼</div>
+  <h2>給「想用 AI 的設計工作者」的階段地圖</h2>
+  <p>給設計師的 AI 路線：設計基礎、AI 工具、進階應用、整合到工作流程。</p>
+      <div class="callout"><h3>怎麼用這張地圖</h3><p style="margin-bottom:0">學習路線把一個大目標拆成 <b>7 個階段</b>，每階段有「<b>要學什麼</b>」「<b>里程碑</b>（學到這你就過關）」「<b>產出範例</b>（動手做什麼證明你會了）」。照順序走，不要跳關。</p></div>
+      <p class="hint">下面每個階段都可以點開（手風琴），就地展開該階段的學習內容與目標。</p>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 互動學習地圖</div>
+  <h2>點階段，看要學什麼、達成什麼</h2>
+  <p>這條路線共 <span class="c-en hl">7 個階段</span>，循序漸進。點開下面各階段，即可就地展開該階段的學習內容：</p>
+      <div class="card">
+        <div id="rmAcc" class="rm-acc"></div>
+        <p class="hint">建議：每個階段都務必完成「產出範例」那種動手練習。看懂不等於會做，做出來才算真的學會、也才是面試/考試的本錢。</p>
+      </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 里程碑總覽</div>
+  <h2>走完每一階段，你會達成</h2>
+  <p>把各階段的里程碑串起來，就是你的成長軌跡。逐一達成，就完成這條路線：</p>
+      <div class="card"><ul class="li pro" style="list-style:none"><li><b>階段 1 基礎工具</b>：產出基礎海報草圖</li><li><b>階段 2 圖生成編輯</b>：產出高品質圖資與插圖</li><li><b>階段 3 影片與編輯</b>：完成影片原型</li><li><b>階段 4 進階整合</b>：優化視聽整合輸出</li><li><b>階段 5 自動化倫理</b>：建立安全工作流</li><li><b>階段 6 應用迭代</b>：產出高品質多媒體內容</li><li><b>設計作品集</b>：完成多媒體作品集</li></ul></div>
+</div></section>
+
+<style>
+.rm-acc{display:flex;flex-direction:column;gap:10px;margin:6px 0 4px}
+.rm-item{border:1px solid var(--line,#e6e9ef);border-radius:12px;background:var(--paper,#fff);overflow:hidden}
+.rm-item[open]{border-color:var(--en,#2563eb);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.rm-head{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;font-weight:700;color:var(--ink2,#2c3e50);user-select:none}
+.rm-head::-webkit-details-marker{display:none}
+.rm-head:hover{background:var(--paper2,#f6f8fc)}
+.rm-num{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff}
+.rm-label{flex:1;font-size:15px}
+.rm-chev{flex:none;transition:transform .2s;color:var(--muted,#9aa1ac)}
+.rm-item[open] .rm-chev{transform:rotate(180deg)}
+.rm-body{padding:0 18px 16px 58px}
+.rm-desc{color:var(--ink2,#475467);margin:0 0 10px}
+.rm-learn{margin:0 0 8px;color:var(--ink2,#475467);line-height:1.85}
+.rm-cap{display:inline-block;font-size:12px;font-weight:700;color:var(--muted,#9aa1ac);background:var(--paper2,#eef1f6);border-radius:6px;padding:2px 9px;margin-right:8px}
+.rm-mile{margin:8px 0 0;font-size:14px;color:var(--ink2,#475467)}
+.rm-ex{margin:6px 0 0;font-size:14px;color:var(--muted,#6b7280)}
+.rm-head{transition:background .15s}
+.rm-item[open] .rm-body{animation:rmOpen .28s cubic-bezier(.22,.61,.36,1)}
+@keyframes rmOpen{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.rm-list{margin:2px 0 0;padding-left:22px}.rm-list li{margin:6px 0;color:var(--ink2,#475467);line-height:1.75}.rm-list li b{color:var(--en,#2563eb)}
+@media(max-width:520px){.rm-body{padding-left:18px}}
+</style>
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const stages=[{"label": "階段 1 基礎工具", "desc": "從Nano Banana與Midjourney入門，結合Suno與Canva，熟悉介面與建立提示工程基礎，避免創意被取代。", "apps": [{"t": "Nano Banana", "d": "Google Gemini 原生影像生成,文字生圖與多圖角色一致。"}, {"t": "Midjourney", "d": "畫面品質與藝術風格著稱的生圖工具。"}, {"t": "Stable Diffusion", "d": "開源生圖模型,可自架、客製化。"}, {"t": "Suno", "d": "用文字生成歌曲(含人聲)的 AI 音樂。"}, {"t": "Canva Magic", "d": "模板式 AI 設計,快速產社群素材與簡報。"}, {"t": "提示詞基礎", "d": "用描述、風格、構圖關鍵字引導生圖。"}, {"t": "圖像基本概念", "d": "解析度、長寬比、構圖與色彩。"}, {"t": "版權概念", "d": "認識生成內容的授權與商用界線。"}], "mile": "產出基礎海報草圖", "ex": "簡單海報與配樂"}, {"label": "階段 2 圖生成編輯", "desc": "Nano Banana修圖、Midjourney創建插圖、Adobe Firefly填充、Claid.ai優化；ComfyUI鏈接步驟。", "apps": [{"t": "Adobe Firefly", "d": "可商用、與 Photoshop 整合的生成功能。"}, {"t": "局部重繪", "d": "Inpainting 修改圖像局部、去除或替換。"}, {"t": "去背與修圖", "d": "Claid.ai 等自動去背、生成情境圖。"}, {"t": "風格控制", "d": "鎖定風格、參考圖、ControlNet 控構圖。"}, {"t": "角色一致", "d": "讓同一角色在多張圖保持一致。"}, {"t": "ComfyUI 基礎", "d": "節點式生圖工作流,可控性高。"}, {"t": "升頻與修復", "d": "放大解析度、修細節(Upscale)。"}, {"t": "3D 與概念圖", "d": "Krea 等即時生成、快速試風格。"}], "mile": "產出高品質圖資與插圖", "ex": "高解析商業插畫"}, {"label": "階段 3 影片與編輯", "desc": "Runway ML轉影片、Heygen創建Avatar、CapCut AI剪輯；Suno配樂、ElevenLabs配音；ComfyUI轉動畫。", "apps": [{"t": "文字生影片", "d": "Runway、Kling、Veo 等文生影片工具。"}, {"t": "圖生影片", "d": "讓靜圖動起來、加運鏡。"}, {"t": "AI 虛擬人", "d": "HeyGen、Synthesia 生成口型同步影片。"}, {"t": "AI 配音", "d": "ElevenLabs 高品質配音與語音克隆。"}, {"t": "AI 剪輯", "d": "CapCut 自動字幕、去贅字、特效。"}, {"t": "運鏡與分鏡", "d": "規劃鏡頭與敘事節奏。"}, {"t": "音樂與音效", "d": "為影片配上 AI 生成配樂。"}, {"t": "影片規格", "d": "解析度、幀率、格式與平台需求。"}], "mile": "完成影片原型", "ex": "有聲動態故事板"}, {"label": "階段 4 進階整合", "desc": "Synthesia唇同步、Agent Opus自動化多步驟；Nano Banana+Suno視聽整合；ComfyUI多模態與Canva模板化。", "apps": [{"t": "多模態整合", "d": "串文字、圖、影、音成完整作品流程。"}, {"t": "ComfyUI 進階", "d": "複雜可控的節點流程(批次、條件)。"}, {"t": "工作流自動化", "d": "用 Agent 串多步驟設計流程。"}, {"t": "API 串接", "d": "把生成模型接進自己的工具或流程。"}, {"t": "批次生成", "d": "一次大量出圖,提升產能。"}, {"t": "風格訓練", "d": "用 LoRA 訓練專屬風格或角色。"}, {"t": "品質把關", "d": "篩選、精修、確保一致與商用品質。"}, {"t": "跨工具協作", "d": "結合 Photoshop、After Effects 等收尾。"}], "mile": "優化視聽整合輸出", "ex": "自動化行銷短片"}, {"label": "階段 5 自動化倫理", "desc": "Claid.ai批量處理、Krea特效；管理語音版權與隱形水印；ComfyUI雲端版；確保輸出合規與高品質。", "apps": [{"t": "批量處理", "d": "大量生成與後製,適合電商高頻出圖。"}, {"t": "版權與授權", "d": "搞懂訓練資料與商用條款,避免侵權。"}, {"t": "肖像與同意", "d": "用真人肖像需取得授權與注意法規。"}, {"t": "資料偏見", "d": "注意生成內容的刻板印象與偏誤。"}, {"t": "浮水印與來源", "d": "標示 AI 生成、可追溯。"}, {"t": "雲端算力", "d": "ComfyUI Cloud 等免裝顯卡跑重模型。"}, {"t": "成本控管", "d": "管理生成的算力與訂閱花費。"}, {"t": "隱私保護", "d": "處理客戶素材時保護機敏資訊。"}], "mile": "建立安全工作流", "ex": "合規商業設計案"}, {"label": "階段 6 應用迭代", "desc": "實作端到端專案：整合MJ、Runway、Synthesia等工具；ComfyUI核心鏈接；測試反饋並以Nano Banana精修。", "apps": [{"t": "端到端專案", "d": "從需求到成品獨立完成設計案。"}, {"t": "工作流範本", "d": "把常用流程做成可重用 Workflow。"}, {"t": "局部精修", "d": "用 Nano Banana 等對成品微調、保持一致。"}, {"t": "客戶溝通", "d": "把需求轉成提示、依回饋調整。"}, {"t": "效率優化", "d": "找瓶頸、用模板與自動化加速。"}, {"t": "品牌一致性", "d": "維持風格、色彩與調性統一。"}, {"t": "成效評估", "d": "用點擊、轉換等數據驗證作品。"}, {"t": "持續學習", "d": "跟上快速更新的工具與模型。"}], "mile": "產出高品質多媒體內容", "ex": "全AI製作品牌影片"}, {"label": "設計作品集", "desc": "收集工具輔助作品（如ComfyUI+Nano Banana+Suno影片）；記錄前後比較；上傳Behance/YT展示效率與創意。", "apps": [{"t": "作品集平台", "d": "Behance 等把代表作整理成線上履歷。"}, {"t": "案例敘事", "d": "說明需求、思路與成果,不只放圖。"}, {"t": "製作過程", "d": "展示發想與迭代,呈現專業度。"}, {"t": "Before/After", "d": "用對照凸顯你帶來的價值。"}, {"t": "短影音展示", "d": "用影片呈現動態作品與流程。"}, {"t": "成效數據", "d": "附上點擊、轉換等實際成效。"}, {"t": "個人風格", "d": "讓作品集有辨識度與一致調性。"}], "mile": "完成多媒體作品集", "ex": "AI 輔助設計Showreel"}];
+  const acc=document.getElementById("rmAcc");
+  const COLORS=["var(--l1)","var(--l2)","var(--en)","var(--ok)","var(--bad)"];
+  acc.innerHTML=stages.map(function(s,i){return '<details class="rm-item"'+(i===0?' open':'')+'><summary class="rm-head"><span class="rm-num" style="background:'+COLORS[i%COLORS.length]+'">'+(i+1)+'</span><span class="rm-label">'+s.label+'</span><span class="rm-chev">▾</span></summary><div class="rm-body"><p class="rm-desc">'+s.desc+'</p><div class="rm-learn"><div class="rm-cap" style="margin-bottom:6px">要學什麼</div><ul class="rm-list">'+s.apps.map(function(a){return '<li><b>'+a.t+'</b> — '+a.d+'</li>';}).join("")+'</ul></div>'+(s.mile?'<p class="rm-mile"><b>里程碑：</b>'+s.mile+'</p>':'')+(s.ex?'<p class="rm-ex">🛠️ <b>產出範例：</b>'+s.ex+'</p>':'')+'</div></details>';}).join("");
+  acc.querySelectorAll("details").forEach(function(d){d.addEventListener("toggle",function(){if(d.open)acc.querySelectorAll("details").forEach(function(o){if(o!==d)o.open=false;});});});
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>這條設計師路線在學什麼？</summary><p>如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。</p></details><details><summary>需要會寫程式嗎？</summary><p>多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。</p></details><details><summary>會學到哪些工具與概念？</summary><p>文字生圖模型(如擴散模型)、提示工程、圖生圖與重繪、風格與構圖控制，以及 CLIP 圖文對齊等背後概念。</p></details><details><summary>用 AI 生圖要注意什麼？</summary><p>版權與授權、訓練資料偏誤、商用條款，以及避免侵權與不當內容；把 AI 當創作夥伴並保有自己的判斷與風格。</p></details><details><summary>適合非美術背景嗎？</summary><p>適合；AI 大幅降低製圖門檻，搭配審美培養與提示技巧，非科班也能快速產出；本站動畫頁可直觀理解生成原理。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "這條設計師路線在學什麼？", "acceptedAnswer": {"@type": "Answer", "text": "如何用生成式 AI 輔助美術與設計：文字生圖、影像編輯、風格控制，以及把 AI 融入創作流程。"}}, {"@type": "Question", "name": "需要會寫程式嗎？", "acceptedAnswer": {"@type": "Answer", "text": "多數工具不必寫程式、以介面與提示(prompt)操作為主；重點是理解模型特性與下好提示，門檻較低。"}}, {"@type": "Question", "name": "會學到哪些工具與概念？", "acceptedAnswer": {"@type": "Answer", "text": "文字生圖模型(如擴散模型)、提示工程、圖生圖與重繪、風格與構圖控制，以及 CLIP 圖文對齊等背後概念。"}}, {"@type": "Question", "name": "用 AI 生圖要注意什麼？", "acceptedAnswer": {"@type": "Answer", "text": "版權與授權、訓練資料偏誤、商用條款，以及避免侵權與不當內容；把 AI 當創作夥伴並保有自己的判斷與風格。"}}, {"@type": "Question", "name": "適合非美術背景嗎？", "acceptedAnswer": {"@type": "Answer", "text": "適合；AI 大幅降低製圖門檻，搭配審美培養與提示技巧，非科班也能快速產出；本站動畫頁可直觀理解生成原理。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="roadmap-ai-coding.html">AI 學寫程式路線 · 學習路線</a><a href="roadmap-data.html">資料分析主線 · 學習路線</a><a href="roadmap-engineer.html">AI 工程師主線 · 學習路線</a><a href="roadmap-ipas-intermediate.html">iPAS 中級 AI 應用規劃師 · 學習路線</a><a href="roadmap-ipas-junior.html">iPAS 初級 AI 應用規劃師 · 學習路線</a><a href="roadmap-product.html">AI 產品主線 · 學習路線</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><p class="hint" style="margin:0 0 12px">學習路線不是死的——你可以依自己的背景加速或補強某些階段，但「先打基礎再進階」的大方向別顛倒。</p><span class="serif" style="font-style:italic">AI 美術設計師路線</span> · 互動教學</div></footer>
+</body>
+</html>

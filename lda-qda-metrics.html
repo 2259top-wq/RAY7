@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LDA / QDA 評估指標 · 互動教學</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。 資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/lda-qda-metrics.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="LDA / QDA 評估指標 · 互動教學">
+    <meta property="og:description" content="線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。 資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/lda-qda-metrics.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LDA / QDA 評估指標 · 互動教學">
+    <meta name="twitter:description" content="線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。 資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "LDA / QDA 評估指標 · 互動教學",
+  "url": "https://akira.ipas-ai.com/lda-qda-metrics.html",
+  "description": "線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。 資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fbf9f4; --ink:#1b1e26; --ink2:#3c4250;
+    --muted:#6b7280; --faint:#9aa1ac; --rule:#ddd6c8; --rule2:#e9e3d6;
+    --l1:#2f6fed; --l1-soft:#dce8ff; --l2:#ef7b30; --l2-soft:#fce4cf;
+    --en:#7c3aed; --en-soft:#ece1ff; --ok:#15976b; --bad:#d6455c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(900px 520px at 88% -8%, rgba(124,58,237,.06), transparent 60%),
+      radial-gradient(700px 520px at -5% 12%, rgba(47,111,237,.05), transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,system-ui,sans-serif;
+    line-height:1.85;letter-spacing:.01em;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Noto Serif TC",serif}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header.hero{position:relative;padding:90px 0 56px;text-align:center}
+  .eyebrow{display:inline-flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.30em;
+    color:var(--en);border:1px solid var(--en);padding:7px 18px;border-radius:999px;
+    background:var(--en-soft);margin-bottom:26px;font-family:Georgia,serif;animation:rise .7s both}
+  h1{font-size:clamp(38px,8vw,68px);font-weight:800;letter-spacing:-.02em;line-height:1.04;margin-bottom:10px;animation:rise .7s .06s both}
+  h1 .en{font-family:Georgia,serif;font-style:italic;font-weight:700;
+    background:linear-gradient(100deg,var(--l1),var(--en) 52%,var(--l2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:16px;color:var(--muted);letter-spacing:.06em;margin-bottom:22px;animation:rise .7s .1s both}
+  .lede{font-size:clamp(17px,2.3vw,20px);color:var(--ink2);max-width:600px;margin:0 auto;animation:rise .7s .16s both}
+  .eq-hero{font-family:Georgia,serif;font-size:clamp(15px,2.4vw,19px);color:var(--ink);margin-top:30px;
+    background:var(--paper2);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:inline-block;animation:rise .7s .22s both}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  section{padding:50px 0;border-top:1px solid var(--rule)}
+  .sec-num{font-family:Georgia,serif;font-size:13px;letter-spacing:.28em;color:var(--en);margin-bottom:8px}
+  h2{font-size:clamp(24px,4.4vw,34px);font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-bottom:14px}
+  h3{font-size:19px;font-weight:700;margin:4px 0 8px}
+  p{color:var(--ink2);margin-bottom:16px}
+  p .hl{color:var(--ink);font-weight:600}
+  .c-l1{color:var(--l1)}.c-l2{color:var(--l2)}.c-en{color:var(--en)}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .card{background:var(--paper2);border:1px solid var(--rule);border-radius:18px;padding:22px;margin:22px 0;
+    box-shadow:0 1px 0 #fff inset, 0 18px 40px -34px rgba(27,30,38,.5)}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+  @media(max-width:640px){.trio{grid-template-columns:1fr}}
+  .persona{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .persona svg{width:84px;height:84px;margin-bottom:8px}
+  .persona .nm{font-weight:800;font-size:17px}
+  .persona .tag{font-size:12px;letter-spacing:.05em;font-family:Georgia,serif;color:var(--en)}
+  .persona p{font-size:14px;margin:8px 0 0;color:var(--muted)}
+  .persona.hi{border-color:var(--en);box-shadow:0 0 0 3px var(--en-soft)}
+  .svgbox{background:var(--paper2);border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+  .svgbox svg{display:block;width:100%;height:auto;touch-action:none}
+  .slider-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+  .slider-row label{font-size:14px;color:var(--muted);min-width:118px}
+  input[type=range]{flex:1;min-width:150px;height:4px;accent-color:var(--en)}
+  .val{font-family:Georgia,serif;font-variant-numeric:tabular-nums;color:var(--en);font-weight:700;min-width:48px;text-align:right}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink2);background:var(--paper);
+    border:1px solid var(--rule);border-radius:9px;padding:8px 14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--en);color:var(--en)}
+  button.btn{font-family:inherit;font-size:14px;font-weight:600;color:#fff;background:var(--en);
+    border:none;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.12s}
+  button.btn:hover{filter:brightness(1.06)} button.btn:active{transform:scale(.96)}
+  button.btn.ghost{background:transparent;color:var(--ink2);border:1px solid var(--rule)}
+  button.btn.ghost:hover{border-color:var(--en);color:var(--en)}
+  .seg{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:4px;gap:4px}
+  .seg button{font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;transition:.15s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(27,30,38,.12)}
+  .readout{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .ro{flex:1;min-width:100px;background:var(--paper);border:1px solid var(--rule);border-radius:11px;padding:12px 14px}
+  .ro .k{font-size:12px;color:var(--muted)}
+  .ro .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;margin-top:6px}
+  .badge.drop{background:#fde8eb;color:var(--bad);border:1px solid #f3c2c9}
+  .badge.keep{background:#e1f3ec;color:var(--ok);border:1px solid #bfe5d3}
+  .hint{font-size:14px;color:var(--faint);margin-top:13px;display:flex;gap:8px;align-items:flex-start}
+  .hint::before{content:"\263E";color:var(--l2)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .legend i{display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+  .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:middle}
+  .callout{border-left:3px solid var(--en);background:var(--en-soft);padding:16px 20px;border-radius:0 12px 12px 0;margin:22px 0}
+  .callout h3{margin-top:0}
+  .formula{font-family:Georgia,serif;font-size:18px;text-align:center;background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:13px 16px;margin:14px 0;overflow-x:auto;white-space:nowrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}}
+  .prosbox{border:1px solid var(--rule);border-radius:14px;padding:18px;background:var(--paper2)}
+  .prosbox.pro{border-left:4px solid var(--ok)} .prosbox.con{border-left:4px solid var(--l2)}
+  .prosbox h3{margin-top:0}
+  .li{list-style:none} .li li{position:relative;padding-left:26px;margin-bottom:10px;color:var(--ink2);font-size:15px}
+  .li.pro li::before{content:"+";position:absolute;left:4px;color:var(--ok);font-weight:800}
+  .li.con li::before{content:"\2212";position:absolute;left:5px;color:var(--l2);font-weight:800}
+  .usecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  @media(max-width:640px){.usecards{grid-template-columns:1fr}}
+  .uc{background:var(--paper2);border:1px solid var(--rule);border-radius:16px;padding:18px;text-align:center}
+  .uc .ic{font-size:30px} .uc .t{font-weight:700;margin-top:6px} .uc .d{font-size:13px;color:var(--muted);margin-top:4px}
+  footer{padding:46px 0 78px;text-align:center;color:var(--faint);font-size:14px;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Accuracy · Class Separability</span>
+    <h1><span class="en">判別分析的評估指標</span></h1>
+    <div class="sub">準確率 × 類別分離度</div>
+    <p class="lede">判別分析分得好不好，看兩件事：分得準（準確率）、分得開（類別分離度）。<br>分離度是問題的先天難度——兩群太近，再好的模型也救不了。</p>
+    <div class="eq-hero">準確率 = (TP+TN)/N　·　分離度 d′ = |μ_A−μ_B|/σ</div>
+  </div>
+</header>
+<section><div class="wrap">
+  <div class="sec-num">01 — 白話直覺</div>
+  <h2>判別分析在做什麼？怎麼評估它？</h2>
+  <p>LDA / QDA 是<span class="hl">分類器</span>：它假設每個類別的資料各自呈常態分布，然後找一條界線把類別分開。LDA 用直線邊界、QDA 允許彎曲邊界。評估它好不好，看兩件事：<span class="c-en hl">分得準不準（準確率）</span>，以及<span class="c-l2 hl">兩群分得開不開（類別分離度）</span>。</p>
+  <div class="trio">
+    <div class="persona hi"><svg viewBox="0 0 100 100"><path d="M20 70 Q34 30 48 70" fill="none" stroke="var(--l1)" stroke-width="2.6"/><path d="M52 70 Q66 30 80 70" fill="none" stroke="var(--l2)" stroke-width="2.6"/><line x1="50" y1="20" x2="50" y2="80" stroke="var(--en)" stroke-width="2" stroke-dasharray="3 3"/></svg><div class="nm">類別分離度</div><div class="tag">分得開嗎</div><p>兩群中心離越遠、各自越集中，越好分。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><rect x="22" y="22" width="24" height="24" fill="var(--ok)" opacity=".8"/><rect x="54" y="22" width="24" height="24" fill="var(--bad)" opacity=".6"/><rect x="22" y="54" width="24" height="24" fill="var(--bad)" opacity=".6"/><rect x="54" y="54" width="24" height="24" fill="var(--ok)" opacity=".8"/></svg><div class="nm">準確率</div><div class="tag">混淆矩陣</div><p>對角線（猜對）越多越好，斜角（猜錯）越少越好。</p></div>
+    <div class="persona"><svg viewBox="0 0 100 100"><path d="M16 72 Q50 -2 84 72" fill="none" stroke="var(--en)" stroke-width="2.6"/></svg><div class="nm">QDA 邊界</div><div class="tag">可彎曲</div><p>各類變異不同時，彎曲邊界比直線分得更準。</p></div>
+  </div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">02 — 核心互動</div>
+  <h2>拉動門檻，看分離度如何決定準確率</h2>
+  <p>下圖是兩個類別投影到一條軸上的分布（<span class="c-l1">藍 = 類別 A</span>、<span class="c-l2">橘 = 類別 B</span>）。拖動<span class="c-en hl">決策門檻</span>看準確率怎麼變；再調「兩群距離」看<span class="hl">分離度</span>如何根本性地決定一個分類問題的上限。</p>
+  <div class="card">
+    <div class="svgbox"><svg id="ldaSvg" viewBox="0 0 460 280"></svg></div>
+    <div class="slider-row"><label>決策門檻</label><input type="range" id="thr" min="60" max="400" step="1" value="230"><span class="val" id="thrV">230</span></div>
+    <div class="slider-row"><label>兩群距離（分離度）</label><input type="range" id="sep" min="20" max="200" step="2" value="110"><span class="val" id="sepV">110</span></div>
+    <div class="readout">
+      <div class="ro"><div class="k">準確率</div><div class="v c-en" id="acc">—</div></div>
+      <div class="ro"><div class="k">分離度 (d′)</div><div class="v" id="dp">—</div></div>
+      <div class="ro"><div class="k">狀態</div><div id="ldaStat" style="margin-top:2px"></div></div>
+    </div>
+    <p class="hint">當兩群靠很近（分離度小），不管門檻怎麼調，準確率都上不去——這就是「類別分離度」的意義：它是這個分類問題先天的難度上限。</p>
+  </div>
+  <div class="formula">d′ = |μ_A − μ_B| / σ　　準確率 = (TP + TN) / 全部</div>
+</div></section>
+<section><div class="wrap">
+  <div class="sec-num">03 — 指標一覽</div>
+  <h2>判別分析常看哪些指標？</h2>
+  <p><b>準確率 (Accuracy)</b>：整體猜對比例，類別均衡時好用。<b>類別分離度 (d′ / Fisher 比)</b>：衡量群間距離相對群內離散的大小。類別不均衡時，還要再看 <b>精確率 / 召回率 / F1</b>。</p><div class="grid2">
+  <div class="prosbox pro"><h3 style="color:var(--ok)">優點</h3><ul class="li pro"><li>準確率直覺、一眼看懂整體表現</li><li>分離度反映問題本質難度，與模型無關</li><li>LDA 的判別軸還能順便做降維與視覺化</li></ul></div>
+  <div class="prosbox con"><h3 style="color:var(--l2)">缺點 / 限制</h3><ul class="li con"><li>類別不均衡時，準確率會騙人（全猜多數類也很高）</li><li>分離度假設常態分布，偏態資料會失真</li><li>高維、非線性結構下，線性分離度低估了可分性</li></ul></div>
+</div><h3 style='margin-top:26px'>典型應用場景</h3><div class="usecards"><div class="uc"><div class="ic">🩺</div><div class="t">醫學診斷</div><div class="d">用檢驗數值區分患病 / 健康</div></div><div class="uc"><div class="ic">🏦</div><div class="t">信用評分</div><div class="d">區分高風險 / 低風險客戶</div></div><div class="uc"><div class="ic">📊</div><div class="t">品質檢測</div><div class="d">良品 / 瑕疵品的二分類</div></div></div>
+</div></section>
+
+<script>
+
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function txt(x,y,s,o){const a=Object.assign({x:x,y:y,"font-size":12,fill:"#6b7280","text-anchor":"middle"},o||{});const t=el("text",a);t.textContent=s;return t;}
+function lerp(a,b,t){return a+(b-a)*t;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+
+(function(){
+  const svg=document.getElementById("ldaSvg");
+  const thrS=document.getElementById("thr"), thrV=document.getElementById("thrV");
+  const sepS=document.getElementById("sep"), sepV=document.getElementById("sepV");
+  const accE=document.getElementById("acc"), dpE=document.getElementById("dp"), stat=document.getElementById("ldaStat");
+  const W=460,H=280, base=210, padL=30, padR=20, sigma=46;
+  let thr=230, sep=110;
+  function gauss(x,mu,s){return Math.exp(-((x-mu)**2)/(2*s*s));}
+  function build(){
+    while(svg.firstChild)svg.removeChild(svg.firstChild);
+    const muA=230-sep/2, muB=230+sep/2, amp=150;
+    svg.appendChild(el("line",{x1:padL,y1:base,x2:W-padR,y2:base,stroke:"#cfc8b8","stroke-width":1.5}));
+    function curve(mu,col){let d="";for(let px=padL;px<=W-padR;px+=2){const y=base-amp*gauss(px,mu,sigma);d+=(px===padL?"M":"L")+px+" "+y.toFixed(1);}
+      svg.appendChild(el("path",{d,fill:"none",stroke:col,"stroke-width":2.4}));
+      // shaded fill
+      svg.appendChild(el("path",{d:d+` L ${W-padR} ${base} L ${padL} ${base} Z`,fill:col,opacity:.10}));}
+    curve(muA,"var(--l1)"); curve(muB,"var(--l2)");
+    // threshold line
+    svg.appendChild(el("line",{x1:thr,y1:30,x2:thr,y2:base,stroke:"var(--en)","stroke-width":2.4,"stroke-dasharray":"5 4"}));
+    svg.appendChild(txt(thr,24,"門檻",{fill:"var(--en)","font-weight":700,"font-size":12}));
+    svg.appendChild(txt(muA,base+20,"類別 A",{fill:"var(--l1)","font-size":12,"font-weight":700}));
+    svg.appendChild(txt(muB,base+20,"類別 B",{fill:"var(--l2)","font-size":12,"font-weight":700}));
+    // accuracy via overlap: A correct if x<thr, B correct if x>thr
+    let correct=0,total=0;
+    for(let px=padL;px<=W-padR;px+=1){const a=gauss(px,muA,sigma),b=gauss(px,muB,sigma);total+=a+b;
+      correct += (px<thr? a : 0) + (px>=thr? b : 0);}
+    const acc=correct/total; const dprime=Math.abs(muA-muB)/sigma;
+    accE.textContent=(acc*100).toFixed(1)+"%"; dpE.textContent=dprime.toFixed(2);
+    stat.innerHTML = acc>0.9?'<span class="badge keep">✓ 分得很開</span>':(acc>0.72?'<span class="badge keep" style="background:#fff7e6;color:#b7791f;border-color:#f3dca0">~ 普通</span>':'<span class="badge drop">✕ 重疊嚴重</span>');
+  }
+  thrS.addEventListener("input",()=>{thr=+thrS.value;thrV.textContent=thr;build();});
+  sepS.addEventListener("input",()=>{sep=+sepS.value;sepV.textContent=sep;build();});
+  build();
+})();
+
+</script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>LDA 與 QDA 是基於機率的分類法,iPAS 中級科目三考點。重點:都假設各類服從常態,LDA 假設共用相同共變異數(決策邊界線性)、QDA 各類各自共變異數(邊界為二次曲線)。易混點:QDA 更彈性但參數多、資料少易過擬合;這個 LDA 是線性判別分析,別跟主題模型 LDA 混。情境:資料近常態、想要可解釋的機率分類。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>LDA 和 QDA 是什麼？</summary><p>線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。</p></details><details><summary>LDA 和 QDA 怎麼選？</summary><p>資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。</p></details><details><summary>LDA 也能降維？</summary><p>能；LDA 可當監督式降維，找最能分開各類別的方向(最大化類間、最小化類內變異)，與 PCA(非監督、看變異)不同。</p></details><details><summary>怎麼評估這類分類器？</summary><p>用分類指標：準確率、Precision 與 Recall、F1、混淆矩陣、ROC-AUC；不平衡時看 F1 與 PR-AUC。</p></details><details><summary>LDA 和 PCA 差在哪？</summary><p>PCA 非監督、找最大變異方向；LDA 監督、找最能分類的方向；降維目的不同(保留資訊相對保留可分性)。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "LDA 和 QDA 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "線性判別分析(LDA)與二次判別分析(QDA)是基於機率的分類法；LDA 假設各類共用相同共變異(邊界線性)，QDA 允許各類不同共變異(邊界二次)。"}}, {"@type": "Question", "name": "LDA 和 QDA 怎麼選？", "acceptedAnswer": {"@type": "Answer", "text": "資料少或各類共變異相近用 LDA(較穩、參數少)；各類分散差異大且資料足夠用 QDA(更彈性但易過擬合)。"}}, {"@type": "Question", "name": "LDA 也能降維？", "acceptedAnswer": {"@type": "Answer", "text": "能；LDA 可當監督式降維，找最能分開各類別的方向(最大化類間、最小化類內變異)，與 PCA(非監督、看變異)不同。"}}, {"@type": "Question", "name": "怎麼評估這類分類器？", "acceptedAnswer": {"@type": "Answer", "text": "用分類指標：準確率、Precision 與 Recall、F1、混淆矩陣、ROC-AUC；不平衡時看 F1 與 PR-AUC。"}}, {"@type": "Question", "name": "LDA 和 PCA 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "PCA 非監督、找最大變異方向；LDA 監督、找最能分類的方向；降維目的不同(保留資訊相對保留可分性)。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="lda.html">LDA / QDA</a><a href="mae-mse-rmse-r2.html">MAE、MSE、RMSE、R²</a><a href="rocauc.html">準確率、F1、Log Loss</a><a href="f1.html">準確率、OOB誤差、特徵重要性</a><a href="roc_interactive.html">準確率、AUC-ROC、Log Loss</a><a href="matrix.html">準確率、邊界間距</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+<footer><div class="wrap"><span class="serif" style="font-style:italic">判別分析的評估指標</span> · 互動教學</div></footer>
+</body>
+</html>

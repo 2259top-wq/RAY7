@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transformer 拼圖遊戲</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。 讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/transformer_game.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Transformer 拼圖遊戲">
+    <meta property="og:description" content="它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。 讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/transformer_game.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Transformer 拼圖遊戲">
+    <meta name="twitter:description" content="它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。 讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Transformer 拼圖遊戲",
+  "url": "https://akira.ipas-ai.com/transformer_game.html",
+  "description": "它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。 讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "game",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── DARK THEME (default) ── */
+    :root {
+      --bg: #06060e;
+      --bg2: #0d0d1a;
+      --surface: #13131f;
+      --surface2: #1a1a28;
+      --surface3: #22223a;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.14);
+      --border-dz: rgba(255, 255, 255, 0.35);
+      --text: #e4e4f0;
+      --text2: #9090b0;
+      --text3: #55556e;
+      --accent: #6c63ff;
+      --accent-glow: rgba(108, 99, 255, 0.35);
+      --teal: #00d4aa;
+      --amber: #ffb830;
+      --coral: #ff6b6b;
+      --green: #4ade80;
+      --pink: #f472b6;
+      --blue: #60a5fa;
+      --mono: 'JetBrains Mono', monospace;
+      --display: 'Syne', sans-serif;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── LIGHT THEME ── */
+    html.light {
+      --bg: #f5f5f8;
+      --bg2: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f0f0f5;
+      --surface3: #e4e4ed;
+      --border: rgba(0, 0, 0, 0.08);
+      --border2: rgba(0, 0, 0, 0.14);
+      --border-dz: rgba(0, 0, 0, 0.18);
+      --text: #1a1a2e;
+      --text2: #4a4a6a;
+      --text3: #8888a8;
+      --accent: #5b52e0;
+      --accent-glow: rgba(91, 82, 224, 0.2);
+      --teal: #00a688;
+      --amber: #d4890a;
+      --coral: #e04545;
+      --green: #22a85a;
+      --pink: #d0368a;
+      --blue: #3b82d0;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--display);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── SCANLINE TEXTURE (dark mode only) ── */
+    html:not(.light) body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+    }
+
+    /* ── HEADER ── */
+    #header {
+      flex-shrink: 0;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--bg2);
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .prompt-chip {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--teal);
+      background: rgba(0, 212, 170, 0.08);
+      border: 1px solid rgba(0, 212, 170, 0.2);
+      border-radius: 20px;
+      padding: 4px 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 8000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid;
+      max-width: 260px;
+      line-height: 1.5;
+      animation: toastIn .3s cubic-bezier(.34, 1.56, .64, 1);
+      pointer-events: none;
+    }
+
+    .toast-msg.toast-ok {
+      background: rgba(0, 212, 170, 0.12);
+      border-color: rgba(0, 212, 170, 0.35);
+      color: var(--teal);
+    }
+
+    .toast-msg.toast-err {
+      background: rgba(255, 107, 107, 0.12);
+      border-color: rgba(255, 107, 107, 0.35);
+      color: var(--coral);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px) scale(.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+    }
+
+    /* ── MAIN LAYOUT ── */
+    #main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* ── LEFT PANEL ── */
+    #left-panel {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .left-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text3);
+      padding: 0 4px;
+      margin-bottom: 4px;
+    }
+
+    /* ── DRAG CARDS ── */
+    .drag-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: grab;
+      user-select: none;
+      transition: transform .15s, box-shadow .15s, border-color .15s, opacity .3s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      min-height: 52px;
+    }
+
+    .drag-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .drag-card:active {
+      cursor: grabbing;
+    }
+
+    .drag-card:hover:not(.placed):not(.disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: var(--accent);
+    }
+
+    .drag-card.dragging {
+      opacity: 0.4;
+      transform: scale(0.97);
+    }
+
+    .drag-card.placed {
+      opacity: 0.3;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+    }
+
+    .drag-card.disabled {
+      opacity: 0.2;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .card-step {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      margin-bottom: 4px;
+      letter-spacing: .08em;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+      font-family: var(--mono);
+    }
+
+    .card-zh {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text2);
+      font-family: var(--mono);
+    }
+
+    /* card colors */
+    .dc-0::before {
+      background: #6c63ff;
+    }
+
+    .dc-1::before {
+      background: #00d4aa;
+    }
+
+    .dc-2::before {
+      background: #ffb830;
+    }
+
+    .dc-3::before {
+      background: #ff6b6b;
+    }
+
+    .dc-4::before {
+      background: #4ade80;
+    }
+
+    .dc-5::before {
+      background: #f472b6;
+    }
+
+    .dc-6::before {
+      background: #818cf8;
+    }
+
+    /* ── RIGHT PANEL ── */
+    #right-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    /* ── PROMPT & CHIPS ── */
+    .prompt-box {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .prompt-box .pnum {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .prompt-box .plabel {
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .prompt-box .ptext {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      font-size: 16px;
+      color: var(--text3);
+      line-height: 1;
+      margin: 3px 0;
+    }
+
+    .handoff-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 2px auto;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--mono);
+      width: fit-content;
+      border: 1px dashed;
+      opacity: 0.8;
+    }
+
+    .hc-llm {
+      background: rgba(91, 82, 224, 0.08);
+      border-color: rgba(91, 82, 224, 0.4);
+      color: var(--accent);
+    }
+
+    /* ── INLINE ACCORDION ── */
+    .zone-wrap {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 8px;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border-dz);
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all .25s;
+      min-height: 66px;
+      position: relative;
+    }
+
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.07);
+      box-shadow: inset 0 0 0 1px rgba(108, 99, 255, 0.2);
+    }
+
+    .drop-zone.correct {
+      border-color: var(--teal);
+      background: rgba(0, 212, 170, 0.06);
+      box-shadow: 0 0 20px rgba(0, 212, 170, 0.12);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .drop-zone.correct.collapsed {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    .drop-zone.wrong-flash {
+      animation: wrongFlash .5s ease;
+    }
+
+    @keyframes wrongFlash {
+
+      0%,
+      100% {
+        border-color: var(--border2);
+        background: transparent;
+      }
+
+      25%,
+      75% {
+        border-color: var(--coral);
+        background: rgba(255, 107, 107, 0.12);
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+      }
+    }
+
+    .dz-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text3);
+      width: 22px;
+      flex-shrink: 0;
+    }
+
+    .dz-placeholder {
+      font-size: 13px;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+
+    .dz-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dz-icon {
+      font-size: 20px;
+    }
+
+    .dz-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .dz-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    .dz-check {
+      font-size: 15px;
+      opacity: 0;
+      transition: opacity .4s;
+      color: var(--teal);
+    }
+
+    .dz-check.show {
+      opacity: 1;
+    }
+
+    /* toggle button */
+    .dz-toggle {
+      display: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: rgba(0, 212, 170, 0.1);
+      border: 1px solid rgba(0, 212, 170, 0.25);
+      color: var(--teal);
+      border-radius: 5px;
+      padding: 5px 11px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .dz-toggle:hover {
+      background: rgba(0, 212, 170, 0.2);
+    }
+
+    .dz-toggle.visible {
+      display: block;
+    }
+
+    /* accordion detail panel */
+    .zone-detail {
+      background: var(--surface);
+      border: 1.5px solid var(--teal);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .zone-detail.open {
+      max-height: 9999px;
+      overflow: visible;
+    }
+
+    .zone-detail-inner {
+      padding: 18px 20px 24px;
+    }
+
+    /* ── FLOATING GHOST ── */
+    #ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.85;
+      transform: rotate(3deg) scale(1.04);
+      transition: opacity .1s;
+      display: none;
+    }
+
+    /* ── SHAKE ANIMATION ── */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      15% {
+        transform: translateX(-10px) rotate(-2deg);
+      }
+
+      30% {
+        transform: translateX(10px) rotate(2deg);
+      }
+
+      45% {
+        transform: translateX(-8px) rotate(-1deg);
+      }
+
+      60% {
+        transform: translateX(8px) rotate(1deg);
+      }
+
+      75% {
+        transform: translateX(-4px);
+      }
+
+      90% {
+        transform: translateX(4px);
+      }
+    }
+
+    .shake {
+      animation: shake .55s cubic-bezier(.36, .07, .19, .97);
+    }
+
+    /* ── RESET ANIMATION ── */
+    @keyframes flyBack {
+      0% {
+        opacity: 0.9;
+        transform: scale(1.05);
+      }
+
+      60% {
+        opacity: 0.5;
+        transform: scale(0.9) translateY(-10px);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.6) translateY(-30px);
+      }
+    }
+
+    .fly-back {
+      animation: flyBack .5s ease forwards;
+    }
+
+    /* ── SUCCESS STATE ── */
+    @keyframes correctPop {
+      0% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.03);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .correct-pop {
+      animation: correctPop .35s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* ── COMPLETE OVERLAY ── */
+    #complete {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 6, 14, 0.85);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+
+    #complete.show {
+      display: flex;
+    }
+
+    .complete-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 48px 56px;
+      text-align: center;
+      max-width: 420px;
+      animation: popIn .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(.8) translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes popOut {
+      from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: scale(.85) translateY(-16px);
+      }
+    }
+
+    .complete-box.dismissing {
+      animation: popOut .4s cubic-bezier(.4, 0, .6, 1) forwards;
+    }
+
+    .complete-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .complete-sub {
+      font-size: 13px;
+      color: var(--text2);
+      font-family: var(--mono);
+      line-height: 1.7;
+    }
+
+    /* ── RESET BUTTON (top-right, hidden until complete) ── */
+    #reset-btn {
+      display: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 16px;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all .2s;
+      animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    #reset-btn:hover {
+      background: rgba(108, 99, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    #reset-btn.visible {
+      display: block;
+    }
+
+    /* ── COLLAPSE ALL BUTTON ── */
+    #collapse-btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 16px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    #collapse-btn:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+      transform: translateY(-1px);
+    }
+
+    #reset-btn {
+      margin-left: 0;
+    }
+
+    #theme-btn {
+      margin-left: auto;
+    }
+
+    .tok-anim {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .atk {
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 5px 12px;
+      border-radius: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--teal);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all .3s;
+    }
+
+    .atk.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    .vec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+    }
+
+    .vec-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+    }
+
+    .vc-tok {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--teal);
+      margin-bottom: 5px;
+    }
+
+    .vc-nums {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+
+    .mini-bar {
+      height: 3px;
+      background: var(--bg2);
+      border-radius: 2px;
+      margin: 2px 0;
+      overflow: hidden;
+    }
+
+    .mini-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    .heat-wrap {
+      overflow-x: auto;
+    }
+
+    .heat-tbl {
+      border-collapse: separate;
+      border-spacing: 3px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .heat-tbl th {
+      color: var(--text3);
+      font-weight: 400;
+      padding: 4px 6px;
+    }
+
+    .heat-tbl td {
+      width: 50px;
+      height: 30px;
+      border-radius: 4px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 10px;
+      transition: background .5s;
+    }
+
+    .calc-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .calc-tbl th {
+      background: var(--surface2);
+      color: var(--text3);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 9px 11px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .calc-tbl td {
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text2);
+    }
+
+    .calc-tbl tr:last-child td {
+      border-bottom: none;
+    }
+
+    .calc-tbl .hi {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    .prob-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pw {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      width: 76px;
+    }
+
+    .pb-bg {
+      flex: 1;
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .pb-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s cubic-bezier(.34, 1.2, .64, 1);
+    }
+
+    .ppct {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text3);
+      width: 44px;
+      text-align: right;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+
+    .slider-row label {
+      font-size: 13px;
+      color: var(--text2);
+      white-space: nowrap;
+      font-family: var(--mono);
+    }
+
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+
+    .sv {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--accent);
+      min-width: 32px;
+    }
+
+    .ffn-row2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .ff-lbl {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      width: 62px;
+      text-align: right;
+    }
+
+    .ff-bg {
+      flex: 1;
+      height: 6px;
+      background: var(--bg);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .ff-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .9s cubic-bezier(.34, 1.2, .64, 1);
+    }
+
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .layer-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 11px 14px;
+    }
+
+    .lr-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      width: 14px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .lr-info {
+      flex: 1;
+    }
+
+    .lr-name {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .lr-desc {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: var(--mono);
+      margin-top: 2px;
+    }
+
+    .lr-bar-bg {
+      width: 90px;
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .lr-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--teal));
+    }
+
+    /* ── THEME TOGGLE ── */
+    #theme-btn {
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #theme-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── INFO BANNER ── */
+    #info-banner {
+      flex-shrink: 0;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #info-banner-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 28px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .2s;
+    }
+
+    #info-banner-bar:hover {
+      background: var(--surface2);
+    }
+
+    .banner-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+
+    .banner-summary {
+      font-size: 13px;
+      color: var(--text2);
+      flex: 1;
+    }
+
+    .banner-summary b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .banner-chevron {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      transition: transform .3s;
+      flex-shrink: 0;
+    }
+
+    .banner-chevron.open {
+      transform: rotate(180deg);
+    }
+
+    #info-banner-detail {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .4s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    #info-banner-detail.open {
+      max-height: 600px;
+    }
+
+    .banner-content {
+      padding: 0 28px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .banner-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .banner-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .banner-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .banner-card-body {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+
+    .banner-card-body b {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .rl-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .rl-row:last-child {
+      border-bottom: none;
+    }
+
+    .rl-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .rl-badge.reward {
+      background: rgba(0, 212, 170, 0.15);
+      color: var(--teal);
+    }
+
+    .rl-badge.penalty {
+      background: rgba(255, 107, 107, 0.15);
+      color: var(--coral);
+    }
+
+
+    /* ── EXPLAINER classes (used inside accordion) ── */
+    .exp-header {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .exp-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .exp-title {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .exp-desc {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.85;
+      margin-top: 6px;
+    }
+
+    .exp-formula {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      line-height: 2.1;
+      color: var(--text2);
+      margin: 12px 0;
+    }
+
+    .exp-formula .hl {
+      color: var(--teal);
+    }
+
+    .exp-formula .hl2 {
+      color: var(--amber);
+    }
+
+    .exp-formula .hl3 {
+      color: var(--coral);
+    }
+
+    .exp-section {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin: 16px 0 8px;
+    }
+
+    .exp-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.85;
+    }
+
+    .exp-card b {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: particleFly var(--dur, .7s) ease-out forwards;
+    }
+
+    @keyframes particleFly {
+      from {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+      }
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <div id="header">
+    <div class="logo">⬡ Transformer 順序遊戲</div>
+    <div class="prompt-chip">輸入 Prompt：蘋果發表了一個新產品MACBOOK NEO</div>
+    <button id="theme-btn" onclick="toggleTheme()">🌙 深色模式</button>
+    <button id="collapse-btn" onclick="collapseAll()">收合全部 ↑</button>
+    <button id="reset-btn" onclick="resetGame()">再玩一次 ↺</button>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast"></div>
+
+  <!-- Info Banner -->
+  <div id="info-banner">
+    <div id="info-banner-bar" onclick="toggleBanner()">
+      <span class="banner-tag">遊戲說明</span>
+      <span class="banner-summary">
+        將左側 <b>7 個處理步驟</b>拖拉到右邊正確的格子，學習 AI 如何把你的 Prompt 一步步變成回答 ── 點此展開詳細說明
+      </span>
+      <span class="banner-chevron" id="banner-chevron">▼</span>
+    </div>
+    <div id="info-banner-detail">
+      <div class="banner-content">
+
+        <!-- 遊戲玩法 -->
+        <div class="banner-card">
+          <div class="banner-card-title">🎮 怎麼玩</div>
+          <div class="banner-card-body">
+            當你輸入 Prompt（例如「蘋果發表了一個新產品MACBOOK NEO」），AI 模型（如 ChatGPT、Claude）並不是直接「看懂」文字然後回答，而是經過 <b>7
+              個嚴謹的數學運算步驟</b>才產生輸出。<br><br>
+            左側有這 7 個步驟的卡片，<b>順序已打亂</b>。你的任務是把它們拖拉到右側對應的格子，放對就會展開該步驟的詳細計算說明。放錯會全部重置，從頭再來！
+          </div>
+        </div>
+
+        <!-- Transformer 簡介 -->
+        <div class="banner-card">
+          <div class="banner-card-title">🧠 什麼是 Transformer？</div>
+          <div class="banner-card-body">
+            Transformer 是 2017 年 Google 提出的神經網路架構，是 ChatGPT、Claude、Gemini 等大型語言模型（LLM）的核心引擎。<br><br>
+            它的關鍵創新是「<b>自注意力機制（Self-Attention）</b>」——讓模型在處理每個字時，同時考慮整句話所有字的關係，而不是一個字一個字依序處理，所以能理解複雜的上下文。
+          </div>
+        </div>
+
+        <!-- 強化學習獎懲 -->
+        <div class="banner-card" style="grid-column: span 2">
+          <div class="banner-card-title">⚖️ 這個遊戲的獎懲機制 ── 模仿 AI 訓練中的強化學習（RLHF）</div>
+          <div class="banner-card-body" style="margin-bottom:10px">
+            真實的 AI 訓練使用 <b>RLHF（從人類回饋中強化學習，Reinforcement Learning from Human Feedback）</b>：AI
+            做對了給獎勵，做錯了給懲罰，反覆調整直到表現更好。這個遊戲的設計刻意模仿了這個機制：
+          </div>
+          <div>
+            <div class="rl-row">
+              <span class="rl-badge reward">✓ 獎勵</span>
+              <span style="color:var(--text2)"><b
+                  style="color:var(--text)">放對格子</b>：立即展開詳細說明，並顯示綠色通知。每次正確放置都是一個「正向強化」，讓你對這個步驟的印象更深刻。</span>
+            </div>
+            <div class="rl-row">
+              <span class="rl-badge penalty">✕ 懲罰</span>
+              <span style="color:var(--text2)"><b style="color:var(--text)">放錯格子</b>：格子紅色閃爍、粒子爆炸，然後<b
+                  style="color:var(--coral)">所有已完成的步驟全部重置</b>，必須從頭開始。這對應 AI 訓練中的「負向懲罰」——錯誤代價越高，學習越有效。</span>
+            </div>
+            <div class="rl-row">
+              <span class="rl-badge reward" style="background:rgba(108,99,255,0.15);color:var(--accent)">★ 完成</span>
+              <span style="color:var(--text2)"><b style="color:var(--text)">全部放對</b>：彈出完成視窗，右上角出現「再玩一次」按鈕。對應 AI
+                訓練中達到目標後的「episode 結束，記錄最佳策略」。</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+
+    <!-- Left: cards -->
+    <div id="left-panel">
+      <div class="left-title">拖拉到正確位置</div>
+      <!-- Cards injected by JS -->
+    </div>
+
+    <!-- Right: drop zones with inline accordions -->
+    <div id="right-panel">
+      <div id="drop-zones">
+        <!-- Zones injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Ghost drag element -->
+  <div id="ghost"></div>
+
+  <!-- Complete overlay -->
+  <div id="complete">
+    <div class="complete-box" id="complete-box">
+      <div class="complete-title">🎉 完成！</div>
+      <div class="complete-sub">
+        你成功組裝了完整的 Transformer 推理流程！<br>
+        從 Tokenization 到輸出預測，每個步驟都到位了。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Data ──────────────────────────────────────────────────────
+    const TOKENS = ["蘋果", "發表", "了", "一個", "新", "產品", "MACBOOK", "NEO"];
+
+    const STEPS = [
+      {
+        id: 'tokenize',
+        title: 'Tokenization',
+        sub: '斷詞 / 分詞',
+        icon: '✂',
+        color: '#6c63ff',
+        correct: 0,
+        formula: `<span class="hl">Token</span>（詞元）= 模型能看懂的最小文字單位<br>"蘋果發表了…" → ["蘋果", "發表", "了", "一個", "新", "產品", "MACBOOK", "NEO"]<br>每個 Token → 一個整數編號（<span class="hl2">Token ID</span>），就像字典的頁碼`,
+        desc: '電腦不懂文字，就像外國人看中文——完全不知道是什麼意思。所以第一步要先把句子切成一塊一塊的「詞元（Token）」，再把每個詞元換成一個數字編號。這就像把文章拆成樂高積木，之後所有計算都是針對這些數字進行的，而不是直接對文字。',
+        render: renderTokenize
+      },
+      {
+        id: 'embed',
+        title: 'Embedding',
+        sub: '向量化',
+        icon: '↗',
+        color: '#00d4aa',
+        correct: 1,
+        formula: `<span class="hl">向量（Vector）</span>= 一串數字，代表一個詞的「語意座標」<br>"蘋果" → [0.2, -0.5, 0.8, …]（幾百到幾千個數字）<br>意思相近的詞 → 座標距離也相近 ← 這就是語意！<br>同時加上<span class="hl2">位置編碼（Positional Encoding）</span>= 告訴模型這個詞在第幾個位置`,
+        desc: '數字編號（Token ID）只是個流水號，沒有語意。所以要把每個 Token 換成一串有意義的數字——「向量」。向量就像在高維空間中的座標，語意相近的詞，座標也相近。例如「貓」和「狗」的向量距離很近，「貓」和「汽車」的距離就很遠。另外還要加上「位置編碼」，告訴模型「蘋果」是第1個詞、「發表」是第2個詞……否則模型根本不知道詞的順序。',
+        render: renderEmbedding
+      },
+      {
+        id: 'qkv',
+        title: 'Q · K · V',
+        sub: '注意力計算',
+        icon: '⊗',
+        color: '#ffb830',
+        correct: 2,
+        formula: `想像你在圖書館找書：<br><span class="hl">Q（Query，查詢）</span>= 你手上的「搜尋關鍵字」<br><span class="hl2">K（Key，鍵）</span>= 每本書封面的「書名標籤」<br><span class="hl3">V（Value，值）</span>= 書裡面的「真實內容」<br>→ 用 Q 比對所有 K → 得出「相關分數」→ <span class="hl">Softmax</span>（把分數變成比例）→ 加權提取 V`,
+        desc: '每個詞都會問一個問題（Q，Query）：「我應該注意句子裡哪些字？」然後去和所有字的標籤（K，Key）比對，算出「相關分數」。Softmax 會把所有分數換算成加起來等於 100% 的比例（注意力權重）。最後用這個比例去加權取出每個字的真實內容（V，Value）。這樣「蘋果」就能根據整句話的上下文，更新自己的理解——知道這裡說的是科技公司，而不是水果。',
+        render: renderQKV
+      },
+      {
+        id: 'mha',
+        title: 'Multi-Head',
+        sub: '多頭注意力',
+        icon: '⊕',
+        color: '#ff6b6b',
+        correct: 3,
+        formula: `<span class="hl">「頭（Head）」</span>= 一組獨立的 Q/K/V 計算，像一個「觀察角度」<br>Multi-Head = 同時用<span class="hl2">多個不同角度</span>觀察句子<br>頭1 可能看「誰對誰做動作」，頭2 看「哪些詞意思相近」……<br>最後把所有頭的結果<span class="hl3">拼接（Concat）</span>在一起 → 更全面的理解`,
+        desc: '如果只有一組 Q/K/V，模型每次只能從「一個角度」理解詞與詞的關係。但語言有很多種關係：誰是主詞、誰是受詞、哪個詞是修飾語、代名詞指的是誰……多頭注意力就像同時派出多個偵探，每個偵探專注在不同的線索上，最後把所有偵探的報告合在一起，得到更完整的理解。',
+        render: renderMHA
+      },
+      {
+        id: 'ffn',
+        title: 'FFN',
+        sub: '前饋神經網路',
+        icon: '▶',
+        color: '#4ade80',
+        correct: 4,
+        formula: `FFN(x) = <span class="hl">ReLU</span>(x·W₁ + b₁)·W₂ + b₂<br><span class="hl">ReLU（激活函數）</span>= max(0, x)，負的歸零、正的通過 → 製造「非線性」讓模型更聰明<br>維度：<span class="hl2">512</span> → 放大到 <span class="hl">2048</span> → 壓縮回 <span class="hl2">512</span><br>之後：<span class="hl3">殘差連接</span>（加回原始輸入）+ <span class="hl3">層歸一化</span>（穩定數值）`,
+        desc: 'Attention 讓每個詞「看完」整句話，了解詞與詞之間的關係。FFN（前饋神經網路）接著讓每個詞「自己消化」這些資訊，進行更深層的特徵提取。它先把向量放大 4 倍（有更多空間思考），經過 ReLU 過濾掉沒用的訊號，再壓縮回原本大小。FFN 儲存了大量的「世界知識」，例如「蘋果」＋「發表」＋「產品」→ 推斷出科技發布會的場景。',
+        render: renderFFN
+      },
+      {
+        id: 'layers',
+        title: 'Stacking',
+        sub: '多層堆疊',
+        icon: '⊞',
+        color: '#f472b6',
+        correct: 5,
+        formula: `每一層 = Attention（詞與詞溝通）+ FFN（各自深化）<br>第 1 層輸出 → 第 2 層輸入 → … → 第 N 層輸出<br><span class="hl">淺層</span>學基本語法，<span class="hl2">中層</span>學語意，<span class="hl3">深層</span>學抽象推理<br>真實 Claude：<span class="hl2">48～96 層以上</span>`,
+        desc: '一層 Transformer 只能做有限的理解。就像讀書不能只讀一遍——第一遍認識生字，第二遍理解句意，第三遍才能體會文章的深意。多層堆疊讓模型一層一層地深化理解：淺層看單詞和語法，中層理解語意和指代，深層處理邏輯推理和抽象概念。每層都有「殘差連接（Residual）」保留前一層的資訊，避免學著學著忘了原始輸入。',
+        render: renderLayers
+      },
+      {
+        id: 'output',
+        title: 'Output',
+        sub: '輸出預測',
+        icon: '◉',
+        color: '#818cf8',
+        correct: 6,
+        formula: `最後一層向量 → <span class="hl">線性投影（Linear）</span>→ 詞彙表大小的分數（<span class="hl2">Logits</span>）<br><span class="hl">Softmax</span> → 每個詞的出現機率（全部加起來 = 100%）<br>÷ <span class="hl3">Temperature（溫度）</span>控制隨機度：溫度低 = 保守，溫度高 = 有創意<br>→ 按機率抽出下一個 Token → 重複整個流程`,
+        desc: '所有層處理完後，最後把向量投影到一個超大的分數列表（Logits），每個詞彙表裡的詞都有一個分數。Softmax 把分數換算成機率——每次生成一個詞，選完之後把它加到輸入句尾，再重新跑一遍整個 Transformer 流程，生成下一個詞。這就是為什麼 AI 是「一個字一個字」出現的，而不是一次全部顯示。Temperature（溫度）控制隨機程度：溫度低=每次都選最高機率（很確定但無聊），溫度高=更隨機（有創意但可能亂說）。',
+        render: renderOutput
+      }
+    ];
+
+    // Shuffle for display order
+    let shuffled = [...STEPS].sort(() => Math.random() - 0.5);
+    let placedCount = 0;
+    let draggedStep = null;
+    let currentExpStep = -1;
+
+    // ── Math helpers ──────────────────────────────────────────────
+    function lcg(seed) {
+      let s = seed >>> 0;
+      return () => { s = (Math.imul(1664525, s) + 1013904223) >>> 0; return s / 4294967296; };
+    }
+    function seedFrom(str) {
+      let h = 0;
+      for (const c of str) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0;
+      return Math.abs(h) || 1;
+    }
+    function genVec(label, dim = 8) {
+      const r = lcg(seedFrom(label));
+      return Array.from({ length: dim }, () => +((r() * 2 - 1).toFixed(3)));
+    }
+    function dot(a, b) { return a.reduce((s, v, i) => s + v * b[i], 0); }
+    function softmax(arr) {
+      const m = Math.max(...arr);
+      const ex = arr.map(v => Math.exp(v - m));
+      const s = ex.reduce((a, b) => a + b);
+      return ex.map(v => +(v / s).toFixed(4));
+    }
+
+    const embeddings = TOKENS.map(t => genVec(t + "_emb", 6));
+    const WQ = TOKENS.map(t => genVec(t + "_Q"));
+    const WK = TOKENS.map(t => genVec(t + "_K"));
+
+    function heatRgb(v) {
+      const t = Math.min(1, Math.max(0, v));
+      const stops = [[15, 15, 30], [25, 45, 100], [40, 90, 175], [80, 130, 220], [120, 175, 255]];
+      const i = Math.floor(t * 4), f = t * 4 - i;
+      const a = stops[Math.min(i, 4)], b = stops[Math.min(i + 1, 4)];
+      return `rgb(${a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(',')})`;
+    }
+    function textOnHeat(v) { return v > 0.45 ? '#fff' : '#8888aa'; }
+
+    // ── Build UI ──────────────────────────────────────────────────
+    function buildUI() {
+      // Left: drag cards
+      const left = document.getElementById('left-panel');
+      left.innerHTML = '<div class="left-title">拖拉到正確格子</div>';
+      shuffled.forEach((step, si) => {
+        const card = document.createElement('div');
+        card.className = `drag-card dc-${step.correct}`;
+        card.id = `card-${step.id}`;
+        card.draggable = true;
+        card.dataset.stepId = step.id;
+        card.innerHTML = `
+      <div class="card-title">${step.icon} ${step.title} <span class="card-zh">（${step.sub}）</span></div>`;
+
+        card.addEventListener('dragstart', onDragStart);
+        card.addEventListener('dragend', onDragEnd);
+        card.addEventListener('touchstart', onTouchStart, { passive: false });
+        left.appendChild(card);
+      });
+
+      // Right: drop zones (each wrapped for accordion)
+      const dz = document.getElementById('drop-zones');
+      dz.innerHTML = `
+    <div class="prompt-box">
+      <div class="pnum">0</div>
+      <div>
+        <div class="plabel">使用者輸入 Prompt</div>
+        <div class="ptext">蘋果發表了一個新產品MACBOOK NEO</div>
+      </div>
+    </div>
+    <div class="flow-arrow">↓</div>
+    <div class="handoff-chip hc-llm">⚡ LLM 模型開始處理</div>
+    <div class="flow-arrow">↓</div>
+  `;
+      STEPS.forEach((step, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'zone-wrap';
+        wrap.id = `wrap-${i}`;
+
+        const zone = document.createElement('div');
+        zone.className = 'drop-zone';
+        zone.id = `zone-${i}`;
+        zone.dataset.slot = i;
+        zone.innerHTML = `
+      <span class="dz-num">${i + 1}</span>
+      <div class="dz-content">
+        <span class="dz-placeholder">— 拖拉第 ${i + 1} 步到這裡 —</span>
+      </div>
+      <span class="dz-check" id="check-${i}">✓</span>
+      <button class="dz-toggle" id="toggle-${i}" onclick="toggleDetail(${i})">▼ 展開說明</button>`;
+
+        const detail = document.createElement('div');
+        detail.className = 'zone-detail';
+        detail.id = `detail-${i}`;
+        const detailInner = document.createElement('div');
+        detailInner.className = 'zone-detail-inner';
+        detailInner.id = `detail-inner-${i}`;
+        detail.appendChild(detailInner);
+
+        zone.addEventListener('dragover', onDragOver);
+        zone.addEventListener('dragleave', onDragLeave);
+        zone.addEventListener('drop', onDrop);
+
+        wrap.appendChild(zone);
+        wrap.appendChild(detail);
+        dz.appendChild(wrap);
+      });
+    }
+
+    // ── Drag & Drop (Mouse) ───────────────────────────────────────
+    const ghost = document.getElementById('ghost');
+
+    function onDragStart(e) {
+      const step = STEPS.find(s => s.id === e.currentTarget.dataset.stepId);
+      if (!step) return;
+      draggedStep = step;
+      e.currentTarget.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', step.id);
+    }
+    function onDragEnd(e) {
+      e.currentTarget.classList.remove('dragging');
+      draggedStep = null;
+    }
+    function onDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const zone = e.currentTarget;
+      if (!zone.classList.contains('correct')) zone.classList.add('drag-over');
+    }
+    function onDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+    function onDrop(e) {
+      e.preventDefault();
+      const zone = e.currentTarget;
+      zone.classList.remove('drag-over');
+      if (zone.classList.contains('correct')) return;
+      const stepId = e.dataTransfer.getData('text/plain');
+      const step = STEPS.find(s => s.id === stepId);
+      if (!step) return;
+      handleDrop(zone, step);
+    }
+
+    // ── Touch drag ────────────────────────────────────────────────
+    let touchStep = null, touchGhost = null, touchCard = null;
+
+    function onTouchStart(e) {
+      const card = e.currentTarget;
+      if (card.classList.contains('disabled') || card.classList.contains('placed')) return;
+      e.preventDefault();
+      const step = STEPS.find(s => s.id === card.dataset.stepId);
+      if (!step) return;
+      touchStep = step;
+      touchCard = card;
+
+      const clone = card.cloneNode(true);
+      clone.style.cssText = `position:fixed;z-index:1000;opacity:0.85;pointer-events:none;width:${card.offsetWidth}px;transform:rotate(3deg) scale(1.04);transition:none;`;
+      document.body.appendChild(clone);
+      touchGhost = clone;
+
+      const touch = e.touches[0];
+      positionGhost(clone, touch.clientX, touch.clientY);
+      card.classList.add('dragging');
+
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
+      document.addEventListener('touchend', onTouchEnd);
+    }
+
+    function onTouchMove(e) {
+      e.preventDefault();
+      if (!touchGhost) return;
+      const touch = e.touches[0];
+      positionGhost(touchGhost, touch.clientX, touch.clientY);
+
+      // Highlight zone under finger
+      touchGhost.style.display = 'none';
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchGhost.style.display = '';
+      const zone = el ? el.closest('.drop-zone') : null;
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('drag-over'));
+      if (zone && !zone.classList.contains('correct')) zone.classList.add('drag-over');
+    }
+
+    function onTouchEnd(e) {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      if (!touchGhost || !touchStep) return;
+
+      const touch = e.changedTouches[0];
+      touchGhost.style.display = 'none';
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      touchGhost.style.display = '';
+      touchGhost.remove();
+      touchGhost = null;
+
+      const zone = el ? el.closest('.drop-zone') : null;
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('drag-over'));
+
+      if (touchCard) touchCard.classList.remove('dragging');
+      if (zone && !zone.classList.contains('correct')) {
+        handleDrop(zone, touchStep);
+      }
+      touchStep = null;
+      touchCard = null;
+    }
+
+    function positionGhost(el, x, y) {
+      el.style.left = (x - 90) + 'px';
+      el.style.top = (y - 30) + 'px';
+    }
+
+    // ── Drop logic ────────────────────────────────────────────────
+    function handleDrop(zone, step) {
+      const slot = parseInt(zone.dataset.slot);
+
+      if (step.correct === slot) {
+        // CORRECT
+        placeCorrect(zone, step, slot);
+      } else {
+        // WRONG
+        handleWrong(zone, step);
+      }
+    }
+
+    function placeCorrect(zone, step, slot) {
+      placedCount++;
+
+      // Update zone UI
+      zone.classList.add('correct', 'correct-pop');
+      zone.innerHTML = `
+    <span class="dz-num" style="color:${step.color}">${slot + 1}</span>
+    <div class="dz-content">
+      <span class="dz-icon">${step.icon}</span>
+      <div class="dz-info">
+        <div class="dz-name">${step.title}</div>
+        <div class="dz-tag" style="color:${step.color}">${step.sub}</div>
+      </div>
+    </div>
+    <span class="dz-check show">✓</span>
+    <button class="dz-toggle visible" id="toggle-${slot}" onclick="toggleDetail(${slot})">▼ 展開說明</button>`;
+
+      // Re-bind drag events (innerHTML wiped them)
+      zone.addEventListener('dragover', onDragOver);
+      zone.addEventListener('dragleave', onDragLeave);
+      zone.addEventListener('drop', onDrop);
+
+      // Click anywhere on zone (except the toggle button) to expand/collapse
+      zone.setAttribute('onclick', `if(!event.target.closest('.dz-toggle')) toggleDetail(${slot})`);
+      zone.style.cursor = 'pointer';
+
+      // Pre-render detail content (hidden)
+      const detailInner = document.getElementById('detail-inner-' + slot);
+      if (detailInner && !detailInner.dataset.rendered) {
+        detailInner.innerHTML = `
+      <div class="exp-header">
+        <div class="exp-eyebrow">Step ${step.correct + 1} / 7</div>
+        <div class="exp-title">${step.icon} ${step.title}</div>
+        <div class="exp-desc">${step.desc}</div>
+      </div>
+      <div class="exp-formula">${step.formula}</div>
+      <div id="exp-content-${slot}"></div>`;
+        step.render(document.getElementById('exp-content-' + slot));
+        detailInner.dataset.rendered = '1';
+      }
+
+      // Auto-open after pop animation (Disabled to match rag_game behavior)
+      // setTimeout(() => toggleDetail(slot, true), 350);
+
+      // Mark card as placed
+      const card = document.getElementById('card-' + step.id);
+      if (card) card.classList.add('placed');
+
+      // Update progress
+      updateProgress();
+
+      // Toast
+      showToast(`✓ ${step.title}（${step.sub}）放置正確！`, 'ok');
+
+      setTimeout(() => zone.classList.remove('correct-pop'), 400);
+
+      // Emit particles
+      const rect = zone.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, step.color, true);
+
+      if (placedCount === STEPS.length) {
+        setTimeout(() => {
+          document.getElementById('complete').classList.add('show');
+          // Auto-dismiss after 2s
+          setTimeout(() => {
+            const box = document.getElementById('complete-box');
+            box.classList.add('dismissing');
+            setTimeout(() => {
+              document.getElementById('complete').classList.remove('show');
+              box.classList.remove('dismissing');
+            }, 400);
+          }, 2000);
+          // Show reset button in header
+          document.getElementById('reset-btn').classList.add('visible');
+        }, 1200);
+      }
+    }
+
+    function handleWrong(zone, step) {
+      // Shake the zone
+      zone.classList.remove('wrong-flash');
+      void zone.offsetWidth; // reflow
+      zone.classList.add('wrong-flash');
+
+      // Toast error
+      showToast(`✕ 放錯位置！全部重置，重新開始`, 'err', 2000);
+
+      // Shake ALL placed cards & reset
+      const rect = zone.getBoundingClientRect();
+      spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, '#ff6b6b', false);
+
+      // Reset after short delay
+      setTimeout(() => {
+        resetAll();
+      }, 600);
+    }
+
+    function resetAll() {
+      // Rebuild all zone-wraps
+      STEPS.forEach((step, i) => {
+        const zone = document.getElementById('zone-' + i);
+        if (zone) {
+          zone.className = 'drop-zone';
+          zone.innerHTML = `
+        <span class="dz-num">${i + 1}</span>
+        <div class="dz-content">
+          <span class="dz-placeholder">— 拖拉第 ${i + 1} 步到這裡 —</span>
+        </div>
+        <span class="dz-check" id="check-${i}">✓</span>
+        <button class="dz-toggle" id="toggle-${i}" onclick="toggleDetail(${i})">▼ 展開說明</button>`;
+          zone.addEventListener('dragover', onDragOver);
+          zone.addEventListener('dragleave', onDragLeave);
+          zone.addEventListener('drop', onDrop);
+          zone.removeAttribute('onclick');
+          zone.style.cursor = '';
+        }
+        // Close and clear accordion
+        const detail = document.getElementById('detail-' + i);
+        if (detail) detail.classList.remove('open');
+        const detailInner = document.getElementById('detail-inner-' + i);
+        if (detailInner) { detailInner.innerHTML = ''; delete detailInner.dataset.rendered; }
+      });
+
+      // Fly-back all cards, then restore
+      document.querySelectorAll('.drag-card.placed').forEach(card => {
+        card.classList.add('fly-back');
+        setTimeout(() => {
+          card.classList.remove('fly-back', 'placed');
+        }, 500);
+      });
+
+      // Re-enable all cards
+      shuffled.forEach((step) => {
+        const card = document.getElementById('card-' + step.id);
+        if (!card) return;
+        card.classList.remove('disabled');
+      });
+
+      // Reset progress
+      placedCount = 0;
+      updateProgress();
+      currentExpStep = -1;
+    }
+
+    function unlockNextCard(placedStep) {
+      const placedShuffleIdx = shuffled.findIndex(s => s.id === placedStep.id);
+      const nextIdx = placedShuffleIdx + 1;
+      if (nextIdx < shuffled.length) {
+        const nextCard = document.getElementById('card-' + shuffled[nextIdx].id);
+        if (nextCard) nextCard.classList.remove('disabled');
+      }
+    }
+
+    function showToast(msg, type, duration = 2200) {
+      const wrap = document.getElementById('toast');
+      const el = document.createElement('div');
+      el.className = `toast-msg toast-${type}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.style.animation = 'toastOut .3s ease forwards';
+        setTimeout(() => el.remove(), 300);
+      }, duration);
+    }
+
+    function updateProgress() {
+      // progress tracked via placedCount only; dots removed
+    }
+
+    function spawnParticles(x, y, color, success) {
+      const count = success ? 10 : 16;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const angle = (Math.PI * 2 * i / count) + (Math.random() - 0.5) * 0.5;
+        const dist = 40 + Math.random() * (success ? 60 : 100);
+        p.style.cssText = `
+      left:${x}px; top:${y}px;
+      background:${success ? color : '#ff6b6b'};
+      --tx:${Math.cos(angle) * dist}px;
+      --ty:${Math.sin(angle) * dist}px;
+      --dur:${0.5 + Math.random() * 0.4}s;
+      width:${success ? 6 : 8}px;
+      height:${success ? 6 : 8}px;`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1000);
+      }
+    }
+
+    // ── Accordion toggle ─────────────────────────────────────────
+    function toggleDetail(slot, forceOpen) {
+      const detail = document.getElementById('detail-' + slot);
+      const btn = document.getElementById('toggle-' + slot);
+      if (!detail || !btn) return;
+      const isOpen = detail.classList.contains('open');
+      const shouldOpen = forceOpen !== undefined ? forceOpen : !isOpen;
+      if (shouldOpen) {
+        detail.classList.add('open');
+        btn.textContent = '▲ 收合說明';
+        // Remove square corners from zone while open
+        const zone = document.getElementById('zone-' + slot);
+        if (zone) zone.classList.remove('collapsed');
+        // Scroll into view
+        setTimeout(() => detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+      } else {
+        detail.classList.remove('open');
+        btn.textContent = '▼ 展開說明';
+        const zone = document.getElementById('zone-' + slot);
+        if (zone) zone.classList.add('collapsed');
+      }
+    }
+
+    function renderTokenize(el) {
+      el.innerHTML = `
+    <div class="exp-section">🔤 什麼是 Token？</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--text)">Token（詞元）</b>= 模型能看懂的最小文字單位。<br>
+      不是每個字就是一個 Token。中文通常一個字 = 1 Token，英文按單字切，長單字可能被切成多塊。<br>
+      <b style="color:var(--teal)">為什麼要切？</b>模型只懂數字，不懂文字。切成 Token 之後再換成數字編號，才能計算。
+    </div>
+    <div class="exp-section">✂ 切分動畫</div>
+    <div class="tok-anim" id="tak" style="margin-bottom:14px"></div>
+    <div class="exp-section">📋 每個 Token 換成數字編號（Token ID）</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.8">
+      <b style="color:var(--text)">詞彙表（Vocabulary）</b>= 模型認識的所有 Token 清單，就像一本超大字典。<br>
+      每個 Token 在字典裡有一個固定頁碼，這個頁碼就是 Token ID。<br>
+      Claude 的詞彙表約有 <b style="color:var(--amber)">100,000 個</b> Token。
+    </div>
+    <table class="calc-tbl">
+      <tr><th>Token（詞元）</th><th>Token ID（字典頁碼）</th><th>語言類型</th></tr>
+      ${TOKENS.map((t, i) => `<tr>
+        <td style="color:var(--teal);font-size:13px">"${t}"</td>
+        <td style="color:var(--amber)">${(1000 + i * 137 + seedFrom(t) % 200)}</td>
+        <td style="color:var(--text3)">${/[^\u0000-\u007F]/.test(t) ? '中文字元' : '英文/ASCII'}</td>
+      </tr>`).join('')}
+    </table>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:12px;font-size:12px;color:var(--text2);line-height:1.8">
+      💡 <b style="color:var(--text)">BPE（Byte Pair Encoding）演算法</b>：Tokenizer 不是手動設計的，而是用大量文字資料訓練出來的，自動學習「哪些字母組合最常出現」，決定怎麼切分最有效率。
+    </div>`;
+      const tak = el.querySelector('#tak');
+      TOKENS.forEach((t, i) => {
+        const span = document.createElement('span');
+        span.className = 'atk'; span.textContent = t;
+        tak.appendChild(span);
+        setTimeout(() => span.classList.add('show'), i * 90);
+      });
+    }
+
+    function renderEmbedding(el) {
+      el.innerHTML = `
+    <div class="exp-section">📐 什麼是向量（Vector）？</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--text)">向量</b> = 一串數字，代表一個詞在「語意空間」裡的座標。<br>
+      就像地圖上的座標 (經度, 緯度) 能定位一個城市，向量能定位一個詞的「意思」。<br>
+      <b style="color:var(--teal)">語意相近 → 座標相近</b>：「貓」和「狗」的向量距離很近，「貓」和「汽車」距離很遠。<br>
+      真實模型的向量有 512～4096 個數字，這裡用 6 個示意。
+    </div>
+    <div class="exp-section">各 Token 的向量（6維示意，綠色=正值，紅色=負值）</div>
+    <div class="vec-grid">
+      ${TOKENS.map((t, i) => {
+        const v = embeddings[i];
+        return `<div class="vec-card">
+          <div class="vc-tok">"${t}"</div>
+          <div class="vc-nums">[${v.join(', ')}]</div>
+          ${v.map(n => `<div class="mini-bar"><div class="mini-fill" style="width:0%;background:${n > 0 ? 'var(--teal)' : 'var(--coral)'}" data-w="${Math.abs(n) * 45 + 5}"></div></div>`).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:4px;font-size:12px;color:var(--text2);line-height:1.8">
+      💡 <b style="color:var(--text)">位置編碼（Positional Encoding）</b>：Transformer 本身不知道詞的順序（不像人類從左讀到右）。所以要額外加上一組代表「位置」的向量，讓模型知道「蘋果」是第1個詞、「發表」是第2個詞……沒有位置編碼的話，「狗咬人」和「人咬狗」對模型來說是一樣的！
+    </div>`;
+      setTimeout(() => {
+        el.querySelectorAll('.mini-fill').forEach(b => {
+          b.style.transition = 'width .9s ease';
+          b.style.width = b.dataset.w + '%';
+        });
+      }, 100);
+    }
+
+    function renderQKV(el) {
+      const idx = 0;
+      const scores = TOKENS.map((_, j) => dot(WQ[idx], WK[j]) / Math.sqrt(8));
+      const weights = softmax(scores);
+      const maxW = Math.max(...weights);
+      const maxIdx = weights.indexOf(maxW);
+      el.innerHTML = `
+    <div class="exp-section">🔍 "蘋果" 在問：「我最應該注意誰？」</div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--amber)">Q（搜尋關鍵字）</b>＝ 「蘋果」想找的資訊方向<br>
+      <b style="color:var(--teal)">K（書名標籤）</b>＝ 每個字「我有什麼資訊」的標籤<br>
+      <b style="color:var(--coral)">V（真實內容）</b>＝ 每個字實際要傳遞的資訊<br>
+      <span style="color:var(--text3);font-size:11px">把 Q 和每個 K 相乘 → 得到「相關分數」→ Softmax 變成權重 → 加權提取 V</span>
+    </div>
+    <div class="exp-section">計算結果：相關分數排名</div>
+    <table class="calc-tbl">
+      <tr><th>Token</th><th>Q·K 分數</th><th>÷√8 縮放</th><th>Softmax 權重（注意力）</th></tr>
+      ${TOKENS.map((t, j) => `<tr>
+        <td style="color:${j === 0 ? 'var(--teal)' : 'var(--text2)'}">${j === 0 ? '👉 ' : ''}"${t}"</td>
+        <td style="color:var(--text3)">${dot(WQ[idx], WK[j]).toFixed(3)}</td>
+        <td style="color:var(--text3)">${scores[j].toFixed(3)}</td>
+        <td class="${j === maxIdx ? 'hi' : ''}">
+          ${j === maxIdx ? '⭐ ' : ''}${weights[j]}${j === maxIdx ? ' ← 最相關' : ''}
+        </td>
+      </tr>`).join('')}
+    </table>
+    <div class="exp-section">視覺化：顏色越深 = "蘋果" 越在意這個字</div>
+    <div style="display:flex;gap:5px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px">
+      ${TOKENS.map((t, j) => `<div style="text-align:center;">
+        <div style="width:48px;height:${Math.round(weights[j] * 120 + 16)}px;border-radius:5px 5px 3px 3px;background:${heatRgb(weights[j])};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:${textOnHeat(weights[j])};transition:height .8s ease">${weights[j].toFixed(2)}</div>
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px">${t}</div>
+      </div>`).join('')}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.8">
+      最終「蘋果」的新向量 = 所有字的內容（V）按上方權重加總<br>
+      <span style="color:var(--text3);font-size:11px">→ 「蘋果」現在「知道」自己後面接的是「發表產品」，而不是「很甜」</span>
+    </div>`;
+    }
+
+    function renderMHA(el) {
+      const heads = 4;
+      const headDescs = [
+        { name: '頭 1：句法關係', color: 'var(--blue)', note: '觀察「誰對誰做什麼」，找主詞、動詞、受詞' },
+        { name: '頭 2：指代關係', color: 'var(--teal)', note: '追蹤「它」「這個」「該產品」指的是哪個詞' },
+        { name: '頭 3：語意相似', color: 'var(--amber)', note: '找出意思相近的詞，例如「發表」≈「公布」' },
+        { name: '頭 4：位置關係', color: 'var(--pink)', note: '注意詞的位置順序，前後文的距離影響' },
+      ];
+      const mats = Array.from({ length: heads }, (_, h) => {
+        const r = lcg(seedFrom('head' + h));
+        return TOKENS.map(() => softmax(TOKENS.map(() => r() * 3 - 1.5)));
+      });
+      let activeHead = 0;
+
+      function buildContent(h) {
+        const mat = mats[h];
+        return `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--text)">為什麼需要多個頭（Multi-Head）？</b><br>
+      一個頭只能從一個角度看句子。多個頭同時從不同角度觀察，就像同時問「誰是主詞？」「這個代詞指什麼？」「哪些詞語意相近？」<br>
+      每個頭的 Q/K/V 矩陣都不同（各有各的「觀察方式」），最後把所有頭的結果<b style="color:var(--teal)">拼接（Concat）</b>起來。
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      ${headDescs.map((d, i) => `<button onclick="switchHead(${i})" style="font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:5px;border:1px solid ${i === h ? d.color : 'var(--border2)'};background:${i === h ? 'rgba(108,99,255,0.12)' : 'transparent'};color:${i === h ? d.color : 'var(--text3)'};cursor:pointer">${d.name}</button>`).join('')}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid ${headDescs[h].color};border-radius:0 8px 8px 0;padding:8px 14px;margin-bottom:10px;font-size:12px;color:var(--text2)">
+      ${headDescs[h].note}
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:6px">
+      注意力矩陣：每一行代表某個詞「看」其他所有詞的權重（顏色越深 = 越在意）
+    </div>
+    <div class="heat-wrap">
+      <table class="heat-tbl">
+        <tr><th style="padding-right:4px">↓看 →被看</th>${TOKENS.map(t => `<th>${t}</th>`).join('')}</tr>
+        ${mat.map((row, ri) => `<tr>
+          <th style="padding-right:6px;color:var(--text2)">${TOKENS[ri]}</th>
+          ${row.map(w => `<td style="background:${heatRgb(w)};color:${textOnHeat(w)}">${w.toFixed(2)}</td>`).join('')}
+        </tr>`).join('')}
+      </table>
+    </div>`;
+      }
+
+      el.innerHTML = `<div id="mha-content">${buildContent(0)}</div>`;
+
+      window.switchHead = (h) => {
+        activeHead = h;
+        document.getElementById('mha-content').innerHTML = buildContent(h);
+      };
+    }
+
+    function renderFFN(el) {
+      // Demo token: 蘋果
+      const demoTok = TOKENS[0];
+      const r = lcg(seedFrom(demoTok + '_ffn'));
+      const inp = Array.from({ length: 6 }, () => +(r() * 2 - 1).toFixed(3));
+      const expanded = inp.map(v => +(v * (r() * 1.2 + 0.4)).toFixed(3));
+      const reluOut = expanded.map(v => Math.max(0, v));
+      const out = reluOut.map(v => +(v * 0.65 + (r() - 0.5) * 0.15).toFixed(3));
+      const residual = inp.map((v, i) => +(v + out[i]).toFixed(3));
+      const mean = residual.reduce((a, b) => a + b, 0) / residual.length;
+      const std = Math.sqrt(residual.map(v => (v - mean) ** 2).reduce((a, b) => a + b, 0) / residual.length + 1e-5);
+      const normed = residual.map(v => +((v - mean) / std).toFixed(3));
+
+      el.innerHTML = `
+
+  <!-- ① ReLU -->
+  <div class="exp-section">① ReLU — 激活函數</div>
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">🔦 ReLU 就像一個「只讓正電通過的開關」</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.9;margin-bottom:12px">
+      神經網路如果只做加法乘法，不管多少層疊起來，效果跟一層一樣。<br>
+      加入 ReLU 後，每層才能學到真正不同的東西。<br>
+      規則超簡單：<b style="color:var(--green)">正數 → 原樣通過</b>　　<b style="color:var(--coral)">負數 → 直接歸零</b>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      ${expanded.map((v, i) => `<div style="text-align:center;">
+        <div style="font-family:var(--mono);font-size:10px;color:${v >= 0 ? 'var(--green)' : 'var(--coral)'};margin-bottom:3px">${v}</div>
+        <div style="font-size:18px">${v >= 0 ? '↓' : '✕'}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:${v >= 0 ? 'var(--green)' : 'var(--text3)'};margin-top:3px">${Math.max(0, v)}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">
+      負值歸零 = 「這個特徵沒用，忽略」　正值保留 = 「這個特徵有意義，傳下去」
+    </div>
+  </div>
+
+  <!-- ReLU 圖示 -->
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px">
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">ReLU 函數圖形</div>
+    <svg width="100%" viewBox="0 0 260 120" style="max-width:280px;display:block">
+      <line x1="20" y1="60" x2="240" y2="60" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <line x1="130" y1="10" x2="130" y2="110" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <text x="235" y="65" font-size="10" fill="#44445a" font-family="monospace">x</text>
+      <text x="133" y="14" font-size="10" fill="#44445a" font-family="monospace">y</text>
+      <!-- 負側：水平線 -->
+      <line x1="20" y1="60" x2="130" y2="60" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 正側：斜線 -->
+      <line x1="130" y1="60" x2="225" y2="15" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="130" cy="60" r="3.5" fill="#ffb830"/>
+      <text x="22" y="54" font-size="9" fill="#ff6b6b" font-family="monospace">負數→0</text>
+      <text x="155" y="30" font-size="9" fill="#4ade80" font-family="monospace">正數→原值</text>
+    </svg>
+  </div>
+
+  <!-- ② 殘差連接 -->
+  <div class="exp-section">② 殘差連接（Residual Connection）</div>
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">📝 殘差就像「邊學新東西，邊記住原本的自己」</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.9;margin-bottom:12px">
+      問題：如果每一層都把向量改得面目全非，100 層後完全不知道原始資訊是什麼。<br>
+      解法：每層輸出時，把<b style="color:var(--teal)">原始輸入</b>直接加回去。<br>
+      <b style="color:var(--accent)">新向量 = FFN處理結果 + 原始輸入</b>（不管 FFN 學到什麼，原始資訊都保留）
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:11px">
+      <div style="background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--teal)">
+        原始輸入<br><span style="font-size:9px;color:var(--text3)">[${inp.slice(0, 3).join(', ')}…]</span>
+      </div>
+      <div style="color:var(--text3)">＋</div>
+      <div style="background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--amber)">
+        FFN輸出<br><span style="font-size:9px;color:var(--text3)">[${out.slice(0, 3).join(', ')}…]</span>
+      </div>
+      <div style="color:var(--text3)">=</div>
+      <div style="background:var(--surface2);border-radius:6px;padding:6px 10px;color:var(--green)">
+        殘差輸出<br><span style="font-size:9px;color:var(--text3)">[${residual.slice(0, 3).join(', ')}…]</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:10px;font-family:var(--mono)">
+      💡 這個技巧讓模型可以疊 100 層以上，梯度也能順利回傳訓練。
+    </div>
+  </div>
+
+  <!-- ③ 歸一化 -->
+  <div class="exp-section">③ Layer Normalization — 層歸一化</div>
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">⚖️ 歸一化就像「把成績單統一換算成百分比」</div>
+    <div style="font-size:12px;color:var(--text2);line-height:1.9;margin-bottom:12px">
+      問題：向量裡的數字經過很多層計算後，有的變成 1000，有的變成 0.0001，差距太大，模型很難學習。<br>
+      解法：把向量重新縮放，讓所有數字的<b style="color:var(--teal)">平均值 ≈ 0、標準差 ≈ 1</b>，大家在同一個尺度上。
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px">
+      平均值 = ${mean.toFixed(3)}　　標準差 = ${std.toFixed(3)}
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+      ${residual.map((v, i) => `<div style="text-align:center;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text2);margin-bottom:2px">${v}</div>
+        <div style="font-size:14px;color:var(--text3)">↓</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent);margin-top:2px">${normed[i]}</div>
+      </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">
+      歸一化後 → 各層數值穩定，訓練更快、更不容易崩潰。
+    </div>
+  </div>
+
+  <!-- 完整流程 -->
+  <div class="exp-section">完整一層的流程總覽</div>
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-family:var(--mono)">
+      ${[
+          ['輸入 x', 'var(--teal)', '來自 Attention 的輸出'],
+          ['FFN 放大 4×', 'var(--blue)', 'x → 512維 擴展到 2048維'],
+          ['ReLU 過濾', 'var(--green)', '負值歸零，保留有用特徵'],
+          ['FFN 壓縮', 'var(--blue)', '2048維 壓縮回 512維'],
+          ['殘差 + 原始 x', 'var(--amber)', '加回原始輸入，不忘本'],
+          ['LayerNorm', 'var(--accent)', '數值縮放，維持穩定'],
+          ['輸出給下一層', 'var(--teal)', '傳給第 l+1 層重複處理'],
+        ].map(([label, color, note], i) => `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0"></div>
+          <span style="color:${color};width:120px;flex-shrink:0">${label}</span>
+          <span style="color:var(--text3);font-size:10px">${note}</span>
+        </div>
+        ${i < 6 ? `<div style="margin-left:3px;color:var(--border2);font-size:14px">↓</div>` : ''}
+      `).join('')}
+    </div>
+  </div>`;
+
+      setTimeout(() => {
+        el.querySelectorAll('.ff-fill').forEach(b => {
+          b.style.transition = 'width .9s cubic-bezier(.34,1.2,.64,1)';
+          b.style.width = b.dataset.w + '%';
+        });
+      }, 100);
+    }
+
+    function renderLayers(el) {
+      const layers = [
+        { name: '第 1 層', tag: '淺層', color: 'var(--blue)', feat: '詞性與邊界', note: '認出名詞、動詞、標點，找到詞組的邊界' },
+        { name: '第 2 層', tag: '淺層', color: 'var(--teal)', feat: '修飾關係', note: '哪個形容詞修飾哪個名詞，例如「新」修飾「產品」' },
+        { name: '第 3 層', tag: '中層', color: 'var(--green)', feat: '指代消解', note: '「它」「該產品」指的是哪個實體，追蹤主詞' },
+        { name: '第 4 層', tag: '中層', color: 'var(--amber)', feat: '語意角色', note: '誰是施事（做動作的人）、受事（被做的對象）' },
+        { name: '第 5 層', tag: '深層', color: 'var(--coral)', feat: '推理與整合', note: '理解因果、轉折關係，整合跨句子的資訊' },
+        { name: '第 6 層', tag: '深層', color: 'var(--pink)', feat: '抽象與輸出', note: '形成最終的語意表示，準備預測下一個 Token' },
+      ];
+      el.innerHTML = `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--text)">為什麼要堆很多層？</b><br>
+      一層只能做有限的理解。就像讀一篇文章，第一遍認識生字，第二遍理解句意，第三遍才能體會深意——每一遍都建立在上一遍的基礎上。<br>
+      真實的 Claude 有 <b style="color:var(--amber)">48～96 層以上</b>，每層都在前一層的理解上繼續深化。
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
+      ${layers.map((l, i) => `
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--border);border-left:3px solid ${l.color};border-radius:0 8px 8px 0;padding:10px 14px">
+          <div style="text-align:right;flex-shrink:0;width:48px">
+            <div style="font-family:var(--mono);font-size:10px;color:${l.color}">${l.name}</div>
+            <div style="font-size:9px;color:var(--text3)">${l.tag}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">${l.feat}</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${l.note}</div>
+          </div>
+          <div style="width:80px;height:4px;background:var(--surface2);border-radius:2px;flex-shrink:0;overflow:hidden">
+            <div style="height:100%;width:${((i + 1) / 6 * 100).toFixed(0)}%;background:${l.color};border-radius:2px;transition:width 1s ease"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--pink);border-radius:0 8px 8px 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.8">
+      💡 <b style="color:var(--text)">殘差連接（Residual Connection）</b>：每一層都把「原始輸入」直接加回輸出，確保不管疊多少層，原始資訊都不會消失。這個設計讓梯度（訓練時用來修正模型的信號）能順利從最後一層回傳到第一層，解決「梯度消失」問題，讓深層網路得以訓練。
+    </div>`;
+    }
+
+    function renderOutput(el) {
+      const candidates = [
+        { word: '"的"', prob: 0.31, color: 'var(--blue)' },
+        { word: '"，"', prob: 0.19, color: 'var(--teal)' },
+        { word: '"！"', prob: 0.14, color: 'var(--accent)' },
+        { word: '"是"', prob: 0.12, color: 'var(--green)' },
+        { word: '"正式"', prob: 0.09, color: 'var(--amber)' },
+        { word: '"面板"', prob: 0.07, color: 'var(--coral)' },
+        { word: '其他…', prob: 0.08, color: 'var(--text3)' },
+      ];
+      function applyTemp(t) {
+        const logits = candidates.map(c => Math.log(c.prob + 1e-10) / Math.max(0.05, t));
+        const mx = Math.max(...logits);
+        const ex = logits.map(l => Math.exp(l - mx));
+        const s = ex.reduce((a, b) => a + b);
+        return ex.map(e => e / s);
+      }
+      el.innerHTML = `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.9">
+      <b style="color:var(--text)">Logits（原始分數）</b>= 最後一層把向量投影到一個超大列表，詞彙表裡每個 Token 都有一個分數。分數越高代表越可能是下一個詞。<br>
+      <b style="color:var(--teal)">Softmax</b>= 把這些分數換算成「機率」，所有詞的機率加起來剛好等於 100%。<br>
+      <b style="color:var(--amber)">抽樣（Sampling）</b>= 不一定選機率最高的，而是按機率隨機抽一個——這就是為什麼 AI 每次回答都不完全一樣。
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">
+      "蘋果發表了一個新產品MACBOOK NEO" 之後，下一個 Token 最可能是？
+    </div>
+    <div class="prob-list" style="margin-bottom:14px">
+      ${candidates.map(c => `<div class="prob-row">
+        <span class="pw">${c.word}</span>
+        <div class="pb-bg"><div class="pb-fill" id="pb-${c.word}" style="width:0%;background:${c.color}"></div></div>
+        <span class="ppct" id="pp-${c.word}">0%</span>
+      </div>`).join('')}
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.8">
+      🌡️ <b style="color:var(--text)">Temperature（溫度）</b>= 控制「隨機程度」的旋鈕：<br>
+      <b style="color:var(--blue)">溫度低（&lt;1）</b>→ 機率集中在最高分，回答保守、確定但重複<br>
+      <b style="color:var(--green)">溫度 = 1</b>→ 正常隨機抽樣，自然多樣<br>
+      <b style="color:var(--coral)">溫度高（&gt;1）</b>→ 機率趨於平均，更隨機、更有創意，但也更容易亂說<br>
+      試著拖動下方滑桿，看看機率分布如何變化：
+    </div>
+    <div class="slider-row">
+      <label>Temperature 溫度</label>
+      <input type="range" id="tsl" min="5" max="300" value="100" step="5">
+      <span class="sv" id="tsv">1.00</span>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:12px;font-size:12px;color:var(--text2);line-height:1.8">
+      🔁 <b style="color:var(--text)">自回歸生成（Autoregressive）</b>= 每次只生成「一個 Token」，然後把它加到句尾，重新跑完整個 Transformer 流程，再生成下一個 Token，直到出現結束符號 &lt;EOS&gt;。這就是為什麼你看到 AI 的文字是一個一個「打出來」的。
+    </div>`;
+      function update(t) {
+        const probs = applyTemp(t);
+        candidates.forEach((c, i) => {
+          const bar = document.getElementById('pb-' + c.word);
+          const pct = document.getElementById('pp-' + c.word);
+          if (bar) bar.style.width = (probs[i] * 100).toFixed(1) + '%';
+          if (pct) pct.textContent = (probs[i] * 100).toFixed(1) + '%';
+        });
+      }
+      setTimeout(() => update(1.0), 150);
+      el.querySelector('#tsl').addEventListener('input', function () {
+        const t = this.value / 100;
+        el.querySelector('#tsv').textContent = t.toFixed(2);
+        update(t);
+      });
+    }
+
+    // ── Theme toggle ──────────────────────────────────────────────
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light');
+      document.getElementById('theme-btn').textContent = isLight ? '🌙 深色模式' : '☀ 白色模式';
+    }
+
+    // ── Banner toggle ─────────────────────────────────────────────
+    function toggleBanner() {
+      const detail = document.getElementById('info-banner-detail');
+      const chevron = document.getElementById('banner-chevron');
+      const isOpen = detail.classList.toggle('open');
+      chevron.classList.toggle('open', isOpen);
+    }
+
+    // ── Collapse all ─────────────────────────────────────────────
+    function collapseAll() {
+      let anyOpen = false;
+      STEPS.forEach((_, i) => {
+        const detail = document.getElementById('detail-' + i);
+        if (detail && detail.classList.contains('open')) anyOpen = true;
+      });
+      STEPS.forEach((_, i) => {
+        const detail = document.getElementById('detail-' + i);
+        const btn = document.getElementById('toggle-' + i);
+        const zone = document.getElementById('zone-' + i);
+        if (!detail) return;
+        if (anyOpen) {
+          // collapse all open ones
+          detail.classList.remove('open');
+          if (btn) btn.textContent = '▼ 展開說明';
+          if (zone) zone.classList.add('collapsed');
+        } else {
+          // all already collapsed — expand all that are filled
+          if (detail.querySelector('.zone-detail-inner')?.dataset.rendered) {
+            detail.classList.add('open');
+            if (btn) btn.textContent = '▲ 收合說明';
+            if (zone) zone.classList.remove('collapsed');
+          }
+        }
+      });
+      const btn = document.getElementById('collapse-btn');
+      btn.textContent = anyOpen ? '展開全部 ↓' : '收合全部 ↑';
+    }
+
+    // ── Reset game ────────────────────────────────────────────────
+    function resetGame() {
+      document.getElementById('complete').classList.remove('show');
+      document.getElementById('reset-btn').classList.remove('visible');
+      document.getElementById('collapse-btn').textContent = '收合全部 ↑';
+      shuffled = [...STEPS].sort(() => Math.random() - 0.5);
+      placedCount = 0;
+      currentExpStep = -1;
+      buildUI();
+    }
+
+    // ── Init ──────────────────────────────────────────────────────
+    buildUI();
+  </script>
+
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>Transformer 是現代大型語言模型與多模態 AI 的共同骨幹,iPAS 中級科目一必考。重點:自注意力讓每個詞直接關注序列所有詞、捕捉長距離關係且可高度平行,取代了循序的 RNN。易混點:注意力本身不含順序、需位置編碼;編碼器(BERT,理解)與解碼器(GPT,生成)用途不同。情境:理解 ChatGPT、BERT 如何運作;長文本因注意力隨長度平方成長而成本高。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>Transformer 為什麼重要？</summary><p>它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。</p></details><details><summary>自注意力在做什麼？</summary><p>讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。</p></details><details><summary>為什麼能平行運算？</summary><p>不像 RNN 要一步步循序處理，Transformer 一次看整個序列、同時計算所有位置的注意力，非常適合 GPU 平行。</p></details><details><summary>編碼器和解碼器差在哪？</summary><p>編碼器雙向理解輸入(如 BERT)；解碼器由左到右生成、且只能看已生成的詞(如 GPT)；翻譯等任務兩者合用。</p></details><details><summary>Transformer 有什麼挑戰？</summary><p>自注意力計算量隨序列長度平方成長，長文本成本高；有稀疏注意力、線性注意力等改良在處理長序列。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Transformer 為什麼重要？", "acceptedAnswer": {"@type": "Answer", "text": "它是現代大型語言模型與多模態 AI 的共同骨幹；靠自注意力捕捉長距離關係、又能高度平行，取代了 RNN。"}}, {"@type": "Question", "name": "自注意力在做什麼？", "acceptedAnswer": {"@type": "Answer", "text": "讓序列中每個詞依與其他詞的相關度，加權彙整資訊；每個詞的表示都融入了整句的上下文。"}}, {"@type": "Question", "name": "為什麼能平行運算？", "acceptedAnswer": {"@type": "Answer", "text": "不像 RNN 要一步步循序處理，Transformer 一次看整個序列、同時計算所有位置的注意力，非常適合 GPU 平行。"}}, {"@type": "Question", "name": "編碼器和解碼器差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "編碼器雙向理解輸入(如 BERT)；解碼器由左到右生成、且只能看已生成的詞(如 GPT)；翻譯等任務兩者合用。"}}, {"@type": "Question", "name": "Transformer 有什麼挑戰？", "acceptedAnswer": {"@type": "Answer", "text": "自注意力計算量隨序列長度平方成長，長文本成本高；有稀疏注意力、線性注意力等改良在處理長序列。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="attention.html">注意力機制</a><a href="gptbert.html">BERT</a><a href="transformer.html">GPT</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="embedding.html">詞嵌入</a><a href="rnn_lstm.html">RNN / LSTM</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+
+</html>

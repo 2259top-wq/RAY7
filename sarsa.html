@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SARSA 演算法互動演示 (懸崖漫步)</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="一種時序差分(TD)強化學習法，名稱來自更新用到的 State、Action、Reward、next State、next Action；學的是實際採取策略的價值。SARSA 是 on-policy(用實際下一步動作更新)、較保守安全；Q-learning 是 off-policy(用下一步最大 Q)、較冒險。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/sarsa.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SARSA 演算法互動演示 (懸崖漫步)">
+    <meta property="og:description" content="時序差分(TD)強化學習法，名稱來自 State-Action-Reward-State-Action。SARSA 是 on-policy、用實際下一動作更新、較保守安全；Q-learning 是 off-policy、用最大 Q、較冒險。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/sarsa.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SARSA 演算法互動演示 (懸崖漫步)">
+    <meta name="twitter:description" content="時序差分強化學習法 State-Action-Reward-State-Action。SARSA 是 on-policy、用實際下一動作更新、較保守安全；Q-learning 是 off-policy、用最大 Q、較冒險。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "SARSA 演算法互動演示 (懸崖漫步)",
+  "url": "https://akira.ipas-ai.com/sarsa.html",
+  "description": "一種時序差分(TD)強化學習法，名稱來自更新用到的 State、Action、Reward、next State、next Action；學的是實際採取策略的價值。SARSA 是 on-policy(用實際下一步動作更新)、較保守安全；Q-learning 是 off-policy(用下一步最大 Q)、較冒險。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root{
+            --am:#d97706; --am-d:#b45309; --am-dd:#92400e;
+            --tc:#0e7490; --blue:#2563eb; --green:#16a34a; --red:#ef4444;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#f7f1e8;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#92400e 0%,#d97706 55%,#fbbf24 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(217,119,6,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.85rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#fde68a 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--am-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#fffbeb; border-left:5px solid var(--am)}
+        .note.meta{background:#ecfeff; border-left:5px solid var(--tc)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#fbf3e3; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .s{color:var(--am-d); font-weight:700} .cmp .q{color:var(--tc); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--am);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--am-d)}
+
+        .sarsa-chain{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:14px 0}
+        .sarsa-chain span{background:#fff7ed; border:2px solid var(--am); color:var(--am-dd); font-weight:800;
+            border-radius:10px; padding:8px 12px; font-size:.92rem; min-width:120px; text-align:center}
+
+        .math-block{background:#fffbeb; padding:12px 16px; border-left:4px solid var(--am); border-radius:0 10px 10px 0; margin:10px 0; overflow-x:auto}
+
+        .qa{background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #fcefc7; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--am-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved, scoped) ===== */
+        .demo-card{background:#fffbeb; border:1px solid #fde68a; border-radius:14px; padding:18px; margin:14px 0}
+        .demo-card .controls{display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%;
+            background:#fff; padding:18px; border-radius:10px; margin-bottom:16px; border:1px solid var(--line)}
+        .demo-card .control-group{display:flex; flex-direction:column; gap:8px}
+        .demo-card label{font-weight:bold; color:#555}
+        .demo-card input[type=range]{width:100%; cursor:pointer; accent-color:var(--am)}
+        .val-display{color:var(--am-d); font-weight:bold; font-family:monospace}
+        .demo-card button{padding:10px 20px; background:var(--am); color:#fff; border:none; border-radius:8px;
+            cursor:pointer; font-weight:800; font-size:1em; transition:.2s; grid-column:span 2; width:200px; justify-self:center}
+        .demo-card button:hover{background:var(--am-d)}
+        .demo-card button.stop{background:#c0392b}
+        .viz-scroll{width:100%; overflow-x:auto; display:flex; justify-content:center}
+        #viz-area{border:2px solid #333; border-radius:6px; background:#fff}
+        .stats{margin-top:12px; font-family:monospace; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; color:#555}
+        .cell{stroke:#eee; stroke-width:1px}
+        .cliff{fill:#34495e} .start{fill:#f1c40f} .goal{fill:#2ecc71}
+        .agent{fill:#e74c3c; stroke:#fff; stroke-width:2px; transition:cx .1s, cy .1s}
+        .arrow{fill:#333; opacity:.1; pointer-events:none}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.45rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+            .demo-card .controls{grid-template-columns:1fr} .demo-card button{grid-column:span 1}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">🧗 SARSA 強化學習 · iPAS 考點</span>
+        <h1>SARSA：會「考慮自己可能手滑」而選安全路的演算法</h1>
+        <p>SARSA 和 <a href="q-learning.html" style="color:#fff;text-decoration:underline;font-weight:700">Q-Learning</a> 是強化學習的兩大時序差分（TD）法，公式只差一個字、考試卻最愛拿來對比。關鍵：SARSA 是 <b>on-policy</b>——它會把「<b>自己等下可能隨機走錯一步</b>」的風險也算進去，所以學出來的路<b>比較保守、安全</b>。</p>
+        <div class="chips"><span>時序差分 TD</span><span>On-policy</span><span>S-A-R-S-A</span><span>懸崖漫步</span><span>較保守安全</span></div>
+    </header>
+
+    <!-- ===== 1. 名字 ===== -->
+    <section class="lesson">
+        <h2>🔤 一、名字就是它的更新材料</h2>
+        <p class="lead">SARSA 這個名字，直接就是它更新一次 Q 值要用到的<b>五樣東西</b>：</p>
+        <div class="sarsa-chain">
+            <span>S<br>狀態</span><span>A<br>動作</span><span>R<br>獎勵</span><span>S'<br>下一狀態</span><span>A'<br>下一動作</span>
+        </div>
+        <div class="note def">
+            <h4>關鍵在最後那個 A'</h4>
+            注意最後一個是 <b>A'（下一個動作）</b>——而且是「<b>實際即將採取的</b>那一步」，<u>包含可能的隨機探索</u>。這一點，就是 SARSA 和 Q-Learning 的全部差別來源。
+        </div>
+    </section>
+
+    <!-- ===== 2. 和 Q-learning 差一個字 ===== -->
+    <section class="lesson">
+        <h2>🔬 二、和 Q-Learning 只差一個字</h2>
+        <p>兩者更新公式長得幾乎一樣，差別只在中括號裡「未來」那一項：</p>
+        <h3 style="color:var(--am-d)">SARSA（On-policy）</h3>
+        <div class="math-block">$$ Q(S,A) \leftarrow Q(S,A) + \alpha\,[\,R + \gamma\, \underbrace{Q(S',A')}_{\text{實際下一步}} - Q(S,A)\,] $$</div>
+        <h3 style="color:var(--tc)">Q-Learning（Off-policy）</h3>
+        <div class="math-block">$$ Q(S,A) \leftarrow Q(S,A) + \alpha\,[\,R + \gamma\, \underbrace{\max_a Q(S',a)}_{\text{假設走最完美的一步}} - Q(S,A)\,] $$</div>
+        <div class="note def">
+            <h4>差在哪？</h4>
+            SARSA 用「<b>我實際打算走的下一步 A'</b>」（可能是探索的爛步）；Q-Learning 用「<b>下一格理論上最好的一步 max</b>」（假設自己永遠不會手滑）。<b>一字之差，行為天差地別。</b>
+        </div>
+    </section>
+
+    <!-- ===== 3. on/off policy ===== -->
+    <section class="lesson">
+        <h2>🎯 三、On-policy vs Off-policy</h2>
+        <div class="keys">
+            <div class="keycard"><b>On-policy（SARSA）</b>學的是「<b>我正在執行的這個策略</b>（含探索）」實際值多少。把探索的風險一起學進去。</div>
+            <div class="keycard"><b>Off-policy（Q-Learning）</b>學的是「<b>理論最佳策略</b>」的值，不管自己當下實際怎麼走，也能用舊資料／別人的資料學。</div>
+        </div>
+    </section>
+
+    <!-- ===== 4. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 四、動手玩：懸崖漫步</h2>
+        <p class="lead">下排中間是<b style="color:#34495e">懸崖（−100）</b>，左下黃色是<b>起點</b>、右下綠色是<b>終點</b>。按「開始訓練」，看 SARSA 學出的路線——紅色箭頭是每格認為的最佳方向。</p>
+
+        <div class="demo-card">
+            <div class="controls">
+                <div class="control-group">
+                    <label>探索率 (ε-Greedy): <span id="val-epsilon" class="val-display">0.1</span></label>
+                    <input type="range" id="slider-epsilon" min="0" max="0.5" value="0.1" step="0.01">
+                    <small style="color:#7f8c8d">值越大，機器人越容易「手滑」走錯步 (隨機探索)。</small>
+                </div>
+                <div class="control-group">
+                    <label>訓練速度 (ms/step): <span id="val-speed" class="val-display">50</span></label>
+                    <input type="range" id="slider-speed" min="1" max="200" value="50" step="10" style="direction: rtl">
+                </div>
+                <button id="btn-toggle" onclick="toggleTraining()">開始訓練</button>
+            </div>
+            <div class="viz-scroll"><div id="viz-area"></div></div>
+            <div class="stats">
+                <span>Episode: <span id="episode-count">0</span></span>
+                <span>Total Reward (Last Ep): <span id="reward-val">0</span></span>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            觀察箭頭形成的路線：SARSA 通常會學出一條<b>往上繞、遠離懸崖</b>的安全路，而不是貼著懸崖邊走最短路。<b>把 ε 調大</b>（更容易手滑），它會閃得<b>離懸崖更遠</b>；把 ε 調很小，它才敢慢慢靠近邊緣。
+        </div>
+    </section>
+
+    <!-- ===== 5. 為什麼安全 ===== -->
+    <section class="lesson">
+        <h2>🧠 五、為什麼 SARSA 會選「安全的繞路」？</h2>
+        <div class="note meta">
+            <h4>因為它知道自己「等下可能手滑」</h4>
+            SARSA 更新時用的是 <b>A'（實際下一步）</b>，而 A' 有 ε 機率是<b>隨機亂走</b>。如果它貼著懸崖走，下一步一旦隨機往懸崖跨，就是 <b>−100</b> 大懲罰。SARSA 把這個風險<b>算進了 Q 值</b>，於是那條貼邊的路在它眼中「沒那麼香」，寧願往上<b>繞遠路求安全</b>。
+        </div>
+        <div class="note warn">
+            <h4>Q-Learning 為什麼敢貼著懸崖？</h4>
+            Q-Learning 用 <b>max</b> 更新，<b>假設自己下一步永遠走完美的一步</b>、不會手滑。所以它學出「貼著懸崖的最短路」是最優的。但<b>訓練過程中</b>它仍會因 ε 偶爾真的掉下去——它學到的「最優路」較<b>冒險</b>。
+        </div>
+    </section>
+
+    <!-- ===== 6. epsilon ===== -->
+    <section class="lesson">
+        <h2>🎚️ 六、ε 怎麼影響 SARSA？</h2>
+        <div class="note def">
+            <h4>ε 越大 → 路越保守；ε → 0 → 兩者趨於一致</h4>
+            ε 代表手滑機率。<b>ε 越大</b>，SARSA 越覺得「靠近懸崖太危險」，學出的路會<b>離懸崖更遠</b>。反之，<b>當 ε → 0</b>（幾乎不探索、不會手滑），SARSA 的 A' 幾乎就等於最佳動作，這時 <b>SARSA 和 Q-Learning 會趨於一致</b>。
+        </div>
+    </section>
+
+    <!-- ===== 7. 總表 ===== -->
+    <section class="lesson">
+        <h2>📊 七、SARSA vs Q-Learning 總整理</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="s">SARSA</th><th class="q">Q-Learning</th></tr>
+            <tr><td>未來那一項</td><td>Q(S', A')　實際下一動作</td><td>max Q(S', a)　最大值</td></tr>
+            <tr><td>策略類型</td><td>On-policy</td><td>Off-policy</td></tr>
+            <tr><td>風格</td><td>保守、避險</td><td>激進、求最優</td></tr>
+            <tr><td>懸崖漫步路徑</td><td>往上繞的<b>安全路</b></td><td>貼懸崖的<b>最短路</b></td></tr>
+            <tr><td>能用舊/別人資料？</td><td>不易</td><td>可以（較彈性）</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 8. 何時用 ===== -->
+    <section class="lesson">
+        <h2>🛠️ 八、什麼時候用哪個？</h2>
+        <div class="keys">
+            <div class="keycard"><b>用 SARSA</b>在<b>真實世界邊學邊做</b>、手滑代價很高時（實體機器人、自駕、醫療）——安全優先。</div>
+            <div class="keycard"><b>用 Q-Learning</b>在<b>模擬環境</b>裡、摔了不痛，只要最後得到<b>理論最優策略</b>時。</div>
+        </div>
+    </section>
+
+    <!-- ===== 9. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 九、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. SARSA 五個字母代表什麼？</summary>
+                <p><b>S</b>tate-<b>A</b>ction-<b>R</b>eward-next <b>S</b>tate-next <b>A</b>ction，正是更新一次要用的材料。</p></details>
+            <details><summary>Q2. SARSA 與 Q-Learning 更新差在哪？</summary>
+                <p>SARSA 用<b>實際下一動作 Q(S',A')</b>；Q-Learning 用<b>下一狀態最大 max Q(S',a)</b>。</p></details>
+            <details><summary>Q3. on-policy 是什麼意思？</summary>
+                <p>學的是「<b>正在執行（含探索）的策略</b>」的價值，把探索風險一起算進去。</p></details>
+            <details><summary>Q4. 為什麼 SARSA 在懸崖漫步走安全路？</summary>
+                <p>它把「下一步可能隨機掉下懸崖」的風險算進 Q 值，於是<b>避開邊緣、繞遠路</b>。</p></details>
+            <details><summary>Q5. 當 ε → 0，SARSA 和 Q-Learning 的關係？</summary>
+                <p>幾乎不再手滑，A' ≈ 最佳動作，兩者<b>趨於一致</b>。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 10. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 十、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>SARSA＝S-A-R-S-A</b>TD 法，用實際下一動作 A' 更新。</div>
+            <div class="keycard"><b>On-policy</b>學「含探索」的當前策略價值。</div>
+            <div class="keycard"><b>vs Q-Learning</b>差在 Q(S',A') 而非 max。</div>
+            <div class="keycard"><b>較保守安全</b>懸崖漫步走繞路、避險。</div>
+            <div class="keycard"><b>ε 越大越保守</b>ε→0 時兩者趨同。</div>
+            <div class="keycard"><b>用途</b>真實世界、避險場景優先選它。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        // Grid Configuration
+        const rows = 5;
+        const cols = 10;
+        const cellSize = 60;
+        const width = cols * cellSize;
+        const height = rows * cellSize;
+
+        // RL Hyperparameters
+        let epsilon = 0.1;
+        const alpha = 0.5; // Learning rate
+        const gamma = 0.9; // Discount factor
+
+        // State
+        let qTable = [];
+        let agentPos = {x: 0, y: rows-1};
+        let isRunning = false;
+        let timer = null;
+        let episode = 0;
+        let currentReward = 0;
+        let speed = 50;
+
+        // Actions: Up, Right, Down, Left
+        const actions = [
+            {dx: 0, dy: -1, name: 'U'},
+            {dx: 1, dy: 0, name: 'R'},
+            {dx: 0, dy: 1, name: 'D'},
+            {dx: -1, dy: 0, name: 'L'}
+        ];
+
+        // Init SVG
+        const svg = d3.select("#viz-area").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Define Cliff, Start, Goal
+        const startState = {x: 0, y: rows-1};
+        const goalState = {x: cols-1, y: rows-1};
+
+        function isCliff(x, y) {
+            return y === rows-1 && x > 0 && x < cols-1;
+        }
+
+        function isGoal(x, y) {
+            return x === goalState.x && y === goalState.y;
+        }
+
+        // --- Initialization ---
+        function initQTable() {
+            qTable = [];
+            for(let x=0; x<cols; x++) {
+                qTable[x] = [];
+                for(let y=0; y<rows; y++) {
+                    // Initialize with 0
+                    qTable[x][y] = [0, 0, 0, 0];
+                }
+            }
+        }
+
+        function drawGrid() {
+            // Draw Cells
+            for(let x=0; x<cols; x++) {
+                for(let y=0; y<rows; y++) {
+                    let fill = "#fff";
+                    if(isCliff(x, y)) fill = "#34495e"; // Cliff
+                    else if(x===startState.x && y===startState.y) fill = "#f1c40f";
+                    else if(isGoal(x, y)) fill = "#2ecc71";
+
+                    svg.append("rect")
+                        .attr("x", x*cellSize)
+                        .attr("y", y*cellSize)
+                        .attr("width", cellSize)
+                        .attr("height", cellSize)
+                        .attr("class", "cell")
+                        .attr("fill", fill);
+
+                    // Draw Arrows (initially invisible)
+                    actions.forEach((a, i) => {
+                        // Calculate center
+                        const cx = x*cellSize + cellSize/2;
+                        const cy = y*cellSize + cellSize/2;
+                        // Offset for arrow direction
+                        const off = cellSize * 0.35;
+
+                        let path = "";
+                        // Simple triangle path based on direction
+                        if(i===0) path = `M${cx},${cy-off} L${cx-5},${cy-off+10} L${cx+5},${cy-off+10} Z`; // U
+                        if(i===1) path = `M${cx+off},${cy} L${cx+off-10},${cy-5} L${cx+off-10},${cy+5} Z`; // R
+                        if(i===2) path = `M${cx},${cy+off} L${cx-5},${cy+off-10} L${cx+5},${cy+off-10} Z`; // D
+                        if(i===3) path = `M${cx-off},${cy} L${cx-off+10},${cy-5} L${cx-off+10},${cy+5} Z`; // L
+
+                        svg.append("path")
+                            .attr("d", path)
+                            .attr("class", `arrow arrow-${x}-${y}-${i}`)
+                            .attr("fill", "#333")
+                            .attr("opacity", 0.1);
+                    });
+                }
+            }
+
+            // Draw Agent
+            svg.append("circle")
+                .attr("id", "agent")
+                .attr("class", "agent")
+                .attr("r", cellSize/3)
+                .attr("cx", (startState.x + 0.5) * cellSize)
+                .attr("cy", (startState.y + 0.5) * cellSize);
+        }
+
+        // --- RL Logic ---
+
+        function chooseAction(x, y) {
+            // Epsilon-Greedy
+            if(Math.random() < epsilon) {
+                return Math.floor(Math.random() * 4);
+            } else {
+                // Argmax Q
+                let maxQ = -Infinity;
+                let bestActions = [];
+                const qs = qTable[x][y];
+                for(let i=0; i<4; i++) {
+                    if(qs[i] > maxQ) {
+                        maxQ = qs[i];
+                        bestActions = [i];
+                    } else if (qs[i] === maxQ) {
+                        bestActions.push(i);
+                    }
+                }
+                return bestActions[Math.floor(Math.random() * bestActions.length)];
+            }
+        }
+
+        // Current Action stored globally for SARSA loop
+        let nextActionIndex = null;
+
+        function step() {
+            const x = agentPos.x;
+            const y = agentPos.y;
+
+            // 1. Determine Action (If first step of episode, choose now. Else use stored nextAction)
+            let actionIdx;
+            if(nextActionIndex === null) {
+                actionIdx = chooseAction(x, y);
+            } else {
+                actionIdx = nextActionIndex;
+            }
+
+            // 2. Take Action & Observe Reward, New State
+            let nx = x + actions[actionIdx].dx;
+            let ny = y + actions[actionIdx].dy;
+
+            // Boundary checks
+            if(nx < 0) nx = 0;
+            if(nx >= cols) nx = cols-1;
+            if(ny < 0) ny = 0;
+            if(ny >= rows) ny = rows-1;
+
+            let reward = -1; // Default step penalty
+            let done = false;
+            let resetPos = false;
+
+            if(isCliff(nx, ny)) {
+                reward = -100;
+                resetPos = true;
+                // Don't mark done, just reset position to start, keeping episode going is one way,
+                // but usually Cliff Walking treats falling as terminal or reset. Let's reset to start.
+                nx = startState.x;
+                ny = startState.y;
+            } else if (isGoal(nx, ny)) {
+                reward = 10;
+                done = true;
+            }
+
+            currentReward += reward;
+
+            // 3. SARSA: Choose Next Action A' (On-policy!)
+            let nextActionIdx_Prime = chooseAction(nx, ny);
+
+            // 4. Update Q-Table
+            // Q(S,A) = Q(S,A) + alpha * [R + gamma * Q(S', A') - Q(S,A)]
+            // Note: If done, Q(S', A') is 0
+            let qNext = done ? 0 : qTable[nx][ny][nextActionIdx_Prime];
+            let qCurrent = qTable[x][y][actionIdx];
+
+            qTable[x][y][actionIdx] = qCurrent + alpha * (reward + gamma * qNext - qCurrent);
+
+            // 5. Move Agent State
+            agentPos = {x: nx, y: ny};
+            nextActionIndex = nextActionIdx_Prime; // Store A' to be A in next loop
+
+            // Visual Update
+            updateAgentView();
+            updateArrows(x, y);
+
+            if(done) {
+                // End Episode
+                episode++;
+                document.getElementById("episode-count").innerText = episode;
+                document.getElementById("reward-val").innerText = currentReward;
+
+                // Reset for next episode
+                agentPos = {x: startState.x, y: startState.y};
+                currentReward = 0;
+                nextActionIndex = null;
+
+                if(isRunning) {
+                    timer = setTimeout(step, speed);
+                }
+            } else {
+                if(isRunning) {
+                    timer = setTimeout(step, speed);
+                }
+            }
+        }
+
+        // --- Visualization Updates ---
+
+        function updateAgentView() {
+            d3.select("#agent")
+                .transition().duration(speed * 0.8)
+                .attr("cx", (agentPos.x + 0.5) * cellSize)
+                .attr("cy", (agentPos.y + 0.5) * cellSize);
+        }
+
+        function updateArrows(x, y) {
+            // Update arrows for cell (x, y)
+            const qs = qTable[x][y];
+            const maxQ = Math.max(...qs);
+            const minQ = Math.min(...qs);
+            const range = Math.max(maxQ - minQ, 0.1); // Avoid div 0
+
+            for(let i=0; i<4; i++) {
+                // Normalize roughly to 0.1 ~ 1.0 opacity
+                // We want better actions to be darker
+                // Since Q values are mostly negative, handle carefully
+
+                // Visualization Strategy:
+                // Just map probability of being chosen? Or raw Q value?
+                // Let's visualize the "Max Q" direction clearly
+
+                let opacity = 0.1;
+                if(qs[i] === maxQ && maxQ !== 0) {
+                    opacity = 1.0;
+                    d3.select(`.arrow-${x}-${y}-${i}`).attr("fill", "#c0392b"); // Highlight best
+                } else {
+                    // Scale relative to max
+                    d3.select(`.arrow-${x}-${y}-${i}`).attr("fill", "#333");
+                }
+
+                d3.select(`.arrow-${x}-${y}-${i}`).attr("opacity", opacity);
+            }
+        }
+
+        // --- Controls ---
+
+        function toggleTraining() {
+            if(isRunning) {
+                isRunning = false;
+                clearTimeout(timer);
+                document.getElementById("btn-toggle").innerText = "開始訓練";
+                document.getElementById("btn-toggle").classList.remove("stop");
+            } else {
+                isRunning = true;
+                step();
+                document.getElementById("btn-toggle").innerText = "暫停";
+                document.getElementById("btn-toggle").classList.add("stop");
+            }
+        }
+
+        document.getElementById("slider-epsilon").addEventListener("input", function() {
+            epsilon = parseFloat(this.value);
+            document.getElementById("val-epsilon").innerText = epsilon;
+        });
+
+        document.getElementById("slider-speed").addEventListener("input", function() {
+            speed = 201 - parseInt(this.value); // Invert so right is faster
+            document.getElementById("val-speed").innerText = speed;
+        });
+
+        // Initialize
+        initQTable();
+        drawGrid();
+
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>SARSA 是強化學習的時序差分(TD)演算法(初級科目一 RL)。重點:名稱來自更新用到的 State-Action-Reward-State-Action;它是同策略(on-policy),用實際採取的下一行動更新,較保守、傾向避開風險路徑。易混點:常與 Q-learning 對比——SARSA 在懸崖漫步會走較安全的路、Q-learning(off-policy)走最短但較冒險的路。情境:風險敏感的路徑決策。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>SARSA 是什麼？</summary><p>一種時序差分(TD)強化學習法，名稱來自更新用到的 State、Action、Reward、next State、next Action；學的是實際採取策略的價值。</p></details><details><summary>SARSA 和 Q-learning 差在哪？</summary><p>SARSA 是 on-policy(用實際下一步動作更新)；Q-learning 是 off-policy(用下一步的最大 Q 更新)。SARSA 較保守、會考慮探索風險。</p></details><details><summary>on-policy 和 off-policy 是什麼？</summary><p>on-policy 用正在執行的策略產生的資料學該策略；off-policy 可用其他策略或舊資料學目標策略，後者更彈性、可重用資料。</p></details><details><summary>為什麼說 SARSA 較安全？</summary><p>它把探索動作的後果也納入學習，在有風險環境(如懸崖)會學到較保守、避開風險的路徑；Q-learning 學最優但可能較冒險。</p></details><details><summary>SARSA 怎麼更新？</summary><p>Q(s,a) ← Q(s,a) + α[r + γ × Q(下一狀態, 實際下一動作) − Q(s,a)]；與 Q-learning 差在用實際下一動作而非 max。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "SARSA 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "一種時序差分(TD)強化學習法，名稱來自更新用到的 State、Action、Reward、next State、next Action；學的是實際採取策略的價值。"}}, {"@type": "Question", "name": "SARSA 和 Q-learning 差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "SARSA 是 on-policy(用實際下一步動作更新)；Q-learning 是 off-policy(用下一步的最大 Q 更新)。SARSA 較保守、會考慮探索風險。"}}, {"@type": "Question", "name": "on-policy 和 off-policy 是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "on-policy 用正在執行的策略產生的資料學該策略；off-policy 可用其他策略或舊資料學目標策略，後者更彈性、可重用資料。"}}, {"@type": "Question", "name": "為什麼說 SARSA 較安全？", "acceptedAnswer": {"@type": "Answer", "text": "它把探索動作的後果也納入學習，在有風險環境(如懸崖)會學到較保守、避開風險的路徑；Q-learning 學最優但可能較冒險。"}}, {"@type": "Question", "name": "SARSA 怎麼更新？", "acceptedAnswer": {"@type": "Answer", "text": "Q(s,a) ← Q(s,a) + α[r + γ × Q(下一狀態, 實際下一動作) − Q(s,a)]；與 Q-learning 差在用實際下一動作而非 max。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="q-learning.html">Q-Learning</a><a href="monte_carlo.html">強化學習</a><a href="riskaversion.html">累積獎勵、安全性指標</a><a href="policygradient.html">Policy Gradient</a><a href="actor-critic.html">Actor-Critic (A2C/A3C)</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

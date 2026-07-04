@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BERT vs GPT｜白話＋互動：雙向理解 vs 單向生成</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。 GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/gptbert.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="BERT vs GPT 全句動態互動演示">
+    <meta property="og:description" content="都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。 GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/gptbert.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="BERT vs GPT 全句動態互動演示">
+    <meta name="twitter:description" content="都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。 GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "BERT vs GPT 全句動態互動演示",
+  "url": "https://akira.ipas-ai.com/gptbert.html",
+  "description": "都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。 GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+    :root{
+      --bg:#ecf7f5; --ink:#0c302b; --sub:#4e7a70;
+      --brand:#0d9488; --brand2:#0f766e; --brand-soft:#cfeee8;
+      --card:#ffffff; --line:#d7ebe6;
+      --warn:#b45309; --warn-soft:#fef4e2;
+      --app:#0369a1; --app-soft:#e2f2fb;
+      --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fde8e8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Noto Sans TC','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.75;display:flex;flex-direction:column;align-items:center}
+    .hero{width:100%;background:linear-gradient(135deg,#14b8a6,#0d9488 55%,#0f766e);color:#fff;padding:44px 20px 40px;text-align:center}
+    .hero .tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 15px;font-size:.82rem;font-weight:700;letter-spacing:.03em;margin-bottom:14px}
+    .hero h1{margin:0 0 12px;font-size:2rem;letter-spacing:.01em}
+    .hero p{margin:0 auto;max-width:640px;color:#e3faf5;font-size:1.02rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+    .chips span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);border-radius:999px;padding:5px 13px;font-size:.83rem;font-weight:600}
+    .lesson{width:100%;max-width:960px;padding:0 20px 10px;box-sizing:border-box}
+    .lesson section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 26px 24px;margin:22px 0;box-shadow:0 6px 22px rgba(13,148,136,.06)}
+    .lesson h2{font-size:1.32rem;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+    .lesson h2 .ic{width:30px;height:30px;flex:0 0 30px;border-radius:9px;background:var(--brand-soft);color:var(--brand2);display:grid;place-items:center;font-size:1rem}
+    .lesson p{margin:.5em 0}
+    .term{color:var(--brand2);font-weight:700}
+    .hl{background:linear-gradient(transparent 60%,#a6e3da 60%);font-weight:700}
+    .note{border-radius:0 12px 12px 0;padding:14px 18px;margin:16px 0;font-size:.96rem}
+    .note.def{background:var(--brand-soft);border-left:4px solid var(--brand)}
+    .note.meta{background:#f3f0fb;border-left:4px solid #8b5cf6}
+    .note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+    .note.app{background:var(--app-soft);border-left:4px solid var(--app)}
+    .cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
+    .cmp th,.cmp td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+    .cmp thead th{background:var(--brand);color:#fff;font-size:.88rem}
+    .cmp tbody tr:nth-child(even){background:#f2faf8}
+    .cmp td:first-child{font-weight:700;color:var(--brand2);white-space:nowrap}
+    .keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:16px 0 4px}
+    .keycard{background:#f2faf8;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+    .keycard b{color:var(--brand2)}
+    .keycard span{display:block;font-size:1.5rem;margin-bottom:4px}
+    .qa details{border:1px solid var(--line);border-radius:12px;padding:0 16px;margin:11px 0;background:#f2faf8}
+    .qa summary{cursor:pointer;font-weight:700;padding:13px 0;color:var(--ink)}
+    .qa details[open] summary{color:var(--brand2)}
+    .qa .ans{padding:0 0 14px;color:#38635a;font-size:.95rem}
+    .steps{counter-reset:s;padding:0;margin:14px 0;list-style:none}
+    .steps li{position:relative;padding:10px 0 10px 44px;border-bottom:1px dashed var(--line)}
+    .steps li:last-child{border-bottom:0}
+    .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+
+    /* ===== 互動 demo（保留原始設計，作用域限定於 .bg-demo） ===== */
+    .bg-demo{--bert-color:#3b82f6;--gpt-color:#10b981;--highlight:#f59e0b;margin:14px 0}
+    .bg-demo .demo-title{font-size:1.12rem;font-weight:800;color:#0f766e;margin:0 0 14px;text-align:center}
+    .bg-demo .viz-wrapper{display:flex;flex-direction:column;align-items:center;gap:18px}
+    .bg-demo .controls{display:flex;gap:12px;background:#f1f5f9;padding:14px;border-radius:8px;justify-content:center;flex-wrap:wrap}
+    .bg-demo button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:1rem;transition:all .2s;background:#e2e8f0;color:#64748b;display:flex;align-items:center;gap:8px}
+    .bg-demo button:hover{transform:translateY(-2px)}
+    .bg-demo button.active-bert{background:var(--bert-color);color:#fff}
+    .bg-demo button.active-gpt{background:var(--gpt-color);color:#fff}
+    .bg-demo .svg-container{position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:8px;height:340px;width:100%;display:flex;justify-content:center;overflow-x:auto}
+    .bg-demo .svg-container svg{width:100%;min-width:640px;height:100%}
+    .bg-demo .token-group{cursor:pointer;transition:transform .2s}
+    .bg-demo .token-group:hover{transform:translateY(-2px)}
+    .bg-demo .token-rect{fill:#eff6ff;stroke:#94a3b8;stroke-width:2;rx:6;transition:all .3s}
+    .bg-demo .token-rect.active-target{stroke:var(--highlight);stroke-width:3;fill:#fffbeb}
+    .bg-demo .token-text{font-family:monospace;font-size:16px;font-weight:bold;text-anchor:middle;fill:#334155;pointer-events:none}
+    .bg-demo .attn-line{fill:none;stroke-width:2;stroke-linecap:round;opacity:.6;transition:d .5s ease, stroke .3s}
+    .bg-demo .bottom-panel{display:flex;width:100%;gap:18px;flex-wrap:wrap}
+    .bg-demo .chart-section{flex:1;min-width:280px;background:#f6fbf9;padding:20px;border-radius:8px;border:1px solid #d7ebe6}
+    .bg-demo .bar-row{display:flex;align-items:center;margin-bottom:8px;font-size:.9rem}
+    .bg-demo .bar-label{width:80px;text-align:right;margin-right:10px;font-weight:bold;font-family:monospace}
+    .bg-demo .bar-track{flex-grow:1;background:#e2e8f0;height:10px;border-radius:6px;overflow:hidden}
+    .bg-demo .bar-fill{height:100%;width:0%;transition:width .5s ease, background-color .3s}
+    .bg-demo .bar-val{width:50px;text-align:right;font-family:monospace;margin-left:5px}
+    .bg-demo .info-box{flex:1;min-width:280px;background:#f0f9ff;border-left:5px solid var(--bert-color);padding:20px;border-radius:8px;display:flex;flex-direction:column;justify-content:center}
+    .bg-demo .info-title{font-weight:bold;font-size:1.1rem;margin-bottom:10px}
+    @media(max-width:560px){.hero h1{font-size:1.6rem}.lesson section{padding:20px 16px}}
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">深度學習 · 自然語言處理</span>
+  <h1>BERT vs GPT</h1>
+  <p>同樣出自 Transformer，卻走上兩條路：BERT 雙向「看左右來理解」，GPT 單向「只看左邊來生成」。</p>
+  <div class="chips">
+    <span>都基於 Transformer</span><span>雙向 vs 單向</span><span>Encoder vs Decoder</span><span>MLM vs LM</span><span>理解 vs 生成</span>
+  </div>
+</header>
+
+<main class="lesson">
+
+  <section>
+    <h2><span class="ic">💡</span>一句話定義</h2>
+    <div class="note def">
+      <b>GPT</b> 是<span class="term">單向（自回歸）的解碼器</span>，靠預測下一個字、擅長<span class="hl">生成</span>；<b>BERT</b> 是<span class="term">雙向的編碼器</span>，能同時看左右文脈、擅長<span class="hl">理解</span>（分類、抽取）。兩者都建立在 Transformer 上，只是用了它的不同部分與不同訓練目標。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎮</span>互動：點一個字，看它能看到誰</h2>
+    <p>切換 BERT / GPT，點句子裡任一個字：<b>BERT</b> 連到<b>左右所有</b>字（全知）；<b>GPT</b> 只連到<b>前面</b>的字（禁止偷看右邊）。下方是該位置的預測機率。</p>
+    <div class="bg-demo">
+      <div class="demo-title">BERT vs GPT 全句動態互動演示</div>
+      <div class="viz-wrapper">
+        <div class="controls">
+          <button class="active-bert" onclick="setMode('bert')">
+            <span>👁️ 👁️</span> BERT (雙向 / Masked LM)
+          </button>
+          <button onclick="setMode('gpt')">
+            <span>👁️ 🚫</span> GPT (單向 / Causal LM)
+          </button>
+        </div>
+
+        <div class="svg-container">
+          <svg id="main-svg" width="900" height="350" viewBox="0 0 900 350">
+            <defs>
+              <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#3b82f6" />
+              </marker>
+              <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#10b981" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="bottom-panel">
+          <div class="chart-section">
+            <div style="font-weight:bold; margin-bottom:10px; color:#475569;">模型對該位置的預測機率 (Top 5)</div>
+            <div id="prob-chart"></div>
+          </div>
+
+          <div class="info-box" id="info-box">
+            <div class="info-title" id="info-title">BERT 模式</div>
+            <div id="info-desc">
+              請點擊上方的任意單字。<br><br>
+              BERT 會嘗試利用<strong>「前後文」</strong>來填補該位置。<br>
+              GPT 則只能利用<strong>「前面的字」</strong>來預測該位置。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">👀</span>雙向 vs 單向</h2>
+    <div class="note meta">
+      <b>BERT（雙向）</b>：預測或理解某個字時，同時參考左邊和右邊——「全知視角」，很適合<b>閱讀理解、分類</b>，因為能一次看清整句結構。<b>GPT（單向 / 自回歸）</b>：生成某個位置時<b>嚴格禁止偷看右邊</b>，只能根據前面已生成的字往下猜——這正是它擅長<b>文字接龍、對話生成</b>的原因。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">⚖️</span>BERT vs GPT 對照表</h2>
+    <table class="cmp">
+      <thead><tr><th>面向</th><th>BERT</th><th>GPT</th></tr></thead>
+      <tbody>
+        <tr><td>用 Transformer 的</td><td>Encoder（編碼器）</td><td>Decoder（解碼器）</td></tr>
+        <tr><td>方向</td><td>雙向（看左右）</td><td>單向（只看前面，Masked）</td></tr>
+        <tr><td>訓練目標</td><td>MLM 克漏字＋下一句預測</td><td>預測下一個 token（語言模型）</td></tr>
+        <tr><td>擅長</td><td>理解：分類、情感、NER、問答抽取</td><td>生成：對話、寫作、補全</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>兩種訓練目標</h2>
+    <div class="keys">
+      <div class="keycard"><span>🕳️</span><b>BERT：MLM 克漏字</b><br>把句中部分字遮住（[MASK]），用<b>左右上下文</b>猜回來；另加「下一句預測」。</div>
+      <div class="keycard"><span>➡️</span><b>GPT：預測下一字</b><br>由左到右，用<b>前面的字</b>預測下一個 token（自回歸語言模型）。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🚫</span>為什麼 BERT 不能直接寫文章？</h2>
+    <div class="note warn">
+      BERT 是<b>雙向編碼</b>、設計來「理解」而非「逐字生成」，它<b>沒有自回歸的生成機制</b>——每個位置都同時看左右，無法像 GPT 那樣一個一個往下接。要生成，就得改架構或直接用解碼器模型。所以現代大型<b>生成</b>模型幾乎都走 <b>GPT（解碼器）</b>路線。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🏗️</span>共同點：預訓練 + 微調</h2>
+    <div class="note app">
+      兩者都採<b>預訓練 → 微調</b>範式：先在<b>海量無標註語料</b>上預訓練學通用語言能力（BERT 用 MLM、GPT 用下一字預測），再用<b>少量標註資料微調</b>到特定任務。這是 NLP 的主流做法，也讓一個大模型能服務很多下游任務。
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">✅</span>自我檢測</h2>
+    <div class="qa">
+      <details><summary>Q1. BERT 和 GPT 最根本的差別？</summary>
+        <div class="ans">BERT 是雙向編碼器（Encoder）、擅長理解；GPT 是單向自回歸解碼器（Decoder）、擅長生成。兩者都基於 Transformer，用了它的不同部分。</div></details>
+      <details><summary>Q2. 兩者的訓練目標各是什麼？</summary>
+        <div class="ans">BERT 用遮罩語言模型（MLM，克漏字）＋下一句預測，雙向看上下文；GPT 用預測下一個 token（自回歸語言模型），由左到右。</div></details>
+      <details><summary>Q3. 各自適合什麼任務？</summary>
+        <div class="ans">BERT 適合理解類：分類、情感分析、命名實體、問答抽取；GPT 適合生成類：對話、寫作、補全。現代大型生成模型多走 GPT 路線。</div></details>
+      <details><summary>Q4. 為什麼 BERT 不能像 GPT 那樣生成文章？</summary>
+        <div class="ans">BERT 是雙向編碼、設計來理解，沒有自回歸的逐字生成機制（每個位置都看左右）。要生成需改架構或用解碼器模型。</div></details>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span>重點整理</h2>
+    <ul class="steps">
+      <li><b>同源：</b>都基於 Transformer。</li>
+      <li><b>BERT：</b>Encoder、雙向、MLM、擅理解。</li>
+      <li><b>GPT：</b>Decoder、單向自回歸、預測下一字、擅生成。</li>
+      <li><b>選型：</b>理解任務選 BERT 類、生成任務選 GPT 類。</li>
+      <li><b>共同：</b>預訓練 + 微調範式。</li>
+    </ul>
+  </section>
+
+</main>
+
+    <script>
+        const svg = document.getElementById('main-svg');
+        const probChart = document.getElementById('prob-chart');
+        const infoBox = document.getElementById('info-box');
+        const infoTitle = document.getElementById('info-title');
+        const infoDesc = document.getElementById('info-desc');
+
+        // Sentence: "The smart robot plays chess in the park."
+        const sentence = ["The", "smart", "robot", "plays", "chess", "in", "the", "park", "."];
+
+        let currentIndex = 4; // Default on 'chess'
+        let currentMode = 'bert';
+
+        // Mock Predictions for demo purposes
+        const mockData = {
+            2: { // robot
+                bert: [{w:"robot", p:0.8}, {w:"boy", p:0.1}, {w:"girl", p:0.05}, {w:"man", p:0.03}, {w:"dog", p:0.02}],
+                gpt: [{w:"man", p:0.2}, {w:"car", p:0.15}, {w:"house", p:0.1}, {w:"way", p:0.1}, {w:"plan", p:0.05}]
+            },
+            4: { // chess
+                bert: [{w:"chess", p:0.9}, {w:"games", p:0.05}, {w:"football", p:0.02}, {w:"music", p:0.02}, {w:"cards", p:0.01}],
+                gpt: [{w:"games", p:0.3}, {w:"football", p:0.2}, {w:"music", p:0.1}, {w:"chess", p:0.1}, {w:"well", p:0.1}]
+            },
+            7: { // park
+                bert: [{w:"park", p:0.85}, {w:"room", p:0.05}, {w:"garden", p:0.05}, {w:"house", p:0.03}, {w:"club", p:0.02}],
+                gpt: [{w:"morning", p:0.2}, {w:"park", p:0.2}, {w:"end", p:0.15}, {w:"garden", p:0.1}, {w:"house", p:0.05}]
+            },
+            generic: {
+                bert: [{w:"(target)", p:0.7}, {w:"word", p:0.1}, {w:"thing", p:0.1}, {w:"it", p:0.05}, {w:"one", p:0.05}],
+                gpt: [{w:"next", p:0.3}, {w:"is", p:0.2}, {w:"was", p:0.15}, {w:"and", p:0.1}, {w:"to", p:0.1}]
+            }
+        };
+
+        window.onload = () => {
+            initViz();
+            updateViz();
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+
+            document.querySelectorAll('.bg-demo button').forEach(btn => btn.className = '');
+            document.querySelector(`button[onclick="setMode('${mode}')"]`).className = `active-${mode}`;
+
+            if(mode === 'bert') {
+                infoBox.style.borderLeftColor = "#3b82f6";
+                infoBox.style.background = "#f0f9ff";
+                infoTitle.style.color = "#1d4ed8";
+            } else {
+                infoBox.style.borderLeftColor = "#10b981";
+                infoBox.style.background = "#f0fdf4";
+                infoTitle.style.color = "#047857";
+            }
+
+            updateViz();
+        }
+
+        function setTarget(index) {
+            currentIndex = index;
+            updateViz();
+        }
+
+        function initViz() {
+            const startX = 50;
+            const startY = 250;
+            const gap = 90;
+
+            sentence.forEach((word, i) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "token-group");
+                g.onclick = () => setTarget(i);
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", startX + i * gap);
+                rect.setAttribute("y", startY);
+                rect.setAttribute("width", 80);
+                rect.setAttribute("height", 40);
+                rect.setAttribute("class", "token-rect");
+                rect.id = `rect-${i}`;
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", startX + i * gap + 40);
+                text.setAttribute("y", startY + 25);
+                text.setAttribute("class", "token-text");
+                text.textContent = word;
+
+                g.appendChild(rect);
+                g.appendChild(text);
+                svg.appendChild(g);
+            });
+        }
+
+        function updateViz() {
+            const startX = 50;
+            const startY = 250;
+            const gap = 90;
+
+            const oldLines = document.querySelectorAll('.attn-line');
+            oldLines.forEach(l => l.remove());
+
+            document.querySelectorAll('.token-rect').forEach(r => r.classList.remove('active-target'));
+            document.getElementById(`rect-${currentIndex}`).classList.add('active-target');
+
+            const targetX = startX + currentIndex * gap + 40;
+            const targetY = startY;
+
+            sentence.forEach((_, i) => {
+                if (i === currentIndex) return;
+
+                let shouldDraw = false;
+                if (currentMode === 'bert') {
+                    shouldDraw = true;
+                } else {
+                    if (i < currentIndex) shouldDraw = true;
+                }
+
+                if (shouldDraw) {
+                    const sourceX = startX + i * gap + 40;
+                    const sourceY = startY;
+
+                    const dist = Math.abs(i - currentIndex);
+                    const height = 60 + dist * 20;
+
+                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    const d = `M ${sourceX} ${sourceY} Q ${(sourceX + targetX)/2} ${sourceY - height} ${targetX} ${targetY}`;
+
+                    path.setAttribute("d", d);
+                    path.setAttribute("class", "attn-line");
+                    path.setAttribute("stroke", currentMode === 'bert' ? '#3b82f6' : '#10b981');
+                    path.setAttribute("marker-end", currentMode === 'bert' ? 'url(#arrow-blue)' : 'url(#arrow-green)');
+
+                    svg.insertBefore(path, svg.firstChild);
+                }
+            });
+
+            updateDataDisplay();
+        }
+
+        function updateDataDisplay() {
+            let preds = (mockData[currentIndex] && mockData[currentIndex][currentMode])
+                        ? mockData[currentIndex][currentMode]
+                        : mockData['generic'][currentMode];
+
+            preds.sort((a,b) => b.p - a.p);
+
+            probChart.innerHTML = '';
+            preds.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'bar-row';
+                const pct = (item.p * 100).toFixed(1);
+                const color = currentMode === 'bert' ? '#3b82f6' : '#10b981';
+
+                row.innerHTML = `
+                    <div class="bar-label">${item.w}</div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width: ${pct}%; background-color: ${color};"></div>
+                    </div>
+                    <div class="bar-val">${pct}%</div>
+                `;
+                probChart.appendChild(row);
+            });
+
+            const targetWord = sentence[currentIndex];
+            if (currentMode === 'bert') {
+                infoTitle.innerText = `BERT 模式：理解 [${targetWord}]`;
+                infoDesc.innerHTML = `
+                    BERT 是<strong>雙向的</strong>。<br>
+                    為了預測或理解 "${targetWord}"，它同時參考了左邊和右邊的資訊。<br>
+                    <br>
+                    這種全知視角讓它非常適合<strong>閱讀理解</strong>、<strong>分類</strong>等任務，因為它能一次看清整個句子的結構。
+                `;
+            } else {
+                infoTitle.innerText = `GPT 模式：預測 [${targetWord}]`;
+                infoDesc.innerHTML = `
+                    GPT 是<strong>單向的 (Autoregressive)</strong>。<br>
+                    在生成 "${targetWord}" 這個位置時，它<strong>嚴格禁止</strong>偷看右邊的字。<br>
+                    <br>
+                    它只能根據左邊的歷史紀錄來猜下一個字是什麼。這種特性讓它非常適合<strong>文字接龍</strong>和<strong>對話生成</strong>。
+                `;
+            }
+        }
+    </script>
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>BERT 與 GPT 都是 Transformer 預訓練語言模型,iPAS 中級科目一高頻對比題。重點:BERT 用雙向、遮罩預測,擅長理解(分類、問答、NER);GPT 由左到右預測下一詞,擅長生成。易混點:BERT 是編碼器、重理解;GPT 是解碼器、重生成,別搞反;兩者都靠自注意力。情境:理解類任務選 BERT 類、生成類(對話、寫作)選 GPT 類。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>GPT 和 BERT 最大差別？</summary><p>都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。</p></details><details><summary>訓練目標差在哪？</summary><p>GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。</p></details><details><summary>各自適合什麼任務？</summary><p>GPT 適合生成(寫作、對話、補全)；BERT 適合理解類(分類、情感、命名實體、問答抽取)；現代大型生成模型多走 GPT 路線。</p></details><details><summary>為什麼 BERT 不能直接生成文章？</summary><p>BERT 是雙向編碼、設計來理解而非逐字生成；它沒有自回歸的生成機制，要生成需改架構或用解碼器模型。</p></details><details><summary>兩者都用預訓練加微調嗎？</summary><p>是；都先在大語料預訓練學通用語言能力，再用少量標註資料微調到特定任務，這是 NLP 的主流範式。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "GPT 和 BERT 最大差別？", "acceptedAnswer": {"@type": "Answer", "text": "都基於 Transformer，但 GPT 是單向(自回歸)解碼器、擅長生成下一個字；BERT 是雙向編碼器、擅長理解(看左右文脈)，適合分類與抽取。"}}, {"@type": "Question", "name": "訓練目標差在哪？", "acceptedAnswer": {"@type": "Answer", "text": "GPT 用預測下一個 token(語言模型)；BERT 用遮罩語言模型(MLM)克漏字加下一句預測，雙向看上下文。"}}, {"@type": "Question", "name": "各自適合什麼任務？", "acceptedAnswer": {"@type": "Answer", "text": "GPT 適合生成(寫作、對話、補全)；BERT 適合理解類(分類、情感、命名實體、問答抽取)；現代大型生成模型多走 GPT 路線。"}}, {"@type": "Question", "name": "為什麼 BERT 不能直接生成文章？", "acceptedAnswer": {"@type": "Answer", "text": "BERT 是雙向編碼、設計來理解而非逐字生成；它沒有自回歸的生成機制，要生成需改架構或用解碼器模型。"}}, {"@type": "Question", "name": "兩者都用預訓練加微調嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是；都先在大語料預訓練學通用語言能力，再用少量標註資料微調到特定任務，這是 NLP 的主流範式。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="transformer.html">Transformer</a><a href="nlp_llm.html">NLP 與 LLM</a><a href="attention.html">注意力機制</a><a href="temperature.html">溫度 Temperature</a><a href="prompt_engineering.html">提示工程</a><a href="embedding.html">詞嵌入</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>

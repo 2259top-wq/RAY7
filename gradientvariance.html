@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>強化學習：梯度方差與訓練穩定性</title>
+    <!-- AKIRA-SEO-v1 -->
+    <meta name="description" content="SGD 用小批次估計整體梯度，每批資料不同，估計值會在真實梯度附近上下波動，這就是梯度變異(雜訊)。適度雜訊能跳出鞍點、有正則化效果；太大則震盪難收斂。批次大小、baseline、動量可降變異。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://akira.ipas-ai.com/gradientvariance.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="強化學習：梯度方差與訓練穩定性">
+    <meta property="og:description" content="SGD 用小批次估計梯度、每批不同而產生雜訊(梯度變異)。適度雜訊能跳出鞍點；太大則震盪。批次大小、baseline、動量可降變異。">
+    <meta property="og:url" content="https://akira.ipas-ai.com/gradientvariance.html">
+    <meta property="og:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <meta property="og:site_name" content="AKIRA 互動式 AI 學習與考證地圖">
+    <meta property="og:locale" content="zh_TW">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="強化學習：梯度方差與訓練穩定性">
+    <meta name="twitter:description" content="SGD 小批次估計梯度而產生雜訊(梯度變異)。適度雜訊能跳出鞍點；太大則震盪。批次大小、baseline、動量可降變異。">
+    <meta name="twitter:image" content="https://akira.ipas-ai.com/assets/og-cover.jpg">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "強化學習：梯度方差與訓練穩定性",
+  "url": "https://akira.ipas-ai.com/gradientvariance.html",
+  "description": "SGD 用小批次估計整體梯度，每批資料不同，估計值會在真實梯度附近上下波動，這就是梯度變異(雜訊)。適度雜訊能跳出鞍點、有正則化效果；太大則震盪難收斂。批次大小、baseline、動量可降變異。",
+  "inLanguage": "zh-TW",
+  "isAccessibleForFree": true,
+  "dateModified": "2026-06-30",
+  "learningResourceType": "interactive simulation",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AKIRA 互動式 AI 學習與考證地圖",
+    "url": "https://akira.ipas-ai.com/"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "AKIRA"
+  }
+}
+    </script>
+
+    <style>
+        :root{
+            --bl:#2563eb; --bl-d:#1d4ed8; --bl-dd:#1e3a8a;
+            --green:#16a34a; --amber:#f59e0b; --red:#ef4444; --violet:#7c3aed;
+            --ink:#1f2a37; --muted:#5b6776; --line:#e6e9ef; --bg:#eaf0fb;
+        }
+        *{box-sizing:border-box}
+        body{
+            font-family:"Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+            margin:0; padding:26px 14px 40px;
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--bg); color:var(--ink); line-height:1.8; -webkit-text-size-adjust:100%;
+        }
+        .hero{
+            width:100%; max-width:960px; border-radius:20px; padding:34px 30px;
+            background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#60a5fa 100%);
+            color:#fff; box-shadow:0 14px 34px rgba(37,99,235,.28); margin-bottom:20px;
+        }
+        .hero .tag{display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.5px;
+            background:rgba(255,255,255,.2); padding:5px 12px; border-radius:999px; margin-bottom:14px}
+        .hero h1{margin:0 0 10px; font-size:1.8rem; line-height:1.3}
+        .hero p{margin:0; font-size:1.05rem; opacity:.97}
+        .hero .chips{margin-top:16px; display:flex; flex-wrap:wrap; gap:8px}
+        .hero .chips span{font-size:.84rem; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25);
+            padding:5px 11px; border-radius:999px}
+
+        .lesson{
+            width:100%; max-width:960px; background:#fff; border-radius:18px; padding:26px 28px;
+            box-shadow:0 3px 16px rgba(16,24,40,.06); border:1px solid var(--line); margin-bottom:18px;
+        }
+        .lesson h2{display:flex; align-items:center; gap:10px; font-size:1.32rem; margin:0 0 4px; color:var(--ink)}
+        .lesson .lead{color:var(--muted); margin:0 0 16px; font-size:.98rem}
+        .lesson h3{font-size:1.06rem; margin:20px 0 8px}
+        .lesson p{margin:10px 0}
+        .hl{background:linear-gradient(transparent 62%,#bfdbfe 62%); font-weight:700; padding:0 1px}
+        .term{color:var(--bl-d); font-weight:800}
+
+        .note{border-radius:12px; padding:15px 18px; margin:16px 0; line-height:1.85; font-size:.97rem}
+        .note h4{margin:0 0 6px; font-size:1rem}
+        .note.def{background:#eff6ff; border-left:5px solid var(--bl)}
+        .note.meta{background:#fffbeb; border-left:5px solid var(--amber)}
+        .note.warn{background:#fef2f2; border-left:5px solid var(--red)}
+        .note.app{background:#f0fdf4; border-left:5px solid var(--green)}
+
+        .cmp{width:100%; border-collapse:collapse; margin:12px 0; font-size:.93rem}
+        .cmp th,.cmp td{border:1px solid var(--line); padding:11px 13px; text-align:left; vertical-align:top}
+        .cmp th{background:#eef3fc; font-weight:800}
+        .cmp tr td:first-child{background:#fafbfd; font-weight:700; white-space:nowrap}
+        .cmp .big{color:var(--bl-d); font-weight:700} .cmp .sm{color:var(--red); font-weight:700}
+
+        .keys{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px}
+        .keycard{background:#fbfcfe; border:1px solid var(--line); border-left:4px solid var(--bl);
+            border-radius:12px; padding:13px 15px; font-size:.95rem}
+        .keycard b{display:block; margin-bottom:3px; color:var(--bl-d)}
+
+        .qa{background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:6px 18px; margin:12px 0}
+        .qa details{border-bottom:1px solid #d5e5fd; padding:11px 0}
+        .qa details:last-child{border-bottom:none}
+        .qa summary{cursor:pointer; font-weight:800; color:var(--bl-d)}
+        .qa p{margin:8px 0 0; color:#374151; font-size:.95rem}
+
+        /* ===== demo (preserved · dark) ===== */
+        .demo-dark{background:#1e293b; border-radius:16px; padding:22px; margin:14px 0; box-shadow:0 12px 30px rgba(0,0,0,.3); color:#cbd5e1}
+        .dashboard{display:flex; gap:18px; flex-wrap:wrap}
+        .panel{flex:1; min-width:250px; background:#0f172a; padding:18px; border-radius:10px; border:1px solid #334155; display:flex; flex-direction:column; gap:14px}
+        .control-group{display:flex; flex-direction:column; gap:8px}
+        .panel label{color:#e2e8f0; font-size:.92rem}
+        .demo-dark input[type=range]{accent-color:#38bdf8; cursor:pointer}
+        .checkbox-container{display:flex; align-items:center; gap:10px; font-size:15px; cursor:pointer; color:#e2e8f0}
+        .demo-dark input[type=checkbox]{width:18px; height:18px; accent-color:#10b981; cursor:pointer}
+        .stats{background:#1e293b; padding:10px; border-radius:8px; font-family:monospace; font-size:14px; color:#fbbf24}
+        .demo-dark button{padding:12px; font-size:15px; font-weight:800; cursor:pointer; border:none; border-radius:8px; color:#fff; transition:all .2s}
+        .btn-run{background:#38bdf8; color:#0f172a; margin-top:auto}
+        .btn-run:hover{background:#0ea5e9}
+        .btn-clear{background:#64748b; margin-top:8px}
+        .btn-clear:hover{background:#475569}
+        .svg-container{flex:1.2; min-width:260px; background:#020617; border-radius:10px; position:relative; overflow:hidden; border:2px solid #334155; display:flex; justify-content:center; align-items:center}
+        #loss-landscape{width:100%; height:400px}
+        .contour{fill:none; stroke:#1e293b; stroke-width:1.5}
+        .target{fill:#10b981}
+        .agent-path{fill:none; stroke-linecap:round; stroke-linejoin:round}
+        .agent-dot{stroke:#fff; stroke-width:1}
+
+        @media(max-width:560px){
+            .hero h1{font-size:1.4rem} .hero{padding:26px 20px} .lesson{padding:20px 17px}
+        }
+    </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X9HHKS34F6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-X9HHKS34F6');
+  </script>
+</head>
+<body>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+        <span class="tag">📉 梯度方差 Gradient Variance · iPAS 訓練機制</span>
+        <h1>梯度方差：AI 下山為什麼「腳步發抖」，又怎麼走穩？</h1>
+        <p>訓練時我們用<b>一小批</b>資料估計該往哪走（梯度）。每批不一樣，估出的方向就會在真方向附近<b>上下抖動</b>——這就是<b>梯度方差（雜訊）</b>。它有好有壞：適量能幫忙跳出陷阱，太多則讓訓練<b>震盪、學不穩</b>。</p>
+        <div class="chips"><span>SGD 雜訊</span><span>批次大小</span><span>基準線 Baseline</span><span>跳出鞍點</span><span>訓練穩定性</span></div>
+    </header>
+
+    <!-- ===== 1. 白話定義 ===== -->
+    <section class="lesson">
+        <h2>🧠 一、先用白話講：梯度方差是什麼？</h2>
+        <p class="lead">SGD（隨機梯度下降）用<b>小批次</b>估計「整體」該走的方向。每批資料不同，估計值就會在真實梯度附近<b>波動</b>——這波動就是<span class="term">梯度方差</span>。</p>
+        <div class="note def">
+            <h4>⛰️ 生活比喻：下山問路</h4>
+            你在濃霧的山上想下到谷底（<b>真實梯度</b>＝谷底方向）。但你每一步只<b>問幾個路人</b>（一個 batch），每組人指的方向都<b>略有出入</b>，於是你的路線歪歪扭扭。<br>
+            <span class="hl">問越多人（batch 越大），把意見平均後越接近真方向</span>，走得越穩——但問越多人也越花時間。
+        </div>
+    </section>
+
+    <!-- ===== 2. 雜訊來源 ===== -->
+    <section class="lesson">
+        <h2>🎲 二、雜訊哪裡來？批次估計</h2>
+        <div class="note def">
+            <h4>用一小批近似全部</h4>
+            算「整體梯度」要用<b>全部資料</b>（準但超慢）。SGD 改用<b>一小批</b>近似它（快，但每批不同 → 有雜訊）。雜訊大小大約以 <b>1/√(批次大小)</b> 縮小——<b>批次放大 4 倍，雜訊只剩一半</b>。這就是為什麼加大 batch 能讓路徑變穩。
+        </div>
+    </section>
+
+    <!-- ===== 3. DEMO ===== -->
+    <section class="lesson">
+        <h2>🎮 三、動手玩：在等高線山谷裡下山</h2>
+        <div class="note def" style="text-align:left">
+            <h4>📜 情境</h4>
+            AI 從左上角出發，要走到中心的<b style="color:#10b981">綠點（最佳解）</b>。但梯度有雜訊，路徑會抖。調整<b>批次大小（探路人數）</b>、勾選<b>基準線 (Baseline)</b>，按「開始一回合訓練」看軌跡穩不穩。
+        </div>
+
+        <div class="demo-dark">
+            <div class="dashboard">
+                <div class="panel">
+                    <div class="control-group">
+                        <label for="batch-slider"><strong>探路人數 (Batch Size): <span id="batch-val">10</span></strong></label>
+                        <input type="range" id="batch-slider" min="1" max="100" step="1" value="10">
+                        <span style="font-size:12px; color:#94a3b8;">*人越多，意見平均後越準確 (降低方差)，但計算成本較高。</span>
+                    </div>
+
+                    <div class="control-group" style="margin-top:8px;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="baseline-check">
+                            <strong>啟用基準線 (Baseline)</strong>
+                        </label>
+                        <span style="font-size:12px; color:#94a3b8;">*過濾掉普遍的雜訊，讓 AI 只關注「比平均更好/更差」的信號 (大幅降低方差)。</span>
+                    </div>
+
+                    <div class="stats">
+                        系統估算方差大小：<br>
+                        <span id="variance-val" style="font-size:20px; font-weight:bold; color:#ef4444;">高 (不穩定)</span>
+                    </div>
+
+                    <button class="btn-run" onclick="startTraining()">開始一回合訓練</button>
+                    <button class="btn-clear" onclick="clearCanvas()">清除畫面</button>
+                </div>
+
+                <div class="svg-container">
+                    <svg id="loss-landscape" viewBox="0 0 400 400">
+                        <circle cx="200" cy="200" r="180" class="contour" />
+                        <circle cx="200" cy="200" r="140" class="contour" />
+                        <circle cx="200" cy="200" r="100" class="contour" />
+                        <circle cx="200" cy="200" r="60" class="contour" />
+                        <circle cx="200" cy="200" r="20" class="contour" style="stroke: #047857;" />
+
+                        <circle cx="200" cy="200" r="6" class="target" />
+                        <text x="200" y="190" text-anchor="middle" fill="#10b981" font-size="12">最佳解</text>
+
+                        <g id="paths-group"></g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="note def">
+            <h4>🗺️ 怎麼看</h4>
+            <b>batch 調到很小（1~5）</b>：路徑<b style="color:#ef4444">紅色、劇烈鋸齒</b>，繞老半天才到（甚至衝過頭）。<b>batch 調大</b>：路徑<b style="color:#f59e0b">變平滑</b>。<b>勾選 Baseline</b>：路徑<b style="color:#10b981">最穩、幾乎直奔綠點</b>。左上角的「方差大小」也會跟著紅→黃→綠。
+        </div>
+    </section>
+
+    <!-- ===== 4. 兩面性 ===== -->
+    <section class="lesson">
+        <h2>⚖️ 四、雜訊是壞事嗎？其實有兩面</h2>
+        <div class="keys">
+            <div class="keycard" style="border-left-color:var(--green)"><b style="color:var(--green)">好的一面 ✅</b>適度雜訊能幫忙<b>跳出鞍點</b>與壞的局部最小，還有<b>正則化效果</b>（泛化常更好）。</div>
+            <div class="keycard" style="border-left-color:var(--red)"><b style="color:var(--red)">壞的一面 ❌</b>雜訊太大 → 訓練<b>震盪、難收斂</b>，甚至發散。</div>
+        </div>
+        <div class="note meta">
+            <h4>🧠 所以不是越小越好</h4>
+            梯度方差要<b>適中</b>：完全沒雜訊（超大批次）容易卡在爛谷底、泛化差；雜訊太大又學不穩。這也是「大批次 vs 小批次」永遠在拉鋸的原因。
+        </div>
+    </section>
+
+    <!-- ===== 5. 批次取捨 ===== -->
+    <section class="lesson">
+        <h2>📊 五、批次大小的取捨</h2>
+        <table class="cmp">
+            <tr><th>比較</th><th class="big">大批次</th><th class="sm">小批次</th></tr>
+            <tr><td>梯度方差</td><td>低（穩）</td><td>高（抖）</td></tr>
+            <tr><td>每步速度</td><td>慢（算得多）</td><td>快</td></tr>
+            <tr><td>更新軌跡</td><td>平滑</td><td>震盪</td></tr>
+            <tr><td>泛化</td><td>有時略差（易卡尖銳谷底）</td><td>常<b>更好</b>（雜訊當正則化）</td></tr>
+        </table>
+    </section>
+
+    <!-- ===== 6. Baseline ===== -->
+    <section class="lesson">
+        <h2>🎯 六、Baseline：策略梯度的降變異神器</h2>
+        <div class="note def">
+            <h4>只看「比平均好多少」，過濾掉共同雜訊</h4>
+            demo 裡那個「基準線」勾選，其實就是前面 <a href="policygradient.html" style="color:#1d4ed8;font-weight:700">Policy Gradient</a> 與 <a href="actor-critic.html" style="color:#1d4ed8;font-weight:700">Actor-Critic</a> 用來降變異的招——把回報<b>減掉一個基準值</b>（如狀態價值），只保留「<b>比平均更好或更差</b>」的訊號。<br>
+            神奇的是：這樣<b>大幅降低變異</b>，卻<b>不改變更新的期望方向</b>（不引入偏差）。所以它幾乎是「免費的午餐」，Actor-Critic 的 Critic 就是在當這個 baseline。
+        </div>
+    </section>
+
+    <!-- ===== 7. 其他手段 ===== -->
+    <section class="lesson">
+        <h2>🛠️ 七、其他降變異／穩定訓練的手段</h2>
+        <div class="keys">
+            <div class="keycard"><b>動量 Momentum</b>累積過去方向、<b>平滑</b>掉抖動，衝過小坑。</div>
+            <div class="keycard"><b>學習率衰減</b>後期步伐變小，減少在谷底來回彈跳。</div>
+            <div class="keycard"><b>梯度裁剪 Clipping</b>設上限，防止偶爾的超大梯度<b>爆炸</b>。</div>
+            <div class="keycard"><b>Adam 等自適應優化器</b>用梯度的統計自動調步伐，較穩。</div>
+            <div class="keycard"><b>適度加大批次</b>直接靠平均降雜訊（但別過頭）。</div>
+        </div>
+    </section>
+
+    <!-- ===== 8. 自我檢測 ===== -->
+    <section class="lesson">
+        <h2>🧪 八、觀念自我檢測</h2>
+        <p class="lead">先想再點開。</p>
+        <div class="qa">
+            <details><summary>Q1. 梯度方差是怎麼產生的？</summary>
+                <p>SGD 用<b>小批次</b>估計整體梯度，每批資料不同 → 估計值在真方向附近<b>波動</b>。</p></details>
+            <details><summary>Q2. 批次大小怎麼影響變異？</summary>
+                <p><b>大批次</b>＝低變異、穩但慢；<b>小批次</b>＝高變異、快但震盪（雜訊 ~ 1/√N）。</p></details>
+            <details><summary>Q3. 梯度雜訊全是壞事嗎？</summary>
+                <p>不是。<b>適度</b>能跳出鞍點/壞局部最小、有正則化效果；<b>太大</b>才會震盪難收斂。</p></details>
+            <details><summary>Q4. baseline 怎麼降變異、有副作用嗎？</summary>
+                <p>把回報<b>減基準</b>只留相對優劣訊號，<b>大幅降變異</b>且<b>不改變期望方向</b>（無偏）。</p></details>
+            <details><summary>Q5. 還有哪些穩定訓練的手段？</summary>
+                <p><b>動量、學習率衰減、梯度裁剪、Adam</b>、適度加大批次。</p></details>
+        </div>
+    </section>
+
+    <!-- ===== 9. 重點整理 ===== -->
+    <section class="lesson">
+        <h2>✅ 九、30 秒重點整理</h2>
+        <div class="keys">
+            <div class="keycard"><b>梯度方差＝估計雜訊</b>小批次近似整體梯度而抖。</div>
+            <div class="keycard"><b>雜訊 ~ 1/√批次</b>批次越大越穩、越慢。</div>
+            <div class="keycard"><b>兩面性</b>適度跳鞍點/正則化；太大則震盪。</div>
+            <div class="keycard"><b>Baseline</b>減基準降變異、不改期望。</div>
+            <div class="keycard"><b>穩定手段</b>動量、LR 衰減、梯度裁剪、Adam。</div>
+            <div class="keycard"><b>取捨</b>大批次穩、小批次常泛化更好。</div>
+        </div>
+    </section>
+
+    <!-- ===== DEMO SCRIPT (preserved verbatim) ===== -->
+    <script>
+        const batchSlider = document.getElementById('batch-slider');
+        const batchLabel = document.getElementById('batch-val');
+        const baselineCheck = document.getElementById('baseline-check');
+        const varianceVal = document.getElementById('variance-val');
+        const pathsGroup = document.getElementById('paths-group');
+
+        let isTraining = false;
+        // 起點固定在左上角附近
+        const startX = 60;
+        const startY = 60;
+
+        // 更新面板數據
+        function updateStats() {
+            let batchSize = parseInt(batchSlider.value);
+            batchLabel.innerText = batchSize;
+
+            // 方差計算模擬：基礎雜訊 / sqrt(BatchSize)。若開啟 Baseline 則雜訊基數大減
+            let baseNoise = baselineCheck.checked ? 30 : 150;
+            let currentVariance = baseNoise / Math.sqrt(batchSize);
+
+            if (currentVariance > 50) {
+                varianceVal.innerText = "極高 (容易崩潰)";
+                varianceVal.style.color = "#ef4444"; // 紅
+            } else if (currentVariance > 20) {
+                varianceVal.innerText = "中等 (搖晃震盪)";
+                varianceVal.style.color = "#fbbf24"; // 黃
+            } else {
+                varianceVal.innerText = "低 (穩定收斂)";
+                varianceVal.style.color = "#10b981"; // 綠
+            }
+        }
+
+        batchSlider.addEventListener('input', updateStats);
+        baselineCheck.addEventListener('change', updateStats);
+        updateStats(); // 初始化
+
+        // 延遲函數
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+        async function startTraining() {
+            if (isTraining) return;
+            isTraining = true;
+
+            // 讀取當前設定
+            let batchSize = parseInt(batchSlider.value);
+            let useBaseline = baselineCheck.checked;
+
+            // 根據設定決定軌跡顏色與粗細
+            let pathColor = useBaseline ? "#10b981" : (batchSize > 30 ? "#f59e0b" : "#ef4444");
+            let strokeWidth = useBaseline ? 3 : 2;
+
+            let currentX = startX;
+            let currentY = startY;
+
+            // 建立 SVG Path 元素
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('class', 'agent-path');
+            path.setAttribute('stroke', pathColor);
+            path.setAttribute('stroke-width', strokeWidth);
+            path.setAttribute('opacity', '0.8');
+            pathsGroup.appendChild(path);
+
+            let pathData = `M ${currentX} ${currentY} `;
+
+            // 建立目前的點指示器
+            const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('r', 4);
+            dot.setAttribute('fill', pathColor);
+            dot.setAttribute('class', 'agent-dot');
+            pathsGroup.appendChild(dot);
+
+            const learningRate = 0.08;
+            const maxSteps = 80;
+
+            for (let step = 0; step < maxSteps; step++) {
+                // 1. 真實的完美梯度方向 (指向 200, 200)
+                let trueGradX = 200 - currentX;
+                let trueGradY = 200 - currentY;
+
+                // 2. 模擬方差帶來的雜訊
+                let baseNoise = useBaseline ? 80 : 400; // Baseline 大幅降低環境雜訊
+                // 雜訊會被 Batch Size 的平方根抵消 (大數法則)
+                let noiseMagnitude = baseNoise / Math.sqrt(batchSize);
+
+                let noiseX = (Math.random() - 0.5) * noiseMagnitude;
+                let noiseY = (Math.random() - 0.5) * noiseMagnitude;
+
+                // 3. 估計出來的梯度 = 真實梯度 + 雜訊
+                let estGradX = trueGradX + noiseX;
+                let estGradY = trueGradY + noiseY;
+
+                // 4. 更新位置 (走一步)
+                currentX += estGradX * learningRate;
+                currentY += estGradY * learningRate;
+
+                // 繪圖更新
+                pathData += `L ${currentX} ${currentY} `;
+                path.setAttribute('d', pathData);
+                dot.setAttribute('cx', currentX);
+                dot.setAttribute('cy', currentY);
+
+                // 檢查是否接近終點
+                let dist = Math.hypot(currentX - 200, currentY - 200);
+                if (dist < 10) {
+                    dot.setAttribute('r', 8);
+                    dot.setAttribute('fill', '#fff');
+                    break; // 成功抵達
+                }
+
+                await sleep(40); // 視覺化動畫速度
+            }
+
+            isTraining = false;
+        }
+
+        function clearCanvas() {
+            if(isTraining) return;
+            pathsGroup.innerHTML = '';
+        }
+    </script>
+
+
+
+
+<!-- AKIRA-RELATED-v1 -->
+<style>body{flex-wrap:wrap}.akira-rel{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;flex:1 1 100%;width:100%;box-sizing:border-box;max-width:900px;margin:28px auto 8px;padding:26px 16px 0;color:#2c3e50;line-height:1.7;border-top:2px dashed #e6e9ef;clear:both}.akira-rel .akr-exam{border-left:4px solid #e67e22;background:#fff8f0;border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:16px}.akira-rel .akr-exam h3{font-size:1.05rem;margin:0 0 6px}.akira-rel .akr-exam p{margin:0 0 6px}.akira-rel .akr-more{font-size:.85rem;color:#667085}.akira-rel .akr-more a,.akira-rel .akr-exam a{color:#b9560f;font-weight:600}.akira-rel .akr-faq{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:14px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06);margin-bottom:16px}.akira-rel .akr-faq h3{font-size:1.05rem;margin:0 0 8px}.akira-rel .akr-faq details{border-top:1px solid #f0f2f5;padding:9px 0}.akira-rel .akr-faq summary{cursor:pointer;font-weight:700;color:#2c3e50}.akira-rel .akr-faq p{margin:8px 0 0;color:#475467;font-size:.92rem}.akira-rel .akr-rel{background:#fff;border:1px solid #e6e9ef;border-radius:16px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.06)}.akira-rel .akr-rel h3{font-size:1.05rem;margin:0 0 10px}.akira-rel .akr-pills{display:flex;flex-wrap:wrap;gap:8px}.akira-rel .akr-pills a{text-decoration:none;font-size:.85rem;font-weight:600;color:#1565C0;background:#e8f2fe;border:1px solid #cfe4fb;border-radius:999px;padding:6px 13px;transition:.15s}.akira-rel .akr-pills a:hover{background:#2196F3;color:#fff;border-color:#2196F3}.akira-rel .akr-home{display:inline-block;margin-top:12px;font-size:.85rem;font-weight:700;color:#667085;text-decoration:none}.akira-rel .akr-home:hover{color:#2196F3}</style>
+<section class="akira-rel">
+<div class="akr-exam"><h3>📝 iPAS 考點提醒</h3><p>梯度變異是隨機梯度下降(SGD)的固有現象,iPAS 訓練機制考點(中級科目三)。重點:用小批次估計整體梯度,每批不同使估計值在真實梯度附近上下波動(雜訊)。易混點:適度雜訊有助跳出鞍點與壞局部最小、有正則化效果,但太大會震盪難收斂;批次越大雜訊越小、每步較慢、泛化有時略差。情境:調批次大小與學習率是在偏差與變異間取捨。</p><p class="akr-more">想練情境題與詳解 → <a href="index.html">AI 學習與考證地圖</a></p></div>
+<div class="akr-faq"><h3>❓ 常見問題</h3><details><summary>為什麼隨機梯度會有變異？</summary><p>SGD 用小批次估計整體梯度，每批資料不同，估計值會在真實梯度附近上下波動，這就是梯度變異(雜訊)。</p></details><details><summary>梯度變異是壞事嗎？</summary><p>有兩面：適度雜訊能幫忙跳出鞍點與壞的局部最小、有正則化效果；但太大會使訓練震盪、難收斂。</p></details><details><summary>批次大小如何影響變異？</summary><p>批次越大估計越準、雜訊越小、更新越穩但每步較慢、泛化有時略差；批次越小雜訊大、更新快但震盪。</p></details><details><summary>怎麼降低梯度變異的負面影響？</summary><p>用動量平滑方向、適度加大批次、學習率衰減、梯度裁剪(防爆炸)，以及 Adam 等自適應優化器。</p></details><details><summary>變異和偏誤怎麼權衡？</summary><p>大批次低變異但可能收斂到較差的平坦度；小批次高變異卻常泛化更好；需依任務調批次與學習率取平衡。</p></details></div><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "為什麼隨機梯度會有變異？", "acceptedAnswer": {"@type": "Answer", "text": "SGD 用小批次估計整體梯度，每批資料不同，估計值會在真實梯度附近上下波動，這就是梯度變異(雜訊)。"}}, {"@type": "Question", "name": "梯度變異是壞事嗎？", "acceptedAnswer": {"@type": "Answer", "text": "有兩面：適度雜訊能幫忙跳出鞍點與壞的局部最小、有正則化效果；但太大會使訓練震盪、難收斂。"}}, {"@type": "Question", "name": "批次大小如何影響變異？", "acceptedAnswer": {"@type": "Answer", "text": "批次越大估計越準、雜訊越小、更新越穩但每步較慢、泛化有時略差；批次越小雜訊大、更新快但震盪。"}}, {"@type": "Question", "name": "怎麼降低梯度變異的負面影響？", "acceptedAnswer": {"@type": "Answer", "text": "用動量平滑方向、適度加大批次、學習率衰減、梯度裁剪(防爆炸)，以及 Adam 等自適應優化器。"}}, {"@type": "Question", "name": "變異和偏誤怎麼權衡？", "acceptedAnswer": {"@type": "Answer", "text": "大批次低變異但可能收斂到較差的平坦度；小批次高變異卻常泛化更好；需依任務調批次與學習率取平衡。"}}]}</script>
+<div class="akr-rel"><h3>🧭 相關主題</h3><div class="akr-pills"><a href="policygradient.html">Policy Gradient</a><a href="actor-critic.html">Actor-Critic (A2C/A3C)</a><a href="q-value.html">Q 值收斂</a><a href="monte_carlo.html">蒙地卡羅、MC vs TD</a><a href="cumulativereward.html">累積獎勵、回報</a></div><a class="akr-home" href="index.html">← 返回 AI 學習與考證地圖</a></div>
+</section>
+</body>
+</html>
