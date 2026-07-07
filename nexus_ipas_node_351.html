@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:-73 Y:2314 | 分類: ipas</div>
+        <div class="badge">星系座標: X:54 Y:2177 | 分類: ipas</div>
         <h1>115 年第一次 AI 應用規劃師-中級能力鑑定 第二科：大數據處理分析與應用</h1>
         
         <div class="content-box">
@@ -287,7 +287,7 @@
             <p>(A) SVD 只能分解方陣（Square Matrix），無法應用於行列數不相等的長方形矩陣；</p><p>(B) SVD 常用於降維（Dimensionality Reduction），透過保留最大的 k 個奇異值來近似原 始矩陣（截斷 SVD）；</p><p>(C) SVD 比 PCA 更一般化，因為 PCA 可視為對資料的共變異數矩陣（Covariance Matrix） 進行的特殊 SVD 運算；</p><p>(D) LSA 是 SVD 在文字-文件矩陣上的應用，透過截斷 SVD 捕捉詞語與文件的潛在語</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> SVD 的重要數學性質之一是它可以應用於任何形狀的長方形矩陣，將其分解為 $U \Sigma V^T$。這也是它與特徵值分解（Eigenvalue Decomposition）不同之處，特徵值分解才限定必須是方陣。因此，選項指出「SVD 只能分解方陣」是不正確的敘述。</p>
             </div>
         </div>
         
@@ -297,7 +297,7 @@
             <p>(A) 將缺失值以整體平均填補，未額外處理感測器漂移，並將敗血症標註區間由 6 小時 擴大至 8 小時以涵蓋時間誤差，模型評估採用 ROC-AUC 作為主要指標；</p><p>(B) 對缺失值進行線性插值，若連續缺失時間過長則刪除該段資料，並以 Z-score 標準 化處理感測器漂移，交叉驗證採隨機切分，未避免同一病患資料同時出現在訓練與測 試集中；</p><p>(C) 刪除所有含缺失值之資料，對資料進行 Min-Max 正規化處理，未考慮病患間差異直 接建模，並以 Accuracy 作為評估指標，交叉驗證採分層 K-Fold 方式進行；</p><p>(D) 對缺失值採前向填補並加入缺失指標特徵，利用感測器 72 小時滾動中位數進行漂</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 針對臨床時間序列資料：前向填補（Forward fill）能避免未來資訊洩漏且符合實務，加入缺失指標特徵能保留缺失模式資訊；滾動中位數能有效校正低頻的感測器漂移；以個別病患基準建模能處理病患個體差異；交叉驗證採病患分組（Group K-Fold）能避免同一病患資料在訓練和測試集洩漏；面對高度不平衡資料（僅佔 3.2%），PR-AUC 和 Recall 比 ROC-AUC 或 Accuracy 更能準確反映模型對少數類別的預測能力。因此該選項的綜合處理方式最為適當。</p>
             </div>
         </div>
         
@@ -307,7 +307,7 @@
             <p>(A) 信賴度=P(A∩B)，即 A 與 B 同時出現的機率，範圍[0,1]；</p><p>(B) 支援度=P(B|A)，即 A 出現時 B 也出現的條件機率，範圍[0,1]；</p><p>(C) 提升度=P(A∩B) / [P(A)×P(B)]，範圍固定在[0,1]之間；</p><p>(D) 提升度=1 表示 A 與 B 獨立（無關聯），<1 表示負相關，>1 表示正向關聯，因此提</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在關聯規則中，提升度（Lift）定義為 $P(A \cap B) / (P(A) \times P(B))$。當 Lift = 1 時，表示 A 與 B 獨立；Lift > 1 表示正相關；Lift < 1 表示負相關。因此，Lift 的範圍可以是大於 1 的任意正數，並不固定在 [0, 1] 之間。選項敘述正確指出了提升度與變數獨立性及正負相關性的判定準則。</p>
             </div>
         </div>
         
@@ -317,7 +317,7 @@
             <p>(A) {A}；</p><p>(B) {A, D}；</p><p>(C) {A, B, E}；</p><p>(D) {B, E}</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 根據 Apriori 演算法的特性，頻繁項目集必須滿足最低支援度（Support）的要求。若最終保留的最大頻繁項目集為 {B, E}，這意味著 B 和 E 同時出現在交易紀錄中的次數大於或等於最低支援度（3），而包含更多項目的超集（如 {A, B, E}）的出現次數則低於 3，不滿足頻繁項目集的條件。演算法會反覆剔除支援度不足的項目集，最終篩選出符合條件的頻繁項目集。</p>
             </div>
         </div>
         
@@ -327,7 +327,7 @@
             <p>(A) 模型訓練時間會因類別不平衡而大幅增加；</p><p>(B) 一個永遠預測為正常交易的模型即可達到 99.5%準確率，但對詐欺交易的召回率為 0%，使準確率失去判別能力；</p><p>(C) 類別不平衡會導致模型訓練過程出現梯度爆炸；</p><p>(D) 類別不平衡會直接導致模型過擬合，使測試集表現下降</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在處理極度不平衡的資料集時，模型只要將所有樣本都預測為多數類（正常交易），就能輕易獲得極高的整體準確率（Accuracy = 99.5%）。然而，這種無作用的模型完全無法識別出任何少數類（詐欺交易），其針對詐欺的召回率（Recall）為 0。這表示 Accuracy 指標在嚴重不平衡資料中會完全失去評估模型分類真實效能的意義。</p>
             </div>
         </div>
         
@@ -337,7 +337,7 @@
             <p>(A) 呼叫 collect()將所有資料傳回 Driver 節點的本機記憶體後，再使用 Python 的 statistics.stdev()計算；</p><p>(B) 先對資料進行全域排序（sortBy），再取中間值計算變異數；</p><p>(C) 將資料輸出為 CSV，再以 Excel 的 STDEV 函數計算；</p><p>(D) 使用 DataFrame.agg({'col': 'stddev'})或 RDD.aggregate()等分散式統計方法，由各</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在 Apache Spark 等分散式運算框架中，處理巨量資料時，將所有資料收集回單一節點（如使用 collect()）會導致記憶體溢出（OOM）。正確且高效的方法是利用 Spark 內建的分散式聚合函數，這些方法會利用各個 Executor 平行計算局部資料的統計量，最後再傳回 Driver 進行全域彙總，大幅提升運算效率並避免資源瓶頸。</p>
             </div>
         </div>
         
@@ -347,7 +347,7 @@
             <p>(A) 採隨機切分（80/20），使用傳統時間序列模型建模，刪除節日資料避免極端值影響， 並以均方根誤差（RMSE）評估；</p><p>(B) 依時間順序切分（最後 90 天為測試集），使用具季節性建模能力的時間序列模型並 加入節日資訊，不處理不定期事件，以平均絕對百分比誤差（MAPE）評估；</p><p>(C) 依時間順序切分並採前進式驗證（Walk-Forward Validation），結合時間序列分解與 機器學習模型，加入時間特徵、滯後與滾動統計特徵，並納入節日與不定期事件資訊， 使用均方根誤差（RMSE）與平均絕對百分比誤差（MAPE）評估；</p><p>(D) 依時間順序切分，直接使用深度學習模型建模，不進行特徵工程，所有門市共用模</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 針對時間序列預測任務：資料必須依時間順序切分並搭配前進式驗證以避免未來資訊洩漏；結合時間序列分解與機器學習模型，並構建滯後與滾動統計特徵，能有效捕捉時間動態；必須將節日與不定期事件作為外生變數納入模型以處理極端值；使用 RMSE 評估大誤差並輔以 MAPE 評估相對誤差。此選項的策略最符合時序預測最佳實踐。</p>
             </div>
         </div>
         
@@ -357,7 +357,7 @@
             <p>(A) 水平線 A；</p><p>(B) 曲線 B；</p><p>(C) 曲線 C；</p><p>(D) 斜直線 D</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> ROC 曲線的橫軸為假陽率（FPR），縱軸為真陽率（TPR）。隨著分類決策閾值從最高降至最低，越來越多的樣本會被預測為正類，這會使得 TPR 和 FPR 都呈現單調遞增（或不減）的趨勢，且曲線必然從 (0,0) 起始並結束於 (1,1)。因此，ROC 曲線在數學上必須是一條非遞減曲線，若某曲線包含下降、折返或違反單調遞增的特徵，則違反了 ROC 曲線的定義。</p>
             </div>
         </div>
         
@@ -367,7 +367,7 @@
             <p>(A) 皮爾森衡量兩個連續變數間的線性關係強度；斯皮爾曼與肯德爾基於排名（Rank） 第 7 頁，共 17 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第二科：大數據處理分析與應用 考試日期：115 年 05 月 23 日 答案 題目 計算，對非線性單調關係也適用；</p><p>(B) 斯皮爾曼相關係數的計算公式等價於皮爾森，只是將原始數值替換為其排名後代入 計算；</p><p>(C) 與肯德爾相比，斯皮爾曼對離群值的穩健度更強；</p><p>(D) 三者的數值範圍（相關係數區間）皆相同，均在[-1, 1]之間</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 斯皮爾曼（Spearman）與肯德爾（Kendall）都是基於排名的無母數相關係數，對於離群值均具備穩健性。然而在統計特性上，肯德爾相關係數是基於和諧對與不和諧對計算，對於極端異常值的敏感度通常更低，因此肯德爾的穩健度實際上比斯皮爾曼更強。該選項宣稱斯皮爾曼穩健度更強是不正確的。</p>
             </div>
         </div>
         
@@ -377,7 +377,7 @@
             <p>(A) 持續優化 Accuracy 指標以提升整體分類正確率；</p><p>(B) 改用精確率（Precision）作為主要評估指標以降低誤報；</p><p>(C) 引入 Class Weight 或 Cost-sensitive Learning 調整損失函數；</p><p>(D) 移除少數類資料以提升模型穩定性與收斂速度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在極度不平衡的分類問題中，如果僅以 Accuracy 為優化目標，模型會傾向將所有樣本預測為多數類。最適當的演算法層面改善方式是引入類別權重（Class Weight）或成本敏感學習（Cost-sensitive Learning），在損失函數中賦予少數類別（詐欺交易）更大的懲罰權重。這樣能迫使模型在訓練時更加關注少數類特徵，提升攔截能力。</p>
             </div>
         </div>
         
@@ -387,7 +387,7 @@
             <p>(A) 特徵離散化（Feature Discretization）；</p><p>(B) 特徵縮放（Feature Scaling）；</p><p>(C) 數據降維（Dimensionality Reduction）；</p><p>(D) One-Hot 編碼（One-Hot Encoding）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在特徵工程中，將連續型數值變數（如時間戳記、年齡等）根據特定區間分割並映射到有限的離散類別（如早、中、晚），這種轉換過程稱為特徵離散化（Feature Discretization）或分箱（Binning）。這有助於模型捕捉變數的非線性特徵並減少雜訊干擾。</p>
             </div>
         </div>
         
@@ -397,7 +397,7 @@
             <p>(A) 將 1,000 筆資料分散至多張圖表（每張顯示約 100 筆），避免單一圖表資訊過載；</p><p>(B) 移除所有圖例、軸標籤與輔助線等非資料墨水（Non-data Ink），使版面最簡潔；</p><p>(C) 在圖表中加入大量裝飾性元素（如色塊、陰影、3D 效果），使視覺效果更豐富；</p><p>(D) 在有限頁面空間中呈現盡可能多的有效資料資訊，同時維持可讀性與清楚的視覺層</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Edward Tufte 的「資料密度（Data Density）」原則，主張在圖表的固定空間內最大化呈現有效資料量比例。高資料密度的設計是在不造成視覺混亂的前提下，利用適當的視覺層次或多維度視覺編碼來整合大量數據，使觀看者能一眼掌握全局與細節，而非單純將資料打散。因此，在有限空間呈現最多有效資訊且維持可讀性的選項最符合該原則精神。</p>
             </div>
         </div>
         
@@ -407,7 +407,7 @@
             <p>(A) 提升資料解析效率並減少認知負擔；</p><p>(B) 增強小幅差異的可視化辨識能力；</p><p>(C) 造成視覺誤導並放大實際差異感；</p><p>(D) 提升圖表計算準確性與數據正確性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在資料視覺化中，長條圖等比較圖表的 Y 軸如果不從 0 起始（刻意截斷），會使得原本微小的真實數值差異（例如 3.2% 與 4.0% 之間僅差距 0.8%）在視覺的幾何比例上被極度放大。這會誤導讀者，讓他們在視覺上誤以為組別間存在數倍的巨大落差，違反了資料客觀呈現的原則。</p>
             </div>
         </div>
         
@@ -417,7 +417,7 @@
             <p>(A) 面積圖（Area Chart）；</p><p>(B) 散佈圖（Scatter Plot）；</p><p>(C) 長條圖（Bar Chart）；</p><p>(D) 折線圖（Line Plot）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 當目標是觀察連續數值（如延遲時間）隨時間變動的軌跡與連續趨勢時，折線圖（Line Plot）是最佳的視覺化選擇。折線圖的連續線條能直觀地呈現時間序列上的波動、異常峰值以及長期趨勢，非常適合用於系統監控和 SLA 追蹤。</p>
             </div>
         </div>
         
@@ -427,7 +427,7 @@
             <p>(A) 大批次（Large Batch）計算量過大，GPU 無法有效處理；</p><p>(B) 大批次（Large Batch）梯度估計更穩定，但容易收斂至局部極小值（Local Minima）， 導致泛化能力較差；</p><p>(C) 小批次（Small Batch）因隨機性高，更容易發生梯度爆炸（Gradient Explosion）；</p><p>(D) 批次大小（Batch Size）與泛化能力無關，問題出在學習率（Learning Rate）設定</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 從深度學習最佳化理論來看，大批次（Large Batch）在計算梯度時包含了更多樣本，使得梯度方向更穩定、變異數較小，但也因此容易陷入且難以跳出平緩的局部極小值（Sharp Minima）。相對地，小批次的梯度帶有較多隨機雜訊，這種類似正則化的隨機性有助於模型跳出局部極小值，尋找到更平坦的極小值（Flat Minima），進而在測試集上展現出更好的泛化能力。</p>
             </div>
         </div>
         
@@ -437,7 +437,7 @@
             <p>(A) 模型推論延遲過高，導致線上服務回應時間不符合系統即時性需求與使用體驗要 求；</p><p>(B) 降低跨團隊重複開發的維護成本；</p><p>(C) 訓練資料儲存空間不足，造成歷史資料保存與批次訓練流程效率下降問題；</p><p>(D) 模型版本管理混亂，導致不同模型部署與回溯分析困難並增加維運複雜度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在企業級 AI 開發中，多個團隊經常需要基於相同基礎資料建構類似的特徵。導入特徵平台（Feature Store）以統一管理與共用特徵，主要目的是打破資料孤島，避免不同團隊重複編寫相同的資料處理管線。這能大幅降低跨團隊重複開發與維護的成本，並確保特徵定義的一致性。</p>
             </div>
         </div>
         
@@ -447,7 +447,7 @@
             <p>(A) SMOTE 不適合用於金融違約預測場景，此類高風險業務應一律採用 class_weight 調 第 9 頁，共 17 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第二科：大數據處理分析與應用 考試日期：115 年 05 月 23 日 答案 題目 整損失函數，而非對資料本身進行過採樣；</p><p>(B) SMOTE 的過採樣操作在訓練/測試切分之前即對全體資料執行，導致合成樣本資訊 洩漏至測試集，使 AUC-ROC 0.91 虛高而不可信；</p><p>(C) AUC-ROC 在 1.6%的不平衡場景下過度樂觀，應改用 PR-AUC 作為評估指標，其餘 流程均正確；</p><p>(D) LightGBM 本身已內建處理不平衡的機制，與 SMOTE 同時使用會造成少數類過度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 這是經典的「資料洩漏（Data Leakage）」問題。SMOTE 等資料擴增技術必須在將資料切分為訓練集與測試集「之後」，並且「僅針對訓練集」執行。如果在切分前就對全體資料進行過採樣，基於整體分佈合成的新樣本會混入測試集中，這使得模型在測試時實際上已經間接看過了測試集的資訊，導致評估結果（如 AUC 0.91）虛高且失真。</p>
             </div>
         </div>
         
@@ -457,7 +457,7 @@
             <p>(A) 多類別羅吉斯迴歸（Multinomial Logistic Regression）；</p><p>(B) 支援向量機（SVM）搭配 One-vs-One；</p><p>(C) K-means 分群後將群集標籤作為分類結果；</p><p>(D) 主成分分析（PCA）後再以最大主成分作為分類依據</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 針對需要高效訓練、快速線上部署的大資料量多類別分類任務，多類別羅吉斯迴歸（Multinomial Logistic Regression）是極佳選擇。其模型結構簡單、訓練速度快，且線上推論延遲極低。相比之下，SVM 在數十萬筆資料下訓練極慢；K-means 與 PCA 是非監督式或降維方法，不適合此完整標註的監督式任務。</p>
             </div>
         </div>
         
@@ -467,7 +467,7 @@
             <p>(A) K-means 分群（K-means Clustering）；</p><p>(B) 決策樹迴歸（Decision Tree Regression）；</p><p>(C) 羅吉斯迴歸（Logistic Regression）；</p><p>(D) 線性迴歸（Linear Regression）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 羅吉斯迴歸（Logistic Regression）是二元分類問題的經典演算法，透過 Sigmoid 函數將線性預測值映射至 0 到 1 之間，使其輸出天然具備統計學上的機率意義（屬於正類的機率）。且其特徵權重具備良好的可解釋性，完美契合題目中需要二元分類且輸出可解釋機率的需求。</p>
             </div>
         </div>
         
@@ -477,7 +477,7 @@
             <p>(A) 在詞嵌入（Embedding）中加入隨機擾動，以提升模型對輸入變化的泛化能力；</p><p>(B) 在注意力機制中加入遮罩（Mask），限制模型只能關注部分詞語；</p><p>(C) 將輸入序列轉換為可同時運算的向量表示，以提升計算效率；</p><p>(D) 在詞的向量表示中加入位置資訊，使模型能區分序列中不同位置的詞語</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Transformer 的核心是自注意力機制（Self-Attention），該機制同時處理所有詞語，本質上無法捕捉序列的時間或順序資訊（如同詞袋模型）。為了解決此問題，Transformer 引入了位置編碼（Positional Encoding），將詞彙在序列中的絕對或相對位置資訊編碼為向量並與詞嵌入相加，使得模型能夠辨識相同詞彙在不同位置時的語意差異。</p>
             </div>
         </div>
         

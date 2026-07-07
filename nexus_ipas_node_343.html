@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:-204 Y:2027 | 分類: ipas</div>
+        <div class="badge">星系座標: X:-193 Y:2000 | 分類: ipas</div>
         <h1>IPAS AI 規劃師專區</h1>
         
         <div class="content-box">
@@ -132,16 +132,6 @@
         
         <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
             <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 1 題</h4>
-            <p><strong>題目：</strong> 若某數據點的 Z 分數（Z-Score）= 2，請問代表下列哪一種意涵？</p>
-            <p>(A) 代表該數據點之原始數值為 2</p><p>(B) 該數據點比平均值低 2 個標準差</p><p>(C) 代表數據為異常值</p><p>(D) 該數據點比平均值高 2 個標準差</p>
-            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
-                <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> Z-Score (標準分數) 表示一個資料點距離平均值有幾個標準差。Z=2 即代表高於平均值 2 個標準差。</p>
-            </div>
-        </div>
-        
-        <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
-            <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 2 題</h4>
             <p><strong>題目：</strong> 某工程師在建立房價預測模型時，訓練資料中存在少數豪宅（成交價超過一般物件 10 倍以上）。若工程師希望模型對這些極端高價物件的預測誤差更敏感，並在訓練時產生較大的梯度更新影響，應優先選擇下列哪種損失函數？</p>
             <p>(A) 平均絕對誤差（MAE）：對誤差進行線性懲罰，對離群值較不敏感，梯度近似固定</p><p>(B) Huber 損失（Huber Loss）：小誤差採平方懲罰，大誤差轉為線性懲罰，以降低離群值影響</p><p>(C) 均方誤差（MSE）：對誤差進行平方處理，使大誤差產生更大的懲罰與梯度</p><p>(D) 交叉熵損失（Cross-Entropy Loss）：用於分類問題的機率分布差異衡量</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
@@ -151,12 +141,22 @@
         </div>
         
         <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
-            <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 3 題</h4>
-            <p><strong>題目：</strong> 工程師使用盒鬚圖（Box Plot）比較三個城市的房價分布，觀察到城市 A 的盒子很短但鬚很長，城市 B 的盒子很長且對稱，城市 C 的中位數位置明顯偏向盒子下方。依統計圖形判讀原則，下列敘述何者正確？</p>
-            <p>(A) 城市 A 中段房價集中但存在極端值；城市 C 中位數偏低，資料呈右偏分布</p><p>(B) 城市 A 房價集中且離群值少；城市 C 資料呈左偏分布</p><p>(C) 城市 B 的盒子較長代表房價變異較大；城市 C 呈左偏分布</p><p>(D) 盒鬚圖無法判斷偏態，需搭配直方圖才能得出以上結論</p>
+            <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 2 題</h4>
+            <p><strong>題目：</strong> 若某數據點的 Z 分數（Z-Score）= 2，請問代表下列哪一種意涵？</p>
+            <p>(A) 代表該數據點之原始數值為 2</p><p>(B) 該數據點比平均值低 2 個標準差</p><p>(C) 代表數據為異常值</p><p>(D) 該數據點比平均值高 2 個標準差</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
-                <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 城市 A 盒子短代表中段 50% 資料集中，鬚長代表存在極端值。城市 C 中位數偏向盒子下方（接近 Q1），表示高數值那端的範圍（Q3 到最大值）被拉長，形成右偏（正偏）分佈。</p>
+                <p><strong>標準答案：</strong> (D)</p>
+                <p><strong>解析：</strong> Z-Score (標準分數) 表示一個資料點距離平均值有幾個標準差。Z=2 即代表高於平均值 2 個標準差。</p>
+            </div>
+        </div>
+        
+        <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
+            <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 3 題</h4>
+            <p><strong>題目：</strong> 某資料工程師在建構大規模影像資料處理流程時，需要處理數千萬筆訓練影像，並發現模型出現嚴重的過度擬合（Overfitting）：訓練集準確率達 99%，但驗證集僅有 72%。在不改變模型架構的前提下，下列哪一項「資料處理層面」的調整最無法有效改善過度擬合，甚至可能使問題惡化？</p>
+            <p>(A) 在資料處理流程中加入資料增強（Data Augmentation），於訓練時動態生成多樣化影像樣本</p><p>(B) 擴充資料來源，收集更多不同場景與條件的影像，以提升訓練資料分布的多樣性</p><p>(C) 為了提升資料處理吞吐量（Throughput），預先將影像轉為固定特徵並快取（Cache），反覆使用相同訓練資料以加速訓練流程</p><p>(D) 在資料前處理階段進行資料清理，移除標註錯誤或品質不佳的影像資料</p>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
+                <p><strong>標準答案：</strong> (C)</p>
+                <p><strong>解析：</strong> 將影像轉為固定特徵並快取，雖然加速了訓練，但也使得模型在多個 Epoch 中看見的都是「完全一樣」的資料特徵，失去了資料多樣性，這將導致過度擬合更加惡化。</p>
             </div>
         </div>
         
