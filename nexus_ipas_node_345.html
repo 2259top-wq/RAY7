@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:52 Y:1822 | 分類: ipas</div>
+        <div class="badge">星系座標: X:48 Y:2208 | 分類: ipas</div>
         <h1>114 年第二次 AI 應用規劃師-中級能力鑑定 第三科：機器學習技術與應用</h1>
         
         <div class="content-box">
@@ -137,7 +137,7 @@
             <p>(A) F 檢定（F-test）；</p><p>(B) 交叉驗證（Cross-Validation）；</p><p>(C) 配對樣本 t 檢定（Paired-sample t-test）；</p><p>(D) 卡方檢定（Chi-square Test）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 評估機器學習模型對未觀察資料（Unseen Data）的適應能力與泛化（Generalization）效果，最標準且有效的方法是交叉驗證（Cross-Validation）。交叉驗證透過將資料集切割為多個子集，輪流將其中一部分作為驗證集，其餘作為訓練集，以客觀地評估模型在不同資料切分下的表現，有效避免過度擬合並檢驗其穩定性（在時間序列資料上則常採用 Time Series Cross-Validation）。其他選項如 F 檢定、t 檢定與卡方檢定皆為傳統統計學中的假說檢定方法，主要用於檢驗變數間的顯著性或關聯性，並不直接用於評估機器學習模型的泛化能力。</p>
             </div>
         </div>
         
@@ -147,7 +147,7 @@
             <p>(A) 增加模型參數的數量，以提升表現靈活度；</p><p>(B) 強化梯度穩定性，避免參數更新過度震盪；</p><p>(C) 產生稀疏模型（Sparse Model），使部分參數權重收斂為零；</p><p>(D) 提高學習率（Learning Rate），加速模型收斂速度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> L1 正則化（又稱為 Lasso Regression）是在損失函數中加入模型權重絕對值的總和作為懲罰項。由於其目標函數的幾何特性（帶有尖點），在最佳化過程中，許多較不重要特徵的權重會被完全壓縮為零。這不僅達到了限制模型複雜度、防止過度擬合的目的，還自動實現了特徵選擇（Feature Selection），從而產生「稀疏模型（Sparse Model）」。相較之下，L2 正則化（Ridge）只會使權重趨近於零而不會完全等於零。</p>
             </div>
         </div>
         
@@ -157,7 +157,7 @@
             <p>(A) 梯度消失；</p><p>(B) 資料過少；</p><p>(C) 局部最優解；</p><p>(D) 過擬合</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在機器學習（特別是深度學習）中，非線性模型的損失函數通常是高度複雜的非凸函數（Non-convex Function）。這意味著損失函數的曲面上存在多個「谷底」。當使用基於梯度的最佳化演算法（如梯度下降法）時，演算法會朝向損失函數值下降的方向更新參數。如果初始權重設定不當或學習率等參數未妥善設定，模型可能會陷入某個局部的最低點而無法跳出，這稱為「局部最優解（Local Minimum）」，進而無法達到全域最優解（Global Minimum），導致最佳化結果不如預期。</p>
             </div>
         </div>
         
@@ -167,7 +167,7 @@
             <p>(A) 鄰近點（Neighbor Point）；</p><p>(B) 雜訊點（Noise Point）；</p><p>(C) 邊界點（Border Point）；</p><p>(D) 潛在點（Potential Point）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在 DBSCAN (Density-Based Spatial Clustering of Applications with Noise) 演算法中，資料點被分類為三種類型：1. 核心點 (Core Point)：在 ε 半徑內的點數量大於或等於 MinPts。2. 邊界點 (Border Point)：本身不是核心點，但落在某個核心點的 ε 鄰域內。3. 雜訊點/離群點 (Noise/Outlier Point)：既不是核心點，也不落在任何核心點的鄰域內，且不與任何群集形成密度可達關係。根據題目描述，該點不滿足核心點與邊界點的條件，因此在密度分群中會被視為無法歸類於任何群集的異常值，即為「雜訊點（Noise Point）」。</p>
             </div>
         </div>
         
@@ -177,7 +177,7 @@
             <p>(A) 自動提取輸入影像中的局部特徵；</p><p>(B) 降低影像維度以加速運算效率；</p><p>(C) 增加神經元與參數數量以提升模型容量；</p><p>(D) 整合所有特徵並輸出最終分類結果</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在卷積神經網路（CNN）的架構中，卷積層（Convolutional Layer）的核心功能是透過卷積核（Filters / Kernels）在輸入影像上滑動，計算內積來自動提取影像的「局部特徵（Local Features）」。通常網路的前段（如第一層卷積層）負責捕捉低階特徵，例如邊緣、線條、角點與顏色梯度等；隨著網路深度增加，後段卷積層則組合這些低階特徵來提取更高階、更複雜的語意特徵。選項 1 是池化層（Pooling Layer）的主要作用；選項 3 是全連接層（Fully Connected Layer）的作用。因此選項 0 正確描述了卷積層的核心功能。</p>
             </div>
         </div>
         
@@ -187,7 +187,7 @@
             <p>(A) CNN 能自動學習影像的旋轉與比例不變性；</p><p>(B) CNN 可直接跳過人工特徵提取步驟進行分類；</p><p>(C) CNN 透過區域感知（Local Receptive Field）與參數共享（Parameter Sharing）機制，降低模型參數量與運算複雜度；</p><p>(D) CNN 捨棄激勵函數（Activation Function），以加快運算速度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 對於處理影像等高維度資料，全連接神經網路 (FCNN) 會將影像攤平為一維向量，導致每一層的神經元都必須與上一層的所有神經元連接，產生極其龐大的參數數量（易導致過度擬合與運算緩慢）。相較之下，卷積神經網路 (CNN) 具有兩大核心機制：「局部感受野（Local Receptive Field）」與「參數共享（Parameter Sharing）」。局部感受野讓卷積核只關注影像的局部區域；參數共享則是同一個卷積核在整張影像上滑動共用同一組權重。這兩項設計大幅減少了模型的總參數數量，降低運算複雜度，從而顯著提升了訓練與推論效率。</p>
             </div>
         </div>
         
@@ -197,7 +197,7 @@
             <p>(A) 預測未來七天的電力需求變化趨勢；</p><p>(B) 辨識監視影像中不同類別的物件；</p><p>(C) 將大量顧客資料依相似特徵自動分群；</p><p>(D) 將高維度的感測器資料壓縮成低維表示</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 長短期記憶網路 (LSTM) 是一種特殊的遞歸神經網路 (RNN)，設計上加入了「閘門機制（Gate Mechanism）」來解決傳統 RNN 的梯度消失問題，特別擅長處理具有時間相依性（Time Dependency）的序列資料，並能捕捉長距離的時間上下文關係。在選項中，「預測未來七天的電力需求變化趨勢」屬於典型的時間序列預測任務（Time-Series Forecasting），非常適合使用 LSTM 處理。選項 1 適合 CNN；選項 2 適合分群演算法（如 K-Means）；選項 3 適合降維技術（如 PCA 或 Autoencoder）。</p>
             </div>
         </div>
         
@@ -207,7 +207,7 @@
             <p>(A) 使用 L1 正則化進行特徵篩選的線性模型；</p><p>(B) 利用激活函數（Activation Function）進行特徵擷取的深度神經網 路；</p><p>(C) 透過核函數（Kernel Function）將特徵映射至高維空間的分類模型；</p><p>(D) 透過遞迴分裂方式建立分類規則的決策樹模型</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 資訊增益（Information Gain）是決策樹（Decision Tree）演算法（特別是 ID3 演算法）中用於選擇最佳分裂特徵的核心準則。它的計算基於資訊熵（Entropy）的概念，衡量在得知某特徵資訊後，能使資料集分類不確定性（即混亂度）下降的程度。決策樹會遞迴地在每個節點選擇「資訊增益最大」的特徵進行資料分裂，直到滿足停止條件。因此，資訊增益最直接應用於決策樹模型的建立過程。</p>
             </div>
         </div>
         
@@ -217,7 +217,7 @@
             <p>(A) 進行特徵縮放（Feature Scaling），使各特徵變數具有相似的數值範 圍；</p><p>(B) 將連續型特徵變數轉換為類別型變數；</p><p>(C) 以平均值或中位數進行缺失值補齊； 第 2 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目</p><p>(D) 進行隨機抽樣以平衡資料筆數</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在以距離為基礎的演算法（如 K-Nearest Neighbors (KNN)、Support Vector Machines (SVM) 以及 K-Means）中，模型依賴特徵向量之間的距離（例如歐幾里得距離）來進行分類或分群。如果資料特徵之間的數值尺度（Scale）差異過大（例如一個特徵範圍是 0-1，另一個是 1000-10000），數值範圍大的特徵將會在距離計算中占據絕對主導地位，導致模型忽略數值範圍小的特徵。因此，進行「特徵縮放（Feature Scaling）」（如標準化 Standardization 或最大最小正規化 Min-Max Scaling），確保所有特徵在距離計算中的貢獻權重合理，是此類模型最關鍵的資料前處理步驟。</p>
             </div>
         </div>
         
@@ -227,7 +227,7 @@
             <p>(A) 公司已有完整的 MLOps 平台與資深資料科學團隊，模型更新採固定流 程；</p><p>(B) 製造部門的生產良率模型已長期穩定運作，只需定期調整參數；</p><p>(C) 行銷部門希望在短時間內比較多種顧客流失預測模型，缺乏專職工程師 與時間進行手動建模；</p><p>(D) 財務部門正在開發高度客製化的信用風險評估模型，需要精細控制特徵</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 自動化機器學習（AutoML）的核心價值在於將機器學習流程（包含特徵工程、模型選擇、超參數調校等）自動化，以降低 AI 開發的技術門檻與時間成本。當團隊（如行銷部門）缺乏專職的資料科學家、且需要在短時間內快速建立並比較多種基礎模型（Base Models）以驗證概念（PoC）時，最能發揮 AutoML 快速建模、自動搜尋最佳架構的優勢。相對地，對於已經高度成熟、需要精細客製化控制或僅需微調參數的情境，AutoML 的導入效益較不顯著。</p>
             </div>
         </div>
         
@@ -237,7 +237,7 @@
             <p>(A) 可自動產生模型架構；</p><p>(B) 可使用更大的訓練集；</p><p>(C) 避免模型過擬合；</p><p>(D) 能更有效率搜尋高維參數空間</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在超參數最佳化中，網格搜尋 (Grid Search) 會窮舉所有指定的超參數組合，當超參數維度增加時，搜尋空間呈指數級增長，面臨「維度災難」。隨機搜尋 (Random Search) 則是在指定的參數空間中進行隨機抽樣評估。研究指出，在多數深度學習或複雜模型中，往往只有少數超參數對模型表現有決定性影響（即低有效維度）。隨機搜尋因為不會在不重要的超參數上浪費計算資源進行窮舉，所以在給定相同運算資源或高維度參數空間下，Random Search 能更有效率且有更高機率探索到表現較佳的超參數組合。</p>
             </div>
         </div>
         
@@ -247,7 +247,7 @@
             <p>(A) 每個神經元的輸出結果；</p><p>(B) 損失函數（Loss Function）在訓練過程中的梯度變化值（Gradient）；</p><p>(C) 學習率（Learning Rate），控制模型權重更新的速度；</p><p>(D) 模型在訓練後產生的權重值</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 學習率（Learning Rate）是深度學習中最關鍵的超參數之一，它決定了模型在每次迭代更新權重時的步伐大小。如果學習率過大，模型可能在最佳解附近震盪，甚至發散無法收斂；如果學習率過小，模型收斂速度會極度緩慢，且容易卡在局部最優解。針對模型收斂速度不穩定的問題，調整學習率（或採用學習率衰減策略 Learning Rate Schedulers、自適應優化器如 Adam）是最直接且有效的改善方法。選項中的神經元輸出、梯度變化值與模型權重皆屬於模型在訓練過程中自行計算或更新的內部變數，而非可供開發者直接手動調整的「超參數（Hyperparameter）」。</p>
             </div>
         </div>
         
@@ -257,7 +257,7 @@
             <p>(A) 訓練資料量過大；</p><p>(B) 標記資料本身帶有主觀偏見；</p><p>(C) 模型結構設計不當；</p><p>(D) 特徵數量設定過多</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在監督式學習中，模型依賴大量被標註（Labeled）的資料進行訓練。所謂的「標籤偏差（Label Bias）」是指作為訓練基準答案（Ground Truth）的標籤本身，由於人工標註過程的主觀性、標註人員的文化背景差異、或者是歷史資料中既存的系統性偏見，而帶有不客觀或歧視性的錯誤資訊。當模型學習這些帶有偏見的標籤後，其預測結果自然也會反映並放大這些偏差。這與資料量大小、模型結構或特徵數量無直接關係，而是資料品質與資料來源客觀性的問題。</p>
             </div>
         </div>
         
@@ -267,7 +267,7 @@
             <p>(A) 電商平台利用深度學習模型預測用戶的下一次購買時間，以優化推播行 銷策略；</p><p>(B) 新創公司使用機器學習演算法自動調整廣告出價策略，以提升點擊轉換 第 3 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目 率；</p><p>(C) 醫院導入 AI 模型分析病患影像並給出腫瘤惡性可能性，作為臨床醫師 診斷依據；</p><p>(D) 銀行導入 AI 模型預測客戶流失率，並自動推薦留客優惠方案</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 機器學習的「可解釋性（Explainability / Interpretability）」對於高風險（High-stakes）決策領域至關重要。在醫療診斷（如 AI 輔助影像分析腫瘤惡性度）的情境中，模型的輸出直接牽涉病患的生命健康。臨床醫師必須了解 AI 是基於哪些影像特徵（如腫瘤邊緣不規則、密度異常等）得出結論，才能信任該預測結果並進行醫療決策。缺乏可解釋性的「黑箱模型（Black-box Model）」會帶來嚴重的倫理、醫療糾紛與責任歸屬問題。相較於行銷推播、廣告出價或流失預測等商業優化場景，醫療應用對可解釋性的要求與重要性遠遠高出許多。</p>
             </div>
         </div>
         
@@ -277,7 +277,7 @@
             <p>(A) 模型準確率為 85%；</p><p>(B) 85%的變異可被模型解釋；</p><p>(C) 預測誤差為 15%；</p><p>(D) 模型有 85%的信心水準</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> R 平方（R²，判定係數 Coefficient of Determination）是迴歸分析中用來評估模型配適度（Goodness of Fit）的重要指標。其值介於 0 與 1 之間，代表目標變數（因變數 Y）的總變異中，有多大比例可以被模型中的自變數（X）所解釋。因此，若 R² 值為 0.85，其統計學上的精確意義為「依變數的總變異中有 85% 可以被該線性迴歸模型所解釋」。R² 不是分類問題中的準確率（Accuracy），也不能直接解讀為誤差比例或信心水準（Confidence Level）。</p>
             </div>
         </div>
         
@@ -287,7 +287,7 @@
             <p>(A) 0.686；</p><p>(B) 0.700；</p><p>(C) 0.720；</p><p>(D) 0.750</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> F1分數為精確率(Precision)與召回率(Recall)的調和平均數。公式為：F1 = 2 * (Precision * Recall) / (Precision + Recall)。代入數值可得 F1 = 2 * (0.8 * 0.6) / (0.8 + 0.6) = 0.96 / 1.4 ≈ 0.6857，四捨五入後為 0.686。因此選項A正確。</p>
             </div>
         </div>
         
@@ -297,7 +297,7 @@
             <p>(A) SGD+Momentum；</p><p>(B) Adam；</p><p>(C) RMSProp；</p><p>(D) Adagrad</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Adam (Adaptive Moment Estimation) 演算法結合了 Momentum 與 RMSProp 的優點，內建了對梯度的一階動差（First-order moment，即動量 Momentum）與二階動差（Second-order moment，即非中心化變異數）的估計機制。SGD+Momentum 雖然也使用動量，但通常被視為在傳統 SGD 上外加動量機制；Adam 則是從演算法設計之初便將動量作為其核心的一部分。</p>
             </div>
         </div>
         
@@ -307,7 +307,7 @@
             <p>(A) 引入正則化項（Regularization）以抑制過擬合，並支援缺失值自動處 理與並行化訓練；</p><p>(B) 改以隨機森林（Random Forest）架構取代樹模型以提升準確率；</p><p>(C) 以類神經網路（Neural Network）取代弱分類器（Weak Learners）；</p><p>(D) 採用批次正規化（Batch Normalization）技術提升模型穩定性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> XGBoost 針對傳統 GBDT 的主要改良包括：(1) 在目標函數中引入正則化項（如 L1/L2 正則化）來控制樹的複雜度並抑制過擬合；(2) 支援缺失值的自動學習與分裂方向處理；(3) 實作了特徵層級的並行化計算與分散式運算架構，大幅提升了訓練效率。</p>
             </div>
         </div>
         
@@ -317,7 +317,7 @@
             <p>(A) 使用 SMOTE 過採樣；</p><p>(B) 調整類別權重；</p><p>(C) 使用準確率（Accuracy）作為評估指標； 第 4 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目</p><p>(D) 欠採樣多數類(Undersampling the majority class)</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在極端不平衡的資料集（如正樣本僅佔 3%）中，模型只要全部預測為負樣本，準確率（Accuracy）就能輕易達到 97%，但這時模型對少數類的預測能力為零。因此，使用準確率作為評估指標無法真實反映模型對少數關鍵類別（確診病例）的偵測能力，是最不適合的做法。應改用精確率、召回率、F1-score等指標。</p>
             </div>
         </div>
         
@@ -327,7 +327,7 @@
             <p>(A) 將單一特徵取平方；</p><p>(B) 對所有特徵進行對數轉換；</p><p>(C) 將兩個或多個特徵進行乘積或交互組合；</p><p>(D) 對特徵進行標準化</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在特徵工程中，互動特徵（Interaction Features）旨在捕捉多個特徵共同作用對目標變數產生的非線性影響。最直接且常見的方法是將這兩個或多個原始特徵相乘或進行交叉組合（例如：特徵 A × 特徵 B），從而幫助模型學習到特徵之間的協同或交互效應。</p>
             </div>
         </div>
         
@@ -337,7 +337,7 @@
             <p>(A) 減少模型參數量以降低訓練成本；</p><p>(B) 加速整體注意力計算過程；</p><p>(C) 從不同表示子空間（Representation Subspaces）同時捕捉多樣化關聯 資訊；</p><p>(D) 避免梯度消失（Gradient Vanishing）問題</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 多頭注意力機制（Multi-head Attention）允許模型將注意力機制的計算拆分成多個「頭（Heads）」，每個頭會在不同的表示子空間（Representation Subspaces）中獨立學習與捕捉序列中不同層次的特徵和關聯性（例如語音特徵、語速、語意等），最後再將這些資訊拼接起來，從而大幅增強模型的表達與理解能力。</p>
             </div>
         </div>
         
@@ -347,7 +347,7 @@
             <p>(A) 根據歷史樣本自動分群，找出行為相似的顧客群；</p><p>(B) 以條件機率方式計算顧客屬於「會購買」或「不會購買」的分類機率；</p><p>(C) 以最小平方誤差（Mean Squared Error）為損失函數，預測顧客的購買 金額；</p><p>(D) 依據回饋信號（Feedback Signal）透過強化學習（Reinforcement</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 貝氏定理（Bayes' Theorem）的核心運作機制是基於先驗機率與概似度來計算後驗機率。在分類問題中，即是利用觀察到的特徵條件（如行為紀錄、停留時間等），透過條件機率來推估該資料點屬於特定類別（如「會購買」或「不會購買」）的機率，並以此進行分類預測。</p>
             </div>
         </div>
         
@@ -357,7 +357,7 @@
             <p>(A) 蒙地卡羅方法（Monte Carlo Method）； 第 5 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目</p><p>(B) K-means 聚類（K-means Clustering）；</p><p>(C) 支持向量迴歸（Support Vector Regression, SVR）；</p><p>(D) 特徵選取（Feature Selection）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 蒙地卡羅方法（Monte Carlo Method）是一種依賴重複隨機抽樣來獲取數值結果的計算演算法。在面對高度不確定性或隨機變數互動複雜的情境（如氣候變數對發電量的影響）時，透過大量隨機生成可能的輸入情境並模擬其結果，可以有效估算出目標變數的機率分佈與風險區間。</p>
             </div>
         </div>
         
@@ -367,7 +367,7 @@
             <p>(A) 模型過度擬合（Overfitting），導致在訓練資料上表現過好、泛化能力 不足；</p><p>(B) 模型特徵數量不足，導致欠擬合（Underfitting）；</p><p>(C) 模型存在異常值（Outlier）或非線性關係，違反迴歸假設；</p><p>(D) 殘差圖呈現隨機分佈，表示模型已完全符合所有假設</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在多元迴歸分析中，理想的殘差圖應呈現隨機散佈，不具備任何明顯的形狀或趨勢。當殘差圖出現系統性的彎曲分佈（如 U 型）以及極端巨大的殘差時，表示自變數與應變數之間可能存在模型未捕捉到的非線性關係，或者資料中存在嚴重的異常值（Outlier），這違反了線性迴歸的基本假設。</p>
             </div>
         </div>
         
@@ -377,7 +377,7 @@
             <p>(A) 使用生成式模型進行特徵學習；</p><p>(B) 進行特徵選擇與多重共線性（Multicollinearity）分析；</p><p>(C) 進行分箱（Binning）與資訊值（Information Value, IV）檢定；</p><p>(D) 使用樣本穩定性指標（Population Stability Index, PSI）檢驗模型</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 傳統信用評分卡（Credit Scorecard）的開發流程強調高度的可解釋性與穩定性，常見步驟包含特徵選擇、多重共線性分析、連續變數分箱（Binning）、資訊值（IV）計算、建立邏輯迴歸模型，以及使用 PSI 監控模型穩定性。使用「生成式模型進行特徵學習」缺乏傳統金融監理所要求的直觀解釋性，並非傳統信用評分卡的標準步驟。</p>
             </div>
         </div>
         
@@ -387,7 +387,7 @@
             <p>(A) 採用 L1 或 L2 正則化；</p><p>(B) 在訓練過程中使用 Dropout 技術；</p><p>(C) 採取早期停止（Early Stopping）機制；</p><p>(D) 擴增輸入特徵變數以提升模型表達能力</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 防止過擬合的核心策略是降低模型複雜度或加入約束條件（如 L1/L2 正則化限制權重大小、Dropout 隨機丟棄神經元、早期停止防止過度訓練）。相對地，擴增輸入特徵變數會「增加」模型的表達能力與複雜度，反而可能讓模型更容易記住訓練資料的雜訊，進一步加劇過擬合。</p>
             </div>
         </div>
         
@@ -397,7 +397,7 @@
             <p>(A) 增加卷積層（Convolutional Layer）數量，使網路更深以強化特徵提 取；</p><p>(B) 將輸入影像先進行灰階化處理，降低運算量；</p><p>(C) 使用 Sigmoid 激活函數，以將輸出壓縮至[0,1]範圍； 第 6 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目</p><p>(D) 改用 ReLU（Rectified Linear Unit）激活函數，以引入非線性並提升</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 若多層神經網路僅使用線性激活函數，其數學本質等同於單層的線性轉換，無法學習複雜的特徵組合。ReLU 是深度學習中最常用的非線性激活函數，它能有效為模型引入非線性能力，同時避免梯度消失問題，大幅提升模型對複雜特徵的表達能力與訓練效率。</p>
             </div>
         </div>
         
@@ -407,7 +407,7 @@
             <p>(A) 特徵設計未排除與會員忠誠度高度相關的變數，導致特徵偏差 （Feature Bias）；</p><p>(B) 標記（Label）由人工標註，導致標籤偏差（Label Bias）；</p><p>(C) 訓練樣本僅涵蓋高活躍顧客，造成取樣偏差（Sampling Bias）；</p><p>(D) 模型未進行超參數調整，導致過擬合（Overfitting）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 模型在訓練時若僅使用特定子群體（高活躍顧客）的資料，將無法學習到其他群體（新註冊或低消費會員）的特徵行為。這種訓練資料的分佈與實際應用場景（全體會員）分佈不一致的現象稱為「取樣偏差（Sampling Bias）」，是導致模型在其他顧客群體中預測準確率低的最主要原因。</p>
             </div>
         </div>
         
@@ -417,7 +417,7 @@
             <p>(A) 固定驗證集內容，並透過模型正則化技巧（如 L2 正則化）強化模型泛 化；</p><p>(B) 將全部歷史資料納入訓練，不使用驗證集，依靠早期停止（Early Stopping）控制訓練；</p><p>(C) 簡化模型架構，減少模型參數數量以降低過擬合風險；</p><p>(D) 採用時間序列交叉驗證（Time Series Cross Validation）或滑動視窗</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在資料分佈會隨時間變動（如概念漂移 Concept Drift）的工業場景中，固定的歷史驗證集無法反映當下現況。採用時間序列交叉驗證或滑動視窗驗證（Rolling Window Validation），可以讓模型持續利用最近期的資料進行驗證與調整，確保模型能夠動態適應隨時間演進的環境變化，從而維持長期的預測穩健性。</p>
             </div>
         </div>
         
@@ -427,7 +427,7 @@
             <p>(A) macro F1-score 本身波動性高，建議改用 micro-average F1-score 評估；</p><p>(B) 模型在西班牙文語料上過度擬合，導致評估結果偏高；</p><p>(C) 語言轉移造成召回率（Recall）下降，模型無法正確辨識關鍵情緒詞 彙；</p><p>(D) 以均方誤差（MSE）取代 F1-score 評估可獲得更準確的結果</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 模型從英文資料轉移到西班牙文資料時發生了跨語言的領域偏移（Domain Shift）。由於語言結構與詞彙不同，原本在英文中學到的特徵無法有效對應到西班牙文，導致模型漏判許多西班牙文的情緒詞彙，進而造成召回率（Recall）大幅下降。因為 F1-score 是精確率與召回率的調和平均，召回率的暴跌會直接導致 F1-score 的驟降。</p>
             </div>
         </div>
         
@@ -437,7 +437,7 @@
             <p>(A) 直接根據訓練集損失最低點停止訓練，以確保模型充分擬合所有樣本；</p><p>(B) 監控驗證集損失並設定適度的耐心值（Patience），在連續多輪未改善 後再停止訓練；</p><p>(C) 改以測試集損失作為早停依據，以提升模型最終評估一致性；</p><p>(D) 將所有資料重新合併後訓練至收斂，避免因資料分割導致評估波動</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 當驗證集損失出現隨機或週期性波動時，如果只要一上升就立刻停止訓練，容易錯過後續可能出現的更佳權重。因此，最合適的 Early Stopping 策略是設定一個合理的「耐心值（Patience）」，允許模型在驗證損失波動但未見長期惡化的情況下繼續觀察幾輪，只有當連續多輪皆無法突破之前的最佳結果時才停止訓練，以確保取得最佳泛化能力。</p>
             </div>
         </div>
         
@@ -447,7 +447,7 @@
             <p>(A) 使用早期停止法（Early Stopping）控制訓練回合數，避免過擬合 （Overfitting）；</p><p>(B) 同時移除多重共線性特徵並採用 L2 正則化（Ridge），以確保模型穩定 收斂；</p><p>(C) 僅使用 L2 正則化（Ridge），抑制所有權重幅度但保留全部特徵；</p><p>(D) 採用 L1 正則化（Lasso），透過懲罰項使部分特徵係數縮為 0</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> L1 正則化（Lasso Regression）在損失函數中加入了權重絕對值總和的懲罰項。這種正則化方式具有產生「稀疏權重矩陣」的特性，會將對預測目標貢獻度低或具高度共線性的多餘特徵的權重係數直接壓縮至 0，從而同時達成防止過擬合以及「自動特徵選擇（Feature Selection）」的目的。</p>
             </div>
         </div>
         
@@ -457,7 +457,7 @@
             <p>(A) O(n) — 執行時間與資料量成線性關係；</p><p>(B) O(n²) — 執行時間與資料量平方成正比；</p><p>(C) O(1) — 執行時間固定不變；</p><p>(D) O(log n) — 執行時間與資料量呈對數成長關係</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 若系統需要逐一將每一位客戶（共 n 位）與其他所有客戶進行兩兩比對，則總共需要進行大約 n × (n - 1) / 2 次比對計算。在演算法的時間複雜度（Big O notation）中，忽略常數與低次項後為 O(n²)，這意味著執行時間會與資料量（客戶數 n）的平方成正比。</p>
             </div>
         </div>
         
@@ -467,7 +467,7 @@
             <p>(A) 5-Fold 交叉驗證（5-Fold Cross Validation）；</p><p>(B) 留一法交叉驗證（Leave-One-Out Cross Validation）；</p><p>(C) 隨機交叉驗證（Random Cross Validation）；</p><p>(D) 分層留一法交叉驗證（Stratified Leave-One-Out Cross</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 針對極度不平衡的資料（陽性小於 8%），為了「確保各類別在驗證折中的比例一致性」，必須引入「分層（Stratified）」抽樣的概念。分層技術能保證每次切分出的訓練集與驗證集中，正負樣本的比例皆與原始資料集相同，避免某些折中完全沒有少數類別的樣本。選項中的「分層」機制正是解決此資料不平衡與確保評估穩定性的關鍵。</p>
             </div>
         </div>
         
@@ -477,7 +477,7 @@
             <p>(A) 前兩個主成分合計解釋 90%的總變異量，因此可安全降維至二維，且仍 保留大部分資訊；</p><p>(B) 第一主成分解釋 60%的變異量，表示資料結構呈現明顯線性關係，僅保 留一維即可避免過擬合；</p><p>(C) 雖然前兩個主成分可解釋超過 80% 變異量，但第二主成分貢獻仍高達 30%，不宜捨棄第三主成分；</p><p>(D) 三個特徵值相差不大，顯示各主成分變異均衡，降維可能導致資訊損失</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 主成分分析（PCA）中，各主成分解釋的變異量比例為該特徵值除以所有特徵值總和。此題總變異量為 λ1 + λ2 + λ3 = 6.0 + 3.0 + 1.0 = 10.0。第一主成分解釋了 6.0 / 10.0 = 60%，第二主成分解釋了 3.0 / 10.0 = 30%。前兩個主成分合計解釋了 60% + 30% = 90% 的總變異量。既然大於團隊設定的 80% 門檻，因此選擇保留前兩個主成分，將資料降維至二維是合理且能保留大部分資訊的最佳選擇。</p>
             </div>
         </div>
         
@@ -487,7 +487,7 @@
             <p>(A) 系統以隨機雜訊（Noise）干擾輸出，確保統計結果不洩漏個資；</p><p>(B) 各參與銀行透過安全通道交換私鑰，確保模型參數一致；</p><p>(C) 將原始資料壓縮並同時加密，以減少加密後資料量與運算時間；</p><p>(D) 資料在加密狀態下仍可進行數值運算，模型訓練可於未解密資料上完成</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 同態加密 (Homomorphic Encryption) 是一種允許在密文上直接進行特定代數運算的加密技術。其核心特性是，對加密資料進行運算後解密的結果，等同於對未加密的原始資料進行相同運算的結果。選項 3 準確描述了此特性，這在多方合作訓練 AI 模型時非常關鍵，因為它允許模型在不解密（即不暴露）原始敏感資料的情況下進行訓練。選項 0 描述的是差分隱私 (Differential Privacy)，選項 1 描述的是傳統加密通訊金鑰交換，選項 2 描述的僅是壓縮與加密，並非同態加密的本質。</p>
             </div>
         </div>
         
@@ -497,7 +497,7 @@
             <p>(A) 對稱加密（Symmetric Encryption）＋ 單向雜湊（Hash Function）＋ 非對稱加密（Asymmetric Encryption）＋ 差分隱私（Differential Privacy）；</p><p>(B) 同態加密（Homomorphic Encryption）＋ 非對稱加密（Asymmetric Encryption）＋ 單向雜湊（ One-way Hash Function）＋ 對稱加密 第 9 頁，共 19 頁 114 年第二次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：114 年 11 月 08 日 試題公告日期：114 年 11 月 20 日 答案 題目 （Symmetric Encryption）；</p><p>(C) 差分隱私（Differential Privacy）＋ 對稱加密（Symmetric Encryption）＋ 同態加密（Homomorphic Encryption）＋ 數位簽章 （Digital Signature）；</p><p>(D) 同態加密（Homomorphic Encryption）＋ 安全多方計算（Secure</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 該情境包含三個主要需求：1. 資料能在加密狀態下運算（不可被平台解密但可訓練模型），這對應「同態加密 (Homomorphic Encryption)」技術。2. 建立安全通訊協議以傳輸資料，通常會結合非對稱加密（用於金鑰交換和身分驗證）與對稱加密（用於大量資料的高效加密傳輸）。3. 確保資料在傳輸過程未被竄改，這需要「單向雜湊函數 (One-way Hash Function)」來生成摘要以驗證資料完整性。選項 1 正確涵蓋了這四項技術來滿足上述所有需求。差分隱私與數位簽章等技術雖然也是隱私或安全工具，但在這個具體情境描述中最契合的是選項 1。</p>
             </div>
         </div>
         
@@ -507,7 +507,7 @@
             <p>(A) np.linalg.inv(A) 計算矩陣 A 的行列式；</p><p>(B) v1 * v2 結果為 array([5, 7, 9])；</p><p>(C) np.dot(v1, v2) 結果為 np.int64(32)；</p><p>(D) np.linalg.eig(A) 計算矩陣 A 的反矩陣</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 根據選項的內容，這題是關於 NumPy 函式庫基本操作的敘述。選項 0 錯誤：np.linalg.inv(A) 是用來計算矩陣 A 的反矩陣，而非行列式 (np.linalg.det)。選項 3 錯誤：np.linalg.eig(A) 是用來計算矩陣 A 的特徵值與特徵向量。選項 1 和 2 涉及兩個向量的運算，如果是 np.dot(v1, v2) 結果為純量 32，這是內積運算 (dot product)；例如 v1=array([1,2,3]), v2=array([4,5,6])，則 np.dot(v1, v2) = 1*4 + 2*5 + 3*6 = 32。選項 2 是正確的 NumPy 內積操作與回傳型態描述。</p>
             </div>
         </div>
         
@@ -517,7 +517,7 @@
             <p>(A) A_and_B.sum() / (A.sum() * B.sum())；</p><p>(B) A_and_B.sum() / (A.sum() + B.sum())；</p><p>(C) A_and_B.sum() / A.sum()；</p><p>(D) A_and_B.sum() / B.sum()</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 條件機率的定義為 P(A|B) = P(A ∩ B) / P(B)。在使用 Monte Carlo 方法或樣本數據估算機率時，P(A ∩ B) 可以用事件 A 和事件 B 同時發生的次數（即 A_and_B.sum()）除以總次數來估算，而 P(B) 可以用事件 B 發生的次數（即 B.sum()）除以總次數來估算。兩者的分母（總次數）互相抵銷，因此 P(A|B) 可以直接透過 (A 與 B 同時發生的次數) / (B 發生的次數) 來計算。對應的程式碼寫法就是 A_and_B.sum() / B.sum()，因此選項 3 是正確的。</p>
             </div>
         </div>
         
@@ -527,7 +527,7 @@
             <p>(A) 卷積層(Conv2d)；</p><p>(B) 全連接層(Linear)；</p><p>(C) ReLU 激活函數；</p><p>(D) 池化層(MaxPool2d, AdaptiveAvgPool2d)</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 根據提供的 VGG16 結構，第一層全連接層 (Linear-33) 的參數量達到 102,764,544（約 1.02 億），第二層全連接層 (Linear-36) 的參數量也有 16,781,312。相較之下，各卷積層的參數量最多在 2,359,808 左右。ReLU 激活函數和池化層不包含任何可訓練參數（參數數目為 0）。因此，在 VGG16 模型中，全連接層佔據了絕大部分的模型參數量。選項 1 是正確的。</p>
             </div>
         </div>
         
@@ -537,7 +537,7 @@
             <p>(A) 卷積層(Conv2d)；</p><p>(B) 全連接層(Linear)；</p><p>(C) ReLU 激活函數；</p><p>(D) 池化層(MaxPool2d, AdaptiveAvgPool2d)</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在卷積神經網路（如 VGG16）中，卷積層的參數量雖然通常少於全連接層，但因為卷積核需要在高解析度的特徵圖（feature map）上進行密集的滑動視窗運算（點積操作），其計算量 (FLOPs, 浮點運算次數) 極大。全連接層僅進行一次矩陣乘法，特徵圖空間維度通常已被展平且縮小，因此運算量較低。池化層和 ReLU 的計算極為簡單。因此，卷積層消耗了 VGG16 絕大部分的運算量，選項 0 正確。</p>
             </div>
         </div>
         
@@ -547,7 +547,7 @@
             <p>(A) AdaptiveAvgPool2d 的輸出會被攤平後傳入第一個全連接層；由於前一 層池化輸出空間為 4×4，所以第一個線性層的輸入維度是 512×4×4 = 8192；</p><p>(B) Linear-33（第一個全連接層）報出的 102,764,544 參數只包含權重， 偏差（bias）沒有算在內；</p><p>(C) 根據列出的「Estimated Total Size (MB) = 624.98」，表示訓練此模 型只需大約 625MB 的 GPU 記憶體（包含所有 optimizer state 與梯度），所 以一張 1 GB 的 GPU 就足夠訓練；</p><p>(D) VGG16 包含 13 層卷積層（conv）與 3 層全連接層（FC），總參數數目</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> VGG16 之所以稱為「16」，是因為它包含 16 個帶有權重的層，這正是由 13 層卷積層 (Conv2d) 加上 3 層全連接層 (Linear) 組成，且總參數量約為 138M（如表格中所示的 138,357,544）。選項 0 錯誤，AdaptiveAvgPool2d-32 的輸出大小為 7x7，因此攤平後的維度是 512x7x7 = 25088。選項 1 錯誤，線性層的參數量計算（例如輸入 25088，輸出 4096）為 25088*4096 + 4096 (bias) = 102,764,544，因此包含了 bias。選項 2 錯誤，訓練模型除了前向傳播的記憶體外，優化器狀態（如 Adam 的動量項）和梯度通常會佔用權重的好幾倍記憶體，此外 batch size 也會成倍增加活化值的記憶體需求，所以 1GB GPU 通常不足以訓練 VGG16。選項 3 是正確描述。</p>
             </div>
         </div>
         
@@ -557,7 +557,7 @@
             <p>(A)  ;</p><p>(B)  ;</p><p>(C)  ;</p><p>(D) </p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 雖然選項中的程式碼內容被省略為空格或分號，但在 PyTorch 等框架中進行遷移學習並凍結特徵擷取層（例如卷積層）的標準做法是遍歷模型特定層的參數，並將其 `requires_grad` 屬性設為 `False`。只有在分類器層（最後的全連接層）參數的 `requires_grad` 保持為 `True`。這樣在反向傳播時，優化器就只會計算並更新分類器層的權重。此題選項 1 標示為正確答案，代表它在原始題目中包含了這段正確的梯度凍結設定邏輯。</p>
             </div>
         </div>
         
@@ -567,7 +567,7 @@
             <p>(A) 程式碼 A；</p><p>(B) 程式碼 B；</p><p>(C) 程式碼 C；</p><p>(D) 程式碼 D</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 使用主成分分析 (PCA) 進行降噪的核心概念是：將原始高維資料投影到較低維度的主成分上（保留包含最多變異數的成分，這通常是主要訊號），並捨棄對應較小變異數的成分（這通常包含隨機雜訊），然後再將低維資料反投影回原始高維空間。如果 PCA 沒有發揮降噪作用，最常見的錯誤是在使用 PCA 時保留了所有的主成分（即未適當設定 `n_components`），這樣重構後的資料將完全等於原始含有雜訊的資料。要使其有效去噪，必須修改相關設定（即選項 1 所對應的程式碼 B），適當減少主成分數量來濾除雜訊。</p>
             </div>
         </div>
         
@@ -577,7 +577,7 @@
             <p>(A) 程式碼 A、程式碼 B、程式碼 C、程式碼 D；</p><p>(B) 程式碼 A、程式碼 C；</p><p>(C) 程式碼 A、程式碼 B；</p><p>(D) 程式碼 C、程式碼 D</p><p>(E) A、B、C、D；</p><p>(F) A、E；</p><p>(G) A、D；</p><p>(H) A、C、F</p><p>(I) activation="relu"其數學式為 ；</p><p>(J) 空格 1 值為 110，空格 2 值為 100；</p><p>(K) 空格 1 值為 100，空格 2 值為 110；</p><p>(L) activation="sigmoid"一般用於多類別分類預測模型</p><p>(M) B、C；</p><p>(N) A、C、D；</p><p>(O) A、D；</p><p>(P) C、D、E</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 交叉驗證（如 k-fold cross-validation）的標準流程包括：1. 實例化模型（例如 KNeighborsClassifier）。2. 呼叫交叉驗證函數（例如 scikit-learn 的 `cross_val_score`），並傳入模型、完整的特徵資料 X、目標變數 y，以及折數（cv）。該函數會自動處理資料切分、多輪訓練與驗證，並回傳每一輪的準確率。在選項中，被標示為正確組合的「程式碼 A、程式碼 C」（對應選項 1）應包含了正確調用交叉驗證庫函數的標準寫法，避免了諸如手動切分訓練集後再傳入 cross_val_score，或是資料與標籤變數不匹配等常見的語法或邏輯錯誤。</p>
             </div>
         </div>
         

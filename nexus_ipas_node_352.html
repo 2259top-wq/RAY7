@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:-436 Y:2190 | 分類: ipas</div>
+        <div class="badge">星系座標: X:-507 Y:1996 | 分類: ipas</div>
         <h1>115 年第一次 AI 應用規劃師-初級能力鑑定 第一科：人工智慧基礎概論</h1>
         
         <div class="content-box">
@@ -137,7 +137,7 @@
             <p>(A) 統一不同來源資料的格式與欄位定義，以確保分析一致性；</p><p>(B) 識別並處理重複資料，避免影響模型訓練結果；</p><p>(C) 整併多來源資料，以提升資料完整性與應用價值；</p><p>(D) 依資料保存政策延長原始資料留存期限，以利未來可能的分析需求</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Data integration primarily focuses on consolidating data from multiple disparate sources, resolving formatting conflicts, ensuring consistency, and eliminating duplicates to provide a unified view for analysis. Extending data retention periods based on storage policies is an aspect of data lifecycle management and data archiving, not a direct objective of data integration.</p>
             </div>
         </div>
         
@@ -147,7 +147,7 @@
             <p>(A) 專家系統（Expert System）；</p><p>(B) 決策支援系統（Decision Support System）；</p><p>(C) 啟發式決策引擎（Heuristic Decision Engine）；</p><p>(D) 感知器網路（Sensor Network）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> A Sensor Network (or Internet of Things / IoT network) consists of distributed devices equipped with sensors to monitor physical or environmental conditions (like PM2.5 or trash bin fill levels) continuously. These networks directly facilitate the real-time collection, transmission, and aggregation of the data required by the AI system for smart city routing and monitoring.</p>
             </div>
         </div>
         
@@ -157,7 +157,7 @@
             <p>(A) 模型可依據資料中的特徵相似性進行自動分群；</p><p>(B) 訓練過程中不需仰賴事先定義的標籤資料；</p><p>(C) 常用於探索資料的潛在結構或隱含模式；</p><p>(D) 模型主要學習輸入特徵與既定目標標記之間的對應關係</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Unsupervised learning relies entirely on unlabelled data to find hidden structures or clusters (e.g., K-Means). Learning the explicit mapping or correspondence between input features and predefined target labels is the defining characteristic of Supervised Learning, making this statement incorrect for unsupervised learning.</p>
             </div>
         </div>
         
@@ -167,7 +167,7 @@
             <p>(A) 依統計準則（如 Z-score 或 IQR）評估後，再決定是否調整或處理極端值；</p><p>(B) 採用截尾（Trimming）處理極端值，以提升模型穩定性；</p><p>(C) 使用 One-hot 編碼（One-hot Encoding）將離群值轉換為類別特徵以改善數值穩 定性；</p><p>(D) 結合領域知識評估其合理性，再決定保留或修正</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> One-hot encoding is designed for converting categorical variables into binary vectors. Applying one-hot encoding to continuous numerical outliers is inappropriate and nonsensical, as it would treat continuous values as distinct categories, drastically expanding the feature space and destroying the numerical magnitude and ordinal relationship essential for regression models.</p>
             </div>
         </div>
         
@@ -177,7 +177,7 @@
             <p>(A) 透過隨機刪除部分正常交易資料，以降低類別失衡程度；</p><p>(B) 依據少數類別樣本的特徵空間，合成產生新的少數類別樣本；</p><p>(C) 調整模型的損失函數（Loss Function）權重，使誤判少數類別時的懲罰提高；</p><p>(D) 以交叉驗證（Cross-validation）方式重新分割資料集，使各折資料類別比例一</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> SMOTE (Synthetic Minority Over-sampling Technique) operates by selecting a minority class instance and finding its k-nearest minority class neighbors. It then synthetically generates new data points by interpolating values along the line segments connecting the chosen instance and its neighbors in the feature space, effectively balancing the class distribution without simply duplicating existing records.</p>
             </div>
         </div>
         
@@ -187,7 +187,7 @@
             <p>(A) 於資料分割前，先對完整資料集計算統計量並進行標準化處理；</p><p>(B) 先分割訓練資料（Training Data）和測試資料（Test Data），並各自獨立計算 統計量後進行標準化；</p><p>(C) 先分割訓練資料（Training Data）和測試資料（Test Data），僅以訓練資料計算 統計量，再套用至測試資料；</p><p>(D) 僅對訓練資料（Training Data）進行標準化處理，測試資料（Test Data）保持原</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> To prevent data leakage, the test set must remain entirely unseen during the model training process. This means statistical parameters like mean and variance used for standardization must be computed exclusively from the training dataset. These learned parameters are then applied to transform both the training and test sets, simulating real-world evaluation on completely unknown data.</p>
             </div>
         </div>
         
@@ -197,7 +197,7 @@
             <p>(A) 資料分群（Data Clustering）；</p><p>(B) 特徵交叉（Feature Cross）；</p><p>(C) One-hot 編碼（One-hot Encoding）；</p><p>(D) 寬深模型（Wide and Deep）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Machine learning models require numerical input. One-hot Encoding is the standard technique used to transform nominal categorical variables (like region or plan type, which have no inherent mathematical order) into a format the model can understand. It creates new binary columns for each distinct category, indicating presence (1) or absence (0), preventing the model from assuming a false ordinal relationship.</p>
             </div>
         </div>
         
@@ -407,7 +407,7 @@
             <p>(A) 分析整體客戶群的信用風險分布，以預測未來違約率趨勢；</p><p>(B) 回溯歷史呆帳案例，辨識造成違約的主要影響因素；</p><p>(C) 分析在模型不變的前提下，客戶申請資料變動對授信決策結果的影響；</p><p>(D) 依據客戶輪廓與行為資料，推薦最適合的金融商品以提升交叉銷售</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 反事實解釋（Counterfactual Explanation）在可解釋性人工智慧（XAI）中旨在回答「如果...會怎樣（What-if）」的問題。它探討在模型維持不變的情況下，需要對輸入資料進行何種最小程度的修改，才能改變模型的預測結果。選項（2）分析客戶申請資料變動（輸入改變）對授信決策（輸出結果）的影響，正是反事實解釋的核心應用情境。</p>
             </div>
         </div>
         
@@ -417,7 +417,7 @@
             <p>(A) 量化各輸入特徵對模型整體預測準確度的平均影響程度；</p><p>(B) 標示輸入資料中對單一預測結果影響較大的區域或部分；</p><p>(C) 評估在不同模型參數設定下，預測結果的穩定性變化；</p><p>(D) 比較不同模型架構在測試資料上的泛化能力差異</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 顯著性圖（Saliency Map）是一種常用於電腦視覺和深度學習的視覺化技術。它透過計算輸出相對於輸入資料的梯度，來突顯輸入圖像（或資料）中對特定預測結果影響最大的區域或像素點。因此，選項（1）「標示輸入資料中對單一預測結果影響較大的區域或部分」最為準確。</p>
             </div>
         </div>
         
@@ -427,7 +427,7 @@
             <p>(A) 監督式學習的分類問題；</p><p>(B) 非監督式學習的分群問題；</p><p>(C) 強化式學習；</p><p>(D) 非監督式學習的關聯規則挖掘</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在該情境中，銀行已經擁有包含明確標籤（「異常」或「正常」）的歷史交易資料。使用這些帶有已知結果的標記資料來訓練模型，以預測新進資料的離散類別標籤，屬於典型的「監督式學習（Supervised Learning）」中的「分類（Classification）」問題。</p>
             </div>
         </div>
         
@@ -437,7 +437,7 @@
             <p>(A) 半監督式學習（Semi-supervised Learning）；</p><p>(B) 監督式學習（Supervised Learning）；</p><p>(C) 非監督式學習（Unsupervised Learning）；</p><p>(D) 強化式學習（Reinforcement Learning）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 半監督式學習（Semi-supervised Learning）是介於監督式學習與非監督式學習之間的一種方法，專門處理資料集中同時包含少量已標記資料（30%）與大量未標記資料（70%）的情況。它能利用未標記資料的整體結構分佈資訊，來輔助並強化依賴少量標記資料所建立的模型。</p>
             </div>
         </div>
         
@@ -447,7 +447,7 @@
             <p>(A) 影像分類，判斷影像中是否有煙霧；</p><p>(B) 物件偵測，找出煙霧位置並用方框標示；</p><p>(C) 影像分割，精確標示出煙霧的像素區域；</p><p>(D) 人臉辨識，識別煙霧來源</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 影像分類僅能判斷整張圖是否有煙霧；物件偵測能用矩形邊界框（Bounding Box）框出物體。然而，煙霧屬於形狀不規則且邊緣模糊的物質，若需要精確「標示其位置和範圍」，必須使用「影像分割（Image Segmentation）」技術，將影像在像素等級上進行分類，精準勾勒出煙霧的不規則輪廓範圍。</p>
             </div>
         </div>
         
@@ -457,7 +457,7 @@
             <p>(A) 卷積神經網路（Convolutional Neural Network, CNN），利用卷積層捕捉局部特 徵；</p><p>(B) 自編碼器（Autoencoder, AE），先進行資料壓縮再重建；</p><p>(C) 全連接神經網路（Fully Connected Neural Network, FCNN），增加隱藏層數量；</p><p>(D) 長短期記憶網路（Long Short-Term Memory, LSTM），改善 RNN 的長期記憶問</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 傳統 RNN 處理長序列資料時，容易面臨「梯度消失（Vanishing Gradient）」問題，導致模型遺忘較早期的資訊。長短期記憶網路（LSTM）透過引入閘門機制（輸入閘、遺忘閘、輸出閘），能有效控制資訊的保留與捨棄，解決了 RNN 難以學習長期依賴（Long-term dependencies）記憶的缺陷。</p>
             </div>
         </div>
         
@@ -467,7 +467,7 @@
             <p>(A) 從零開始建立深度學習框架並自行訓練模型；</p><p>(B) 採用開源機器學習框架進行客製化模型開發；</p><p>(C) 使用雲端 AutoML 平台進行自動化模型訓練；</p><p>(D) 購買現成的詐欺偵測軟體套件直接部署</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 因為該公司「缺乏 AI 專業人員」且「需要快速上線驗證效果」，從零開發或使用開源框架門檻過高；而購買現成軟體套件可能無法適配該保險公司獨特的歷史資料型態。雲端 AutoML（自動化機器學習）平台能自動執行特徵工程、模型選擇與超參數調優，讓不具備深厚 AI 專業知識的人員也能快速利用自有資料訓練出高效能模型，是最符合此情境的解決方案。</p>
             </div>
         </div>
         
@@ -477,7 +477,7 @@
             <p>(A) 提供完整資料集並透過合約約定研究用途與保密責任；</p><p>(B) 僅保留用電數值資料，移除所有其他欄位以避免識別風險；</p><p>(C) 對具識別風險的資料欄位進行轉換處理，並移除直接識別資訊；</p><p>(D) 僅將資料加密後提供，確保資料在傳輸過程中的安全性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在釋出涉及個人資料的數據前，必須進行適當的去識別化（De-identification）或匿名化處理。移除直接識別資訊（如姓名、身分證字號），並對準識別特徵（如年齡區間、部分地址等）進行轉換或概括化處理（例如 k-anonymity），能在保護個人隱私的同時，最大程度地保留資料在學術研究上的分析價值。</p>
             </div>
         </div>
         
@@ -487,7 +487,7 @@
             <p>(A) 弱 AI（Weak AI/Narrow AI）；</p><p>(B) 強 AI（Strong AI）；</p><p>(C) 通用人工智慧（Artificial General Intelligence, AGI）；</p><p>(D) 超級人工智慧（Artificial Superintelligence, ASI）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 弱人工智慧（Weak AI 或狹義人工智慧 Narrow AI）是指專為解決特定問題或執行單一特定任務（如棋盤遊戲、語音辨識、PCB 缺陷檢測）而設計並訓練的 AI 系統。它不具備人類的全面認知能力與跨領域通用性。強 AI 或 AGI 則指具有與人類相當的廣泛智能，能解決各種未曾見過的問題，目前尚未實現。</p>
             </div>
         </div>
         
@@ -497,7 +497,7 @@
             <p>(A) 擴充資料儲存容量，以因應長期資料累積需求；</p><p>(B) 強化即時資料處理與推論計算資源配置，以降低延遲風險；</p><p>(C) 調整資料格式標準，以降低跨來源整合複雜度；</p><p>(D) 增加資料驗證與清理機制，以提升資料品質穩定性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 系統的核心痛點是「尖峰時段的判定延遲」導致無法滿足「3 秒內完成判定」的即時性（Real-time）要求。擴充儲存空間或清理資料無法解決運算瓶頸；為了解決推論延遲（Inference Latency），最直接有效的方式是增強即時資料流的處理能力，以及提升邊緣運算或伺服器的推論硬體資源（如 GPU 加速），確保算力能應付尖峰負載。</p>
             </div>
         </div>
         
@@ -507,7 +507,7 @@
             <p>(A) 自然語言處理（Natural Language Processing）；</p><p>(B) 電腦視覺（Computer Vision）；</p><p>(C) 語音識別（Speech Recognition）；</p><p>(D) 推薦系統（Recommendation System）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 評估蘋果成熟度需要系統透過鏡頭或感測器「看」到果實的外觀特徵（如顏色、大小、紋理、有無瑕疵等），這屬於影像擷取、處理與分析的範疇，因此歸類為「電腦視覺（Computer Vision）」領域。</p>
             </div>
         </div>
         
@@ -517,7 +517,7 @@
             <p>(A) 在醫療影像分析中，同時運用少量已標註資料與大量未標註影像進行模型訓練 —監督式學習（Supervised Learning）；</p><p>(B) 在智慧推薦系統中，利用顧客是否點擊的歷史標籤資料預測未來偏好—非監督 式學習（Unsupervised Learning）；</p><p>(C) 在詐欺交易分析中，模型透過錯誤判斷所產生的損失作為回饋訊號，持續調整 策略—監督式學習（Supervised Learning）；</p><p>(D) 在股價資料分析中，將歷史價格變動模式劃分為若干趨勢型態，且未使用人工</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 選項（3）「將歷史變動模式劃分為若干趨勢型態，且未使用人工標註」屬於分群（Clustering）任務，正是「非監督式學習（Unsupervised Learning）」的應用。選項（0）為半監督式學習；選項（1）使用歷史標籤資料，屬於監督式學習；選項（2）透過環境回饋訊號進行策略優化，屬於強化式學習（Reinforcement Learning）。</p>
             </div>
         </div>
         
@@ -527,7 +527,7 @@
             <p>(A) F1-score；</p><p>(B) 均方誤差（Root Mean Squared Error, RMSE）；</p><p>(C) 準確率（Accuracy）；</p><p>(D) 判定係數（R², Coefficient of Determination）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在「資料不平衡（Imbalanced Data）」的情境（瑕疵品極少，正常品極多）下，「準確率（Accuracy）」會因為模型只要全猜「正常品」就能得到高分而失真。要有效衡量模型對少數類別（瑕疵品）的辨識能力，應使用綜合考量了精確率（Precision）與召回率（Recall）的調和平均數「F1-score」。而 RMSE 與 R² 是用於迴歸問題的評估指標，不適用於分類任務。</p>
             </div>
         </div>
         
@@ -537,7 +537,7 @@
             <p>(A) 透過忽略影響較小的注意力權重，減少模型需要計算的關聯數量，以降低運算 成本；</p><p>(B) 透過調整注意力計算與資料處理方式，減少中間結果的儲存需求，進而改善速 度與資源使用效率；</p><p>(C) 透過增加注意力計算的並行程度，使模型可同時處理更多注意力頭部；</p><p>(D) 透過將注意力結果暫存於高速快取記憶體，以避免重複計算造成延遲</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Flash Attention 是一種透過硬體感知（Hardware-aware）優化的精確注意力演算法。它利用分塊（Tiling）技術重構計算流程，避免將巨大的注意力分數矩陣（N x N）具現化並寫入速度較慢的高頻寬記憶體（HBM），從而大幅減少記憶體讀寫瓶頸與中間存儲需求，達到提升運算速度並節省記憶體空間的雙重效益。</p>
             </div>
         </div>
         
@@ -547,7 +547,7 @@
             <p>(A) 提升模型推論資源配置，以維持高流量查詢時的回應效能；</p><p>(B) 調整語言模型的輸出限制機制，以降低生成內容與法規不一致的風險；</p><p>(C) 建立固定法規問答對照表，以規則化方式優先回應常見問題；</p><p>(D) 導入可支援增量更新的索引管理方式，使異動文件可即時反映於檢索結果</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> RAG 系統的核心之一是外部向量資料庫。當知識庫頻繁變動時，若每次都要重建整體索引，將耗費大量運算資源並造成服務中斷。導入「增量更新（Incremental Update）」機制，能讓系統只針對新增、刪除或修改的特定文件進行局部向量重新計算與索引更新，有效解決更新空窗期及引用過期資料的問題。</p>
             </div>
         </div>
         
@@ -557,7 +557,7 @@
             <p>(A) 2、3、6；</p><p>(B) 2、4、5；</p><p>(C) 1、3、6；</p><p>(D) 2、3、4</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 敘述 2、3、4 是錯誤的：(2)非監督學習不需要預先定義輸出類別，是由模型自行探索數據隱含結構。(3)半監督學習是同時結合少量標記資料與大量未標記資料進行訓練。(4)自監督學習是利用資料本身的內部結構自動生成標籤（如文字接龍或影像遮蔽還原），完全「不需要」人工提供標註資料。因此答案為包含 2、3、4 錯誤敘述的選項。</p>
             </div>
         </div>
         
@@ -567,7 +567,7 @@
             <p>(A) 對數轉換（Log Transformation）；</p><p>(B) 區間化（Binning）；</p><p>(C) One-hot 編碼（One-hot Encoding）；</p><p>(D) 隨機重抽樣（Random Resampling）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 消費金額等財務數據常呈現「右偏分佈（Right-skewed distribution）」，少數極端高消費紀錄會嚴重拉扯模型權重。「對數轉換（Log Transformation）」是一種有效的特徵工程技術，能對龐大的數值進行壓縮，將高度偏態的分佈轉換為近似常態分佈，從而削弱極端離群值對模型穩定性的負面影響。</p>
             </div>
         </div>
         
@@ -577,7 +577,7 @@
             <p>(A) 延長模型訓練時間，使模型有更多機會調整參數；</p><p>(B) 增加訓練樣本數量，以提升模型學習能力；</p><p>(C) 調整模型中的啟動函數設定，以改善訓練過程的穩定性；</p><p>(D) 簡化模型結構，以降低模型過度擬合的可能性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在深層神經網路中，梯度傳遞效率低落且參數更新極小，典型的現象就是「梯度消失（Vanishing Gradient）」。此現象常因為使用了如 Sigmoid 或 Tanh 等在兩端導數趨近於零的啟動函數。將啟動函數調整為 ReLU（Rectified Linear Unit）或其變體，能有效保持梯度傳遞、避免梯度消失，進而打破學習停滯的問題。</p>
             </div>
         </div>
         
@@ -587,7 +587,7 @@
             <p>(A) Volume；</p><p>(B) Velocity；</p><p>(C) Variety；</p><p>(D) Veracity</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 大數據領域通常有「多 V」特質。題目中提到的「交通車流（結構化數字）」、「監視影像（非結構化影片）」、「民眾通報（非結構化文字）」等多種不同資料格式與型態的整合，正是對應到大數據特徵中的「多樣性（Variety）」。</p>
             </div>
         </div>
         
@@ -597,7 +597,7 @@
             <p>(A) 判斷一封電子郵件是否為垃圾郵件；</p><p>(B) 預測未來一週的產品需求量；</p><p>(C) 預測客戶是否可能流失；</p><p>(D) 為語音內容轉換後的文字進行逐詞標註</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 結構化預測（Structured Prediction）是指模型的輸出不僅是一個純量（如單一分類或數值），而是一個具有內部關聯與結構的物件，例如序列、樹狀結構或圖形。「為語音轉文字的內容進行逐詞標註（例如詞性標註或命名實體辨識）」輸出的是一個相互依賴的標籤序列，完美符合結構化預測的定義。選項 0、2 為二元分類，選項 1 為數值迴歸預測。</p>
             </div>
         </div>
         
@@ -607,7 +607,7 @@
             <p>(A) 依據包裹每日掃描紀錄的時間序列，預測下週各倉庫的進貨量波動； 第 11 頁，共 12 頁 115 年第一次 AI 應用規劃師-初級能力鑑定【公告試題】 第一科：人工智慧基礎概論 考試日期：115 年 03 月 21 日 答案 題目</p><p>(B) 根據客服對話逐句內容的先後順序，判斷客訴是否可能升級為申訴案件；</p><p>(C) 根據倉庫監視器影像，自動辨識貨架是否缺貨並標示缺貨區域位置；</p><p>(D) 依據車隊 GPS 路徑點的連續軌跡，預測下一段可能行駛路線</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 卷積神經網路（CNN）最擅長處理具有網格狀拓撲結構的資料，例如二維的影像資料。選項中「根據倉庫監視器影像，自動辨識貨架是否缺貨並標示缺貨區域位置」屬於電腦視覺（Computer Vision）中的物件偵測（Object Detection）或影像分類（Image Classification）任務，這正是 CNN 的核心應用場景。其他選項（時間序列、文字序列、GPS 軌跡）更適合使用循環神經網路（RNN）、長短期記憶網路（LSTM）或 Transformer 等擅長處理序列資料的模型架構。</p>
             </div>
         </div>
         
@@ -617,7 +617,7 @@
             <p>(A) 增加模型參數規模，使模型具備更強表達能力；</p><p>(B) 透過資料增強（Data Augmentation）擴展影像變化，以提升模型穩定性；</p><p>(C) 重新蒐集大量影像並進行完整人工標註；</p><p>(D) 採用遷移學習（Transfer Learning），利用既有預訓練模型進行調整</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 遷移學習（Transfer Learning）的核心思想是將在一個任務上學習到的知識，應用到另一個相關的新任務上。題目中提到該公司「在工業缺陷檢測領域已有成熟的辨識產品經驗」，代表他們已經擁有在類似領域訓練好的模型。當面臨「標註樣本極為稀少且專家標註成本高昂」的新產品檢測任務時，最有效的策略是將既有的成熟模型作為預訓練模型（Pre-trained Model），利用其已經學會的通用特徵擷取能力，再針對新產品的少量樣本進行微調（Fine-tuning）。這不僅能充分利用公司既有優勢，還能在資料匱乏的情況下顯著提升模型表現並加速收斂。</p>
             </div>
         </div>
         
@@ -627,7 +627,7 @@
             <p>(A) 精準率（Precision）；</p><p>(B) 召回率（Recall）；</p><p>(C) 假陽性率（False Positive Rate）；</p><p>(D) ROC-AUC 曲線</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 召回率（Recall，又稱敏感度 Sensitivity 或 True Positive Rate）的定義是「在所有實際為正樣本（真正患有癌症）的案例中，模型成功預測為正樣本的比例」。當醫院的目標是「盡量找出所有可能的癌症患者，降低漏診風險」時，代表他們最在意的是減少偽陰性（False Negative，即實際有病卻被預測為沒病）。提高召回率意味著模型能更全面地捕捉到潛在的癌症患者，符合院方寧可增加一些偽陽性（誤判沒病為有病）也要避免漏網之魚的醫療篩檢策略。</p>
             </div>
         </div>
         

@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:-373 Y:1755 | 分類: ipas</div>
+        <div class="badge">星系座標: X:-24 Y:1771 | 分類: ipas</div>
         <h1>115 年第一次 AI 應用規劃師-中級能力鑑定 第三科：機器學習技術與應用</h1>
         
         <div class="content-box">
@@ -137,7 +137,7 @@
             <p>(A) 馬可夫鏈（Markov Chain）：以狀態轉移機率描述系統演變的隨機過程；</p><p>(B) 梯度下降最佳化（Gradient Descent）：透過迭代更新參數以最小化損失函數；</p><p>(C) 蒙地卡羅方法（Monte Carlo Method）：透過大量隨機抽樣近似機率分布或數值 結果；</p><p>(D) 貝氏推論（Bayesian Inference）：結合先驗分布與資料更新後驗機率</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 當數學模型過於複雜、變數過多，導致無法計算精確的解析解（Analytical Solution）時，金融工程與機器學習領域常使用隨機抽樣演算法來求得數值近似解。「採用隨機模擬方式，產生大量市場情境模擬並估計損失分布」，正是「蒙地卡羅方法（Monte Carlo Method）」的核心概念。它依賴大數法則，透過大量的隨機抽樣（Random Sampling）與重複模擬來逼近複雜系統的機率分布、期望值或積分結果。在金融風險管理（如計算風險值 VaR）中，蒙地卡羅模擬是被廣泛使用的標準技術。</p>
             </div>
         </div>
         
@@ -147,7 +147,7 @@
             <p>(A) 平均絕對誤差（MAE）：對誤差進行線性懲罰，對離群值較不敏感，梯度近似 固定；</p><p>(B) Huber 損失（Huber Loss）：小誤差採平方懲罰，大誤差轉為線性懲罰，以降低 離群值影響；</p><p>(C) 均方誤差（MSE）：對誤差進行平方處理，使大誤差產生更大的懲罰與梯度；</p><p>(D) 交叉熵損失（Cross-Entropy Loss）：用於分類問題的機率分布差異衡量</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在迴歸問題中，損失函數的選擇決定了模型對預測誤差的容忍度與懲罰方式。均方誤差（MSE，Mean Squared Error）會將預測值與真實值的誤差進行「平方」。這意味著，當預測誤差越大（如遇到成交價極高的豪宅離群值），平方項會使該筆資料產生極端巨大的損失值，進而在反向傳播時產生極大的梯度，迫使模型大幅更新權重去迎合這些極端值。相對地，MAE 對誤差僅作線性懲罰，對離群值較不敏感（Robust）；Huber Loss 在大誤差時退化為線性也是為了抑制離群值。既然目標是「對極端高價物件的誤差更敏感」，MSE（選項2）是唯一符合此特性的損失函數。</p>
             </div>
         </div>
         
@@ -157,7 +157,7 @@
             <p>(A) (1, 64)；</p><p>(B) (10, 10)；</p><p>(C) (64, 1)；</p><p>(D) 維度不相容，無法相乘</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 此題考查基礎的線性代數與神經網路張量乘法（Matrix Multiplication）規則。在計算矩陣相乘 A x B 時，矩陣 A 的形狀為 (m, n)，矩陣 B 的形狀為 (n, p)，兩者相乘的必要條件是 A 的列寬（n）必須等於 B 的行高（n），而相乘結果輸出的形狀將會是 (m, p)。套用在題目中，輸入矩陣 Q 形狀為 (1, 10)，權重矩陣 WQ 形狀為 (10, 64)。因為 10 ＝ 10，兩矩陣維度相容可相乘，結果的形狀為 (1, 64)。這是 Transformer 模型中將特徵投射至 Query 空間的標準線性轉換操作。</p>
             </div>
         </div>
         
@@ -167,7 +167,7 @@
             <p>(A) 寵物監控中的貓狗分類；</p><p>(B) 車輛辨識中的車型分類；</p><p>(C) 手寫數字辨識；</p><p>(D) 道路場景中的行人偵測</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在手寫數字辨識中，某些數字在水平翻轉後語意會改變或變成無效數字（例如數字「3」翻轉後不再是有效的數字，「2」與「5」在某些寫法下翻轉可能造成混淆，或是像字母「b」和「d」、「p」和「q」在水平翻轉會改變類別，儘管這是數字，但原理相同）。而貓狗、車型、行人水平翻轉後，其類別標籤仍保持不變。因此對手寫數字進行隨機水平翻轉會引入語意錯誤，破壞標籤的正確性。</p>
             </div>
         </div>
         
@@ -177,7 +177,7 @@
             <p>(A) 殘差之間存在關聯；</p><p>(B) 特徵之間高度相關；</p><p>(C) 殘差變異數不一致；</p><p>(D) 殘差不符合常態分布</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在線性迴歸的殘差圖中，如果殘差（Residuals）的散佈範圍隨著預測值（或自變數）的增大而呈現漏斗狀擴散或收縮，這表示殘差的變異數不是常數。這種現象稱為「異質變異數」（Heteroscedasticity）或「殘差變異數不一致」。它違反了線性迴歸模型中「同質變異數」（Homoscedasticity）的假設，可能導致估計的標準誤不準確，進而影響模型推論的可靠性。</p>
             </div>
         </div>
         
@@ -187,7 +187,7 @@
             <p>(A) t-SNE 保留全局線性結構，適合作為 XGBoost 的降維前處理；</p><p>(B) t-SNE 保留局部鄰域結構，適合視覺化；但不保留全局結構，不適合作為模型 輸入特徵；</p><p>(C) PCA 為非線性降維方法，能保留複雜流形結構；</p><p>(D) t-SNE 與 PCA 皆可直接對新資料進行線性外推</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> t-SNE（t-Distributed Stochastic Neighbor Embedding）是一種非線性降維技術，特別擅長將高維資料對應到低維（通常是2D或3D）空間進行視覺化，其核心在於保留資料的局部鄰域結構。然而，t-SNE 在降維過程中會遺失全局結構的距離意義，且無法直接提供一個函數將新資料映射到相同的降維空間（即缺乏外推能力），因此通常不適合作為機器學習模型（如 XGBoost）特徵工程的前處理。相對地，PCA 是一種線性降維方法，保留全局變異性，且可將相同的轉換矩陣應用於新資料上。</p>
             </div>
         </div>
         
@@ -197,7 +197,7 @@
             <p>(A) 模型使用 L2 正則化，導致所有特徵係數被壓縮至接近零，重要性難以區分；</p><p>(B) 模型使用 L1 正則化，面對高度相關特徵時隨機保留其中之一，導致每次訓練 保留的特徵不穩定；</p><p>(C) 模型未使用任何正則化，過擬合導致係數每次收斂至不同極值；</p><p>(D) 特徵數量過多導致梯度消失，應優先進行 PCA 降維再套用正則化</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> L1 正則化（Lasso Regression）具有特徵選擇（Feature Selection）的作用，會將部分特徵的係數壓縮至零。當資料中存在高度相關的共線性特徵群（例如月收入、年收入、季收入）時，L1 正則化傾向於隨機從該群體中挑選一個特徵保留，而將其他的權重降為零。這導致模型在每次因資料微小變動重新訓練時，被選中的特徵可能會在這些高度相關特徵間反覆切換，進而造成特徵重要性清單不穩定、難以解釋的現象。若要解決此問題，通常可改用 L2 正則化（Ridge Regression）或 Elastic Net（結合 L1 與 L2）。</p>
             </div>
         </div>
         
@@ -207,7 +207,7 @@
             <p>(A) 梯度消失（Gradient Vanishing）：梯度在反向傳播中逐層縮小趨近於零，底層 無法學習；</p><p>(B) 損失函數震盪或發散（Oscillation / Divergence）：每次更新步伐過大，參數在 最優點兩側反覆跳越，無法穩定收斂；</p><p>(C) 過擬合（Overfitting）：模型記憶訓練資料的雜訊，泛化能力下降；</p><p>(D) 死亡 ReLU（Dying ReLU）：大量神經元輸出永久為零，停止參與梯度更新</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在梯度下降優化演算法中，學習率（Learning Rate）決定了每次參數更新的步長。當學習率設置過大時，每次更新的步伐會過於劇烈，導致模型參數在損失函數的最優解附近來回跳躍（震盪），甚至可能使得損失值不降反升，最終導致模型發散（Divergence）而無法穩定收斂。這正是工程師將學習率調高後觀察到訓練損失明顯震盪的原因。</p>
             </div>
         </div>
         
@@ -217,7 +217,7 @@
             <p>(A) 同時結合一階動量（Momentum）與自適應學習率（Adaptive Learning Rate）， 為每個參數調整更新步長；</p><p>(B) 強制所有參數使用相同學習率（Learning Rate），避免梯度差異造成不穩定；</p><p>(C) 透過批次正規化（Batch Normalization）重新分布輸入資料；</p><p>(D) 將梯度裁剪為固定範圍以避免梯度爆炸（Gradient Explosion）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Adam（Adaptive Moment Estimation）優化器的核心設計是同時結合了 Momentum（動量，即過去梯度的指數移動平均，屬於一階動量）以及 RMSProp（自適應學習率，基於過去梯度平方的指數移動平均，屬於二階動量）。透過一階動量，Adam 能平滑梯度的震盪並加速收斂；透過二階動量，Adam 能為神經網路中的每個參數獨立調整自適應的學習率。這種結合使得 Adam 在面對複雜損失地形時能夠更穩定且快速地收斂。</p>
             </div>
         </div>
         
@@ -227,7 +227,7 @@
             <p>(A) 使用時長預測：均方誤差（MSE）；流失預測：二元交叉熵（Binary Cross- Entropy）；</p><p>(B) 使用時長預測：交叉熵損失（Cross-Entropy）；流失預測：均方誤差（MSE）；</p><p>(C) 使用時長預測：Hinge 損失（Hinge Loss）；流失預測：MAE（平均絕對誤差）；</p><p>(D) 兩個任務均使用交叉熵損失，因為兩者的輸出都有不確定性</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 「隔日 App 使用時長（分鐘）」是一個連續數值的預測任務，屬於迴歸問題（Regression）。在迴歸任務中，最常用的損失函數是均方誤差（Mean Squared Error, MSE）或平均絕對誤差（MAE）。而「隔日是否流失（是/否）」是預測兩個類別中的其中一個，屬於二元分類問題（Binary Classification）。對於輸出機率介於 0 與 1 之間的二元分類問題，最適當的損失函數是二元交叉熵（Binary Cross-Entropy, BCE）。因此正確組合為使用時長預測用 MSE，流失預測用二元交叉熵。</p>
             </div>
         </div>
         
@@ -237,7 +237,7 @@
             <p>(A) 全批次梯度下降（Full-batch GD）：使用完整資料集計算梯度，更新穩定但每 次更新耗時長；</p><p>(B) 隨機梯度下降（SGD）：每次只用一個樣本，速度快但梯度雜訊大，收斂不穩 定；</p><p>(C) 第二階梯度法（Newton's Method）：利用 Hessian 矩陣精確估計曲率，大幅減 少更新次數；</p><p>(D) 小批次梯度下降（Mini-batch GD）：以適當批次大小（如 256-2048）平衡梯度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在訓練深度學習模型時，全批次梯度下降（Full-batch GD）能計算出無偏且穩定的真實梯度，但計算量龐大導致單次更新耗時過長，且容易陷入局部最小值；隨機梯度下降（SGD，批次大小為 1）更新頻率極高，但梯度變異（Variance）極大導致收斂震盪，且無法有效利用 GPU 的平行運算優勢。小批次梯度下降（Mini-batch GD）取兩者之折衷，將資料分為適當大小的批次（例如 256 或 2048），既能充分發揮硬體（如 GPU）的矩陣平行運算能力（提高 Throughput），又能提供相對穩定的梯度方向，是目前深度學習訓練中最標準且實用的策略。</p>
             </div>
         </div>
         
@@ -247,7 +247,7 @@
             <p>(A) Accuracy 對類別不平衡不敏感，可能無法反映模型對肺癌陽性的偵測能力；</p><p>(B) Accuracy 的計算不包含模型對邊界樣本的分類結果，容易遺漏困難樣本；</p><p>(C) Accuracy 無法處理多分類問題，在二元分類下需改用 AUC；</p><p>(D) Accuracy 無法揭示模型的收斂速度，因此不適合用來選擇最終模型</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 此情境是一個極度不平衡的資料集（Imbalanced Dataset），多數類別（正常病例）佔 99%，少數類別（肺癌陽性）僅佔 1%。如果模型設計成一個「無腦預測所有人皆為正常」的笨模型（Majority Class Classifier），其整體準確率（Accuracy）依然可以高達 99%。然而，這種模型在臨床上毫無價值，因為它錯過了所有真正的肺癌患者（Recall 為 0%）。因此，在類別不平衡的情況下，Accuracy 會被多數類別主導，無法真實反映模型對少數類（且通常是最重要的類別）的預測能力。此時應參考精確率（Precision）、召回率（Recall/Sensitivity）或 F1-Score 等指標。</p>
             </div>
         </div>
         
@@ -257,7 +257,7 @@
             <p>(A) 增加訓練 Epoch 數至 200，讓模型充分學習訓練資料的所有細節；</p><p>(B) 引入更多原始文本特徵（包括原始 URL、HTML 標籤），增加特徵多樣性；</p><p>(C) 對 Embedding 層與全連結層加入 L2 權重衰減（Weight Decay），懲罰參數值；</p><p>(D) 移除驗證集並將其併入訓練集，以增加模型可見的訓練樣本數</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 過擬合（Overfitting）代表模型過於複雜，以至於記住了訓練資料中的雜訊，導致泛化到未見資料（驗證集）的能力下降。要降低模型複雜度以緩解過擬合，常用的正則化（Regularization）技術之一是 L2 權重衰減（Weight Decay）。L2 正則化會在損失函數中加入對權重大小的懲罰項，迫使模型在訓練過程中讓參數值盡量趨近於零，從而限制模型的擬合能力，使其更為平滑、不易過擬合於局部雜訊。選項 0 和 1 反而會增加過擬合風險，選項 3 雖增加了訓練資料，但不屬於「降低模型複雜度」的範疇且會失去驗證模型效果的依據。</p>
             </div>
         </div>
         
@@ -267,7 +267,7 @@
             <p>(A) 應禁用 Naive Bayes，改用其他更先進演算法；</p><p>(B) 模型過擬合於訓練資料，應增加 Epoch 數以提升泛化能力；</p><p>(C) 類別條件機率受訓練資料分布影響，導致促銷關鍵字被視為垃圾信特徵，應重 新平衡資料或調整先驗機率；</p><p>(D) 模型未進行特徵標準化（Feature Scaling），導致分類邊界偏移，應先進行正規</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 樸素貝氏分類器的核心依賴於貝氏定理，透過計算給定特徵下的類別條件機率來進行分類。當訓練資料的分布偏頗（例如「促銷相關關鍵字」在訓練集中壓倒性地集中出現在垃圾郵件），模型學習到的類別條件機率就會強烈傾向將包含這些詞彙的郵件預測為垃圾郵件。要改善這個問題，最直接的方法是調整訓練資料集的分布（使其涵蓋更多包含這些關鍵字的「正常」郵件樣本），或是透過調整模型的先驗機率（Prior Probability），從而修正模型對特定關鍵字的強烈偏見。</p>
             </div>
         </div>
         
@@ -277,7 +277,7 @@
             <p>(A) K-means 無法處理維度超過 10 的資料，在高維空間中距離計算失效；</p><p>(B) K-means 假設群集為高斯分佈，無法處理任何非球形群集；</p><p>(C) K-means 對 K 值敏感，但初始化不影響最終結果（演算法保證全局最優）；</p><p>(D) K-means 需預先指定 K；以歐氏距離為基礎，難以處理非凸群集；對初始化與</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> K-means 分群演算法有幾個著名的限制：(1) 必須預先人為指定群集數量 K；(2) 由於目標函數是最小化群內變異數（基於歐氏距離的平方），它隱含了假設資料呈現球狀（Convex, 凸形）分布的特性，因此無法有效處理半月形或環狀等非凸結構；(3) 它是以群集平均值作為中心，因此極度容易受到離群值（Outliers）的拉扯影響；(4) K-means 是一個局部最佳化演算法，不同的初始中心點（初始化）會導致最終收斂到不同的結果，因此對初始化非常敏感。選項 3 最完整地總結了這些限制。</p>
             </div>
         </div>
         
@@ -287,7 +287,7 @@
             <p>(A) 加入樹的複雜度懲罰項（包含深度、葉節點數量與葉節點權重的 L2 正則化）；</p><p>(B) 加入動態學習率（Dynamic Learning Rate）的強制衰減機制；</p><p>(C) 加入卷積運算（Convolution）以萃取特徵間的空間關係； 第 4 頁，共 18 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：115 年 05 月 23 日 答案 題目</p><p>(D) 強制所有決策樹深度為 1（Decision Stumps）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> XGBoost（eXtreme Gradient Boosting）是對傳統 GBDT 的一項重大改良，其最大的特點之一就是將正則化（Regularization）明確地整合進模型的目標函數中。XGBoost 的目標函數除了包含傳統的訓練損失（如誤差平方和或對數損失）外，還額外加入了一個正則化項（Regularization Term），該項由兩個部分組成：對葉節點數量（樹的大小）的懲罰（gamma）以及對葉節點權重分數的 L2 正則化（lambda）。這種設計能有效控制樹的結構複雜度，避免生長出過於複雜的樹，從而賦予 XGBoost 更強大抵抗過擬合的能力。</p>
             </div>
         </div>
         
@@ -297,7 +297,7 @@
             <p>(A) 網路層數增加導致參數量過多，應減少每層卷積濾波器（Filters）數量以降低 模型複雜度；</p><p>(B) 深層網路可能出現梯度消失問題，導致淺層權重難以更新；應採用 ResNet 的 殘差連接（Skip Connection）以改善梯度傳遞；</p><p>(C) 16 層模型對 CT 影像而言仍過淺，應進一步增加網路深度以學習更高階特徵；</p><p>(D) 問題可能來自激活函數（Activation Function），將 ReLU 改為 Sigmoid 可改善</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 當神經網路的深度增加時，在反向傳播（Backpropagation）計算梯度的過程中，由於連鎖律的連續相乘，極容易出現梯度消失（Gradient Vanishing）或梯度爆炸（Gradient Explosion）的問題。梯度消失會導致靠近輸入層的淺層網路權重無法有效獲得更新信號，進而使得深層模型的表現甚至不如淺層模型（此稱為網路退化問題, Degradation Problem）。為了解決這個問題，ResNet 提出了殘差連接（Residual/Skip Connection），它在神經網路中加入了捷徑，讓梯度可以直接跨層向後傳遞而不衰減，大幅改善了深層網路的訓練難度。</p>
             </div>
         </div>
         
@@ -307,7 +307,7 @@
             <p>(A) 降低特徵圖空間維度，減少參數與計算量；</p><p>(B) 提供非線性表達能力，以提升模型學習複雜度；</p><p>(C) 改善梯度消失問題，以強化反向傳播穩定性；</p><p>(D) 提升模型泛化能力而不影響特徵維度</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在卷積神經網路（CNN）中，卷積層提取的特徵圖（Feature Maps）在空間維度（寬度與高度）上往往仍然很大。若直接攤平（Flatten）後連接到全連結層（Fully Connected Layer），會產生極其龐大的參數矩陣。池化層（如 Max Pooling 或 Average Pooling）的主要功能是在保留重要特徵的同時，透過下採樣（Down-sampling）來壓縮特徵圖的空間維度大小（例如將 $2 \times 2$ 的區域壓縮成 $1 \times 1$）。這樣做能顯著減少後續網路層需要處理的資料量與權重參數量，進而降低計算成本並減輕過擬合。</p>
             </div>
         </div>
         
@@ -317,7 +317,7 @@
             <p>(A) Transformer 參數量比 LSTM 少，因此訓練速度更快、不易過擬合；</p><p>(B) Transformer 內建位置編碼，使模型天生理解文件的章節結構與段落順序；</p><p>(C) LSTM 無法處理超過 512 個 token 的輸入，Transformer 無此硬性限制；</p><p>(D) Transformer 的 Self-Attention 可讓任意 token 直接建立關聯，不受距離限制，</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> LSTM 處理序列資料時，資訊必須沿著時間步（Time Steps）逐次傳遞，這不僅導致無法進行高度的平行運算，而且在面對極長序列時，即便有記憶細胞的設計，早期資訊傳遞到後期仍會衰減（長距離依賴問題）。相對地，Transformer 揚棄了循環結構，其核心的自注意力機制（Self-Attention）允許模型在處理任何一個詞彙時，直接計算與序列中所有其他詞彙的關聯度（權重）。這種機制使得不論距離多遠（例如合約首頁與第 20 頁），任何兩個 Token 之間都能直接建立捷徑關聯，且因為無需循序處理，整個序列的注意力矩陣計算可以高度平行化，從而改善了長文件語意捕捉效果與訓練效率。</p>
             </div>
         </div>
         
@@ -327,7 +327,7 @@
             <p>(A) 使用 ReLU 作為激活函數，輸出維度設為 1，直接輸出單一數值作為預測結 果； 第 5 頁，共 18 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：115 年 05 月 23 日 答案 題目</p><p>(B) 使用 Sigmoid 作為激活函數，輸出維度設為 3，使每個類別獨立輸出 0 到 1 的 機率；</p><p>(C) 不使用任何激活函數，直接輸出未經正規化的 logits，輸出維度設為 3 對應三 個類別；</p><p>(D) 使用 Softmax 作為激活函數，輸出維度設為 3，輸出為已正規化的機率分布</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在深度學習框架 PyTorch 中，`torch.nn.CrossEntropyLoss` 函數的設計將 `LogSoftmax` 操作與負對數似然損失 `NLLLoss` 結合在一起，以提升數值穩定性（避免數值溢位或下溢）。因此，該損失函數預期接收的模型輸出是「未經 Softmax 正規化的原始預測值」（稱為 Logits）。如果模型在最後一層額外加上了 Softmax，等同於重複計算了兩次 Softmax，會破壞數值穩定性並導致錯誤的梯度更新。因為這是一個三分類問題，所以網路的最終層應設定輸出維度為 3，且不掛載任何激活函數，直接輸出 Logits。</p>
             </div>
         </div>
         
@@ -337,7 +337,7 @@
             <p>(A) 知識蒸餾（Knowledge Distillation）；</p><p>(B) 權重剪枝（Pruning）；</p><p>(C) 張量分解（Tensor Decomposition）；</p><p>(D) 模型量化（Quantization）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 模型量化（Model Quantization）是一種透過降低神經網路模型參數（如權重與啟動值）精度的技術，用以減少模型儲存空間及加速推論速度。將原本表示精細小數的 32 位元浮點數（FP32）壓縮成佔用空間更小的 8 位元整數（INT8）或 16 位元浮點數（FP16），即是典型的量化技術（PTQ, Post-Training Quantization 或 QAT, Quantization-Aware Training）。這種技術在部署至記憶體與運算資源受限的邊緣裝置（如手機或嵌入式系統）時極為關鍵。相較之下，知識蒸餾是訓練一個小模型來模仿大模型，權重剪枝是將不重要的連接權重設為零。</p>
             </div>
         </div>
         
@@ -347,7 +347,7 @@
             <p>(A) 將切片大小（Chunk Size）由 512tokens 縮小至 128tokens，以提升檢索精細度；</p><p>(B) 調整向量相似度閾值（Similarity Threshold），以過濾低相關檢索結果；</p><p>(C) 採用混合搜尋（Hybrid Search）：結合語意向量搜尋與關鍵字搜尋（BM25）， 並以 RRF（Reciprocal Rank Fusion）融合排序；</p><p>(D) 將檢索結果隨機洗牌（Shuffle）後回傳給 LLM，避免位置偏誤（Position Bias）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在檢索增強生成（Retrieval-Augmented Generation, RAG）系統中，純粹依賴密集向量搜尋（Dense Vector Search，語意匹配）有時會失效，特別是在查詢包含專有名詞、產品型號或精確的特定字詞時，語意模型可能無法捕捉這些離散關鍵字的重要性。為了解決這類檢索不準確的問題，目前業界的最佳實踐是引入「混合搜尋」（Hybrid Search），將基於語意相似度的向量搜尋與傳統基於詞頻統計的關鍵字搜尋（如 BM25，Sparse Search）結合。透過 RRF（Reciprocal Rank Fusion）等演算法將兩種搜尋結果的排名進行融合，既能保證語意相近，又能精準命中小眾或特定的關鍵字，顯著提升整體檢索品質。</p>
             </div>
         </div>
         
@@ -357,7 +357,7 @@
             <p>(A) BERT 缺乏法律領域知識，因此生成能力較差；</p><p>(B) BERT 的分詞方式影響語意理解，導致生成效果不佳；</p><p>(C) BERT 模型規模較小，因此生成能力不足；</p><p>(D) BERT 無法根據前文逐步生成後續文字，較不適合此類任務</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> BERT（Bidirectional Encoder Representations from Transformers）的核心架構是 Transformer 的編碼器（Encoder），設計理念在於利用雙向的上下文資訊來深刻理解整段文字，非常適合用於自然語言理解任務（如文字分類、命名實體識別、問答系統等）。然而，文本生成（如根據前半段自動生成後半段）屬於自迴歸（Autoregressive）任務，需要模型根據過去的詞彙，由左至右單向地逐步預測下一個詞彙。GPT-2 是基於 Transformer 的解碼器（Decoder）架構設計，內建了 Masked Self-Attention 來防止看到未來資訊，正是為了此類生成任務而生。因此，BERT 在結構上本來就不適合直接用來做連續文字的生成，這是其生成效果差的根本原因。</p>
             </div>
         </div>
         
@@ -367,7 +367,7 @@
             <p>(A) 目標編碼（Target Encoding）；</p><p>(B) 標籤編碼（Label Encoding）；</p><p>(C) Embedding 層（Categorical Embedding）；</p><p>(D) One-Hot 編碼（One-Hot Encoding）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> One-Hot Encoding（獨熱編碼）會將每一個類別轉換為一個獨立的二元特徵維度。當特徵具有高基數（High Cardinality，即包含極多不同的類別，如本題的 3,000 個商品項目）時，使用 One-Hot Encoding 會直接增加等同於類別數量的維度，導致特徵空間急遽膨脹（即維度爆炸問題），這不僅會大幅增加記憶體消耗與計算成本，還容易造成資料稀疏性問題並引發維度災難（Curse of Dimensionality）。其他選項如標籤編碼、目標編碼或 Embedding 都能有效控制特徵維度，避免此問題。</p>
             </div>
         </div>
         
@@ -377,7 +377,7 @@
             <p>(A) 屋齡與房價若呈線性關係，Log 轉換反而破壞此結構；</p><p>(B) Log 轉換會壓縮所有特徵的變異數，導致模型失去鑑別能力；</p><p>(C) Log 轉換不適用於有單位的連續變數，應改用 Box-Cox；</p><p>(D) 兩特徵須套用相同轉換，否則尺度不一致導致梯度不穩定</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 對數轉換（Log Transformation）主要用於處理嚴重右偏（長尾）的資料分布，藉由壓縮大數值的尺度來使其更接近常態分布，並減輕極端值的影響。但如果特徵（如屋齡）與目標變數（房價）之間原本就存在良好的線性關係，或者其分布並沒有嚴重的偏態，強行應用非線性的 Log 轉換反而會扭曲原本的線性結構，使得依賴該結構的模型難以捕捉正確的關聯性，進而導致模型預測表現下降。</p>
             </div>
         </div>
         
@@ -387,7 +387,7 @@
             <p>(A) 資料增強；</p><p>(B) 去除資料雜訊；</p><p>(C) 降低特徵維度；</p><p>(D) 建立滯後特徵</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在時間序列分析與預測中，未來的數值通常與過去的歷史數值高度相關。滑動窗口（Sliding Window）的主要目的在於從時序資料中「建立滯後特徵（Lag Features）」，也就是將過去固定時間長度（Window Size）內的歷史觀測值截取出來，轉換成標準的表格型監督式學習特徵（例如將 t-1, t-2 等時刻的數值作為預測 t 時刻的輸入）。這使得一般的機器學習模型（如隨機森林、MLP）能夠捕捉時間序列的時間依賴性與歷史規律。</p>
             </div>
         </div>
         
@@ -397,7 +397,7 @@
             <p>(A) K-fold 交叉驗證（K-fold Cross-Validation）；</p><p>(B) 分層 K-fold（Stratified K-fold）；</p><p>(C) 滾動窗口驗證（Rolling Window Validation / Time Series Split）；</p><p>(D) 留一驗證法（Leave-One-Out Cross-Validation）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 時間序列資料具有時間先後的依賴性與演進性，且常伴隨概念漂移（Concept Drift）或行為模式改變。傳統的 K-fold 等交叉驗證方法會隨機打亂時間順序，導致「使用未來資料預測過去」的資料洩漏（Data Leakage）問題。滾動窗口驗證（Rolling Window Validation 或 Time Series Split）會嚴格遵守時間順序，每次訓練時使用過去一段時間的資料，並在緊接著的未來時間區間進行測試，然後隨著時間推進不斷將測試集納入下一次的訓練集中，最能模擬模型在實際生產環境中持續更新的狀況。</p>
             </div>
         </div>
         
@@ -407,7 +407,7 @@
             <p>(A) 使用羅吉斯迴歸（Logistic Regression），透過線性係數解釋特徵影響，但無法 有效建模非線性關係；</p><p>(B) 使用隨機森林迴歸（Random Forest Regression），可處理非線性關係，並提供 整體特徵重要性（Feature Importance）作為解釋依據；</p><p>(C) 用 K-means 分群（K-means Clustering）後分別建立迴歸模型，以提升預測準確 度並間接提升可解釋性；</p><p>(D) 使用支持向量迴歸（Support Vector Regression, SVR），透過核函數（Kernel</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 根據題目需求，模型必須同時滿足「能處理非線性關係」以及「能提供整體特徵重要性（Global Feature Importance）」兩個條件。隨機森林迴歸（Random Forest Regression）是一種基於決策樹的集成學習演算法，天生具備處理特徵與目標間非線性關係的能力；同時，它在訓練過程中可透過計算特徵在節點分裂時帶來的不純度減少量，或透過排列重要性（Permutation Importance）提供直觀且具解釋力的特徵重要性分數，完全符合業務單位對稽核的解釋性要求。</p>
             </div>
         </div>
         
@@ -417,7 +417,7 @@
             <p>(A) 監督式二元分類（Supervised Binary Classification）；</p><p>(B) 非監督或半監督異常偵測（Unsupervised / Semi-supervised Anomaly Detection）；</p><p>(C) 強化學習（Reinforcement Learning）；</p><p>(D) 自監督學習（Self-supervised Learning）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在真實工業場景中，設備通常長時間處於正常運作狀態，故障或異常樣本極度稀少甚至完全缺乏，這使得無法依賴監督式二元分類（需要正負樣本皆有足夠且明確的標註）來訓練模型。當只有大量正常樣本時，最合適的任務範疇是非監督式或半監督式異常偵測（如 One-Class SVM、Isolation Forest 或 Autoencoder）。這類方法藉由學習正常資料的分布或特徵表示，當輸入新資料明顯偏離已學得的正常模式時，即判定為異常。</p>
             </div>
         </div>
         
@@ -427,7 +427,7 @@
             <p>(A) 高偏差；</p><p>(B) 高變異；</p><p>(C) 過擬合；</p><p>(D) 資料漂移</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 訓練集表現極佳（AUC=0.97）但驗證集表現大幅衰退（AUC=0.72），且在不同的交叉驗證切分下結果差異明顯，對少數樣本預測波動大，這是機器學習中典型「高變異（High Variance）」的特徵。高變異表示模型過度擬合了訓練資料的雜訊與局部細節，導致泛化能力不佳，且對訓練資料的微小變動極度敏感（模型穩定度差）。雖然這也伴隨著過擬合現象，但「高變異」從誤差來源的角度更精確地描述了模型對訓練樣本的敏感度與預測波動性。</p>
             </div>
         </div>
         
@@ -437,7 +437,7 @@
             <p>(A) 獎勵塑形（Reward Shaping）：將獎勵改為「成功完成一次揀貨任務」而非單次 抓取行為；</p><p>(B) 策略退化（Policy Degradation）：降低學習率以穩定訓練；</p><p>(C) 信 用 分 配 問 題 （ Credit Assignment Problem ）： 引 入 優 勢 函 數 （ Advantage Function）；</p><p>(D) 災難性遺忘（Catastrophic Forgetting）：加入經驗回放（Replay Buffer）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 此現象在強化學習中被稱為「獎勵駭客行為（Reward Hacking）」，即代理（Agent）找到了不符合人類期望但能最大化既有獎勵函數的取巧策略。核心問題在於獎勵函數的設計不周延，僅獎勵「抓取」動作而未與最終目標對齊。解決方式是透過「獎勵塑形（Reward Shaping）」，重新設計獎勵機制，將獎勵發放與最終的業務目的（如：成功完成整個揀貨並放置到目的地）綁定，從而引導 Agent 學習到正確的行為策略。</p>
             </div>
         </div>
         
@@ -447,7 +447,7 @@
             <p>(A) F1-score = (Precision + Recall) / 2，為算術平均；</p><p>(B) F1-score 為 Precision 的加權平均；</p><p>(C) F1-score 僅適用於類別平衡資料；</p><p>(D) F1-score = 2 × (Precision×Recall)/(Precision+Recall)，為調和平均，對較小值敏</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 精確率（Precision）與召回率（Recall）往往存在權衡關係，單一指標無法全面評估模型。F1-score 的數學定義是 Precision 與 Recall 的調和平均數（Harmonic Mean），其特性是會強烈受到數值較小的那一方牽制（對較小值敏感）。這意味著只有當 Precision 和 Recall 都很高且表現均衡時，F1-score 才會高；如果其中一項偏低，F1-score 也會隨之大幅下降。這非常適合評估詐欺偵測這種需要同時兼顧兩者表現的不平衡分類任務。</p>
             </div>
         </div>
         
@@ -457,7 +457,7 @@
             <p>(A) Lasso 迴歸（L1 正則化）：透過絕對值懲罰使部分係數歸零，具有特徵選擇效 第 8 頁，共 18 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：115 年 05 月 23 日 答案 題目 果；</p><p>(B) Ridge 迴歸（L2 正則化）：透過平方懲罰縮小所有係數，在共線性下穩定估計 且不歸零；</p><p>(C) Elastic Net（L1+L2）：結合稀疏性與穩定性，但部分係數仍可能被壓為 0；</p><p>(D) 無正則化的 OLS 迴歸：不控制過擬合，在共線性下係數估計不穩定</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Ridge 迴歸（L2 正則化）會在損失函數中加入特徵係數平方和的懲罰項。面對高度共線性的特徵（如建坪與總面積），Ridge 迴歸會將權重均勻地分配給這些高度相關的特徵，藉由縮小整體係數的量級來穩定模型的估計並控制過擬合。更重要的是，L2 正則化不會將任何特徵的係數壓縮至絕對的零（不同於 L1 Lasso 迴歸會產生將係數壓縮至零的稀疏效應），完全符合題目中「保留所有特徵的解釋能力，不讓任何特徵係數歸零」的需求。</p>
             </div>
         </div>
         
@@ -467,7 +467,7 @@
             <p>(A) 3 + 4 + 5 + 3 + 3 = 18 個；</p><p>(B) 5 × 5 = 25 個；</p><p>(C) max(3,4,5,3,3) × 5 = 25 個；</p><p>(D) 3 × 4 × 5 × 3 × 3 × 5 = 2,700 個</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 網格搜尋（Grid Search）會窮舉每一種可能的超參數組合。這裡有 5 種超參數，其候選值數量分別為 3, 4, 5, 3, 3。因此總共的參數組合數為 3 × 4 × 5 × 3 × 3 = 540 種不同的超參數組合。對於每一種參數組合，又必須進行完整的 5 折交叉驗證（5-Fold Cross-Validation），即每種組合需要獨立訓練 5 個模型。因此，總共需要訓練的模型數量為 540 × 5 = 2,700 個。</p>
             </div>
         </div>
         
@@ -477,7 +477,7 @@
             <p>(A) 提高 LoRA rank 以增強模型表達能力；</p><p>(B) 改用完整微調（Full Fine-tuning）以學習更多細節；</p><p>(C) 降低 LoRA rank 以釋放記憶體並增加 Batch Size；</p><p>(D) 降低 LoRA rank 但套用到更多層，保持 trainable 總參數不變</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> LoRA（Low-Rank Adaptation）的參數預算由 Rank（秩）以及套用的模型層數共同決定。在 GPU 顯存接近上限且模型表現有遺漏（代表表達能力不足或未能捕捉深層語義）的情況下，單純提高 Rank 會直接導致顯存耗盡。最佳的策略是在保持總可訓練參數（Trainable Parameters）和顯存佔用大致不變的前提下，降低單一層的 Rank，並將 LoRA 模組擴展套用到更多的 Transformer 層（如除 Attention 外也套用於 MLP 層）。研究表明，將有限的參數預算分散到更多層中，能使模型獲得更全面的特徵適應能力，改善複雜任務的表現。</p>
             </div>
         </div>
         
@@ -487,7 +487,7 @@
             <p>(A) 聯邦學習（Federated Learning）；</p><p>(B) 同態加密（Homomorphic Encryption）；</p><p>(C) 差分隱私（Differential Privacy）；</p><p>(D) 安全多方計算（Secure Multi-Party Computation, MPC）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 同態加密（Homomorphic Encryption, HE）是一種特殊的密碼學技術，允許在不解密密文的狀態下，直接對加密資料進行特定數學運算（如加法、乘法），且其運算結果解密後會與直接對明文運算的結果一致。這意味著金融機構可以將客戶資料加密後傳送至雲端，雲端服務商的模型直接在密文上進行推論，並將加密的預測結果回傳。雲端服務商自始至終無法接觸到原始明文資料，完全符合「在不解密資料的前提下進行運算」的嚴苛隱私要求。</p>
             </div>
         </div>
         
@@ -497,7 +497,7 @@
             <p>(A) SHAP（SHapley Additive exPlanations）值：計算每個特徵對單筆預測的貢獻；</p><p>(B) 全域特徵重要性（Global Feature Importance）：說明整體特徵影響，無法解釋 單一個案；</p><p>(C) Grad-CAM（Gradient-weighted Class Activation Mapping）：以熱力圖解釋影像 第 9 頁，共 18 頁 115 年第一次 AI 應用規劃師-中級能力鑑定【公告試題】 第三科：機器學習技術與應用 考試日期：115 年 05 月 23 日 答案 題目 模型；</p><p>(D) 混淆矩陣（Confusion Matrix）：呈現整體分類表現</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 局部可解釋性（Local Explainability）的目的是解釋模型對於「單一特定樣本」做出該預測的原因。SHAP（SHapley Additive exPlanations）基於合作賽局理論中的 Shapley 值，能夠精確計算出每個特徵數值對於該筆特定預測結果的邊際貢獻（即將模型輸出從基準值推向最終預測值的影響力分配）。因此，透過 SHAP 值，銀行可以清楚向特定的被拒申請人說明是哪些具體特徵（如信用分數、負債比）導致了該筆個別申請被拒絕，完全符合監管要求。</p>
             </div>
         </div>
         
@@ -507,7 +507,7 @@
             <p>(A) 符合統計均等，因為模型未使用性別作為輸入特徵；</p><p>(B) 符合統計均等，因為兩個族群皆有部分應徵者被錄取；</p><p>(C) 不符合統計均等，因為不同群體的正向決策比例（通過率）存在明顯差異；</p><p>(D) 不符合統計均等，因為女性族群的預測準確率較低</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 統計均等（Statistical Parity，又稱 Demographic Parity）是機器學習公平性的一個核心指標。它的定義是：模型給出正向決策（例如通過面試）的機率，在不同的敏感屬性群體（如不同性別、種族）之間必須相等或接近。在此案例中，男性族群的正向預測率為 55%，而女性族群的正向預測率僅為 30%，兩者存在顯著的比例差異。即便模型在訓練時未直接輸入性別特徵（可能透過其他潛在相關特徵產生了代理歧視），只要最終的決策比例不一致，即違反了統計均等的定義。</p>
             </div>
         </div>
         
@@ -517,7 +517,7 @@
             <p>(A) 訓練中（In-processing）：在損失函數加入公平性懲罰項，降低不同群體的錯誤 拒絕比例差異；</p><p>(B) 前處理（Pre-processing）：僅於訓練資料進行重新採樣，無法直接修正既有模 型在推論階段的偏誤；</p><p>(C) 後處理（Post-processing）：依性別分組調整決策門檻，使不同群體的錯誤拒絕 比例一致；</p><p>(D) 改用人口統計均等指標（Demographic Parity），錯誤拒絕比例差異將自動消失</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 由於法務嚴格限制在「推論（Inference）階段」不能使用性別特徵來調整輸出，這直接排除了後處理（Post-processing）策略，因為後處理需要在預測時依賴敏感特徵來進行門檻校正。在推論時不可見敏感特徵的前提下，最有效的作法是採用「訓練中去偏（In-processing）」，也就是在模型訓練階段，將性別作為輔助計算特徵，並在損失函數中加入公平性正則化項（Fairness Penalty）。這樣模型在學習權重時會自動懲罰對特定群體產生差異化錯誤率的行為，最終學到一個更公平的內部特徵表示與決策邏輯，且推論時不再需要依賴性別欄位。</p>
             </div>
         </div>
         
@@ -527,7 +527,7 @@
             <p>(A) sigmoid，mean_squared_error；</p><p>(B) softmax，categorical_crossentropy；</p><p>(C) relu，binary_crossentropy；</p><p>(D) tanh，sparse_categorical_crossentropy</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 處理互斥的多類別分類問題（Multi-class Classification，如將圖片歸入 0~9 互斥的十個類別之一），神經網路的輸出層必須使用 Softmax 激勵函數，它能將模型輸出的 Logits 正規化為總和為 1 的各類別機率分佈。此外，題目明確指出目標標籤已經預先轉換為 One-Hot Encoding（獨熱編碼）格式。在主流深度學習框架中，當真實標籤為 One-Hot 格式時，必須搭配 Categorical Crossentropy 作為損失函數（若標籤為整數索引格式，才會使用 Sparse Categorical Crossentropy）。</p>
             </div>
         </div>
         
@@ -537,7 +537,7 @@
             <p>(A) RandomRotation(15)角度過大導致特徵變形，應降至 5 度以內；</p><p>(B) RandomHorizontalFlip 破壞字母方向語義，使模型以 50%機率學到鏡像錯誤標 籤；</p><p>(C) ColorJitter 改變筆畫灰階，導致邊緣偵測特徵失真；</p><p>(D) ToTensor( )應放在所有幾何變換之前才能保持座標對應正確</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在進行影像資料增強（Data Augmentation）時，必須考量變換操作是否會改變目標物件的真實語義（Semantics）。對於文字辨識（OCR）任務，英文字母具有強烈的方向性與幾何對稱性。「b、d、p、q」這四個字母互為垂直或水平的鏡像對稱。若在訓練過程中加入了隨機水平翻轉（RandomHorizontalFlip），會將原本圖片為「b」的影像翻轉為「d」的外觀，但其標籤依然是「b」。這種語義破壞會給模型引入嚴重的矛盾雜訊，使得模型在面對這類具方向性特徵的字母時產生混淆，進而導致實際部署時錯誤率飆高。</p>
             </div>
         </div>
         
@@ -547,7 +547,7 @@
             <p>(A) 全面微調（Full Fine-Tuning）；</p><p>(B) 零樣本學習（Zero-shot Learning）；</p><p>(C) 特徵萃取（Feature Extraction）；</p><p>(D) 知識蒸餾（Knowledge Distillation）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 在遷移學習（Transfer Learning）中，若將預訓練模型（如 ResNet）既有層次的所有權重凍結（即關閉梯度計算 requires_grad = False），使其在反向傳播時不更新參數，僅在模型頂部附加並訓練新的全連接分類層，這種標準策略稱為「特徵萃取（Feature Extraction）」。其核心理念是將預訓練模型視為一個固定的、已具備強大泛化能力的特徵轉換器，直接萃取輸入資料的高階語義特徵，從而大幅減少下游任務需要訓練的參數數量與計算成本。</p>
             </div>
         </div>
         
@@ -557,7 +557,7 @@
             <p>(A) 為了避免記憶體耗盡（OOM）；</p><p>(B) 為了加速模型整體的收斂時間；</p><p>(C) 為了讓損失函數強制歸零；</p><p>(D) 為了避免更新步伐過大，破壞預訓練模型原本已學好的良好特徵表示</p><p>(E) 此寫法完全正確，因為先以整體資料進行 LDA 降維，再以交叉驗證測試 KNN，</p><p>(F) 此寫法存在資料洩漏（Data Leakage）問題，應將 LDA 納入交叉驗證流程中一</p><p>(G) 雖然流程不夠嚴謹，但結果仍然能夠代表模型真實的泛化能力；</p><p>(H) 如果只想驗證 KNN 的分類效果，可以直接跳過 LDA 步驟，以簡化流程</p><p>(I) 程式碼 B、程式碼 C、程式碼 D；</p><p>(J) 程式碼 A、程式碼 C；</p><p>(K) 程式碼 A、程式碼 B、程式碼 D；</p><p>(L) 程式碼 C、程式碼 D</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> 遷移學習中的微調（Fine-Tuning）會解凍預訓練模型的部分或全部層次進行權重更新。由於預訓練模型（例如在 ImageNet 龐大資料集上訓練得到的權重）已經學到了非常良好且具泛化能力的特徵表示（如邊緣、紋理、複雜語義），如果使用過大的學習率，反向傳播的梯度更新步伐會過於劇烈，這會瞬間破壞原模型已經收斂的優良權重結構（即發生災難性遺忘）。因此，微調時必須使用極小的學習率，以小幅度的溫和調整來使預訓練權重慢慢適應新的下游任務特徵。</p>
             </div>
         </div>
         

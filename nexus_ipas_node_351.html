@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:117 Y:1968 | 分類: ipas</div>
+        <div class="badge">星系座標: X:-73 Y:2314 | 分類: ipas</div>
         <h1>115 年第一次 AI 應用規劃師-中級能力鑑定 第二科：大數據處理分析與應用</h1>
         
         <div class="content-box">
@@ -487,7 +487,7 @@
             <p>(A) 協同過濾（Collaborative Filtering）：根據歷史查詢推薦相似問題的答案，無法執行新 問題的即時計算；</p><p>(B) 檢索增強生成（RAG）：讓 LLM 檢索相關資料後生成回答，但無法可靠執行大規模 數值聚合與精確統計查詢；</p><p>(C) 生成對抗網路（GAN）：用於生成合成資料或模擬數據分佈，可用於資料擴增，但不 適合即時查詢與資料庫聚合運算；</p><p>(D) Text-to-SQL Agent：由 LLM 將自然語言轉換為 SQL 查詢，交由分散式資料庫執行，</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Text-to-SQL Agent can parse natural language and translate it into standard SQL queries that are directly executed on the database. This allows leveraging the database's existing scalable engine, access control (permission constraints), and auditing systems while guaranteeing the numeric precision required for analytics. Collaborative filtering or standard RAG are not suitable for precise complex aggregations over big data databases.</p>
             </div>
         </div>
         
@@ -497,7 +497,7 @@
             <p>(A) 利用模型對訓練樣本的高信心輸出判斷其是否屬於訓練集；以差分隱私或降低輸出 信心防禦；</p><p>(B) 利用查詢次數與回應頻率差異判斷資料是否在訓練集中；以限制查詢次數防禦；</p><p>(C) 透過模型輸出推測輸入的敏感特徵；以限制輸出資訊防禦；</p><p>(D) 透過大量查詢建立替代模型模擬目標模型；以限制模型存取防禦</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Membership Inference Attack aims to determine whether a particular data record was used in the training dataset of a machine learning model. It usually exploits the fact that models often produce higher confidence predictions for training data (overfitting) than for unseen data. Defenses include Differential Privacy, which bounds the influence of any single data point, or reducing/limiting the precision of the confidence scores exposed by the API.</p>
             </div>
         </div>
         
@@ -507,7 +507,7 @@
             <p>(A) K 匿名主要應用於表格型資料，確保每筆記錄在準識別符（Quasi-identifier）組合上 至少與 K-1 筆其他記錄相同，防止個體被唯一識別；</p><p>(B) 差分隱私合成資料是在發布統計查詢結果或訓練模型時直接對原始資料加入雜訊， 以確保單一個體的加入或移除不會顯著改變輸出；</p><p>(C) 亂數回應機制讓受訪者以機率性方式回答敏感問題（如：您是否曾逃稅？），賦予個 人對答案的可否認性（Plausible Deniability）；</p><p>(D) 三種技術中，只有差分隱私提供可組合且可量化的隱私保證，而 K 匿名與亂數回應</p><p>(E) ["checked", "tags"]；</p><p>(F) []；</p><p>(G) ["checked", "checked"] ；</p><p>(H) 拋出 KeyError 錯誤，因為字典中沒有 tags 鍵值</p><p>(I) K-近鄰（K-Nearest Neighbors, KNN）；</p><p>(J) K-means 分群（K-means Clustering）；</p><p>(K) 支援向量機（Support Vector Machine, SVM）；</p><p>(L) 隨機森林分類器（Random Forest Classifier）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Differential Privacy typically adds noise to the output (like query results or gradients during training), not directly to the raw original records prior to computation. Adding noise directly to raw individual data points is more aligned with local differential privacy or specific obfuscation. Generating synthetic data under differential privacy involves learning a differentially private model of the data distribution first, and then generating new data from it.</p>
             </div>
         </div>
         
@@ -517,7 +517,7 @@
             <p>(A) df['daily_earnings'].fillna(df['daily_earnings'].mean(), inplace=True)；</p><p>(B) df['daily_earnings'].fillna(df['daily_earnings'].median(), inplace=True)；</p><p>(C) df['daily_earnings'].fillna(df['daily_earnings'].max(), inplace=True)；</p><p>(D) 直接刪除所有遺失資料，因數值型欄位不適合進行補值處理</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> In datasets related to income or earnings, there are typically extreme high values (right-skewed distribution). Using the mean to impute missing values can be heavily influenced by these outliers, shifting the center and introducing bias. The median is more robust to outliers and preserves the central tendency better, making it the more appropriate imputation method for continuous variable distributions like income when aiming to minimize bias.</p>
             </div>
         </div>
         
@@ -527,7 +527,7 @@
             <p>(A) 羅吉斯迴歸（Logistic Regression）；</p><p>(B) Ridge 迴歸（Ridge Regression）；</p><p>(C) 支援向量機（Support Vector Machine, SVM）搭配線性核函數；</p><p>(D) 隨機森林（Random Forest）</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> Linear algorithms (like Logistic Regression, Ridge Regression, and SVM with linear kernel) inherently interpret numerical values as having a continuous, ordered relationship, which leads to incorrect assumptions when categorical variables are label-encoded. Tree-based models like Random Forest, however, split data based on decision rules (e.g., region == 3 or region < 2.5), allowing them to naturally handle non-linear relationships and label-encoded categorical variables without assuming continuous magnitude or ordinality.</p>
             </div>
         </div>
         
@@ -537,7 +537,7 @@
             <p>(A) 在此類極度不平衡的資料中，即使模型永遠預測所有司機皆為正常，整體準確率仍 可能高達 99.95%；</p><p>(B) 報告中未呈現召回率（Recall），因此模型可能無法有效辨識真正的外掛司機；</p><p>(C) 異常偵測問題不可使用分類模型處理，僅能使用分群或離群值方法；</p><p>(D) 對於少數類比例極低的問題，若僅觀察 Accuracy，可能忽略模型對異常樣本的實際</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> In extreme class imbalance scenarios, high accuracy is misleading because predicting the majority class exclusively can yield >99% accuracy. Therefore, checking metrics like Recall and observing minority class performance is essential. However, the claim that anomaly detection 'cannot' be solved with classification models is categorically false—supervised classification (like Random Forest or XGBoost) is commonly and effectively used for anomaly detection when labeled data is available.</p>
             </div>
         </div>
         
@@ -547,7 +547,7 @@
             <p>(A) 選擇使模型對作弊者的召回率（Recall）最大化的門檻，通常代表應降低 Threshold</p><p>(B) 選擇使模型精確率（Precision）最大化的門檻，通常代表應提高 Threshold</p><p>(C) 固定使用 Threshold=0.5 作為預設值，因為調整門檻將破壞演算法原有的訓練平衡</p><p>(D) 選擇使模型特異度（Specificity）達到 100%的門檻，以確保正常司機不會被誤判</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> The business goal demands that no actual cheater is missed, meaning we need to minimize False Negatives. This translates to maximizing Recall (True Positive Rate) for the cheating class. To capture more positive cases, the decision threshold for the model's probability output should be lowered, even though this will result in more False Positives (normal drivers flagged for review).</p>
             </div>
         </div>
         
@@ -557,7 +557,7 @@
             <p>(A) df.sort_values('Revenue', ascending=False).head(3)['CustomerID']；</p><p>(B) df.groupby('CustomerID')['Revenue'].max().head(3)；</p><p>(C) df.groupby('CustomerID')['Revenue'].sum().nlargest(3)；</p><p>(D) df.value_counts('CustomerID').head(3)</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> To find the top contributing customers, we must first aggregate the total revenue per customer. `groupby('CustomerID')['Revenue'].sum()` accurately computes the sum of revenue for each customer. Following this, `.nlargest(3)` efficiently retrieves the top 3 customers with the highest aggregated revenue. The other options fail to aggregate correctly by sum before retrieving the top records.</p>
             </div>
         </div>
         
@@ -567,7 +567,7 @@
             <p>(A) df[df['Category'] == 'Electronics']['Revenue'].mean()；</p><p>(B) df['Category' == 'Electronics']['Revenue'].mean()；</p><p>(C) df.loc['Electronics', 'Revenue'].mean()；</p><p>(D) df.filter(items=['Electronics'])['Revenue'].mean()；</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (A)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> To compute the average revenue for a specific category, boolean indexing is used to filter the DataFrame. `df['Category'] == 'Electronics'` creates a boolean mask. `df[...]` applies this mask to filter the rows. Then, `['Revenue']` selects the Revenue column, and `.mean()` calculates the average value of those specific rows.</p>
             </div>
         </div>
         
@@ -577,7 +577,7 @@
             <p>(A) pd.concat([df, customers], axis=1)；</p><p>(B) pd.merge(df, customers, on='CustomerID', how='outer')；</p><p>(C) pd.merge(df, customers, on='CustomerID', how='inner')；</p><p>(D) df.join(customers, on='CustomerID')</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> An 'inner' join operation only retains rows that have matching keys in both DataFrames. Therefore, `pd.merge` with `how='inner'` on the 'CustomerID' key ensures that only the transaction records in `df` that correspond to an existing customer in the `customers` table are kept, effectively discarding transactions without a valid customer mapping.</p>
             </div>
         </div>
         
@@ -587,7 +587,7 @@
             <p>(A) X_norm = scaler.transform(X)；</p><p>(B) X_norm = scaler.fit(X)；</p><p>(C) X_norm = scaler.fit_transform(X)；</p><p>(D) X_norm = fit_transform(scaler)</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> In Scikit-learn, the `fit()` method computes the parameters (like mean and standard deviation) needed for transformation, and `transform()` applies it to the data. `fit_transform()` is a convenience method that efficiently combines both steps in a single pass, which is the correct and most efficient way to scale training data.</p>
             </div>
         </div>
         
@@ -597,7 +597,7 @@
             <p>(A) </p><p>(B) </p><p>(C) </p><p>(D) </p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (B)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> The typical standard pipeline in Scikit-learn involves first splitting the data using `train_test_split(X, y)`, then initializing the model via `model = LogisticRegression()`, and finally fitting the model exclusively on the training data using `model.fit(X_train, y_train)`. This ensures that the model learns parameters from the training set without data leakage from the test set.</p>
             </div>
         </div>
         
@@ -607,7 +607,7 @@
             <p>(A) cm 表示混淆矩陣，橫列表測試集的預測值；</p><p>(B) 混淆矩陣對角線數值皆大於非對角線數值表示模型過度擬合；</p><p>(C) f1_score 參數 average="weighted"表示計算平均 f1_score；</p><p>(D) f1_score 計算時採用各類別精確率（Precision）與召回率（Recall）的調和平均，並</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> 官方精選歷屆考題與詳解，請參考命題大綱與實務。</p>
+                <p><strong>解析：</strong> The F1 score is defined as the harmonic mean of Precision and Recall: 2 * (Precision * Recall) / (Precision + Recall). It is particularly useful for imbalanced datasets because it provides a balanced metric that penalizes extreme disparities between Precision and Recall, unlike simple accuracy.</p>
             </div>
         </div>
         
