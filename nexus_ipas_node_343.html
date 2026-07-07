@@ -107,7 +107,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="badge">星系座標: X:-140 Y:2142 | 分類: ipas</div>
+        <div class="badge">星系座標: X:-185 Y:2000 | 分類: ipas</div>
         <h1>IPAS AI 規劃師專區</h1>
         
         <div class="content-box">
@@ -142,21 +142,21 @@
         
         <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
             <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 2 題</h4>
-            <p><strong>題目：</strong> 一家新創公司希望對 Llama3 70B 模型進行領域微調（Domain Fine-Tuning）以建立企業專用助理，但 GPU 記憶體有限，無法支撐完整模型的反向傳播梯度計算。工程師希望凍結（freeze）原模型權重、僅訓練少量額外參數的前提下，評估採用 LoRA（Low-Rank Adaptation）方案。請問 LoRA 在此場景下的主要優勢為何？</p>
-            <p>(A) 透過知識蒸餾（Knowledge Distillation）將 70B 模型壓縮為較小的學生模型</p><p>(B) 對原始模型各層權重進行剪枝（Pruning），移除低重要性參數後再進行微調</p><p>(C) 凍結原始預訓練權重，僅在各層加入低秩分解的可訓練矩陣，大幅降低可訓練參數量與 GPU 記憶體需求</p><p>(D) 將模型中的注意力機制改為稀疏注意力（Sparse Attention），以降低長序列計算成本</p>
+            <p><strong>題目：</strong> 某工程師在建立房價預測模型時，訓練資料中存在少數豪宅（成交價超過一般物件 10 倍以上）。若工程師希望模型對這些極端高價物件的預測誤差更敏感，並在訓練時產生較大的梯度更新影響，應優先選擇下列哪種損失函數？</p>
+            <p>(A) 平均絕對誤差（MAE）：對誤差進行線性懲罰，對離群值較不敏感，梯度近似固定</p><p>(B) Huber 損失（Huber Loss）：小誤差採平方懲罰，大誤差轉為線性懲罰，以降低離群值影響</p><p>(C) 均方誤差（MSE）：對誤差進行平方處理，使大誤差產生更大的懲罰與梯度</p><p>(D) 交叉熵損失（Cross-Entropy Loss）：用於分類問題的機率分布差異衡量</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
                 <p><strong>標準答案：</strong> (C)</p>
-                <p><strong>解析：</strong> LoRA 的核心思想是凍結預訓練模型權重，並在每一層注入可訓練的低秩分解矩陣（Low-Rank Matrices），從而大幅減少訓練參數及 GPU VRAM 的消耗。</p>
+                <p><strong>解析：</strong> MSE (Mean Squared Error) 採用誤差的平方，這會使模型對誤差較大的樣本（如離群的豪宅）極度敏感，並產生極大的懲罰與梯度更新。</p>
             </div>
         </div>
         
         <div style="background: rgba(220, 161, 150, 0.05); padding: 20px; border-radius: 8px; border-left: 4px solid #DCA196; margin-bottom: 20px;">
             <h4 style="margin-top: 0; color: #C25B4E;">⚠️ 第 3 題</h4>
-            <p><strong>題目：</strong> 若某數據點的 Z 分數（Z-Score）= 2，請問代表下列哪一種意涵？</p>
-            <p>(A) 代表該數據點之原始數值為 2</p><p>(B) 該數據點比平均值低 2 個標準差</p><p>(C) 代表數據為異常值</p><p>(D) 該數據點比平均值高 2 個標準差</p>
+            <p><strong>題目：</strong> 某企業建置一套多代理人（Multi-Agent）系統，由一個 Orchestrator Agent 負責任務分配，多個 Worker Agent 分別執行網路搜尋、程式撰寫與結果彙整。若 Orchestrator 發現某 Worker Agent 回傳結果品質不符合預期，從系統容錯與任務可靠性角度，下列哪一項機制最能確保整體任務仍能正確完成？</p>
+            <p>(A) 直接採用該 Worker Agent 的輸出，避免重試機制造成延遲</p><p>(B) Orchestrator 具備結果評估能力，對不合格結果觸發重試（Retry）或重新分配給不同 Worker，並記錄失敗原因供後續改善</p><p>(C) 強制所有 Worker Agent 統一使用相同的 LLM 模型，以減少輸出差異</p><p>(D) 當任何一個 Worker 失敗時，整個 Multi-Agent 任務直接中止並通知使用者重新啟動</p>
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(194, 91, 78, 0.3);">
-                <p><strong>標準答案：</strong> (D)</p>
-                <p><strong>解析：</strong> Z-Score (標準分數) 表示一個資料點距離平均值有幾個標準差。Z=2 即代表高於平均值 2 個標準差。</p>
+                <p><strong>標準答案：</strong> (B)</p>
+                <p><strong>解析：</strong> 在 Multi-Agent 架構中，Orchestrator (主控 Agent) 負責協調與監控。具備結果評估與重試(Retry)/重新分配機制，是提升 Agentic Workflow 容錯度與可靠性的最佳實踐。</p>
             </div>
         </div>
         
