@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS 節點: 工具調用 (Tool Calling)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FAFAF7;
+            color: #2C2A25;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: clamp(10px, 3vw, 40px) clamp(10px, 3vw, 20px);
+            line-height: 1.618;
+            background-image: 
+              radial-gradient(circle at 50% 0%, rgba(139, 168, 136, 0.08), transparent 50%),
+              linear-gradient(rgba(122, 144, 164, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(122, 144, 164, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #9A8A9E40;
+            border-radius: 16px;
+            padding: clamp(20px, 5vw, 40px);
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px #9A8A9E15;
+            backdrop-filter: blur(16px);
+        }
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.618rem);
+            margin-top: 0;
+            color: #9A8A9E;
+            text-shadow: none;
+            border-bottom: 1px solid #9A8A9E30;
+            padding-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        h2, h3 {
+            color: #2C2A25;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-block;
+            background: #9A8A9E15;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            border: 1px solid #9A8A9E40;
+            color: #9A8A9E;
+            font-weight: 600;
+        }
+        .content-box {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 26px;
+            border-radius: 8px;
+            border-left: 4px solid #9A8A9E;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        code {
+            background: #F0EBE1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #9A8A9E;
+            font-weight: 600;
+        }
+        pre {
+            background: #FAFAF7;
+            padding: clamp(16px, 4vw, 26px);
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #9A8A9E30;
+            color: #2C2A25;
+            max-width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .code-comment {
+            color: #65A30D; /* Dark Green */
+            font-style: italic;
+        }
+        .code-string {
+            color: #D97706; /* Amber */
+        }
+        .code-keyword {
+            color: #0284C7; /* Blue */
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8C877D;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">星系座標: X:529 Y:-1006 | 分類: agentic</div>
+        <h1>工具調用 (Tool Calling)</h1>
+        
+        <div class="content-box">
+            <p><strong>自動生成的智能節點</strong></p>
+            <p>賦予大語言模型直接輸出符合特定函數或 API 簽章的 JSON 參數的能力，使其能主動觸發外部系統操作，如讀取資料庫、發送郵件或執行程式碼。</p>
+        </div>
+
+        <h2>技術深度解析 (Auto-Generated Content)</h2>
+        <p>本節點由 NEXUS Agentic Engine 全自動化生成。探討 <code>工具調用 (Tool Calling)</code> 於現代 AI 生態系中的作用與底層架構。</p>
+
+        <h3>實戰架構範例</h3>
+        
+        <pre><code>
+<span class="code-comment"># ---------------------------------------------------------
+# 【Agentic AI 架構實作】: 工具調用 (Tool Calling) 的代理迴圈 (Agent Loop)
+# 本範例展示如何實作具備 Thought-Action-Observation 的自主代理
+# ---------------------------------------------------------</span>
+
+<span class="code-keyword">import</span> openai
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> List, Dict
+
+<span class="code-keyword">class</span> AgentExecutor:
+    <span class="code-keyword">def</span> __init__(self, tools: List[Dict]):
+        self.tools = {t['name']: t['func'] <span class="code-keyword">for</span> t <span class="code-keyword">in</span> tools}
+        self.memory = [] <span class="code-comment"># 代理的長期/短期記憶庫</span>
+        
+    <span class="code-keyword">def</span> run(self, user_prompt: str) -> str:
+        self.memory.append({"role": "user", "content": user_prompt})
+        
+        <span class="code-keyword">while True</span>:
+            <span class="code-comment"># 步驟 1: Thought (思考) - 讓 LLM 決定下一步</span>
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=self.memory,
+                functions=[t['schema'] <span class="code-keyword">for</span> t <span class="code-keyword">in</span> self.tools]
+            )
+            
+            message = response.choices[0].message
+            self.memory.append(message)
+            
+            <span class="code-comment"># 步驟 2: Action (行動) - 如果 LLM 決定呼叫工具</span>
+            <span class="code-keyword">if</span> message.get("function_call"):
+                func_name = message.function_call.name
+                func_args = eval(message.function_call.arguments)
+                
+                print(f"[*] Agent 決定執行工具: {func_name}")
+                observation = self.tools[func_name](**func_args)
+                
+                <span class="code-comment"># 步驟 3: Observation (觀察) - 將工具執行結果存入記憶</span>
+                self.memory.append({
+                    "role": "function",
+                    "name": func_name,
+                    "content": str(observation)
+                })
+            <span class="code-keyword">else</span>:
+                <span class="code-comment"># 如果沒有呼叫工具，代表 Agent 已經得出最終解答</span>
+                <span class="code-keyword">return</span> message.content
+
+<span class="code-comment"># 建立實體並執行</span>
+<span class="code-comment"># agent = AgentExecutor(tools=[web_search, calculator])</span>
+<span class="code-comment"># print(agent.run("幫我查一下 2024 年巴黎奧運的金牌數並乘以 2"))</span></code></pre>
+        
+
+        <div class="footer">
+            NEXUS AI 知識宇宙 &copy; 2026 | Agentic Generation Farm
+        </div>
+    </div>
+</body>
+</html>
+  

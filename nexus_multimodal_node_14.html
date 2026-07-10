@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS 節點: 影像分割</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FAFAF7;
+            color: #2C2A25;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: clamp(10px, 3vw, 40px) clamp(10px, 3vw, 20px);
+            line-height: 1.618;
+            background-image: 
+              radial-gradient(circle at 50% 0%, rgba(139, 168, 136, 0.08), transparent 50%),
+              linear-gradient(rgba(122, 144, 164, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(122, 144, 164, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #C28E7D40;
+            border-radius: 16px;
+            padding: clamp(20px, 5vw, 40px);
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px #C28E7D15;
+            backdrop-filter: blur(16px);
+        }
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.618rem);
+            margin-top: 0;
+            color: #C28E7D;
+            text-shadow: none;
+            border-bottom: 1px solid #C28E7D30;
+            padding-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        h2, h3 {
+            color: #2C2A25;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-block;
+            background: #C28E7D15;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            border: 1px solid #C28E7D40;
+            color: #C28E7D;
+            font-weight: 600;
+        }
+        .content-box {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 26px;
+            border-radius: 8px;
+            border-left: 4px solid #C28E7D;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        code {
+            background: #F0EBE1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #C28E7D;
+            font-weight: 600;
+        }
+        pre {
+            background: #FAFAF7;
+            padding: clamp(16px, 4vw, 26px);
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #C28E7D30;
+            color: #2C2A25;
+            max-width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .code-comment {
+            color: #65A30D; /* Dark Green */
+            font-style: italic;
+        }
+        .code-string {
+            color: #D97706; /* Amber */
+        }
+        .code-keyword {
+            color: #0284C7; /* Blue */
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8C877D;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">星系座標: X:-1695 Y:1051 | 分類: multimodal</div>
+        <h1>影像分割</h1>
+        
+        <div class="content-box">
+            <p><strong>自動生成的智能節點</strong></p>
+            <p>在像素級別將影像劃分為具備語義意義的區域，無論是區分不同實體或僅區分類別，為電腦視覺中最精細的場景理解技術。</p>
+        </div>
+
+        <h2>技術深度解析 (Auto-Generated Content)</h2>
+        <p>本節點由 NEXUS Agentic Engine 全自動化生成。探討 <code>影像分割</code> 於現代 AI 生態系中的作用與底層架構。</p>
+
+        <h3>實戰架構範例</h3>
+        
+        <pre><code>
+<span class="code-comment"># ---------------------------------------------------------
+# 【多模態與電腦視覺】: 影像分割 (Cross-Attention Pipeline)
+# 展示文字特徵與影像特徵如何進行跨模態對齊
+# ---------------------------------------------------------</span>
+
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+
+<span class="code-keyword">class</span> MultimodalCrossAttention(nn.Module):
+    <span class="code-keyword">def</span> __init__(self, visual_dim, text_dim):
+        super().__init__()
+        <span class="code-comment"># 將不同模態的特徵投影到相同的潛在空間 (Latent Space)</span>
+        self.vision_proj = nn.Linear(visual_dim, 512)
+        self.text_proj = nn.Linear(text_dim, 512)
+        
+        self.attention = nn.MultiheadAttention(embed_dim=512, num_heads=8)
+        
+    <span class="code-keyword">def</span> forward(self, image_features, text_embeddings):
+        <span class="code-comment"># 步驟 1: 空間投影對齊</span>
+        v_feat = self.vision_proj(image_features)
+        t_feat = self.text_proj(text_embeddings)
+        
+        <span class="code-comment"># 步驟 2: Cross-Attention</span>
+        <span class="code-comment"># Query 來自影像，Key/Value 來自文字描述</span>
+        # 這使得模型能根據文字提示，聚焦於影像的特定區域
+        attn_output, attn_weights = self.attention(
+            query=v_feat,
+            key=t_feat,
+            value=t_feat
+        )
+        <span class="code-keyword">return</span> attn_output</code></pre>
+        
+
+        <div class="footer">
+            NEXUS AI 知識宇宙 &copy; 2026 | Agentic Generation Farm
+        </div>
+    </div>
+</body>
+</html>
+  

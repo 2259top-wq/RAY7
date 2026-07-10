@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS 節點: 信息論</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #FAFAF7;
+            color: #2C2A25;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: clamp(10px, 3vw, 40px) clamp(10px, 3vw, 20px);
+            line-height: 1.618;
+            background-image: 
+              radial-gradient(circle at 50% 0%, rgba(139, 168, 136, 0.08), transparent 50%),
+              linear-gradient(rgba(122, 144, 164, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(122, 144, 164, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #8BA88840;
+            border-radius: 16px;
+            padding: clamp(20px, 5vw, 40px);
+            box-sizing: border-box;
+            box-shadow: 0 10px 40px #8BA88815;
+            backdrop-filter: blur(16px);
+        }
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.618rem);
+            margin-top: 0;
+            color: #8BA888;
+            text-shadow: none;
+            border-bottom: 1px solid #8BA88830;
+            padding-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        h2, h3 {
+            color: #2C2A25;
+            font-weight: 700;
+        }
+        .badge {
+            display: inline-block;
+            background: #8BA88815;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            border: 1px solid #8BA88840;
+            color: #8BA888;
+            font-weight: 600;
+        }
+        .content-box {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 26px;
+            border-radius: 8px;
+            border-left: 4px solid #8BA888;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        code {
+            background: #F0EBE1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #8BA888;
+            font-weight: 600;
+        }
+        pre {
+            background: #FAFAF7;
+            padding: clamp(16px, 4vw, 26px);
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #8BA88830;
+            color: #2C2A25;
+            max-width: 100%;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .code-comment {
+            color: #65A30D; /* Dark Green */
+            font-style: italic;
+        }
+        .code-string {
+            color: #D97706; /* Amber */
+        }
+        .code-keyword {
+            color: #0284C7; /* Blue */
+            font-weight: 600;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #8C877D;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">星系座標: X:83 Y:-2326 | 分類: foundations</div>
+        <h1>信息論</h1>
+        
+        <div class="content-box">
+            <p><strong>自動生成的智能節點</strong></p>
+            <p>衡量數據不確定性與信息含量的理論，透過熵(Entropy)的概念，構築了機器學習分類任務與生成模型中評估分佈差異的基礎。</p>
+        </div>
+
+        <h2>技術深度解析 (Auto-Generated Content)</h2>
+        <p>本節點由 NEXUS Agentic Engine 全自動化生成。探討 <code>信息論</code> 於現代 AI 生態系中的作用與底層架構。</p>
+
+        <h3>實戰架構範例</h3>
+        
+        <pre><code>
+<span class="code-comment"># ---------------------------------------------------------
+# 【AI 數學與底層理論】: 信息論 (Gradient Descent)
+# 從零刻劃反向傳播與梯度下降的數學運算邏輯
+# ---------------------------------------------------------</span>
+
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-keyword">class</span> SimpleNeuralNet:
+    <span class="code-keyword">def</span> __init__(self, learning_rate=0.01):
+        <span class="code-comment"># 初始化權重與偏差值 (隨機常態分佈)</span>
+        self.weights = np.random.randn(2, 1)
+        self.bias = np.random.randn(1)
+        self.lr = learning_rate
+        
+    <span class="code-keyword">def</span> sigmoid(self, x):
+        <span class="code-keyword">return</span> 1 / (1 + np.exp(-x))
+        
+    <span class="code-keyword">def</span> train(self, X, Y, epochs=1000):
+        <span class="code-keyword">for</span> epoch <span class="code-keyword">in</span> range(epochs):
+            <span class="code-comment"># 步驟 1: 前向傳播 (Forward Propagation)</span>
+            z = np.dot(X, self.weights) + self.bias
+            pred = self.sigmoid(z)
+            
+            <span class="code-comment"># 步驟 2: 計算損失 (Loss) 的梯度</span>
+            error = pred - Y
+            d_pred = error * (pred * (1 - pred)) <span class="code-comment"># Sigmoid 的導數</span>
+            
+            <span class="code-comment"># 步驟 3: 反向傳播 (Backward Propagation)</span>
+            d_weights = np.dot(X.T, d_pred)
+            d_bias = np.sum(d_pred)
+            
+            <span class="code-comment"># 步驟 4: 更新權重 (Gradient Descent)</span>
+            self.weights -= self.lr * d_weights
+            self.bias -= self.lr * d_bias</code></pre>
+        
+
+        <div class="footer">
+            NEXUS AI 知識宇宙 &copy; 2026 | Agentic Generation Farm
+        </div>
+    </div>
+</body>
+</html>
+  
